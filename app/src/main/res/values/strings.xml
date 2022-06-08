@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">WeatherForecast</string>
+    <string name="degrees_values">Value of degrees for an air in Celsius of Fahrenheit</string>
+    <string name="default_degrees_values">25</string>
+    <string name="default_degrees_type">C</string>
+    <string name="weather_image_content_description">Weather type</string>
+</resources>

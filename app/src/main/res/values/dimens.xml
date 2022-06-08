@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="activity_all_borders_padding">16dp</dimen>
+    <dimen name="text_views_margin">20dp</dimen>
+    <dimen name="degrees_value_text_size">60sp</dimen>
+    <dimen name="degrees_type_text_size">30sp</dimen>
+    <dimen name="image_size">100dp</dimen>
+    <dimen name="progressbar_background_transparency">0.7</dimen>
+    <dimen name="progress_bar_padding">160dp</dimen>
+</resources>
