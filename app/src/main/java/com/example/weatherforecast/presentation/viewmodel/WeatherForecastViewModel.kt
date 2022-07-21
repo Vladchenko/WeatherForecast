@@ -4,48 +4,65 @@ import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.weatherforecast.data.util.Resource
-import com.example.weatherforecast.data.models.WeatherForecastResponse
-import com.example.weatherforecast.domain.WeatherForecastInteractor
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import com.example.weatherforecast.data.models.WeatherForecastDomainModel
+import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.domain.WeatherForecastLocalInteractor
+import com.example.weatherforecast.domain.WeatherForecastRemoteInteractor
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /**
  * View model, as MVVM component
  *
  * @property app custom [Application] implementation for Hilt
- * @property weatherForecastInteractor provides domain layer data
+ * @property weatherForecastRemoteInteractor provides domain layer data
  */
 class WeatherForecastViewModel(
     private val app: Application,
-    private val weatherForecastInteractor: WeatherForecastInteractor
+    private val weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor,
+    private val weatherForecastLocalInteractor: WeatherForecastLocalInteractor
 ) : AndroidViewModel(app) {
 
-    private val _getWeatherForecastLiveData: MutableLiveData<Resource<WeatherForecastResponse>> = MutableLiveData()
+    private val _getWeatherForecastLiveData: MutableLiveData<WeatherForecastDomainModel> = MutableLiveData()
+    private val _showErrorLiveData: MutableLiveData<String> = MutableLiveData()
 
-    val getWeatherForecastLiveData: LiveData<Resource<WeatherForecastResponse>>
+    val getWeatherForecastLiveData: LiveData<WeatherForecastDomainModel>
         get() = _getWeatherForecastLiveData
 
-    fun getWeatherForecast(city: String) {
-        _getWeatherForecastLiveData.postValue(Resource.Loading)
+    val showErrorLiveData: LiveData<String>
+        get() = _showErrorLiveData
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Log.e("WeatherForecastViewModel", throwable.message!!)
+        _showErrorLiveData.postValue(throwable.message!!)
+    }
+
+    fun getWeatherForecast(temperatureType: TemperatureType, city: String) {
         try {
             if (isNetworkAvailable(app)) {
-                viewModelScope.launch(Dispatchers.IO) {
-                    val result = weatherForecastInteractor.execute(city)
+                viewModelScope.launch(exceptionHandler) {
+                    // Downloading a weather forecast from network
+                    val result = weatherForecastRemoteInteractor.loadForecast(temperatureType, city)
+                    // Saving it to database
+                    weatherForecastLocalInteractor.saveForecast(result)
                     _getWeatherForecastLiveData.postValue(result)
                 }
             } else {
-                _getWeatherForecastLiveData.postValue(Resource.Error(Exception("Internet is not available")))
+                // When network is not available,
+                viewModelScope.launch(exceptionHandler) {
+                    // Download forecast from database
+                    val result = weatherForecastLocalInteractor.loadForecast(city)
+                    _getWeatherForecastLiveData.postValue(result)
+                    _showErrorLiveData.postValue("No internet connection, outdated forecast has been loaded from database")
+                }
             }
         } catch (ex: Exception) {
-            _getWeatherForecastLiveData.postValue(Resource.Error(ex))
+            _showErrorLiveData.postValue(ex.message)
         }
     }
 

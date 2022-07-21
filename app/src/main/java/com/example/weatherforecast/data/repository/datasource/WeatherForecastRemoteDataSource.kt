@@ -4,9 +4,9 @@ import com.example.weatherforecast.data.models.WeatherForecastResponse
 import retrofit2.Response
 
 /**
- * Data source interface
+ * Remote(network) data source interface
  */
-interface WeatherForecastDataSource {
+interface WeatherForecastRemoteDataSource {
     /**
      * Receives data, having [city] as a request parameter
      */

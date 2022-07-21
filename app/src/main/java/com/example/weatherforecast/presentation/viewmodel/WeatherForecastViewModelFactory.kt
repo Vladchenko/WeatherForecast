@@ -3,23 +3,26 @@ package com.example.weatherforecast.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.weatherforecast.domain.WeatherForecastInteractor
-import javax.inject.Inject
+import com.example.weatherforecast.domain.WeatherForecastLocalInteractor
+import com.example.weatherforecast.domain.WeatherForecastRemoteInteractor
 
 /**
  * View model factory
  *
  * @property app custom [Application] implementation for Hilt
- * @property weatherForecastInteractor provides domain layer data
+ * @property weatherForecastRemoteInteractor provides domain layer data through network
+ * @property weatherForecastLocalInteractor  provides domain layer data through database
  */
 class WeatherForecastViewModelFactory(
     private val app: Application,
-    private val weatherForecastInteractor: WeatherForecastInteractor
+    private val weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor,
+    private val weatherForecastLocalInteractor: WeatherForecastLocalInteractor
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return WeatherForecastViewModel(
             app,
-            weatherForecastInteractor
+            weatherForecastRemoteInteractor,
+            weatherForecastLocalInteractor
         ) as T
     }
 }

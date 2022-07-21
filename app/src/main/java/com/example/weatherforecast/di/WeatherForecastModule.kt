@@ -1,12 +1,19 @@
 package com.example.weatherforecast.di
 
 import android.app.Application
+import androidx.room.Room
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
-import com.example.weatherforecast.data.converter.ResponseToResourceConverter
+import com.example.weatherforecast.data.converter.DataToDomainModelsConverter
+import com.example.weatherforecast.data.database.WeatherForecastDAO
+import com.example.weatherforecast.data.database.WeatherForecastDataBase
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
-import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastDataSourceImpl
-import com.example.weatherforecast.domain.WeatherForecastInteractor
+import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
+import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
+import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastRemoteDataSourceImpl
+import com.example.weatherforecast.domain.WeatherForecastLocalInteractor
+import com.example.weatherforecast.domain.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.domain.WeatherForecastRepository
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
 import dagger.Module
@@ -50,40 +57,73 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastRemoteDataSource(weatherForecastApiService: WeatherForecastApiService): WeatherForecastDataSourceImpl {
-        return WeatherForecastDataSourceImpl(weatherForecastApiService)
+    fun provideWeatherForecastLocalDataSource(forecastDAO: WeatherForecastDAO): WeatherForecastLocalDataSource {
+        return WeatherForecastLocalDataSourceImpl(forecastDAO)
     }
 
     @Singleton
     @Provides
-    fun provideConverter(): ResponseToResourceConverter {
-        return ResponseToResourceConverter()
+    fun provideWeatherForecastRemoteDataSource(weatherForecastApiService: WeatherForecastApiService): WeatherForecastRemoteDataSource {
+        return WeatherForecastRemoteDataSourceImpl(weatherForecastApiService)
+    }
+
+    @Singleton
+    @Provides
+    fun provideArticlesDataBase(app: Application): WeatherForecastDataBase {
+        return Room
+            .databaseBuilder(app, WeatherForecastDataBase::class.java, "WeatherForecastDataBase")
+            // .fallbackToDestructiveMigration()   // For migration from old database to a new one
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherForecastDAO(database: WeatherForecastDataBase): WeatherForecastDAO {
+        return database.getInstance();
+    }
+
+    @Singleton
+    @Provides
+    fun provideConverter(): DataToDomainModelsConverter {
+        return DataToDomainModelsConverter()
     }
 
     @Singleton
     @Provides
     fun provideWeatherForecastRepository(
-        weatherForecastDataSourceImpl: WeatherForecastDataSourceImpl,
-        converter: ResponseToResourceConverter
+        weatherForecastRemoteDataSource: WeatherForecastRemoteDataSource,
+        weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
+        converter: DataToDomainModelsConverter
     ): WeatherForecastRepository {
-        return WeatherForecastRepositoryImpl(weatherForecastDataSourceImpl, converter)
+        return WeatherForecastRepositoryImpl(
+            weatherForecastRemoteDataSource,
+            weatherForecastLocalDataSource,
+            converter)
     }
 
     @Singleton
     @Provides
-    fun provideWeatherForecastInteractor(weatherForecastRepository: WeatherForecastRepository): WeatherForecastInteractor {
-        return WeatherForecastInteractor(weatherForecastRepository)
+    fun provideWeatherForecastRemoteInteractor(weatherForecastRepository: WeatherForecastRepository): WeatherForecastRemoteInteractor {
+        return WeatherForecastRemoteInteractor(weatherForecastRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherForecastLocalInteractor(weatherForecastRepository: WeatherForecastRepository): WeatherForecastLocalInteractor {
+        return WeatherForecastLocalInteractor(weatherForecastRepository)
     }
 
     @Singleton
     @Provides
     fun provideViewModelFactory(
         app: Application,
-        weatherForecastInteractor: WeatherForecastInteractor
+        weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor,
+        weatherForecastLocalInteractor: WeatherForecastLocalInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
-            weatherForecastInteractor
+            weatherForecastRemoteInteractor,
+            weatherForecastLocalInteractor
         )
     }
 }

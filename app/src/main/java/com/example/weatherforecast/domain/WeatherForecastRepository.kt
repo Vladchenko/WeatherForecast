@@ -1,12 +1,14 @@
 package com.example.weatherforecast.domain
 
-import com.example.weatherforecast.data.models.WeatherForecastResponse
-import com.example.weatherforecast.data.util.Resource
+import com.example.weatherforecast.data.models.WeatherForecastDomainModel
+import com.example.weatherforecast.data.util.TemperatureType
 
 /**
  * Weather forecast repository.
- * Provides data-layer data.
+ * Provides domain-layer data.
  */
 interface WeatherForecastRepository {
-    suspend fun getWeatherForecastData(city: String): Resource<WeatherForecastResponse>
+    suspend fun loadRemoteForecast(temperatureType: TemperatureType, city: String): WeatherForecastDomainModel
+    suspend fun loadLocalForecast(city: String): WeatherForecastDomainModel
+    suspend fun saveForecast(model: WeatherForecastDomainModel)
 }
