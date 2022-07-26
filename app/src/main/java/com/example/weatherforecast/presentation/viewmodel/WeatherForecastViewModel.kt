@@ -52,16 +52,11 @@ class WeatherForecastViewModel(
                         if (!city.isNullOrBlank()) {
                             weatherForecastRemoteInteractor.loadForecastForCity(temperatureType, city)
                         } else {
-                            // if (location == null) {
-                            //     _showErrorLiveData.postValue(
-                            //         "Location is not properly defined: longitude=$location.longitude, latitude=$location.latitude")
-                            // } else {
-                                weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
-                                    temperatureType,
-                                    location?.longitude?:0.0,
-                                    location?.latitude?:0.0
-                                )
-                            // } as WeatherForecastDomainModel
+                            weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
+                                temperatureType,
+                                location?.latitude ?: 0.0,
+                                location?.longitude ?: 0.0
+                            )
                         }
                     // Saving it to database
                     weatherForecastLocalInteractor.saveForecast(result)
@@ -71,7 +66,7 @@ class WeatherForecastViewModel(
                 // When network is not available,
                 viewModelScope.launch(exceptionHandler) {
                     // Download forecast from database
-                    val result = weatherForecastLocalInteractor.loadForecast(city?:"")
+                    val result = weatherForecastLocalInteractor.loadForecast(city ?: "")
                     _getWeatherForecastLiveData.postValue(result)
                     _showErrorLiveData.postValue("No internet connection, outdated forecast has been loaded from database")
                 }

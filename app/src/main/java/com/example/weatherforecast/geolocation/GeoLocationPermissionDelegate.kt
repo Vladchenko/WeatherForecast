@@ -7,12 +7,12 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 
 /**
- * Grants permission to get geo location of a device
+ * Grants permission to further get a geo location of a device.
  */
 class GeoLocationPermissionDelegate {
 
     /**
-     * Grant permission to get geo location of a device, using [activity]
+     * Grant permission to get geo location of a device, using [activity].
      */
     fun getPermissionForGeoLocation(activity: Activity):LocationPermission {
         if (ActivityCompat.checkSelfPermission(activity as Context, Manifest.permission.ACCESS_FINE_LOCATION)
