@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate.Companion.REQUEST_CODE_ASK_PERMISSIONS
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
@@ -32,19 +33,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CurrentTimeForecastFragment : Fragment() {
 
-    private lateinit var cityNameTextView: TextView
-    private lateinit var dateTextView: TextView
-    private lateinit var degreesTypeTextView: TextView
-    private lateinit var degreesValueTextView: TextView
-    private lateinit var weatherTypeTextView: TextView
-    private lateinit var weatherImageView: ImageView
-    private lateinit var progressBar: ProgressBar
-
     //TODO Get city name from some place. Some dropdown list or from cellphone local area ?
     private var city: String = "Kazan"
     private var currentGeoLocation: Location? = null
 
     private lateinit var viewModel: WeatherForecastViewModel
+    private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     @Inject
     lateinit var geoLocator: WeatherForecastGeoLocator
@@ -55,13 +49,12 @@ class CurrentTimeForecastFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_current_time_forecast, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
+        fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
         viewModel = (activity as WeatherForecastActivity).viewModel
         if (permissionDelegate.getPermissionForGeoLocation(activity as Activity)
             == GeoLocationPermissionDelegate.LocationPermission.ALREADY_PRESENT
@@ -87,16 +80,6 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    private fun initViews() {
-        progressBar = (activity as WeatherForecastActivity).findViewById(R.id.progressBar)
-        dateTextView = requireActivity().findViewById(R.id.date_text_view)
-        cityNameTextView = requireActivity().findViewById(R.id.city_name_text_view)
-        weatherImageView = requireActivity().findViewById(R.id.weather_type_image_view)
-        degreesTypeTextView = requireActivity().findViewById(R.id.degrees_type_text_view)
-        weatherTypeTextView = requireActivity().findViewById(R.id.weather_type_text_view)
-        degreesValueTextView = requireActivity().findViewById(R.id.degrees_value_text_view)
-    }
-
     private fun viewWeatherForecastData(temperatureType: TemperatureType, city: String, location: Location?) {
         viewModel.getWeatherForecast(temperatureType, city, location)
         viewModel.getWeatherForecastLiveData.observe(this) { showForecastData(it) }
@@ -105,11 +88,11 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
         hideProgressBar()
-        dateTextView.text = getCurrentDate()
-        cityNameTextView.text = dataModel.city
-        degreesValueTextView.text = dataModel.temperature
-        degreesTypeTextView.text = dataModel.temperatureType
-        weatherImageView.setImageResource(getWeatherTypeIcon(dataModel.weatherType))
+        fragmentDataBinding.dateTextView.text = getCurrentDate()
+        fragmentDataBinding.cityNameTextView.text = dataModel.city
+        fragmentDataBinding.degreesValueTextView.text = dataModel.temperature
+        fragmentDataBinding.degreesTypeTextView.text = dataModel.temperatureType
+        fragmentDataBinding.weatherTypeImageView.setImageResource(getWeatherTypeIcon(dataModel.weatherType))
     }
 
     private fun showError(errorMessage: String) {
@@ -131,7 +114,7 @@ class CurrentTimeForecastFragment : Fragment() {
         )
 
     private fun hideProgressBar() {
-        progressBar.visibility = View.INVISIBLE
+        fragmentDataBinding.progressBar.visibility = View.INVISIBLE
     }
 
     private companion object {

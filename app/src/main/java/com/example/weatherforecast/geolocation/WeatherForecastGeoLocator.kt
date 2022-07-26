@@ -1,14 +1,9 @@
 package com.example.weatherforecast.geolocation
 
-import android.Manifest
 import android.app.Activity
-import android.content.Context
-import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import com.example.weatherforecast.data.util.TemperatureType
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -17,14 +12,14 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
 
 /**
- * TODO
+ * Defines location of a device.
  */
 class WeatherForecastGeoLocator {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     /**
-     * Define device geo location, using [activity]
+     * Define device geo location, using [activity].
      */
     fun getLocation(activity: Activity): Location? {
         var currentLocation: Location? = null
