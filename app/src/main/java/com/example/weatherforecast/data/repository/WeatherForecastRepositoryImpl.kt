@@ -23,9 +23,15 @@ class WeatherForecastRepositoryImpl(
     private val modelsConverter: DataToDomainModelsConverter
 ) : WeatherForecastRepository {
 
-    override suspend fun loadRemoteForecast(temperatureType: TemperatureType, city: String) =
+    override suspend fun loadRemoteForecastForCity(temperatureType: TemperatureType, city: String) =
         withContext(Dispatchers.IO) {
-            modelsConverter.convert(temperatureType, city, weatherForecastRemoteDataSource.getWeatherForecastData(city))
+            modelsConverter.convert(temperatureType, city, weatherForecastRemoteDataSource.getWeatherForecastDataForCity(city))
+        }
+
+    override suspend fun loadRemoteForecastForLocation(temperatureType: TemperatureType, latitude: Double, longitude: Double) =
+        withContext(Dispatchers.IO) {
+            val model = weatherForecastRemoteDataSource.getWeatherForecastForLocation(latitude, longitude)
+            modelsConverter.convert(temperatureType, model.body()!!.name, model)
         }
 
     override suspend fun loadLocalForecast(city: String) =

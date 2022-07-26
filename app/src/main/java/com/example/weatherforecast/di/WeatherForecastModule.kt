@@ -15,6 +15,8 @@ import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecas
 import com.example.weatherforecast.domain.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.domain.WeatherForecastRepository
+import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
+import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
 import dagger.Module
 import dagger.Provides
@@ -98,7 +100,8 @@ class WeatherForecastModule {
         return WeatherForecastRepositoryImpl(
             weatherForecastRemoteDataSource,
             weatherForecastLocalDataSource,
-            converter)
+            converter
+        )
     }
 
     @Singleton
@@ -125,5 +128,17 @@ class WeatherForecastModule {
             weatherForecastRemoteInteractor,
             weatherForecastLocalInteractor
         )
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherForecastGeoLocator(): WeatherForecastGeoLocator {
+        return WeatherForecastGeoLocator()
+    }
+
+    @Singleton
+    @Provides
+    fun provideGeoLocationPermissionDelegate(): GeoLocationPermissionDelegate {
+        return GeoLocationPermissionDelegate()
     }
 }

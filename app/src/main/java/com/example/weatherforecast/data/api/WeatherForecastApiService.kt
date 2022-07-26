@@ -12,14 +12,25 @@ import retrofit2.http.Query
 interface WeatherForecastApiService {
 
     /**
-     * Receives weather forecast data for one city
-     *
-     * @property city to have a weather forecast on
+     * Receives weather forecast data for one [city]
      */
     @GET("data/2.5/weather")
-    suspend fun getWeatherForecastResponse(
+    suspend fun getWeatherForecastResponseForCity(
         @Query("q")
         city:String,
+        @Query("appid")
+        apiKey: String = BuildConfig.API_KEY
+    ): Response<WeatherForecastResponse>
+
+    /**
+     * Receives weather forecast data for current [Location]
+     */
+    @GET("data/2.5/weather")
+    suspend fun getWeatherForecastResponseForLocation(
+        @Query("lat")
+        lat:Double,
+        @Query("lon")
+        lon:Double,
         @Query("appid")
         apiKey: String = BuildConfig.API_KEY
     ): Response<WeatherForecastResponse>

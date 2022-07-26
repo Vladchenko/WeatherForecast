@@ -2,6 +2,7 @@ package com.example.weatherforecast.presentation.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.location.Location
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
@@ -42,12 +43,26 @@ class WeatherForecastViewModel(
         _showErrorLiveData.postValue(throwable.message!!)
     }
 
-    fun getWeatherForecast(temperatureType: TemperatureType, city: String) {
+    fun getWeatherForecast(temperatureType: TemperatureType, city: String?, location: Location?) {
         try {
             if (isNetworkAvailable(app)) {
                 viewModelScope.launch(exceptionHandler) {
                     // Downloading a weather forecast from network
-                    val result = weatherForecastRemoteInteractor.loadForecast(temperatureType, city)
+                    val result: WeatherForecastDomainModel =
+                        if (!city.isNullOrBlank()) {
+                            weatherForecastRemoteInteractor.loadForecastForCity(temperatureType, city)
+                        } else {
+                            // if (location == null) {
+                            //     _showErrorLiveData.postValue(
+                            //         "Location is not properly defined: longitude=$location.longitude, latitude=$location.latitude")
+                            // } else {
+                                weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
+                                    temperatureType,
+                                    location?.longitude?:0.0,
+                                    location?.latitude?:0.0
+                                )
+                            // } as WeatherForecastDomainModel
+                        }
                     // Saving it to database
                     weatherForecastLocalInteractor.saveForecast(result)
                     _getWeatherForecastLiveData.postValue(result)
@@ -56,7 +71,7 @@ class WeatherForecastViewModel(
                 // When network is not available,
                 viewModelScope.launch(exceptionHandler) {
                     // Download forecast from database
-                    val result = weatherForecastLocalInteractor.loadForecast(city)
+                    val result = weatherForecastLocalInteractor.loadForecast(city?:"")
                     _getWeatherForecastLiveData.postValue(result)
                     _showErrorLiveData.postValue("No internet connection, outdated forecast has been loaded from database")
                 }

@@ -8,7 +8,9 @@ import com.example.weatherforecast.data.util.TemperatureType
  * Provides domain-layer data.
  */
 interface WeatherForecastRepository {
-    suspend fun loadRemoteForecast(temperatureType: TemperatureType, city: String): WeatherForecastDomainModel
+    suspend fun loadRemoteForecastForCity(temperatureType: TemperatureType, city: String): WeatherForecastDomainModel
+    suspend fun loadRemoteForecastForLocation(temperatureType: TemperatureType, latitude: Double, longitude: Double)
+        : WeatherForecastDomainModel
     suspend fun loadLocalForecast(city: String): WeatherForecastDomainModel
     suspend fun saveForecast(model: WeatherForecastDomainModel)
 }

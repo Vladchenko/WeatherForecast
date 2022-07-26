@@ -9,11 +9,12 @@ import retrofit2.Response
 import kotlin.math.roundToInt
 
 /**
- * TODO
+ * Convert data-layer model to domain-layer
  */
 class DataToDomainModelsConverter {
+
     /**
-     * TODO
+     * Convert server response to domain model
      */
     fun convert(
         temperatureType: TemperatureType,
