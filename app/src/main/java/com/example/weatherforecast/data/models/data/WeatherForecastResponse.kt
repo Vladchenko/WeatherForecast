@@ -1,4 +1,4 @@
-package com.example.weatherforecast.data.models
+package com.example.weatherforecast.data.models.data
 // To parse the JSON, install kotlin's serialization plugin and do:
 //
 // val json    = Json(JsonConfiguration.Stable)

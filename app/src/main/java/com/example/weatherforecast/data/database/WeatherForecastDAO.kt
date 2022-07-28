@@ -6,17 +6,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.weatherforecast.data.models.WeatherForecastDomainModel
-import kotlinx.coroutines.flow.Flow
+import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 
 /**
- * DAO class for database
+ * DAO class for ROOM database
  */
 @Dao
 interface WeatherForecastDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)    // Replaces a new entity with an old one, when a conflict arises
-    // @Insert
     suspend fun insertCityForecast(model: WeatherForecastDomainModel): Long
 
     @Update

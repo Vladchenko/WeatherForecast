@@ -7,4 +7,12 @@
     <dimen name="image_size">100dp</dimen>
     <dimen name="progressbar_background_transparency">0.7</dimen>
     <dimen name="progress_bar_padding">160dp</dimen>
+    <dimen name="city_typing_title_text_size">20sp</dimen>
+    <dimen name="city_name_text_size">40sp</dimen>
+    <dimen name="wether_type_margin_top">10dp</dimen>
+    <dimen name="city_name_margin_top">12dp</dimen>
+    <dimen name="current_date_margin_top">82dp</dimen>
+    <dimen name="weather_image_view_margin_left">16dp</dimen>
+    <dimen name="weather_image_view_margin_top">12dp</dimen>
+    <dimen name="city_name_fragment_padding">16dp</dimen>
 </resources>

@@ -1,11 +1,11 @@
-package com.example.weatherforecast.domain
+package com.example.weatherforecast.domain.forecast
 
-import com.example.weatherforecast.data.models.WeatherForecastDomainModel
+import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 
 /**
  * Weather forecast interactor.
  *
- * @property weatherForecastRepository provides data-layer data.
+ * @property weatherForecastRepository provides domain-layer data.
  */
 class WeatherForecastLocalInteractor(private val weatherForecastRepository: WeatherForecastRepository) {
 

@@ -1,12 +1,14 @@
 package com.example.weatherforecast.presentation
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.add
 import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.R
+import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment
+import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
+import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,22 +20,27 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class WeatherForecastActivity : FragmentActivity() {
 
-    lateinit var viewModel: WeatherForecastViewModel
+    lateinit var forecastViewModel: WeatherForecastViewModel
+    lateinit var citiesNamesViewModel: CitiesNamesViewModel
 
     @Inject
-    lateinit var mViewModelFactory: WeatherForecastViewModelFactory
+    lateinit var forecastViewModelFactory: WeatherForecastViewModelFactory
+
+    @Inject
+    lateinit var citiesNamesViewModelFactory: CitiesNamesViewModelFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.weather_forecast_activity)
-        viewModel = ViewModelProvider(this, mViewModelFactory).get(WeatherForecastViewModel::class.java)
+        forecastViewModel = ViewModelProvider(this, forecastViewModelFactory).get(WeatherForecastViewModel::class.java)
+        citiesNamesViewModel = ViewModelProvider(this, citiesNamesViewModelFactory).get(CitiesNamesViewModel::class.java)
         addCurrentTimeForecastFragment()
     }
 
     private fun addCurrentTimeForecastFragment() {
         supportFragmentManager.commit {
             setReorderingAllowed(true)
-            add<CurrentTimeForecastFragment>(R.id.fragment_container_view)
+            replace<CurrentTimeForecastFragment>(R.id.fragment_container_view)
         }
     }
 }

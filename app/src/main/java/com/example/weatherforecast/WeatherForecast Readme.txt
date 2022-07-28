@@ -7,6 +7,4 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 
 JSON data to data class - https://app.quicktype.io/
 
-- Add fields like updateDate, temperatureType to DB
-- Move logic from activity to utils class
-- Add fragment for presentation
+- Add Google navigation

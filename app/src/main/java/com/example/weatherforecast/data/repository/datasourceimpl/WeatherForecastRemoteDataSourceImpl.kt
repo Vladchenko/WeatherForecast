@@ -2,7 +2,7 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import android.util.Log
 import com.example.weatherforecast.data.api.WeatherForecastApiService
-import com.example.weatherforecast.data.models.WeatherForecastResponse
+import com.example.weatherforecast.data.models.data.WeatherForecastResponse
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
 import retrofit2.Response
 

@@ -2,14 +2,14 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import android.util.Log
 import com.example.weatherforecast.data.database.WeatherForecastDAO
-import com.example.weatherforecast.data.models.WeatherForecastDomainModel
+import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
 
-/** TODO
+/**
  * [WeatherForecastRemoteDataSource] implementation.
  *
- * @property apiService Retrofit service to download weather data
+ * @property dao Retrofit DAO to download weather data
  */
 class WeatherForecastLocalDataSourceImpl(private val dao: WeatherForecastDAO) : WeatherForecastLocalDataSource {
 

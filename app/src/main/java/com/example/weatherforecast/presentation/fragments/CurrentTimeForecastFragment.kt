@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation
+package com.example.weatherforecast.presentation.fragments
 
 import android.app.Activity
 import android.content.pm.PackageManager
@@ -10,8 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.models.WeatherForecastDomainModel
+import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
 import com.example.weatherforecast.geolocation.AlertDialogClickListener
@@ -20,6 +22,7 @@ import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate.Companion.REQUEST_CODE_ASK_PERMISSIONS
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
+import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -27,7 +30,7 @@ import java.util.Calendar
 import javax.inject.Inject
 
 /**
- * Fragment displaying a weather forecast for current time.
+ * Fragment representing a weather forecast for current time.
  */
 @AndroidEntryPoint
 class CurrentTimeForecastFragment : Fragment() {
@@ -44,6 +47,13 @@ class CurrentTimeForecastFragment : Fragment() {
     @Inject
     lateinit var permissionDelegate: GeoLocationPermissionDelegate
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            city = it.getString(CITY_ARGUMENT_KEY) ?:""
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,10 +65,18 @@ class CurrentTimeForecastFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
-        viewModel = (activity as WeatherForecastActivity).viewModel
+        viewModel = (activity as WeatherForecastActivity).forecastViewModel
         locationListener = GeoLocationListenerImpl()
 
-        geoLocator.getCityByLocation(activity as Activity, locationListener)
+        if (city.isBlank()) {
+            geoLocator.getCityByLocation(activity as Activity, locationListener)
+        } else {
+            viewWeatherForecastData(
+                TemperatureType.CELSIUS,
+                city,
+                Location("")
+            )
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -90,6 +108,7 @@ class CurrentTimeForecastFragment : Fragment() {
         fragmentDataBinding.cityNameTextView.text = dataModel.city
         fragmentDataBinding.degreesValueTextView.text = dataModel.temperature
         fragmentDataBinding.degreesTypeTextView.text = dataModel.temperatureType
+        fragmentDataBinding.weatherTypeTextView.text = dataModel.weatherType
         fragmentDataBinding.weatherTypeImageView.setImageResource(getWeatherTypeIcon(dataModel.weatherType))
     }
 
@@ -115,7 +134,8 @@ class CurrentTimeForecastFragment : Fragment() {
         fragmentDataBinding.progressBar.visibility = View.INVISIBLE
     }
 
-    private companion object {
+    companion object {
+        const val CITY_ARGUMENT_KEY = "CITY"
         private const val ICON_PREFIX = "icon_"
         private const val DRAWABLE_RESOURCE_TYPE = "drawable"
     }
@@ -143,7 +163,10 @@ class CurrentTimeForecastFragment : Fragment() {
         }
 
         override fun onNegativeClick() {
-            Toast.makeText(activity, "Here comes a fragment for a city picker", Toast.LENGTH_SHORT).show()
+            parentFragmentManager.commit {
+                setReorderingAllowed(true)
+                replace<CitiesNamesFragment>(R.id.fragment_container_view)
+            }
         }
     }
 }

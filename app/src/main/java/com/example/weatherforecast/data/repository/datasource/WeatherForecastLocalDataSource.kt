@@ -1,9 +1,6 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import com.example.weatherforecast.data.models.WeatherForecastDomainModel
-import com.example.weatherforecast.data.models.WeatherForecastResponse
-import kotlinx.coroutines.flow.Flow
-import retrofit2.Response
+import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 
 /**
  * Local data source interface

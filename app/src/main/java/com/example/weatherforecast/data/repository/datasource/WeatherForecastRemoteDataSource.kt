@@ -1,6 +1,6 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import com.example.weatherforecast.data.models.WeatherForecastResponse
+import com.example.weatherforecast.data.models.data.WeatherForecastResponse
 import retrofit2.Response
 
 /**

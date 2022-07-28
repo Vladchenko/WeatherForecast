@@ -4,19 +4,26 @@ import android.app.Application
 import androidx.room.Room
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
-import com.example.weatherforecast.data.converter.DataToDomainModelsConverter
+import com.example.weatherforecast.data.converter.CitiesNamesDataToDomainConverter
+import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
 import com.example.weatherforecast.data.database.WeatherForecastDAO
 import com.example.weatherforecast.data.database.WeatherForecastDataBase
+import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
+import com.example.weatherforecast.data.repository.datasource.CitiesNamesDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
+import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastRemoteDataSourceImpl
-import com.example.weatherforecast.domain.WeatherForecastLocalInteractor
-import com.example.weatherforecast.domain.WeatherForecastRemoteInteractor
-import com.example.weatherforecast.domain.WeatherForecastRepository
+import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
+import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
+import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
+import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
+import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
+import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
 import dagger.Module
 import dagger.Provides
@@ -86,8 +93,8 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideConverter(): DataToDomainModelsConverter {
-        return DataToDomainModelsConverter()
+    fun provideConverter(): ForecastDataToDomainModelsConverter {
+        return ForecastDataToDomainModelsConverter()
     }
 
     @Singleton
@@ -95,7 +102,7 @@ class WeatherForecastModule {
     fun provideWeatherForecastRepository(
         weatherForecastRemoteDataSource: WeatherForecastRemoteDataSource,
         weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
-        converter: DataToDomainModelsConverter
+        converter: ForecastDataToDomainModelsConverter
     ): WeatherForecastRepository {
         return WeatherForecastRepositoryImpl(
             weatherForecastRemoteDataSource,
@@ -127,6 +134,48 @@ class WeatherForecastModule {
             app,
             weatherForecastRemoteInteractor,
             weatherForecastLocalInteractor
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitiesNamesDataSource(weatherForecastApiService: WeatherForecastApiService): CitiesNamesDataSource {
+        return CitiesNamesDataSourceImpl(weatherForecastApiService)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitiesNamesConverter(): CitiesNamesDataToDomainConverter {
+        return CitiesNamesDataToDomainConverter()
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitiesNamesRepository(
+        citiesNamesDataSource: CitiesNamesDataSource,
+        converter: CitiesNamesDataToDomainConverter
+    ): CitiesNamesRepository {
+        return CitiesNamesRepositoryImpl(
+            citiesNamesDataSource,
+            converter
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitiesNamesInteractor(citiesNamesRepository: CitiesNamesRepository): CitiesNamesInteractor {
+        return CitiesNamesInteractor(citiesNamesRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitiesNamesViewModelFactory(
+        app: Application,
+        citiesNamesInteractor: CitiesNamesInteractor
+    ): CitiesNamesViewModelFactory {
+        return CitiesNamesViewModelFactory(
+            app,
+            citiesNamesInteractor
         )
     }
 
