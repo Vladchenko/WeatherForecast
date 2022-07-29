@@ -19,6 +19,8 @@ interface WeatherForecastApiService {
     suspend fun getCityNamesForTyping(
         @Query("q")
         city:String,
+        @Query("limit")
+        limit: Int = 5,
         @Query("appid")
         apiKey: String = BuildConfig.API_KEY
     ): Response<List<WeatherForecastCityResponse>>
