@@ -67,6 +67,7 @@ class CurrentTimeForecastFragment : Fragment() {
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
         viewModel = (activity as WeatherForecastActivity).forecastViewModel
         locationListener = GeoLocationListenerImpl()
+        permissionDelegate.getPermissionForGeoLocation(activity as Activity)
 
         if (city.isBlank()) {
             geoLocator.getCityByLocation(activity as Activity, locationListener)
