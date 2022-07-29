@@ -22,23 +22,24 @@ import java.util.Locale
  */
 class WeatherForecastGeoLocator {
 
+    private lateinit var locationListener: GeoLocationListener
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     /**
-     * Define device geo location, using [activity].
+     * Define device geo location, using [activity] and deliver callback through [locationListener].
      */
     fun getCityByLocation(activity: Activity, locationListener: GeoLocationListener) {
+        this.locationListener = locationListener
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
             override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
             override fun isCancellationRequested() = false
         }).addOnSuccessListener { location: Location? ->
-            Log.i("WeatherForecastGeoLocator1", location.toString())
+            Log.i("WeatherForecastGeoLocator",location.toString())
             if (location == null) {
-                Log.i("WeatherForecastGeoLocator2", location.toString())
                 Toast.makeText(activity, "Cannot get location", Toast.LENGTH_LONG).show()
             } else {
-                Log.i("WeatherForecastGeoLocator3", location.toString())
+                Log.i("WeatherForecastGeoLocator", location.toString())
                 val geoCoder = Geocoder(activity, Locale.getDefault())
                 locationListener.onGeoLocationSuccess(
                     activity,

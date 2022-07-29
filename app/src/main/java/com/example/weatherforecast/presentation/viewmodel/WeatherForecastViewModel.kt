@@ -73,7 +73,7 @@ class WeatherForecastViewModel(
                     // Download forecast from database
                     val result = weatherForecastLocalInteractor.loadForecast(city ?: "")
                     _getWeatherForecastLiveData.postValue(result)
-                    _showErrorLiveData.postValue("No internet connection, outdated forecast has been loaded from database")
+                    _showErrorLiveData.postValue("No internet connection, outdated forecast has been loaded from database on default location area.")
                 }
             }
         } catch (ex: Exception) {

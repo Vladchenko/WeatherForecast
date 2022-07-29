@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation android:id="@+id/navigation_graph"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/currentTimeForecastFragment">
+
+    <fragment
+        android:id="@+id/citiesNamesFragment"
+        android:name="com.example.weatherforecast.presentation.fragments.CitiesNamesFragment"
+        android:label="CitiesNamesFragment">
+        <action
+            android:id="@+id/action_citiesNamesFragment_to_currentTimeForecastFragment"
+            app:destination="@id/currentTimeForecastFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/currentTimeForecastFragment"
+        android:name="com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment"
+        android:label="CurrentTimeForecastFragment">
+        <action
+            android:id="@+id/action_currentTimeForecastFragment_to_citiesNamesFragment"
+            app:destination="@id/citiesNamesFragment" />
+    </fragment>
+
+</navigation>

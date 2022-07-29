@@ -19,17 +19,21 @@ import kotlinx.coroutines.launch
  */
 class CitiesNamesViewModel(
     private val app: Application,
-    private val citiesNamesInteractor: CitiesNamesInteractor
+    private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AndroidViewModel(app) {
 
-    private val _getCitiesNamesLiveData: MutableLiveData<CitiesNamesDomainModel> = MutableLiveData()
-    private val _showErrorLiveData: MutableLiveData<String> = MutableLiveData()
+    private val _showErrorLiveData = MutableLiveData<String>()
+    private val _getCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
+    private val _gotoOutdatedForecastLiveData = MutableLiveData<Unit>()
+
+    val showErrorLiveData: LiveData<String>
+        get() = _showErrorLiveData
 
     val getCitiesNamesLiveData: LiveData<CitiesNamesDomainModel>
         get() = _getCitiesNamesLiveData
 
-    val showErrorLiveData: LiveData<String>
-        get() = _showErrorLiveData
+    val gotoOutdatedForecastLiveData: LiveData<Unit>
+        get() = _gotoOutdatedForecastLiveData
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message!!)
@@ -37,7 +41,7 @@ class CitiesNamesViewModel(
     }
 
     /**
-     * TODO
+     * Download a cities names matching a token [city]
      */
     fun getCitiesNames(city: String?) {
         try {
@@ -48,6 +52,10 @@ class CitiesNamesViewModel(
                         _getCitiesNamesLiveData.postValue(response)
                     }
                 }
+            } else {
+                // Start a previous fragment
+                _gotoOutdatedForecastLiveData.postValue(Unit)
+                _showErrorLiveData.postValue("No internet connection, choose Google Maps' default location area.")
             }
         } catch (ex: Exception) {
             _showErrorLiveData.postValue(ex.message)

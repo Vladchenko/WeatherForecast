@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
 import com.example.weatherforecast.presentation.WeatherForecastActivity
@@ -51,13 +52,13 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.autocompleteCity.threshold = 2
         fragmentDataBinding.autocompleteCity.setOnItemClickListener { parent, view, position, id ->
             city = autoSuggestAdapter.getItem(position)
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                val bundle = Bundle().apply {
-                    putString(CITY_ARGUMENT_KEY, city)
-                }
-                replace(R.id.fragment_container_view, CurrentTimeForecastFragment::class.java, bundle)
+            val bundle = Bundle().apply {
+                putSerializable(CITY_ARGUMENT_KEY, city)
             }
+            findNavController().navigate(
+                R.id.action_currentTimeForecastFragment_to_citiesNamesFragment,
+                bundle
+            )
         }
         fragmentDataBinding.autocompleteCity.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -77,6 +78,15 @@ class CitiesNamesFragment : Fragment() {
         }
         viewModel.showErrorLiveData.observe(this) {
             Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+        }
+        viewModel.gotoOutdatedForecastLiveData.observe(this) {
+            val bundle = Bundle().apply {
+                putSerializable(CITY_ARGUMENT_KEY, city)
+            }
+            findNavController().navigate(
+                R.id.action_citiesNamesFragment_to_currentTimeForecastFragment,
+                bundle
+            )
         }
     }
 }

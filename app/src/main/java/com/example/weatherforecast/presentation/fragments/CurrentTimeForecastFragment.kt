@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
@@ -164,10 +166,7 @@ class CurrentTimeForecastFragment : Fragment() {
         }
 
         override fun onNegativeClick() {
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<CitiesNamesFragment>(R.id.fragment_container_view)
-            }
+            findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
         }
     }
 }
