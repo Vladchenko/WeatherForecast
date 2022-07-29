@@ -56,7 +56,7 @@ class CitiesNamesFragment : Fragment() {
                 putSerializable(CITY_ARGUMENT_KEY, city)
             }
             findNavController().navigate(
-                R.id.action_currentTimeForecastFragment_to_citiesNamesFragment,
+                R.id.action_citiesNamesFragment_to_currentTimeForecastFragment,
                 bundle
             )
         }

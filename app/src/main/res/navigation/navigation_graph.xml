@@ -10,7 +10,11 @@
         android:label="CitiesNamesFragment">
         <action
             android:id="@+id/action_citiesNamesFragment_to_currentTimeForecastFragment"
-            app:destination="@id/currentTimeForecastFragment" />
+            app:destination="@id/currentTimeForecastFragment"
+            app:enterAnim="@anim/nav_default_pop_enter_anim"
+            app:exitAnim="@anim/nav_default_pop_exit_anim"
+            app:popUpTo="@id/currentTimeForecastFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -19,7 +23,9 @@
         android:label="CurrentTimeForecastFragment">
         <action
             android:id="@+id/action_currentTimeForecastFragment_to_citiesNamesFragment"
-            app:destination="@id/citiesNamesFragment" />
+            app:destination="@id/citiesNamesFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
 </navigation>
