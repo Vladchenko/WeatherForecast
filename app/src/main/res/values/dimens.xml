@@ -15,4 +15,5 @@
     <dimen name="weather_image_view_margin_left">16dp</dimen>
     <dimen name="weather_image_view_margin_top">12dp</dimen>
     <dimen name="city_name_fragment_padding">16dp</dimen>
+    <dimen name="city_name_text_view_width">250dp</dimen>
 </resources>

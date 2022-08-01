@@ -23,7 +23,7 @@ class AutoSuggestAdapter(context: Context, resource: Int) : ArrayAdapter<String>
 
     @Nullable
     override fun getItem(position: Int):String {
-        return if (!dataList[position].state.isNullOrBlank()) {
+        return if (!dataList[position].state.isNullOrBlank() && dataList[position].state != dataList[position].name) {
             dataList[position].name + ", " + dataList[position].state + ", " + dataList[position].country
         } else {
             dataList[position].name + ", " + dataList[position].country
