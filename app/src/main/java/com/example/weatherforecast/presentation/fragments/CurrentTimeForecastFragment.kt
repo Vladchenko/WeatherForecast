@@ -10,9 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
@@ -70,6 +67,9 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel = (activity as WeatherForecastActivity).forecastViewModel
         locationListener = GeoLocationListenerImpl()
         permissionDelegate.getPermissionForGeoLocation(activity as Activity)
+        fragmentDataBinding.cityNameTextView.setOnClickListener(
+            CityClickListener(findNavController())
+        )
 
         if (city.isBlank()) {
             geoLocator.getCityByLocation(activity as Activity, locationListener)
@@ -150,7 +150,6 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    // FIXME Should this go to activity ?
     inner class CityApprovalAlertDialogListenerImpl: AlertDialogClickListener {
         override fun onPositiveClick(locationName: String) {
             fragmentDataBinding.progressBar.visibility = View.VISIBLE

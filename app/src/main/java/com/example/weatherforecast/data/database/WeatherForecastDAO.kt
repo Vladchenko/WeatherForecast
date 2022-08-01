@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
+import kotlinx.coroutines.flow.Flow
 
 /**
  * DAO class for ROOM database
@@ -30,8 +31,7 @@ interface WeatherForecastDAO {
     fun getCityForecast(city: String): WeatherForecastDomainModel // This is not a suspend fun, since it returns LiveData
 
     @Query("SELECT * FROM citiesForecasts")
-    fun getAllCitiesForecasts(): List<WeatherForecastDomainModel> // This is not a suspend fun, since it returns LiveData
-    // // At the end of a lesson, there is saying - use Flow instead of LiveData, like Flow<List<WeatherForecastDomainModel>>
+    fun getAllCitiesForecasts(): Flow<List<WeatherForecastDomainModel>> // Flow is used to get several items
 
     // @Insert
     // fun insertSubscriber2(model: WeatherForecastDomainModel): Long  // This ordinary fun is used for an implementation different
