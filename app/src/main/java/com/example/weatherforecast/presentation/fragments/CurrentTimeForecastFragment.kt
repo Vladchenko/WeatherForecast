@@ -1,5 +1,7 @@
 package com.example.weatherforecast.presentation.fragments
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.location.Location
@@ -106,13 +108,13 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
-        hideProgressBar()
         fragmentDataBinding.dateTextView.text = getCurrentDate()
         fragmentDataBinding.cityNameTextView.text = dataModel.city
         fragmentDataBinding.degreesValueTextView.text = dataModel.temperature
         fragmentDataBinding.degreesTypeTextView.text = dataModel.temperatureType
         fragmentDataBinding.weatherTypeTextView.text = dataModel.weatherType
         fragmentDataBinding.weatherTypeImageView.setImageResource(getWeatherTypeIcon(dataModel.weatherType))
+        animateFadeOut(fragmentDataBinding.progressBar, resources.getInteger(android.R.integer.config_mediumAnimTime))
     }
 
     private fun showError(errorMessage: String) {
@@ -137,6 +139,19 @@ class CurrentTimeForecastFragment : Fragment() {
         fragmentDataBinding.progressBar.visibility = View.INVISIBLE
     }
 
+    private fun animateFadeOut(progressBar: View, shortAnimationDuration: Int) {
+        progressBar.apply {
+            animate()
+            .alpha(0f)
+            .setDuration(shortAnimationDuration.toLong())
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    progressBar.visibility = View.GONE
+                }
+            })
+        }
+    }
+
     companion object {
         const val CITY_ARGUMENT_KEY = "CITY"
         private const val ICON_PREFIX = "icon_"
@@ -152,7 +167,6 @@ class CurrentTimeForecastFragment : Fragment() {
 
     inner class CityApprovalAlertDialogListenerImpl: AlertDialogClickListener {
         override fun onPositiveClick(locationName: String) {
-            fragmentDataBinding.progressBar.visibility = View.VISIBLE
             if (permissionDelegate.getPermissionForGeoLocation(activity as Activity)
                 == GeoLocationPermissionDelegate.LocationPermission.ALREADY_PRESENT
             ) {

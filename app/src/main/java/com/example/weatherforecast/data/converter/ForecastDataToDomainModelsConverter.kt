@@ -23,9 +23,9 @@ class ForecastDataToDomainModelsConverter {
     ): WeatherForecastDomainModel {
         return WeatherForecastDomainModel(
             city,
-            response.body()!!.dt.toString(),
+            response.body()?.dt.toString(),
             defineTemperature(temperatureType, response),
-            response.body()!!.weather[0].description,
+            response.body()?.weather?.get(0)?.description?:"",
             defineTemperatureSign(temperatureType)
         )
     }
@@ -35,10 +35,10 @@ class ForecastDataToDomainModelsConverter {
         response: Response<WeatherForecastResponse>
     ) = when (temperatureType) {
         TemperatureType.CELSIUS -> {
-            getCelsiusFromKelvinTemperature(response.body()!!.main.temp).roundToInt().toString()
+            getCelsiusFromKelvinTemperature(response.body()?.main?.temp?:0.0).roundToInt().toString()
         }
         TemperatureType.FAHRENHEIT -> {
-            getFahrenheitFromKelvinTemperature(response.body()!!.main.temp).roundToInt().toString()
+            getFahrenheitFromKelvinTemperature(response.body()?.main?.temp?:0.0).roundToInt().toString()
         }
         TemperatureType.KELVIN -> {
             response.body()!!.main.temp.roundToInt().toString()
