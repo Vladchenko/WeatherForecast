@@ -9,5 +9,8 @@ JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
     - Add unit tests
-    - When no internet, initial message shows up in about 10 secs (too long)
+    - When no internet
+        - "Cannot get location" message shows up in about 10 secs (too long)
+        - Once internet is back, app doesn't see that
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
+    - Add "heavy intensity rain" to weather images

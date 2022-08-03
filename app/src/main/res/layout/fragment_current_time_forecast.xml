@@ -11,10 +11,10 @@
         tools:context=".presentation.WeatherForecastActivity">
 
         <ImageView
-            android:layout_marginStart="@dimen/weather_image_view_margin_left"
             android:id="@+id/weather_type_image_view"
             android:layout_width="@dimen/image_size"
             android:layout_height="@dimen/image_size"
+            android:layout_marginStart="@dimen/weather_image_view_margin_left"
             android:layout_marginTop="@dimen/weather_image_view_margin_top"
             android:contentDescription="@string/weather_image_content_description"
             app:layout_constraintEnd_toEndOf="parent"
@@ -66,6 +66,19 @@
             tools:text="@string/default_degrees_type" />
 
         <TextView
+            android:id="@+id/connection_status_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corner"
+            android:textColor="@color/common_border_color"
+            app:layout_constrainedWidth="true"
+            android:layout_marginTop="@dimen/connection_status_margin"
+            app:layout_constraintTop_toBottomOf="@id/weather_type_text_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="@string/connection_status_example" />
+
+        <TextView
             android:id="@+id/date_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -82,20 +95,20 @@
             android:layout_width="@dimen/city_name_text_view_width"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/city_name_margin_top"
+            android:gravity="center"
             android:textColor="@color/common_border_color"
             android:textSize="@dimen/city_name_text_size"
             android:textStyle="bold"
-            android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/date_text_view"
             tools:text="@string/city_name_example" />
 
         <TextView
-            android:layout_marginTop="@dimen/wether_type_margin_top"
             android:id="@+id/weather_type_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/wether_type_margin_top"
             android:textColor="@color/common_border_color"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

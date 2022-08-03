@@ -15,5 +15,6 @@ data class CityDomainModel(
     val lat: Double,
     val lon: Double,
     val country: String,
-    val state: String? = null
+    val state: String? = null,
+    val serverError: String? = null,
 )

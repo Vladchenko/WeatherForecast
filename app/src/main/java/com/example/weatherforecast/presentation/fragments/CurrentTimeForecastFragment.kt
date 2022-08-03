@@ -23,6 +23,8 @@ import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate.Companion.REQUEST_CODE_ASK_PERMISSIONS
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
+import com.example.weatherforecast.network.ConnectionLiveData
+import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,9 +39,12 @@ import javax.inject.Inject
 class CurrentTimeForecastFragment : Fragment() {
 
     private var city: String = ""
+    private var temperatureType: TemperatureType = TemperatureType.CELSIUS
+    private var localLocation: Location? = Location("")
 
     private lateinit var viewModel: WeatherForecastViewModel
     private lateinit var locationListener: GeoLocationListener
+    private lateinit var connectionLiveData: ConnectionLiveData
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     @Inject
@@ -51,7 +56,7 @@ class CurrentTimeForecastFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            city = it.getString(CITY_ARGUMENT_KEY) ?:""
+            city = it.getString(CITY_ARGUMENT_KEY) ?: ""
         }
     }
 
@@ -62,38 +67,16 @@ class CurrentTimeForecastFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_current_time_forecast, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
-        viewModel = (activity as WeatherForecastActivity).forecastViewModel
-        locationListener = GeoLocationListenerImpl()
-        permissionDelegate.getPermissionForGeoLocation(activity as Activity)
-        fragmentDataBinding.cityNameTextView.setOnClickListener(
-            CityClickListener(findNavController())
-        )
-
-        if (city.isBlank()) {
-            geoLocator.getCityByLocation(activity as Activity, locationListener)
-        } else {
-            viewWeatherForecastData(
-                TemperatureType.CELSIUS,
-                city,
-                Location("")
-            )
-        }
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             REQUEST_CODE_ASK_PERMISSIONS -> if (grantResults.isNotEmpty()
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
                 Log.i("CurrentTimeForecastFragment", "Permission Granted!")
-                viewWeatherForecastData(
+                downloadWeatherForecastData(
                     TemperatureType.CELSIUS,
                     city,
-                    Location("")
+                    localLocation
                 )
             } else {
                 Log.i("CurrentTimeForecastFragment", "Permission Not Granted!")
@@ -101,10 +84,50 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    private fun viewWeatherForecastData(temperatureType: TemperatureType, city: String, location: Location?) {
-        viewModel.getWeatherForecast(temperatureType, city, location)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
+        connectionLiveData = ConnectionLiveData(requireContext())
+        locationListener = GeoLocationListenerImpl()
+        permissionDelegate.getPermissionForGeoLocation(activity as Activity)
+        fragmentDataBinding.cityNameTextView.setOnClickListener(
+            CityClickListener(findNavController())
+        )
+        viewModel = (activity as WeatherForecastActivity).forecastViewModel
+        // locateCityOrDownloadForeCastData()
+        prepareObservers()
+    }
+
+    private fun prepareObservers() {
         viewModel.getWeatherForecastLiveData.observe(this) { showForecastData(it) }
         viewModel.showErrorLiveData.observe(this) { showError(it) }
+        viewModel.showProgressBarLiveData.observe(this) { toggleProgressBar(it) }
+        connectionLiveData.observe(this) {
+            viewModel._isNetworkAvailable.value = it
+            viewModel.notifyAboutNetworkAvailability { onNetworkAvailable() }
+        }
+    }
+
+    private fun locateCityOrDownloadForeCastData() {
+        if (city.isBlank()) {
+            geoLocator.getCityByLocation(activity as Activity, locationListener)
+        } else {
+            downloadWeatherForecastData(
+                TemperatureType.CELSIUS,
+                city,
+                localLocation
+            )
+        }
+    }
+
+    private fun downloadWeatherForecastData(temperatureType: TemperatureType, city: String, location: Location?) {
+        this.city = city
+        localLocation = location
+        this.temperatureType = temperatureType
+        fragmentDataBinding.connectionStatusTextView.text = ""
+        fragmentDataBinding.connectionStatusTextView.visibility =View.INVISIBLE
+        viewModel.getWeatherForecast(temperatureType, city, location)
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -118,8 +141,21 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun showError(errorMessage: String) {
-        hideProgressBar()
-        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
+        toggleProgressBar(false)
+        fragmentDataBinding.connectionStatusTextView.text = errorMessage
+        fragmentDataBinding.connectionStatusTextView.visibility =View.VISIBLE
+    }
+
+    private fun onNetworkAvailable() {
+        if (viewModel._isNetworkAvailable.value == true
+            || isNetworkAvailable(context)
+        ) {
+            fragmentDataBinding.connectionStatusTextView.visibility =View.INVISIBLE
+            toggleProgressBar(true)
+            locateCityOrDownloadForeCastData()
+        } else {
+            showError(getString(R.string.network_not_available))
+        }
     }
 
     private fun getCurrentDate(): String {
@@ -135,20 +171,24 @@ class CurrentTimeForecastFragment : Fragment() {
             requireActivity().packageName
         )
 
-    private fun hideProgressBar() {
-        fragmentDataBinding.progressBar.visibility = View.INVISIBLE
+    private fun toggleProgressBar(toggle: Boolean) {
+        if (toggle) {
+            fragmentDataBinding.progressBar.visibility = View.VISIBLE
+        } else {
+            fragmentDataBinding.progressBar.visibility = View.INVISIBLE
+        }
     }
 
     private fun animateFadeOut(progressBar: View, shortAnimationDuration: Int) {
         progressBar.apply {
             animate()
-            .alpha(0f)
-            .setDuration(shortAnimationDuration.toLong())
-            .setListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    progressBar.visibility = View.GONE
-                }
-            })
+                .alpha(0f)
+                .setDuration(shortAnimationDuration.toLong())
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        progressBar.visibility = View.GONE
+                    }
+                })
         }
     }
 
@@ -158,22 +198,23 @@ class CurrentTimeForecastFragment : Fragment() {
         private const val DRAWABLE_RESOURCE_TYPE = "drawable"
     }
 
-    inner class GeoLocationListenerImpl: GeoLocationListener {
+    inner class GeoLocationListenerImpl : GeoLocationListener {
         override fun onGeoLocationSuccess(activity: Activity, location: Location, locationName: String) {
             city = locationName
+            localLocation = location
             AlertDialogDelegate(city, CityApprovalAlertDialogListenerImpl()).showAlertDialog(activity)
         }
     }
 
-    inner class CityApprovalAlertDialogListenerImpl: AlertDialogClickListener {
+    inner class CityApprovalAlertDialogListenerImpl : AlertDialogClickListener {
         override fun onPositiveClick(locationName: String) {
             if (permissionDelegate.getPermissionForGeoLocation(activity as Activity)
                 == GeoLocationPermissionDelegate.LocationPermission.ALREADY_PRESENT
             ) {
-                viewWeatherForecastData(
+                downloadWeatherForecastData(
                     TemperatureType.CELSIUS,
                     locationName,
-                    Location("")    //FIXME
+                    localLocation
                 )
             }
         }

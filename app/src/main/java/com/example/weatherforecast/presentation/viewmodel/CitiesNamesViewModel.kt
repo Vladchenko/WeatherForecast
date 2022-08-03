@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
+import com.example.weatherforecast.network.NetworkUtils
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
@@ -23,8 +24,8 @@ class CitiesNamesViewModel(
 ) : AndroidViewModel(app) {
 
     private val _showErrorLiveData = MutableLiveData<String>()
-    private val _getCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
     private val _gotoOutdatedForecastLiveData = MutableLiveData<Unit>()
+    private val _getCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
 
     val showErrorLiveData: LiveData<String>
         get() = _showErrorLiveData
@@ -56,6 +57,7 @@ class CitiesNamesViewModel(
                 // Start a previous fragment
                 _gotoOutdatedForecastLiveData.postValue(Unit)
                 _showErrorLiveData.postValue("No internet connection, choose Google Maps' default location area.")
+                //TODO Remove progressbar and put message to error text
             }
         } catch (ex: Exception) {
             _showErrorLiveData.postValue(ex.message)

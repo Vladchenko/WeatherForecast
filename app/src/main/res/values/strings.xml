@@ -9,4 +9,6 @@
     <string name="weather_type_example">weather type</string>
     <string name="city_name_example">City name</string>
     <string name="current_date_example">Current date</string>
+    <string name="connection_status_example">Connection status</string>
+    <string name="network_not_available">Network is not available, check connection</string>
 </resources>

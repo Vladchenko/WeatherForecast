@@ -21,4 +21,5 @@ data class WeatherForecastDomainModel(
     val weatherType: String,
     @SerializedName("temperatureType")
     val temperatureType: String,
+    val serverError: String,
 )

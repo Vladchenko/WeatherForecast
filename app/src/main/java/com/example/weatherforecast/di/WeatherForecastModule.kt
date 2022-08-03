@@ -51,7 +51,7 @@ class WeatherForecastModule {
         }
         val client = OkHttpClient.Builder().apply {
             addInterceptor(loggingInterceptor)
-            connectTimeout(3, TimeUnit.SECONDS)
+            connectTimeout(5, TimeUnit.SECONDS)
         }.build()
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())

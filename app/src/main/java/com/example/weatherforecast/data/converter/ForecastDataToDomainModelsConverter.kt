@@ -21,12 +21,18 @@ class ForecastDataToDomainModelsConverter {
         city: String,
         response: Response<WeatherForecastResponse>
     ): WeatherForecastDomainModel {
+        val serverError = response.errorBody().toString()
         return WeatherForecastDomainModel(
             city,
             response.body()?.dt.toString(),
             defineTemperature(temperatureType, response),
-            response.body()?.weather?.get(0)?.description?:"",
-            defineTemperatureSign(temperatureType)
+            response.body()?.weather?.get(0)?.description ?: "",
+            defineTemperatureSign(temperatureType),
+            if (serverError != "null") {
+                serverError
+            } else {
+                ""
+            }
         )
     }
 
@@ -35,10 +41,10 @@ class ForecastDataToDomainModelsConverter {
         response: Response<WeatherForecastResponse>
     ) = when (temperatureType) {
         TemperatureType.CELSIUS -> {
-            getCelsiusFromKelvinTemperature(response.body()?.main?.temp?:0.0).roundToInt().toString()
+            getCelsiusFromKelvinTemperature(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
         }
         TemperatureType.FAHRENHEIT -> {
-            getFahrenheitFromKelvinTemperature(response.body()?.main?.temp?:0.0).roundToInt().toString()
+            getFahrenheitFromKelvinTemperature(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
         }
         TemperatureType.KELVIN -> {
             response.body()!!.main.temp.roundToInt().toString()
