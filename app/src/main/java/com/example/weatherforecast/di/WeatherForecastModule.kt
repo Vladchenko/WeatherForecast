@@ -203,8 +203,8 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastGeoLocator(): WeatherForecastGeoLocator {
-        return WeatherForecastGeoLocator()
+    fun provideWeatherForecastGeoLocator(permissionDelegate: GeoLocationPermissionDelegate): WeatherForecastGeoLocator {
+        return WeatherForecastGeoLocator(permissionDelegate)
     }
 
     @Singleton

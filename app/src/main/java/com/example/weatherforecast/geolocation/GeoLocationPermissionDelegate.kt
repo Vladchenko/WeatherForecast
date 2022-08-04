@@ -15,7 +15,7 @@ class GeoLocationPermissionDelegate {
      * Grant permission to get geo location of a device, using [activity].
      */
     fun getPermissionForGeoLocation(activity: Activity):LocationPermission {
-        if (ActivityCompat.checkSelfPermission(activity as Context, Manifest.permission.ACCESS_FINE_LOCATION)
+        return if (ActivityCompat.checkSelfPermission(activity as Context, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
             && ActivityCompat.checkSelfPermission(activity as Context, Manifest.permission.ACCESS_COARSE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
@@ -24,9 +24,9 @@ class GeoLocationPermissionDelegate {
                 activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_CODE_ASK_PERMISSIONS
             )
-            return LocationPermission.GRANTED
+            LocationPermission.GRANTED
         } else {
-            return LocationPermission.ALREADY_PRESENT
+            LocationPermission.ALREADY_PRESENT
         }
     }
 

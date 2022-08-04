@@ -8,11 +8,11 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
-    - Try to remove "Call requires permission" errors
     - ! Make data source to return a data not domain model
     - When no internet
         - "Cannot get location" message shows up in about 10 secs (too long)
         - Once internet is back, app doesn't see that
+    - When app starts for the very first time, its progress bar spins forever
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
     - Add "heavy intensity rain" to weather images
     - Activity leaking when passed to geoLocator.getCityByLocation(activity as Activity, locationListener)

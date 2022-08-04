@@ -16,33 +16,37 @@ import java.util.Locale
 /**
  * Defines location of a device.
  */
-class WeatherForecastGeoLocator {
+class WeatherForecastGeoLocator(private val permissionDelegate: GeoLocationPermissionDelegate) {
 
-    private lateinit var locationListener: GeoLocationListener
+    // private lateinit var locationListener: GeoLocationListener
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     /**
      * Define device geo location, using [activity] and deliver callback through [locationListener].
      */
     fun getCityByLocation(activity: Activity, locationListener: GeoLocationListener) {
-        this.locationListener = locationListener
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
-            override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
-            override fun isCancellationRequested() = false
-        }).addOnSuccessListener { location: Location? ->
-            Log.i("WeatherForecastGeoLocator",location.toString())
-            if (location == null) {
-                Toast.makeText(activity, "Cannot get location", Toast.LENGTH_LONG).show()
-            } else {
+        try {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
+                override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
+                override fun isCancellationRequested() = false
+            }).addOnSuccessListener { location: Location? ->
                 Log.i("WeatherForecastGeoLocator", location.toString())
-                val geoCoder = Geocoder(activity, Locale.getDefault())
-                locationListener.onGeoLocationSuccess(
-                    activity,
-                    location,
-                    geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-                )
+                if (location == null) {
+                    Toast.makeText(activity, "Cannot get location", Toast.LENGTH_LONG).show()
+                } else {
+                    Log.i("WeatherForecastGeoLocator", location.toString())
+                    val geoCoder = Geocoder(activity, Locale.getDefault())
+                    locationListener.onGeoLocationSuccess(
+                        activity,
+                        location,
+                        geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+                    )
+                }
             }
+        } catch (sec: SecurityException) {
+            permissionDelegate.getPermissionForGeoLocation(activity)
+            getCityByLocation(activity, locationListener)
         }
     }
 }
