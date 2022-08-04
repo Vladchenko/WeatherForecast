@@ -7,9 +7,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
+import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.network.NetworkUtils
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 /**
@@ -44,23 +49,43 @@ class CitiesNamesViewModel(
     /**
      * Download a cities names matching a token [city]
      */
-    fun getCitiesNames(city: String?) {
+    fun getCitiesNames(city: String) {
+        Log.i("CitiesNamesViewModel1", city)
         try {
             if (NetworkUtils.isNetworkAvailable(app)) {
                 viewModelScope.launch(exceptionHandler) {
-                    if (!city.isNullOrBlank()) {
-                        val response = citiesNamesInteractor.loadCitiesNames(city)
-                        _getCitiesNamesLiveData.postValue(response)
-                    }
+                    val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
+                    _getCitiesNamesLiveData.postValue(response)
                 }
             } else {
-                // Start a previous fragment
-                _gotoOutdatedForecastLiveData.postValue(Unit)
-                _showErrorLiveData.postValue("No internet connection, choose Google Maps' default location area.")
-                //TODO Remove progressbar and put message to error text
+                _showErrorLiveData.postValue("No internet connection, trying to download from database...")
+                // Trying to download a chosen city from database
+                viewModelScope.launch(exceptionHandler) {
+                    val result = CitiesNamesDomainModel(
+                        citiesNamesInteractor.loadLocalCitiesNames("").flatMapConcat {
+                            it.asFlow().map {
+                                Log.i("CitiesNamesViewModel2", it.name)
+                            }
+                            it.asFlow()
+                        }.toList()
+                    )
+                    Log.i("CitiesNamesViewModel3", result.cities.size.toString())
+                    if (result.cities.isNotEmpty()) {
+                        _getCitiesNamesLiveData.postValue(result)
+                        Log.i("CitiesNamesViewModel4", result.cities[0].toString())
+                    } else {
+                        _showErrorLiveData.postValue("Database records, matching $city, not found.")
+                    }
+                }
             }
         } catch (ex: Exception) {
             _showErrorLiveData.postValue(ex.message)
+        }
+    }
+
+    fun saveChosenCity(city: CityDomainModel) {
+        viewModelScope.launch(exceptionHandler) {
+            citiesNamesInteractor.saveCitiesNames(city)
         }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
+import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
 import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
@@ -26,9 +28,8 @@ class CitiesNamesFragment : Fragment() {
 
     private var city = ""
 
-    private lateinit var autoSuggestAdapter: AutoSuggestAdapter
-
     private lateinit var viewModel: CitiesNamesViewModel
+    private lateinit var autoSuggestAdapter: AutoSuggestAdapter
     private lateinit var fragmentDataBinding: FragmentCitiesNamesBinding
 
     override fun onCreateView(
@@ -43,6 +44,7 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding = FragmentCitiesNamesBinding.bind(view)
         viewModel = (activity as WeatherForecastActivity).citiesNamesViewModel
         autoSuggestAdapter = AutoSuggestAdapter(activity as Context, android.R.layout.select_dialog_item)
+        fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
         observeCitiesNamesResponse()
         initSearch()
     }
@@ -52,6 +54,7 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.autocompleteCity.threshold = 2
         fragmentDataBinding.autocompleteCity.setOnItemClickListener { parent, view, position, id ->
             city = autoSuggestAdapter.getItem(position)
+            viewModel.saveChosenCity(CityDomainModel(city,0.0,0.0,"",""))
             val bundle = Bundle().apply {
                 putSerializable(CITY_ARGUMENT_KEY, city)
             }
@@ -64,7 +67,9 @@ class CitiesNamesFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.getCitiesNames(s.toString())
+                if (!s.isNullOrBlank()) {
+                    viewModel.getCitiesNames(s.toString())
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -77,7 +82,9 @@ class CitiesNamesFragment : Fragment() {
             autoSuggestAdapter.notifyDataSetChanged()
         }
         viewModel.showErrorLiveData.observe(this) {
-            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+            Log.e("CitiesNamesFragment",it)
+            fragmentDataBinding.errorTextView.text = it
+            fragmentDataBinding.errorTextView.visibility =View.VISIBLE
         }
         viewModel.gotoOutdatedForecastLiveData.observe(this) {
             val bundle = Bundle().apply {

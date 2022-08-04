@@ -6,7 +6,9 @@ import android.content.Context.CONNECTIVITY_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.lifecycle.LiveData
+import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 
 /**
  * Notifies through a broadcast receiver about a network availability.
@@ -15,7 +17,7 @@ class ConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
 
     private val networkReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            postValue(context.isConnected)
+            postValue(isNetworkAvailable(context))
         }
     }
 
@@ -35,5 +37,3 @@ class ConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
         }
     }
 }
-val Context.isConnected: Boolean
-    get() = (getSystemService(CONNECTIVITY_SERVICE) as? ConnectivityManager)?.activeNetworkInfo?.isConnected == true

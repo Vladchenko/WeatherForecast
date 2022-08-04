@@ -3,16 +3,16 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 import android.util.Log
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.models.data.WeatherForecastCityResponse
-import com.example.weatherforecast.data.repository.datasource.CitiesNamesDataSource
+import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
 import retrofit2.Response
 
 /**
  * CitiesNamesDataSource implementation
  */
-class CitiesNamesDataSourceImpl(private val apiService: WeatherForecastApiService) : CitiesNamesDataSource {
+class CitiesNamesRemoteDataSourceImpl(private val apiService: WeatherForecastApiService) : CitiesNamesRemoteDataSource {
 
-    override suspend fun getCityNamesForTyping(city: String): Response<List<WeatherForecastCityResponse>> {
-        val model = apiService.getCityNamesForTyping(city)
+    override suspend fun getCityNames(token: String): Response<List<WeatherForecastCityResponse>> {
+        val model = apiService.getCityNames(token)
         Log.i("CitiesNamesDataSourceImpl", model.body().toString())
         return model
     }

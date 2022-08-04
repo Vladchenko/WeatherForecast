@@ -6,14 +6,17 @@ import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.converter.CitiesNamesDataToDomainConverter
 import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
+import com.example.weatherforecast.data.database.CitiesNamesDAO
 import com.example.weatherforecast.data.database.WeatherForecastDAO
 import com.example.weatherforecast.data.database.WeatherForecastDataBase
 import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
-import com.example.weatherforecast.data.repository.datasource.CitiesNamesDataSource
+import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
+import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
-import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastRemoteDataSourceImpl
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
@@ -90,7 +93,7 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideWeatherForecastDAO(database: WeatherForecastDataBase): WeatherForecastDAO {
-        return database.getInstance();
+        return database.getWeatherForecastInstance();
     }
 
     @Singleton
@@ -141,8 +144,20 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideCitiesNamesDataSource(weatherForecastApiService: WeatherForecastApiService): CitiesNamesDataSource {
-        return CitiesNamesDataSourceImpl(weatherForecastApiService)
+    fun provideCitiesNamesDAO(database: WeatherForecastDataBase): CitiesNamesDAO {
+        return database.getCitiesNamesInstance();
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitiesNamesLocalDataSource(dao: CitiesNamesDAO): CitiesNamesLocalDataSource {
+        return CitiesNamesLocalDataSourceImpl(dao)
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitiesNamesRemoteDataSource(weatherForecastApiService: WeatherForecastApiService): CitiesNamesRemoteDataSource {
+        return CitiesNamesRemoteDataSourceImpl(weatherForecastApiService)
     }
 
     @Singleton
@@ -154,11 +169,13 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideCitiesNamesRepository(
-        citiesNamesDataSource: CitiesNamesDataSource,
-        converter: CitiesNamesDataToDomainConverter
+        converter: CitiesNamesDataToDomainConverter,
+        citiesNamesLocalDataSource: CitiesNamesLocalDataSource,
+        citiesNamesRemoteDataSource: CitiesNamesRemoteDataSource
     ): CitiesNamesRepository {
         return CitiesNamesRepositoryImpl(
-            citiesNamesDataSource,
+            citiesNamesLocalDataSource,
+            citiesNamesRemoteDataSource,
             converter
         )
     }

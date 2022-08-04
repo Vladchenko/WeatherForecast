@@ -10,7 +10,7 @@ import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import kotlinx.coroutines.flow.Flow
 
 /**
- * DAO class for ROOM database
+ * Weather forecast DAO class for ROOM database
  */
 @Dao
 interface WeatherForecastDAO {

@@ -125,8 +125,8 @@ class CurrentTimeForecastFragment : Fragment() {
         this.city = city
         localLocation = location
         this.temperatureType = temperatureType
-        fragmentDataBinding.connectionStatusTextView.text = ""
-        fragmentDataBinding.connectionStatusTextView.visibility =View.INVISIBLE
+        fragmentDataBinding.errorTextView.text = ""
+        fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
         viewModel.getWeatherForecast(temperatureType, city, location)
     }
 
@@ -142,15 +142,16 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun showError(errorMessage: String) {
         toggleProgressBar(false)
-        fragmentDataBinding.connectionStatusTextView.text = errorMessage
-        fragmentDataBinding.connectionStatusTextView.visibility =View.VISIBLE
+        Log.e("CurrentTimeForecastFragment", errorMessage)
+        fragmentDataBinding.errorTextView.text = errorMessage
+        fragmentDataBinding.errorTextView.visibility =View.VISIBLE
     }
 
     private fun onNetworkAvailable() {
         if (viewModel._isNetworkAvailable.value == true
             || isNetworkAvailable(context)
         ) {
-            fragmentDataBinding.connectionStatusTextView.visibility =View.INVISIBLE
+            fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
             toggleProgressBar(true)
             locateCityOrDownloadForeCastData()
         } else {

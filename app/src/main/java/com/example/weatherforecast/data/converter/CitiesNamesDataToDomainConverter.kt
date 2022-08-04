@@ -1,6 +1,5 @@
 package com.example.weatherforecast.data.converter
 
-import android.util.Log
 import com.example.weatherforecast.data.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.data.models.domain.CityDomainModel

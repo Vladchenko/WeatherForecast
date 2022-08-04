@@ -1,6 +1,8 @@
 package com.example.weatherforecast.domain.citiesnames
 
 import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
+import com.example.weatherforecast.data.models.domain.CityDomainModel
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Cities names interactor.
@@ -9,7 +11,15 @@ import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
  */
 class CitiesNamesInteractor(private val citiesNamesRepository: CitiesNamesRepository) {
 
-    suspend fun loadCitiesNames(city: String): CitiesNamesDomainModel {
-        return citiesNamesRepository.loadCitiesForTyping(city)
+    suspend fun loadRemoteCitiesNames(city: String): CitiesNamesDomainModel {
+        return citiesNamesRepository.loadRemoteCitiesNames(city)
+    }
+
+    suspend fun loadLocalCitiesNames(city: String): Flow<List<CityDomainModel>> {
+        return citiesNamesRepository.loadLocalCitiesNames(city)
+    }
+
+    suspend fun saveCitiesNames(city: CityDomainModel) {
+        citiesNamesRepository.saveCity(city)
     }
 }

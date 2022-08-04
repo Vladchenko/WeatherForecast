@@ -16,7 +16,7 @@ interface WeatherForecastApiService {
      * Receive cities names that match the requested criteria, i.e. [city]
      */
     @GET("geo/1.0/direct")
-    suspend fun getCityNamesForTyping(
+    suspend fun getCityNames(
         @Query("q")
         city:String,
         @Query("limit")

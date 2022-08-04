@@ -22,6 +22,15 @@
             android:layout_height="wrap_content"
             android:hint="@string/city_typing_hint"/>
 
+        <TextView
+            android:id="@+id/error_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corner"
+            android:textColor="@color/common_border_color"
+            android:layout_marginTop="@dimen/error_text_view_top_margin"
+            tools:text="@string/error_text_example" />
+
     </LinearLayout>
 
 </layout>

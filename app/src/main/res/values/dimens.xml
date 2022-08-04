@@ -16,5 +16,5 @@
     <dimen name="weather_image_view_margin_top">12dp</dimen>
     <dimen name="city_name_fragment_padding">16dp</dimen>
     <dimen name="city_name_text_view_width">250dp</dimen>
-    <dimen name="connection_status_margin">16dp</dimen>
+    <dimen name="error_text_view_top_margin">16dp</dimen>
 </resources>
