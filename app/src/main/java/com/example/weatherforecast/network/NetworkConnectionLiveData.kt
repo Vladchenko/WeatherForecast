@@ -2,11 +2,10 @@ package com.example.weatherforecast.network
 
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Context.CONNECTIVITY_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 
@@ -25,7 +24,7 @@ class NetworkConnectionLiveData(private val context: Context) : LiveData<Boolean
         super.onActive()
         context.registerReceiver(
             networkReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)   //TODO Replace this solution with NetworkCallback https://stackoverflow.com/questions/36421930/connectivitymanager-connectivity-action-deprecated
         )
     }
 
@@ -34,6 +33,7 @@ class NetworkConnectionLiveData(private val context: Context) : LiveData<Boolean
         try {
             context.unregisterReceiver(networkReceiver)
         } catch (e: Exception) {
+            Log.e("NetworkConnectionLiveData", "Cannot unregister broadcast receiver.")
         }
     }
 }

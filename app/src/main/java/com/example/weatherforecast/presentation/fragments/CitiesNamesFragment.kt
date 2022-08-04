@@ -8,9 +8,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.AdapterView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CityDomainModel
@@ -49,12 +48,17 @@ class CitiesNamesFragment : Fragment() {
         initSearch()
     }
 
-    private fun initSearch() {
-        fragmentDataBinding.autocompleteCity.setAdapter(autoSuggestAdapter)
-        fragmentDataBinding.autocompleteCity.threshold = 2
-        fragmentDataBinding.autocompleteCity.setOnItemClickListener { parent, view, position, id ->
-            city = autoSuggestAdapter.getItem(position)
-            viewModel.saveChosenCity(CityDomainModel(city,0.0,0.0,"",""))
+    private fun observeCitiesNamesResponse() {
+        viewModel.getCitiesNamesLiveData.observe(viewLifecycleOwner) {
+            autoSuggestAdapter.setData(it.cities)
+            autoSuggestAdapter.notifyDataSetChanged()
+        }
+        viewModel.showErrorLiveData.observe(viewLifecycleOwner) {
+            Log.e("CitiesNamesFragment",it)
+            fragmentDataBinding.errorTextView.text = it
+            fragmentDataBinding.errorTextView.visibility =View.VISIBLE
+        }
+        viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) {
             val bundle = Bundle().apply {
                 putSerializable(CITY_ARGUMENT_KEY, city)
             }
@@ -63,8 +67,19 @@ class CitiesNamesFragment : Fragment() {
                 bundle
             )
         }
-        fragmentDataBinding.autocompleteCity.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+    }
+
+    private fun initSearch() {
+        fragmentDataBinding.autocompleteCity.setAdapter(autoSuggestAdapter)
+        fragmentDataBinding.autocompleteCity.threshold = 2
+        fragmentDataBinding.autocompleteCity.onItemClickListener = clickListener
+        fragmentDataBinding.autocompleteCity.addTextChangedListener(textChangeListener)
+    }
+
+    private val textChangeListener = object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Not used
+            }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (!s.isNullOrBlank()) {
@@ -72,28 +87,20 @@ class CitiesNamesFragment : Fragment() {
                 }
             }
 
-            override fun afterTextChanged(s: Editable?) {}
-        })
-    }
-
-    private fun observeCitiesNamesResponse() {
-        viewModel.getCitiesNamesLiveData.observe(this) {
-            autoSuggestAdapter.setData(it.cities)
-            autoSuggestAdapter.notifyDataSetChanged()
-        }
-        viewModel.showErrorLiveData.observe(this) {
-            Log.e("CitiesNamesFragment",it)
-            fragmentDataBinding.errorTextView.text = it
-            fragmentDataBinding.errorTextView.visibility =View.VISIBLE
-        }
-        viewModel.gotoOutdatedForecastLiveData.observe(this) {
-            val bundle = Bundle().apply {
-                putSerializable(CITY_ARGUMENT_KEY, city)
+            override fun afterTextChanged(s: Editable?) {
+                // Not used
             }
-            findNavController().navigate(
-                R.id.action_citiesNamesFragment_to_currentTimeForecastFragment,
-                bundle
-            )
         }
+
+    private val clickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+        city = autoSuggestAdapter.getItem(position)
+        viewModel.saveChosenCity(CityDomainModel(city,0.0,0.0,"",""))
+        val bundle = Bundle().apply {
+            putSerializable(CITY_ARGUMENT_KEY, city)
+        }
+        findNavController().navigate(
+            R.id.action_citiesNamesFragment_to_currentTimeForecastFragment,
+            bundle
+        )
     }
 }

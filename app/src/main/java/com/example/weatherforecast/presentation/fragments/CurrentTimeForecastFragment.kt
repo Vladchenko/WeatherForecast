@@ -49,7 +49,7 @@ class CurrentTimeForecastFragment : Fragment() {
     lateinit var geoLocator: WeatherForecastGeoLocator
 
     @Inject
-    lateinit var mNetworkConnectionLiveData: NetworkConnectionLiveData
+    lateinit var networkConnectionLiveData: NetworkConnectionLiveData
 
     @Inject
     lateinit var permissionDelegate: GeoLocationPermissionDelegate
@@ -95,15 +95,14 @@ class CurrentTimeForecastFragment : Fragment() {
             CityClickListener(findNavController())
         )
         viewModel = (activity as WeatherForecastActivity).forecastViewModel
-        // locateCityOrDownloadForeCastData()
         prepareObservers()
     }
 
     private fun prepareObservers() {
-        viewModel.getWeatherForecastLiveData.observe(this) { showForecastData(it) }
-        viewModel.showErrorLiveData.observe(this) { showError(it) }
-        viewModel.showProgressBarLiveData.observe(this) { toggleProgressBar(it) }
-        mNetworkConnectionLiveData.observe(this) {
+        viewModel.getWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
+        viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
+        networkConnectionLiveData.observe(viewLifecycleOwner) {
             viewModel._isNetworkAvailable.value = it
             viewModel.notifyAboutNetworkAvailability { onNetworkAvailable() }
         }

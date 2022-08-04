@@ -2,14 +2,8 @@ package com.example.weatherforecast.presentation
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
-import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel

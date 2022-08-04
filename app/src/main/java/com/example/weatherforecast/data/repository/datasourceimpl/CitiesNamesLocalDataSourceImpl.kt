@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.collect
  */
 class CitiesNamesLocalDataSourceImpl(private val dao: CitiesNamesDAO) : CitiesNamesLocalDataSource {
 
-    override suspend fun getCitiesNames(token: String): Flow<List<CityDomainModel>> {
-        val model = dao.getAllCitiesNames() //TODO Replace it with correct method
+    override fun getCitiesNames(token: String): Flow<List<CityDomainModel>> {
+        val model = dao.getAllCitiesNames() //TODO Replace it with a method of getting cities on token
         Log.i("CitiesNamesLocalDataSourceImpl", model.toString())
         return model
     }

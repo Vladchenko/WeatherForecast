@@ -6,6 +6,7 @@ import com.example.weatherforecast.data.repository.datasource.WeatherForecastLoc
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -19,27 +20,24 @@ import kotlinx.coroutines.withContext
 class WeatherForecastRepositoryImpl(
     private val weatherForecastRemoteDataSource: WeatherForecastRemoteDataSource,
     private val weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
-    private val modelsConverter: ForecastDataToDomainModelsConverter
+    private val modelsConverter: ForecastDataToDomainModelsConverter,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : WeatherForecastRepository {
 
     override suspend fun loadRemoteForecastForCity(temperatureType: TemperatureType, city: String) =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             modelsConverter.convert(temperatureType, city, weatherForecastRemoteDataSource.getWeatherForecastDataForCity(city))
         }
 
     override suspend fun loadRemoteForecastForLocation(temperatureType: TemperatureType, latitude: Double, longitude: Double) =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val model = weatherForecastRemoteDataSource.getWeatherForecastForLocation(latitude, longitude)
             modelsConverter.convert(temperatureType, model.body()!!.name, model)
         }
 
     override suspend fun loadLocalForecast(city: String) =
-        withContext(Dispatchers.IO) {
             weatherForecastLocalDataSource.loadWeatherForecastData(city)
-        }
 
     override suspend fun saveForecast(model: WeatherForecastDomainModel) =
-        withContext(Dispatchers.IO) {
             weatherForecastLocalDataSource.saveWeatherForecastData(model)
-        }
 }

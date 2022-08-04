@@ -2,7 +2,6 @@ package com.example.weatherforecast.network
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
 
 /**

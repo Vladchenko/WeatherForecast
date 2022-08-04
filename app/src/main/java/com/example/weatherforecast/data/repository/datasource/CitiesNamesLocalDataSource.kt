@@ -10,7 +10,7 @@ interface CitiesNamesLocalDataSource {
     /**
      * Retrieve cities names for [token].
      */
-    suspend fun getCitiesNames(token: String): Flow<List<CityDomainModel>>
+    fun getCitiesNames(token: String): Flow<List<CityDomainModel>>
 
     /**
      * Save [city] to database.

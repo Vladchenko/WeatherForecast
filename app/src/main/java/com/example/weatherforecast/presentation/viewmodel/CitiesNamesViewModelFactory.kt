@@ -4,8 +4,6 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
-import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
-import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 
 /**
  * Cities names view model factory

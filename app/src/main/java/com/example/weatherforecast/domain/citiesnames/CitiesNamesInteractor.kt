@@ -15,7 +15,7 @@ class CitiesNamesInteractor(private val citiesNamesRepository: CitiesNamesReposi
         return citiesNamesRepository.loadRemoteCitiesNames(city)
     }
 
-    suspend fun loadLocalCitiesNames(city: String): Flow<List<CityDomainModel>> {
+    fun loadLocalCitiesNames(city: String): Flow<List<CityDomainModel>> {
         return citiesNamesRepository.loadLocalCitiesNames(city)
     }
 
