@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
@@ -23,7 +22,7 @@ import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate.Companion.REQUEST_CODE_ASK_PERMISSIONS
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.network.ConnectionLiveData
+import com.example.weatherforecast.network.NetworkConnectionLiveData
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
@@ -44,11 +43,13 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private lateinit var viewModel: WeatherForecastViewModel
     private lateinit var locationListener: GeoLocationListener
-    private lateinit var connectionLiveData: ConnectionLiveData
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     @Inject
     lateinit var geoLocator: WeatherForecastGeoLocator
+
+    @Inject
+    lateinit var mNetworkConnectionLiveData: NetworkConnectionLiveData
 
     @Inject
     lateinit var permissionDelegate: GeoLocationPermissionDelegate
@@ -88,7 +89,6 @@ class CurrentTimeForecastFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
-        connectionLiveData = ConnectionLiveData(requireContext())
         locationListener = GeoLocationListenerImpl()
         permissionDelegate.getPermissionForGeoLocation(activity as Activity)
         fragmentDataBinding.cityNameTextView.setOnClickListener(
@@ -103,7 +103,7 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.getWeatherForecastLiveData.observe(this) { showForecastData(it) }
         viewModel.showErrorLiveData.observe(this) { showError(it) }
         viewModel.showProgressBarLiveData.observe(this) { toggleProgressBar(it) }
-        connectionLiveData.observe(this) {
+        mNetworkConnectionLiveData.observe(this) {
             viewModel._isNetworkAvailable.value = it
             viewModel.notifyAboutNetworkAvailability { onNetworkAvailable() }
         }

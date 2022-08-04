@@ -1,6 +1,7 @@
 package com.example.weatherforecast.di
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
@@ -26,11 +27,13 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteract
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
+import com.example.weatherforecast.network.NetworkConnectionLiveData
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -93,7 +96,7 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideWeatherForecastDAO(database: WeatherForecastDataBase): WeatherForecastDAO {
-        return database.getWeatherForecastInstance();
+        return database.getWeatherForecastInstance()
     }
 
     @Singleton
@@ -145,7 +148,7 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideCitiesNamesDAO(database: WeatherForecastDataBase): CitiesNamesDAO {
-        return database.getCitiesNamesInstance();
+        return database.getCitiesNamesInstance()
     }
 
     @Singleton
@@ -208,5 +211,11 @@ class WeatherForecastModule {
     @Provides
     fun provideGeoLocationPermissionDelegate(): GeoLocationPermissionDelegate {
         return GeoLocationPermissionDelegate()
+    }
+
+    @Singleton
+    @Provides
+    fun provideConnectionLiveData(@ApplicationContext context: Context): NetworkConnectionLiveData {
+        return NetworkConnectionLiveData(context)
     }
 }

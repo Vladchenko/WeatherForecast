@@ -13,7 +13,7 @@ import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 /**
  * Notifies through a broadcast receiver about a network availability.
  */
-class ConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
+class NetworkConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
 
     private val networkReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
