@@ -72,7 +72,7 @@
             android:background="@drawable/rounded_corner"
             android:textColor="@color/common_border_color"
             app:layout_constrainedWidth="true"
-            android:layout_marginTop="@dimen/error_text_view_top_margin"
+            android:layout_margin="@dimen/error_text_view_margin"
             app:layout_constraintTop_toBottomOf="@id/weather_type_text_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

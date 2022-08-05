@@ -10,6 +10,8 @@ import androidx.appcompat.app.AlertDialog
 class AlertDialogDelegate(private val city: String,
                           private val clickListener: AlertDialogClickListener) {
 
+    private lateinit var alertDialog: AlertDialog
+
     /**
      * Show alert dialog using [android.content.Context]
      */
@@ -27,7 +29,11 @@ class AlertDialogDelegate(private val city: String,
                 _dialogInterface
             )
         }
-        builder.show()
+        alertDialog = builder.show()
+    }
+
+    fun dismissAlertDialog() {
+        alertDialog.dismiss()
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {

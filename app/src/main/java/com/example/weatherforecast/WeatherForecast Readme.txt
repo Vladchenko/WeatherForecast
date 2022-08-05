@@ -9,11 +9,23 @@ JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
     - ! Make data source to return a data not domain model
-    - When no internet
-        - "Cannot get location" message shows up in about 10 secs (too long)
-        - Once internet is back, app doesn't see that
     - When app starts for the very first time, its progress bar spins forever
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
+        - Emptying a views doesn't help
+            - Tried in onViewCreated and in onPause
+        ! Probably, one has to remove fragment
     - Add "heavy intensity rain" to weather images
     - Activity leaking when passed to geoLocator.getCityByLocation(activity as Activity, locationListener)
+    E/WindowManager: android.view.WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@4f88978[WeatherForecastActivity] that was originally added here
+            at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797)
+            at android.view.ViewRootImpl.<init>(ViewRootImpl.java:781)
+            at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:399)
+            at android.view.WindowManagerImpl.addView(WindowManagerImpl.java:109)
+            at android.app.Dialog.show(Dialog.java:342)
+            at androidx.appcompat.app.AlertDialog$Builder.show(AlertDialog.java:1009)
+            at com.example.weatherforecast.geolocation.AlertDialogDelegate.showAlertDialog(AlertDialogDelegate.kt:30)
+            at com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment$GeoLocationListenerImpl.onGeoLocationSuccess(CurrentTimeForecastFragment.kt:204)
+            at com.example.weatherforecast.geolocation.WeatherForecastGeoLocator.getCityByLocation$lambda-0(WeatherForecastGeoLocator.kt:40)
+            at com.example.weatherforecast.geolocation.WeatherForecastGeoLocator.$r8$lambda$t6wtjVvEtEA0pWWis3ehR9ND8OQ(Unknown Source:0)
+            at com.example.weatherforecast.geolocation.WeatherForecastGeoLocator$$ExternalSyntheticLambda0.onSuccess(Unknown Source:6)
     - Add unit tests

@@ -3,6 +3,7 @@ package com.example.weatherforecast.presentation.fragments
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -23,7 +24,6 @@ import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate.Companion.REQUEST_CODE_ASK_PERMISSIONS
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.network.NetworkConnectionLiveData
-import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,6 +43,7 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private lateinit var viewModel: WeatherForecastViewModel
     private lateinit var locationListener: GeoLocationListener
+    private var alertDialogDelegate: AlertDialogDelegate? = null
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     @Inject
@@ -68,6 +69,26 @@ class CurrentTimeForecastFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_current_time_forecast, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
+        locationListener = GeoLocationListenerImpl()
+        permissionDelegate.getPermissionForGeoLocation(activity as Activity)
+        fragmentDataBinding.cityNameTextView.setOnClickListener(
+            CityClickListener(findNavController())
+        )
+        viewModel = (activity as WeatherForecastActivity).forecastViewModel
+        prepareObservers()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("CurrentTimeForecastFragment", alertDialogDelegate.toString())
+        alertDialogDelegate?.dismissAlertDialog()
+        alertDialogDelegate = null
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
             REQUEST_CODE_ASK_PERMISSIONS -> if (grantResults.isNotEmpty()
@@ -83,19 +104,6 @@ class CurrentTimeForecastFragment : Fragment() {
                 Log.i("CurrentTimeForecastFragment", "Permission Not Granted!")
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
-        locationListener = GeoLocationListenerImpl()
-        permissionDelegate.getPermissionForGeoLocation(activity as Activity)
-        fragmentDataBinding.cityNameTextView.setOnClickListener(
-            CityClickListener(findNavController())
-        )
-        viewModel = (activity as WeatherForecastActivity).forecastViewModel
-        prepareObservers()
     }
 
     private fun prepareObservers() {
@@ -125,7 +133,7 @@ class CurrentTimeForecastFragment : Fragment() {
         localLocation = location
         this.temperatureType = temperatureType
         fragmentDataBinding.errorTextView.text = ""
-        fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
+        fragmentDataBinding.errorTextView.visibility = View.INVISIBLE
         viewModel.getWeatherForecast(temperatureType, city, location)
     }
 
@@ -135,6 +143,7 @@ class CurrentTimeForecastFragment : Fragment() {
         fragmentDataBinding.degreesValueTextView.text = dataModel.temperature
         fragmentDataBinding.degreesTypeTextView.text = dataModel.temperatureType
         fragmentDataBinding.weatherTypeTextView.text = dataModel.weatherType
+        fragmentDataBinding.weatherTypeImageView.visibility = View.VISIBLE
         fragmentDataBinding.weatherTypeImageView.setImageResource(getWeatherTypeIcon(dataModel.weatherType))
         animateFadeOut(fragmentDataBinding.progressBar, resources.getInteger(android.R.integer.config_mediumAnimTime))
     }
@@ -143,18 +152,16 @@ class CurrentTimeForecastFragment : Fragment() {
         toggleProgressBar(false)
         Log.e("CurrentTimeForecastFragment", errorMessage)
         fragmentDataBinding.errorTextView.text = errorMessage
-        fragmentDataBinding.errorTextView.visibility =View.VISIBLE
+        fragmentDataBinding.errorTextView.visibility = View.VISIBLE
     }
 
     private fun onNetworkAvailable() {
-        if (viewModel._isNetworkAvailable.value == true
-            || isNetworkAvailable(context)
-        ) {
-            fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
+        if (viewModel._isNetworkAvailable.value == true) {
+            fragmentDataBinding.errorTextView.visibility = View.INVISIBLE
             toggleProgressBar(true)
             locateCityOrDownloadForeCastData()
         } else {
-            showError(getString(R.string.network_not_available))
+            showError(getString(R.string.network_not_available_error_text))
         }
     }
 
@@ -199,10 +206,16 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     inner class GeoLocationListenerImpl : GeoLocationListener {
-        override fun onGeoLocationSuccess(activity: Activity, location: Location, locationName: String) {
-            city = locationName
-            localLocation = location
-            AlertDialogDelegate(city, CityApprovalAlertDialogListenerImpl()).showAlertDialog(activity)
+        override fun onGeoLocationSuccess(context: Context, location: Location, locationName: String) {
+            if (fragmentDataBinding.cityNameTextView.text.isNullOrBlank()) {
+                city = locationName
+                localLocation = location
+                alertDialogDelegate = AlertDialogDelegate(city, CityApprovalAlertDialogListenerImpl())
+                alertDialogDelegate?.showAlertDialog(context)
+            }
+        }
+        override fun onGeoLocationFail() {
+            fragmentDataBinding.errorTextView.text = getString(R.string.location_fail_error_text)
         }
     }
 

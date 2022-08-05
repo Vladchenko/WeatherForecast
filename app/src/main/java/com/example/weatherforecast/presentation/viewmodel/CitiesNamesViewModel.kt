@@ -32,6 +32,8 @@ class CitiesNamesViewModel(
     private val _gotoOutdatedForecastLiveData = MutableLiveData<Unit>()
     private val _getCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
 
+    val _isNetworkAvailable: MutableLiveData<Boolean> = MutableLiveData()
+
     val showErrorLiveData: LiveData<String>
         get() = _showErrorLiveData
 
@@ -86,6 +88,16 @@ class CitiesNamesViewModel(
     fun saveChosenCity(city: CityDomainModel) {
         viewModelScope.launch(exceptionHandler) {
             citiesNamesInteractor.saveCitiesNames(city)
+        }
+    }
+
+    fun notifyAboutNetworkAvailability(callback: suspend () -> Unit) {
+        if (_isNetworkAvailable.value == true) {
+            viewModelScope.launch {
+                callback.invoke()
+            }
+        } else {
+            _showErrorLiveData.value = ("Network not available")
         }
     }
 }

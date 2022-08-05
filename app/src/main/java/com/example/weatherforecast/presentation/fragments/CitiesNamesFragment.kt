@@ -14,10 +14,12 @@ import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
+import com.example.weatherforecast.network.NetworkConnectionLiveData
 import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * Represents a feature of choosing a city to further have a weather forecast on.
@@ -30,6 +32,9 @@ class CitiesNamesFragment : Fragment() {
     private lateinit var viewModel: CitiesNamesViewModel
     private lateinit var autoSuggestAdapter: AutoSuggestAdapter
     private lateinit var fragmentDataBinding: FragmentCitiesNamesBinding
+
+    @Inject
+    lateinit var networkConnectionLiveData: NetworkConnectionLiveData
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,11 +49,11 @@ class CitiesNamesFragment : Fragment() {
         viewModel = (activity as WeatherForecastActivity).citiesNamesViewModel
         autoSuggestAdapter = AutoSuggestAdapter(activity as Context, android.R.layout.select_dialog_item)
         fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
-        observeCitiesNamesResponse()
+        initLiveDataObservers()
         initSearch()
     }
 
-    private fun observeCitiesNamesResponse() {
+    private fun initLiveDataObservers() {
         viewModel.getCitiesNamesLiveData.observe(viewLifecycleOwner) {
             autoSuggestAdapter.setData(it.cities)
             autoSuggestAdapter.notifyDataSetChanged()
@@ -67,6 +72,10 @@ class CitiesNamesFragment : Fragment() {
                 bundle
             )
         }
+        networkConnectionLiveData.observe(viewLifecycleOwner) {
+            viewModel._isNetworkAvailable.value = it
+            viewModel.notifyAboutNetworkAvailability { onNetworkAvailable() }
+        }
     }
 
     private fun initSearch() {
@@ -74,6 +83,15 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.autocompleteCity.threshold = 2
         fragmentDataBinding.autocompleteCity.onItemClickListener = clickListener
         fragmentDataBinding.autocompleteCity.addTextChangedListener(textChangeListener)
+    }
+
+    private fun onNetworkAvailable() {
+        if (viewModel._isNetworkAvailable.value == true) {
+            fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
+        } else {
+            fragmentDataBinding.errorTextView.visibility =View.VISIBLE
+            fragmentDataBinding.errorTextView.text = getString(R.string.network_not_available_error_text)
+        }
     }
 
     private val textChangeListener = object: TextWatcher {

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.location.Geocoder
 import android.location.Location
 import android.util.Log
-import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -18,7 +17,6 @@ import java.util.Locale
  */
 class WeatherForecastGeoLocator(private val permissionDelegate: GeoLocationPermissionDelegate) {
 
-    // private lateinit var locationListener: GeoLocationListener
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     /**
@@ -33,15 +31,15 @@ class WeatherForecastGeoLocator(private val permissionDelegate: GeoLocationPermi
             }).addOnSuccessListener { location: Location? ->
                 Log.i("WeatherForecastGeoLocator", location.toString())
                 if (location == null) {
-                    Toast.makeText(activity, "Cannot get location", Toast.LENGTH_LONG).show()
+                    locationListener.onGeoLocationFail()
                 } else {
                     Log.i("WeatherForecastGeoLocator", location.toString())
-                    val geoCoder = Geocoder(activity, Locale.getDefault())
-                    locationListener.onGeoLocationSuccess(
-                        activity,
-                        location,
-                        geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-                    )
+                        val geoCoder = Geocoder(activity, Locale.getDefault())
+                        locationListener.onGeoLocationSuccess(
+                            activity,
+                            location,
+                            geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+                        )
                 }
             }
         } catch (sec: SecurityException) {

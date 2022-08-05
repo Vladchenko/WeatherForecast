@@ -1,6 +1,6 @@
 package com.example.weatherforecast.geolocation
 
-import android.app.Activity
+import android.content.Context
 import android.location.Location
 
 /**
@@ -10,5 +10,10 @@ interface GeoLocationListener {
     /**
      * Retrieve a geo location with a lat,lon [location] and a city [locationName] provided.
      */
-    fun onGeoLocationSuccess(activity: Activity, location: Location, locationName: String)
+    fun onGeoLocationSuccess(context: Context, location: Location, locationName: String)
+
+    /**
+     * When geo location failed.
+     */
+    fun onGeoLocationFail()
 }
