@@ -3,7 +3,8 @@ package com.example.weatherforecast.presentation.fragments
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity
-import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -27,6 +28,7 @@ import com.example.weatherforecast.network.NetworkConnectionLiveData
 import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import javax.inject.Inject
@@ -37,13 +39,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CurrentTimeForecastFragment : Fragment() {
 
-    private var city: String = ""
-    private var temperatureType: TemperatureType = TemperatureType.CELSIUS
     private var localLocation: Location? = Location("")
+    private var alertDialogDelegate: AlertDialogDelegate? = null
+    private var temperatureType: TemperatureType = TemperatureType.CELSIUS
 
     private lateinit var viewModel: WeatherForecastViewModel
-    private lateinit var locationListener: GeoLocationListener
-    private var alertDialogDelegate: AlertDialogDelegate? = null
+    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     @Inject
@@ -57,8 +58,12 @@ class CurrentTimeForecastFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPreferences = (activity as Activity).getPreferences(MODE_PRIVATE)
         arguments?.let {
-            city = it.getString(CITY_ARGUMENT_KEY) ?: ""
+            val city = it.getString(CITY_ARGUMENT_KEY) ?: ""
+            if (city.isNotBlank()) {
+                sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, city).apply()
+            }
         }
     }
 
@@ -73,20 +78,18 @@ class CurrentTimeForecastFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
-        locationListener = GeoLocationListenerImpl()
-        permissionDelegate.getPermissionForGeoLocation(activity as Activity)
         fragmentDataBinding.cityNameTextView.setOnClickListener(
             CityClickListener(findNavController())
         )
+        fragmentDataBinding.toolbar.title = getString(R.string.app_name)
+        fragmentDataBinding.toolbar.subtitle = getString(R.string.location_defining_text)
         viewModel = (activity as WeatherForecastActivity).forecastViewModel
         prepareObservers()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i("CurrentTimeForecastFragment", alertDialogDelegate.toString())
         alertDialogDelegate?.dismissAlertDialog()
-        alertDialogDelegate = null
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -107,15 +110,19 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.getWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
+        viewModel.showAlertDialogLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
         networkConnectionLiveData.observe(viewLifecycleOwner) {
             viewModel._isNetworkAvailable.value = it
-            viewModel.notifyAboutNetworkAvailability { onNetworkAvailable() }
+            viewModel.notifyAboutNetworkAvailability { onNetworkAvailable(it) }
         }
     }
 
-    private fun locateCityOrDownloadForeCastData() {
-        if (city.isBlank()) {
-            geoLocator.getCityByLocation(activity as Activity, locationListener)
+    private fun locateCityOrDownloadForecastData() {
+        val city = sharedPreferences.getString(CITY_ARGUMENT_KEY, "")
+        Log.d("CurrentTimeForecastFragment", "city = $city")
+        if (city.isNullOrBlank()) {
+            fragmentDataBinding.toolbar.subtitle = getString(R.string.location_defining_text)
+            geoLocator.getCityByLocation(WeakReference(activity as Activity), GeoLocationListenerImpl())
         } else {
             downloadWeatherForecastData(
                 TemperatureType.CELSIUS,
@@ -126,15 +133,17 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun downloadWeatherForecastData(temperatureType: TemperatureType, city: String, location: Location?) {
-        this.city = city
         localLocation = location
         this.temperatureType = temperatureType
-        fragmentDataBinding.errorTextView.text = ""
-        fragmentDataBinding.errorTextView.visibility = View.INVISIBLE
+        fragmentDataBinding.toolbar.subtitle = getString(R.string.forecast_pending_text)
+        // context.applicationInfo.theme
+        fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary, resources.newTheme()))
         viewModel.downloadWeatherForecast(temperatureType, city, location)
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
+        fragmentDataBinding.toolbar.subtitle = "Provided for city ${dataModel.city}"
+        fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary))
         fragmentDataBinding.dateTextView.text = getCurrentDate()
         fragmentDataBinding.cityNameTextView.text = dataModel.city
         fragmentDataBinding.degreesValueTextView.text = dataModel.temperature
@@ -148,16 +157,23 @@ class CurrentTimeForecastFragment : Fragment() {
     private fun showError(errorMessage: String) {
         toggleProgressBar(false)
         Log.e("CurrentTimeForecastFragment", errorMessage)
-        fragmentDataBinding.errorTextView.text = errorMessage
-        fragmentDataBinding.errorTextView.visibility = View.VISIBLE
+        fragmentDataBinding.toolbar.subtitle = errorMessage
+        fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
     }
 
-    private fun onNetworkAvailable() {
-        if (viewModel._isNetworkAvailable.value == true) {
-            fragmentDataBinding.errorTextView.visibility = View.INVISIBLE
+    private fun onNetworkAvailable(isAvailable: Boolean) {
+        if (isAvailable) {
+            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary))
             toggleProgressBar(true)
-            locateCityOrDownloadForeCastData()
+            if (permissionDelegate.getPermissionForGeoLocation(activity as Activity)
+                == GeoLocationPermissionDelegate.LocationPermission.ALREADY_PRESENT
+            ) {
+                locateCityOrDownloadForecastData()
+            } else {
+                permissionDelegate.getPermissionForGeoLocation(activity as Activity)
+            }
         } else {
+            sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, "").apply()
             showError(getString(R.string.network_not_available_error_text))
         }
     }
@@ -196,6 +212,14 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
+    private fun showAlertDialog() {
+        alertDialogDelegate = AlertDialogDelegate(
+            sharedPreferences.getString(CITY_ARGUMENT_KEY, "") ?: "",
+            CityApprovalAlertDialogListenerImpl()
+        )
+        alertDialogDelegate?.showAlertDialog(WeakReference(activity as Activity))
+    }
+
     companion object {
         const val CITY_ARGUMENT_KEY = "CITY"
         private const val ICON_PREFIX = "icon_"
@@ -203,16 +227,22 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     inner class GeoLocationListenerImpl : GeoLocationListener {
-        override fun onGeoLocationSuccess(context: Context, location: Location, locationName: String) {
+        override fun onGeoLocationSuccess(
+            location: Location,
+            locationName: String
+        ) {
             if (fragmentDataBinding.cityNameTextView.text.isNullOrBlank()) {
-                city = locationName
+                sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, locationName).apply()
+                // city = locationName
                 localLocation = location
-                alertDialogDelegate = AlertDialogDelegate(city, CityApprovalAlertDialogListenerImpl())
-                alertDialogDelegate?.showAlertDialog(context)
+                viewModel.showAlertDialog()
             }
         }
+
         override fun onGeoLocationFail() {
-            fragmentDataBinding.errorTextView.text = getString(R.string.location_fail_error_text)
+            // city = ""
+            fragmentDataBinding.toolbar.subtitle = getString(R.string.location_fail_error_text)
+            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
         }
     }
 

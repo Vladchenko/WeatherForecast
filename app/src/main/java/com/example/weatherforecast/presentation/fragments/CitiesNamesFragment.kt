@@ -48,7 +48,8 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding = FragmentCitiesNamesBinding.bind(view)
         viewModel = (activity as WeatherForecastActivity).citiesNamesViewModel
         autoSuggestAdapter = AutoSuggestAdapter(activity as Context, android.R.layout.select_dialog_item)
-        fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
+        fragmentDataBinding.toolbar.title = getString(R.string.app_name)
+        fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
     }
@@ -60,8 +61,8 @@ class CitiesNamesFragment : Fragment() {
         }
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) {
             Log.e("CitiesNamesFragment",it)
-            fragmentDataBinding.errorTextView.text = it
-            fragmentDataBinding.errorTextView.visibility =View.VISIBLE
+            fragmentDataBinding.toolbar.subtitle = it
+            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
         }
         viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) {
             val bundle = Bundle().apply {
@@ -87,10 +88,11 @@ class CitiesNamesFragment : Fragment() {
 
     private fun onNetworkAvailable() {
         if (viewModel._isNetworkAvailable.value == true) {
-            fragmentDataBinding.errorTextView.visibility =View.INVISIBLE
+            fragmentDataBinding.toolbar.subtitle = getString(R.string.network_available_text)
+            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary))
         } else {
-            fragmentDataBinding.errorTextView.visibility =View.VISIBLE
-            fragmentDataBinding.errorTextView.text = getString(R.string.network_not_available_error_text)
+            fragmentDataBinding.toolbar.subtitle = getString(R.string.network_not_available_error_text)
+            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
         }
     }
 

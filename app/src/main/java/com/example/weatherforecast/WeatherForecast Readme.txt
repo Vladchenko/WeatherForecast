@@ -8,6 +8,7 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
+    - Downloading repeats twice
     - When app starts for the very first time, its progress bar spins forever
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
         - Emptying a views doesn't help

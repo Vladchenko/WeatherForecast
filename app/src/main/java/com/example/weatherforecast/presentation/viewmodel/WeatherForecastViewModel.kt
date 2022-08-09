@@ -31,6 +31,7 @@ class WeatherForecastViewModel(
     private val _getWeatherForecastLiveData: MutableLiveData<WeatherForecastDomainModel> = MutableLiveData()
     private val _showErrorLiveData: MutableLiveData<String> = MutableLiveData()
     private val _showProgressBarLiveData: MutableLiveData<Boolean> = MutableLiveData()
+    private val _showAlertDialogLiveData: MutableLiveData<Unit> = MutableLiveData()
     val _isNetworkAvailable: MutableLiveData<Boolean> = MutableLiveData()
 
     val getWeatherForecastLiveData: LiveData<WeatherForecastDomainModel>
@@ -42,7 +43,8 @@ class WeatherForecastViewModel(
     val showProgressBarLiveData: LiveData<Boolean>
         get() = _showProgressBarLiveData
 
-    // val isNetworkAvailable: LiveData<Boolean> = _isNetworkAvailable
+    val showAlertDialogLiveData: LiveData<Unit>
+        get() = _showAlertDialogLiveData
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("WeatherForecastViewModel", throwable.message!!)
@@ -100,5 +102,9 @@ class WeatherForecastViewModel(
         } else {
             _showErrorLiveData.value = ("Network not available")
         }
+    }
+
+    fun showAlertDialog() {
+        _showAlertDialogLiveData.postValue(Unit)
     }
 }

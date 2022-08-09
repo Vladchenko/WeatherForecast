@@ -5,14 +5,34 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/city_name_fragment_padding"
         android:orientation="vertical"
         tools:context=".presentation.fragments.CitiesNamesFragment"
         android:background="@drawable/background">
 
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/appbar_height"
+            android:elevation="@dimen/app_bar_elevation"
+            android:fitsSystemWindows="true"
+            android:theme="?attr/actionBarTheme">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/appbar_height"
+                android:elevation="@dimen/app_bar_elevation"
+                android:fitsSystemWindows="true"
+                android:theme="?attr/actionBarTheme">
+            </androidx.appcompat.widget.Toolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_all_borders_padding"
+            android:layout_marginLeft="@dimen/activity_all_borders_padding"
             android:text="@string/city_typing_title"
             android:textSize="@dimen/city_typing_title_text_size" />
 
@@ -20,16 +40,9 @@
             android:id="@+id/autocomplete_city"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_all_borders_padding"
+            android:layout_marginRight="@dimen/activity_all_borders_padding"
             android:hint="@string/city_typing_hint"/>
-
-        <TextView
-            android:id="@+id/error_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_corner"
-            android:textColor="@color/common_border_color"
-            android:layout_marginTop="@dimen/error_text_view_margin"
-            tools:text="@string/error_text_example" />
 
     </LinearLayout>
 

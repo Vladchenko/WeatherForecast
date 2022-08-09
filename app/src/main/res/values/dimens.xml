@@ -11,10 +11,12 @@
     <dimen name="city_name_text_size">40sp</dimen>
     <dimen name="wether_type_margin_top">10dp</dimen>
     <dimen name="city_name_margin_top">12dp</dimen>
-    <dimen name="current_date_margin_top">82dp</dimen>
+    <dimen name="current_date_margin_top">32dp</dimen>
     <dimen name="weather_image_view_margin_left">16dp</dimen>
     <dimen name="weather_image_view_margin_top">12dp</dimen>
     <dimen name="city_name_fragment_padding">16dp</dimen>
     <dimen name="city_name_text_view_width">250dp</dimen>
     <dimen name="error_text_view_margin">16dp</dimen>
+    <dimen name="appbar_height">64dp</dimen>
+    <dimen name="app_bar_elevation">4dp</dimen>
 </resources>

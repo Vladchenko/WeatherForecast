@@ -66,19 +66,6 @@
             tools:text="@string/default_degrees_type" />
 
         <TextView
-            android:id="@+id/error_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_corner"
-            android:textColor="@color/common_border_color"
-            app:layout_constrainedWidth="true"
-            android:layout_margin="@dimen/error_text_view_margin"
-            app:layout_constraintTop_toBottomOf="@id/weather_type_text_view"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:text="@string/error_text_example" />
-
-        <TextView
             android:id="@+id/date_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -87,7 +74,7 @@
             app:layout_constrainedWidth="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/appbar_layout"
             tools:text="@string/current_date_example" />
 
         <TextView
@@ -114,6 +101,26 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/weather_type_image_view"
             tools:text="@string/weather_type_example" />
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/appbar_height"
+            android:elevation="@dimen/app_bar_elevation"
+            android:fitsSystemWindows="true"
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/appbar_height"
+                android:elevation="@dimen/app_bar_elevation"
+                android:fitsSystemWindows="true"
+                android:theme="?attr/actionBarTheme">
+            </androidx.appcompat.widget.Toolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -1,39 +1,49 @@
 package com.example.weatherforecast.network
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.util.Log
 import androidx.lifecycle.LiveData
-import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
+import com.example.weatherforecast.R
 
 /**
  * Notifies through a broadcast receiver about a network availability.
  */
 class NetworkConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
 
-    private val networkReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            postValue(isNetworkAvailable(context))
+    private val networkRequest: NetworkRequest = NetworkRequest.Builder()
+        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+        .build()
+
+    private val networkCallback: ConnectivityManager.NetworkCallback =
+        object : ConnectivityManager.NetworkCallback() {
+
+            override fun onAvailable(network: Network) {
+                Log.d("NetworkConnectionLiveData", context.getString(R.string.network_available_text))
+                super.onAvailable(network)
+                postValue(true)
+            }
+
+            override fun onLost(network: Network) {
+                Log.d("NetworkConnectionLiveData", context.getString(R.string.network_not_available_error_text))
+                super.onLost(network)
+                postValue(false)
+            }
         }
-    }
 
     override fun onActive() {
         super.onActive()
-        context.registerReceiver(
-            networkReceiver,
-            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)   //TODO Replace this solution with NetworkCallback https://stackoverflow.com/questions/36421930/connectivitymanager-connectivity-action-deprecated
-        )
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
     }
 
     override fun onInactive() {
         super.onInactive()
-        try {
-            context.unregisterReceiver(networkReceiver)
-        } catch (e: Exception) {
-            Log.e("NetworkConnectionLiveData", "Cannot unregister broadcast receiver.")
-        }
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 }
