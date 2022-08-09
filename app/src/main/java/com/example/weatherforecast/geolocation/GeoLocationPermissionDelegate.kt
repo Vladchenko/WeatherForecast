@@ -24,14 +24,14 @@ class GeoLocationPermissionDelegate {
                 activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_CODE_ASK_PERMISSIONS
             )
-            LocationPermission.GRANTED
+            LocationPermission.PENDING
         } else {
             LocationPermission.ALREADY_PRESENT
         }
     }
 
     enum class LocationPermission {
-        GRANTED,
+        PENDING,
         ALREADY_PRESENT
     }
 

@@ -90,18 +90,15 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        Log.d("CurrentTimeForecastFragment", "Permission Granting Underway...")
         when (requestCode) {
             REQUEST_CODE_ASK_PERMISSIONS -> if (grantResults.isNotEmpty()
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
-                Log.i("CurrentTimeForecastFragment", "Permission Granted!")
-                downloadWeatherForecastData(
-                    TemperatureType.CELSIUS,
-                    city,
-                    localLocation
-                )
+                Log.d("CurrentTimeForecastFragment", "Permission Granted!")
+                locateCityOrDownloadForecastData()
             } else {
-                Log.i("CurrentTimeForecastFragment", "Permission Not Granted!")
+                Log.d("CurrentTimeForecastFragment", "Permission Not Granted!")
             }
         }
     }
@@ -134,7 +131,7 @@ class CurrentTimeForecastFragment : Fragment() {
         this.temperatureType = temperatureType
         fragmentDataBinding.errorTextView.text = ""
         fragmentDataBinding.errorTextView.visibility = View.INVISIBLE
-        viewModel.getWeatherForecast(temperatureType, city, location)
+        viewModel.downloadWeatherForecast(temperatureType, city, location)
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -178,8 +175,8 @@ class CurrentTimeForecastFragment : Fragment() {
             requireActivity().packageName
         )
 
-    private fun toggleProgressBar(toggle: Boolean) {
-        if (toggle) {
+    private fun toggleProgressBar(isVisible: Boolean) {
+        if (isVisible) {
             fragmentDataBinding.progressBar.visibility = View.VISIBLE
         } else {
             fragmentDataBinding.progressBar.visibility = View.INVISIBLE

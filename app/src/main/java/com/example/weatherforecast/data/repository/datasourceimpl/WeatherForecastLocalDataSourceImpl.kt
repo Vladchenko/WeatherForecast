@@ -15,12 +15,12 @@ class WeatherForecastLocalDataSourceImpl(private val dao: WeatherForecastDAO) : 
 
     override suspend fun loadWeatherForecastData(city:String): WeatherForecastDomainModel {
         val model = dao.getCityForecast(city)
-        Log.i("WeatherForecastLocalDataSourceImpl", "${model.city} city forecast loaded successfully")
+        Log.d("WeatherForecastLocalDataSourceImpl", "${model.city} city forecast loaded successfully")
         return model
     }
 
     override suspend fun saveWeatherForecastData(response: WeatherForecastDomainModel) {
         dao.insertCityForecast(response)
-        Log.i("WeatherForecastLocalDataSourceImpl", "${response.city} city forecast saved successfully")
+        Log.d("WeatherForecastLocalDataSourceImpl", "${response.city} city forecast saved successfully")
     }
 }

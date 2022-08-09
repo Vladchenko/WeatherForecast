@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
@@ -52,7 +53,7 @@ class WeatherForecastViewModel(
      * Retrieve and save to database if retrieval is successful of city weather forecast, using [temperatureType],
      * [city] and [location], otherwise try to download it from database.
      */
-    fun getWeatherForecast(temperatureType: TemperatureType, city: String?, location: Location?) {
+    fun downloadWeatherForecast(temperatureType: TemperatureType, city: String?, location: Location?) {
         try {
             if (isNetworkAvailable(app)) {
                 _showProgressBarLiveData.postValue(true)
@@ -82,9 +83,8 @@ class WeatherForecastViewModel(
                     // Download forecast from database
                     val result = weatherForecastLocalInteractor.loadForecast(city ?: "")
                     _getWeatherForecastLiveData.postValue(result)
-                    Log.i("WeatherForecastViewModel", city.toString())
-                    Log.i("WeatherForecastViewModel", result.toString())
-                    _showErrorLiveData.postValue("No internet connection, outdated forecast has been loaded from database on default location area.")
+                    Log.d("WeatherForecastViewModel", result.toString())
+                    _showErrorLiveData.postValue(app.applicationContext.getString(R.string.database_downloading))
                 }
             }
         } catch (ex: Exception) {

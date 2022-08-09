@@ -52,7 +52,7 @@ class CitiesNamesViewModel(
      * Download a cities names matching a token [city]
      */
     fun getCitiesNames(city: String) {
-        Log.i("CitiesNamesViewModel1", city)
+        Log.d("CitiesNamesViewModel1", city)
         try {
             if (NetworkUtils.isNetworkAvailable(app)) {
                 viewModelScope.launch(exceptionHandler) {
@@ -66,15 +66,15 @@ class CitiesNamesViewModel(
                     val result = CitiesNamesDomainModel(
                         citiesNamesInteractor.loadLocalCitiesNames("").flatMapConcat {
                             it.asFlow().map {
-                                Log.i("CitiesNamesViewModel2", it.name)
+                                Log.d("CitiesNamesViewModel2", it.name)
                             }
                             it.asFlow()
                         }.toList()
                     )
-                    Log.i("CitiesNamesViewModel3", result.cities.size.toString())
+                    Log.d("CitiesNamesViewModel3", result.cities.size.toString())
                     if (result.cities.isNotEmpty()) {
                         _getCitiesNamesLiveData.postValue(result)
-                        Log.i("CitiesNamesViewModel4", result.cities[0].toString())
+                        Log.d("CitiesNamesViewModel4", result.cities[0].toString())
                     } else {
                         _showErrorLiveData.postValue("Database records, matching $city, not found.")
                     }

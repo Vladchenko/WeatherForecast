@@ -29,12 +29,12 @@ class WeatherForecastGeoLocator(private val permissionDelegate: GeoLocationPermi
                 override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
                 override fun isCancellationRequested() = false
             }).addOnSuccessListener { location: Location? ->
-                Log.i("WeatherForecastGeoLocator", location.toString())
+                Log.d("WeatherForecastGeoLocator", location.toString())
                 if (location == null) {
                     locationListener.onGeoLocationFail()
                 } else {
-                    Log.i("WeatherForecastGeoLocator", location.toString())
-                        val geoCoder = Geocoder(activity, Locale.getDefault())
+                    Log.d("WeatherForecastGeoLocator", location.toString())
+                        val geoCoder = Geocoder(weakReference.get() as Context, Locale.getDefault())
                         locationListener.onGeoLocationSuccess(
                             activity,
                             location,

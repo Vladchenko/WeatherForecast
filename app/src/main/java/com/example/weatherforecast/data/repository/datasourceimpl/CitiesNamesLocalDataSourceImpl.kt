@@ -14,13 +14,13 @@ class CitiesNamesLocalDataSourceImpl(private val dao: CitiesNamesDAO) : CitiesNa
 
     override fun getCitiesNames(token: String): Flow<List<CityDomainModel>> {
         val model = dao.getAllCitiesNames() //TODO Replace it with a method of getting cities on token
-        Log.i("CitiesNamesLocalDataSourceImpl", model.toString())
+        Log.d("CitiesNamesLocalDataSourceImpl", model.toString())
         return model
     }
 
     override suspend fun saveCity(city: CityDomainModel) {
-        Log.i("CitiesNamesLocalDataSourceImpl",dao.getAllCitiesNames().collect().toString())
+        Log.d("CitiesNamesLocalDataSourceImpl",dao.getAllCitiesNames().collect().toString())
         dao.insertCityName(city)
-        Log.i("CitiesNamesLocalDataSourceImpl",dao.getAllCitiesNames().collect().toString())
+        Log.d("CitiesNamesLocalDataSourceImpl",dao.getAllCitiesNames().collect().toString())
     }
 }

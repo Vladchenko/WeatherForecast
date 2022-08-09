@@ -13,7 +13,7 @@ class CitiesNamesRemoteDataSourceImpl(private val apiService: WeatherForecastApi
 
     override suspend fun getCityNames(token: String): Response<List<WeatherForecastCityResponse>> {
         val model = apiService.getCityNames(token)
-        Log.i("CitiesNamesDataSourceImpl", model.body().toString())
+        Log.d("CitiesNamesDataSourceImpl", model.body().toString())
         return model
     }
 }
