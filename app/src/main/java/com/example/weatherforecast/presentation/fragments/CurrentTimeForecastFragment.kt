@@ -1,8 +1,10 @@
 package com.example.weatherforecast.presentation.fragments
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity
+import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -12,7 +14,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
@@ -22,28 +27,39 @@ import com.example.weatherforecast.geolocation.AlertDialogClickListener
 import com.example.weatherforecast.geolocation.AlertDialogDelegate
 import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
-import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate.Companion.REQUEST_CODE_ASK_PERMISSIONS
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.network.NetworkConnectionLiveData
-import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 /**
  * Fragment representing a weather forecast for current time.
  */
 @AndroidEntryPoint
-class CurrentTimeForecastFragment : Fragment() {
+class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallback {
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            locateCityOrDownloadForecastData()
+        } else {
+            exitProcess(0)  //TODO Inform user that app cannot proceed
+        }
+    }
+
+    private val viewModel by activityViewModels<WeatherForecastViewModel>()
 
     private var localLocation: Location? = Location("")
     private var alertDialogDelegate: AlertDialogDelegate? = null
     private var temperatureType: TemperatureType = TemperatureType.CELSIUS
 
-    private lateinit var viewModel: WeatherForecastViewModel
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
@@ -83,7 +99,6 @@ class CurrentTimeForecastFragment : Fragment() {
         )
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
         fragmentDataBinding.toolbar.subtitle = getString(R.string.location_defining_text)
-        viewModel = (activity as WeatherForecastActivity).forecastViewModel
         prepareObservers()
     }
 
@@ -92,31 +107,18 @@ class CurrentTimeForecastFragment : Fragment() {
         alertDialogDelegate?.dismissAlertDialog()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        Log.d("CurrentTimeForecastFragment", "Permission Granting Underway...")
-        when (requestCode) {
-            REQUEST_CODE_ASK_PERMISSIONS -> if (grantResults.isNotEmpty()
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED
-            ) {
-                Log.d("CurrentTimeForecastFragment", "Permission Granted!")
-                locateCityOrDownloadForecastData()
-            } else {
-                Log.d("CurrentTimeForecastFragment", "Permission Not Granted!")
-            }
-        }
-    }
-
     private fun prepareObservers() {
         viewModel.getWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
         viewModel.showAlertDialogLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
         networkConnectionLiveData.observe(viewLifecycleOwner) {
-            viewModel._isNetworkAvailable.value = it
+            viewModel.isNetworkAvailableLiveData.value = it
             viewModel.notifyAboutNetworkAvailability { onNetworkAvailable(it) }
         }
     }
 
+    // Put to viewmodel
     private fun locateCityOrDownloadForecastData() {
         val city = sharedPreferences.getString(CITY_ARGUMENT_KEY, "")
         Log.d("CurrentTimeForecastFragment", "city = $city")
@@ -144,7 +146,7 @@ class CurrentTimeForecastFragment : Fragment() {
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
         fragmentDataBinding.toolbar.subtitle = "Provided for city ${dataModel.city}"
         fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary))
-        fragmentDataBinding.dateTextView.text = getCurrentDate()
+        fragmentDataBinding.dateTextView.text = getCurrentDate(dataModel.date)
         fragmentDataBinding.cityNameTextView.text = dataModel.city
         fragmentDataBinding.degreesValueTextView.text = dataModel.temperature
         fragmentDataBinding.degreesTypeTextView.text = dataModel.temperatureType
@@ -161,16 +163,17 @@ class CurrentTimeForecastFragment : Fragment() {
         fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
     }
 
+    // Put to view model
     private fun onNetworkAvailable(isAvailable: Boolean) {
         if (isAvailable) {
             fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary))
             toggleProgressBar(true)
-            if (permissionDelegate.getPermissionForGeoLocation(activity as Activity)
-                == GeoLocationPermissionDelegate.LocationPermission.ALREADY_PRESENT
+            if (ActivityCompat.checkSelfPermission(activity as Context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
             ) {
-                locateCityOrDownloadForecastData()
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             } else {
-                permissionDelegate.getPermissionForGeoLocation(activity as Activity)
+                locateCityOrDownloadForecastData()
             }
         } else {
             sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, "").apply()
@@ -178,10 +181,12 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    private fun getCurrentDate(): String {
-        val date = Calendar.getInstance().time
-        val formatter = SimpleDateFormat.getDateInstance()
-        return formatter.format(date)
+    private fun getCurrentDate(time: String): String {
+        return try {
+            SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(time.toLong() * 1000))
+        } catch (ex: Exception) {
+            getString(R.string.bad_date_format)
+        }
     }
 
     private fun getWeatherTypeIcon(weatherType: String) =
@@ -223,6 +228,7 @@ class CurrentTimeForecastFragment : Fragment() {
     companion object {
         const val CITY_ARGUMENT_KEY = "CITY"
         private const val ICON_PREFIX = "icon_"
+        private const val DATE_FORMAT = "dd/MM/yyyy"
         private const val DRAWABLE_RESOURCE_TYPE = "drawable"
     }
 
@@ -233,14 +239,12 @@ class CurrentTimeForecastFragment : Fragment() {
         ) {
             if (fragmentDataBinding.cityNameTextView.text.isNullOrBlank()) {
                 sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, locationName).apply()
-                // city = locationName
                 localLocation = location
                 viewModel.showAlertDialog()
             }
         }
 
         override fun onGeoLocationFail() {
-            // city = ""
             fragmentDataBinding.toolbar.subtitle = getString(R.string.location_fail_error_text)
             fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
         }
@@ -248,15 +252,11 @@ class CurrentTimeForecastFragment : Fragment() {
 
     inner class CityApprovalAlertDialogListenerImpl : AlertDialogClickListener {
         override fun onPositiveClick(locationName: String) {
-            if (permissionDelegate.getPermissionForGeoLocation(activity as Activity)
-                == GeoLocationPermissionDelegate.LocationPermission.ALREADY_PRESENT
-            ) {
-                downloadWeatherForecastData(
-                    TemperatureType.CELSIUS,
-                    locationName,
-                    localLocation
-                )
-            }
+            downloadWeatherForecastData(
+                TemperatureType.CELSIUS,
+                locationName,
+                localLocation
+            )
         }
 
         override fun onNegativeClick() {

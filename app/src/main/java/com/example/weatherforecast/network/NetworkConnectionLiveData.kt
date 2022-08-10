@@ -25,13 +25,17 @@ class NetworkConnectionLiveData(private val context: Context) : LiveData<Boolean
             override fun onAvailable(network: Network) {
                 Log.d("NetworkConnectionLiveData", context.getString(R.string.network_available_text))
                 super.onAvailable(network)
-                postValue(true)
+                if (value != true) {
+                    postValue(true)
+                }
             }
 
             override fun onLost(network: Network) {
                 Log.d("NetworkConnectionLiveData", context.getString(R.string.network_not_available_error_text))
                 super.onLost(network)
-                postValue(false)
+                if (value != false) {
+                    postValue(false)
+                }
             }
         }
 

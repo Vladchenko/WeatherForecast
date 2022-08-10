@@ -10,12 +10,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
 import com.example.weatherforecast.network.NetworkConnectionLiveData
-import com.example.weatherforecast.presentation.WeatherForecastActivity
 import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,9 +27,10 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
 
+    private val viewModel by activityViewModels<CitiesNamesViewModel>()
+
     private var city = ""
 
-    private lateinit var viewModel: CitiesNamesViewModel
     private lateinit var autoSuggestAdapter: AutoSuggestAdapter
     private lateinit var fragmentDataBinding: FragmentCitiesNamesBinding
 
@@ -46,7 +47,7 @@ class CitiesNamesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fragmentDataBinding = FragmentCitiesNamesBinding.bind(view)
-        viewModel = (activity as WeatherForecastActivity).citiesNamesViewModel
+        // viewModel = (activity as WeatherForecastActivity).citiesNamesViewModel
         autoSuggestAdapter = AutoSuggestAdapter(activity as Context, android.R.layout.select_dialog_item)
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)

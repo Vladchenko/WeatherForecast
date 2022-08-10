@@ -17,4 +17,5 @@
     <string name="location_defining_text">Geo location defining…</string>
     <string name="forecast_pending_text">Weather forecast pending…</string>
     <string name="database_downloading">No network connection, database last location forecast has been loaded.</string>
+    <string name="bad_date_format">Bad date format</string>
 </resources>

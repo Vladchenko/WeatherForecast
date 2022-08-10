@@ -31,8 +31,9 @@ class WeatherForecastViewModel(
     private val _getWeatherForecastLiveData: MutableLiveData<WeatherForecastDomainModel> = MutableLiveData()
     private val _showErrorLiveData: MutableLiveData<String> = MutableLiveData()
     private val _showProgressBarLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    private val _showAlertDialogLiveData: MutableLiveData<Unit> = MutableLiveData()
-    val _isNetworkAvailable: MutableLiveData<Boolean> = MutableLiveData()
+    private val _showAlertDialogLiveData: MutableLiveData<Unit> = MutableLiveData()     // onSuccessLocationLiveData
+    private val _networkAvailableLiveData: MutableLiveData<Boolean> = MutableLiveData()
+    val isNetworkAvailableLiveData: MutableLiveData<Boolean> = MutableLiveData()
 
     val getWeatherForecastLiveData: LiveData<WeatherForecastDomainModel>
         get() = _getWeatherForecastLiveData
@@ -95,10 +96,11 @@ class WeatherForecastViewModel(
     }
 
     fun notifyAboutNetworkAvailability(callback: suspend () -> Unit) {
-        if (_isNetworkAvailable.value == true) {
+        if (isNetworkAvailableLiveData.value == true) {
             viewModelScope.launch {
                 callback.invoke()
             }
+            _networkAvailableLiveData.postValue(true)
         } else {
             _showErrorLiveData.value = ("Network not available")
         }
