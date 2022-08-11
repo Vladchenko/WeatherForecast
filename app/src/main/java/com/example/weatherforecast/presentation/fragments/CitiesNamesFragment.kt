@@ -15,7 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
-import com.example.weatherforecast.network.NetworkConnectionLiveData
+import com.example.weatherforecast.network.ConnectionLiveData
 import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,7 +35,7 @@ class CitiesNamesFragment : Fragment() {
     private lateinit var fragmentDataBinding: FragmentCitiesNamesBinding
 
     @Inject
-    lateinit var networkConnectionLiveData: NetworkConnectionLiveData
+    lateinit var connectionLiveData: ConnectionLiveData
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,7 +74,7 @@ class CitiesNamesFragment : Fragment() {
                 bundle
             )
         }
-        networkConnectionLiveData.observe(viewLifecycleOwner) {
+        connectionLiveData.observe(viewLifecycleOwner) {
             viewModel._isNetworkAvailable.value = it
             viewModel.notifyAboutNetworkAvailability { onNetworkAvailable(it) }
         }

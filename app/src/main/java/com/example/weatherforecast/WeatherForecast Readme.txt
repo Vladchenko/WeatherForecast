@@ -16,6 +16,18 @@ TODO:
         - Emptying a views doesn't help
             - Tried in onViewCreated and in onPause
         ! Probably, one has to remove fragment
+    - WindowManager: android.view.WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@bee3763[WeatherForecastActivity] that was originally added here
+              at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797)
+              at android.view.ViewRootImpl.<init>(ViewRootImpl.java:781)
+              at android.view.WindowManagerGlobal.addView(WindowManagerGlobal.java:399)
+              at android.view.WindowManagerImpl.addView(WindowManagerImpl.java:109)
+              at android.app.Dialog.show(Dialog.java:342)
+              at androidx.appcompat.app.AlertDialog$Builder.show(AlertDialog.java:1009)
+              at com.example.weatherforecast.geolocation.AlertDialogDelegate.showAlertDialog(AlertDialogDelegate.kt:34)
+              at com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.showAlertDialog(CurrentTimeForecastFragment.kt:188)
+              at com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.initLiveDataObservers$lambda-6(CurrentTimeForecastFragment.kt:113)
+              at com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.$r8$lambda$Tca9sM4y3frWmHOFcrY-iyx18V4(Unknown Source:0)
+              at com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment$$ExternalSyntheticLambda7.onChanged(Unknown Source:4)
 
     - Put all texts to string.xml
     - Remove all superfluous Log.d

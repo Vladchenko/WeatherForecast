@@ -27,7 +27,7 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteract
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.network.NetworkConnectionLiveData
+import com.example.weatherforecast.network.ConnectionLiveData
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
 import dagger.Module
@@ -215,7 +215,7 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideConnectionLiveData(@ApplicationContext context: Context): NetworkConnectionLiveData {
-        return NetworkConnectionLiveData(context)
+    fun provideConnectionLiveData(@ApplicationContext context: Context): ConnectionLiveData {
+        return ConnectionLiveData(context)
     }
 }

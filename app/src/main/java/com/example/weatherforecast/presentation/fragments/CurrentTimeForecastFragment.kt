@@ -14,7 +14,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -26,9 +25,8 @@ import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBindin
 import com.example.weatherforecast.geolocation.AlertDialogClickListener
 import com.example.weatherforecast.geolocation.AlertDialogDelegate
 import com.example.weatherforecast.geolocation.GeoLocationListener
-import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.network.NetworkConnectionLiveData
+import com.example.weatherforecast.network.ConnectionLiveData
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.setToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
@@ -41,7 +39,7 @@ import kotlin.system.exitProcess
  * Fragment representing a weather forecast for current time.
  */
 @AndroidEntryPoint
-class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallback {
+class CurrentTimeForecastFragment : Fragment() {
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -66,10 +64,10 @@ class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissi
     lateinit var geoLocator: WeatherForecastGeoLocator
 
     @Inject
-    lateinit var networkConnectionLiveData: NetworkConnectionLiveData
+    lateinit var connectionLiveData: ConnectionLiveData
 
-    @Inject
-    lateinit var permissionDelegate: GeoLocationPermissionDelegate
+    // @Inject      // TODO Remove ?
+    // lateinit var permissionDelegate: GeoLocationPermissionDelegate
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +95,6 @@ class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissi
             CityClickListener(findNavController())
         )
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
-        showStatus(getString(R.string.location_defining_text))
         toggleProgressBar(true)
         initLiveDataObservers()
     }
@@ -115,17 +112,10 @@ class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissi
         viewModel.showAlertDialogLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCity() }
-        networkConnectionLiveData.observe(viewLifecycleOwner) {
-            viewModel.isNetworkAvailableLiveData.value = it
-            viewModel.notifyAboutNetworkAvailability { viewModel.onNetworkAvailable(it) }
+        connectionLiveData.observe(viewLifecycleOwner) {
+            Log.d("NetworkConnectionLiveData2", it.toString())
+            viewModel.requestPermissionOrDownloadForecast(it)
         }
-    }
-
-    private fun downloadWeatherForecastData(temperatureType: TemperatureType, city: String, location: Location?) {
-        localLocation = location
-        this.temperatureType = temperatureType
-        showStatus(getString(R.string.forecast_pending_text))
-        viewModel.downloadWeatherForecast(temperatureType, city, location)
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -166,6 +156,7 @@ class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissi
 
     private fun toggleProgressBar(isVisible: Boolean) {
         if (isVisible) {
+            fragmentDataBinding.progressBar.alpha = 0.7f
             fragmentDataBinding.progressBar.visibility = View.VISIBLE
         } else {
             animateFadeOut(
@@ -205,11 +196,9 @@ class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissi
             location: Location,
             locationName: String
         ) {
-            if (fragmentDataBinding.cityNameTextView.text.isNullOrBlank()) {
-                sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, locationName).apply()
-                localLocation = location
-                viewModel.showAlertDialog()
-            }
+            sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, locationName).apply()
+            localLocation = location
+            viewModel.showAlertDialog()
         }
 
         override fun onGeoLocationFail() {
@@ -219,7 +208,8 @@ class CurrentTimeForecastFragment : Fragment(), ActivityCompat.OnRequestPermissi
 
     inner class CityApprovalAlertDialogListenerImpl : AlertDialogClickListener {
         override fun onPositiveClick(locationName: String) {
-            downloadWeatherForecastData(
+            showStatus(getString(R.string.network_forecast_downloading_for_city_text, locationName))
+            viewModel.downloadWeatherForecast(
                 TemperatureType.CELSIUS,
                 locationName,
                 localLocation

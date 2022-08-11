@@ -16,7 +16,6 @@ import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
-import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -39,10 +38,8 @@ class WeatherForecastViewModel(
     private val _showStatusLiveData: MutableLiveData<String> = MutableLiveData()
     private val _showProgressBarLiveData: MutableLiveData<Boolean> = MutableLiveData()
     private val _showAlertDialogLiveData: MutableLiveData<Unit> = MutableLiveData()     // onSuccessLocationLiveData
-    private val _networkAvailableLiveData: MutableLiveData<Boolean> = MutableLiveData()
     private val _requestPermissionLiveData: MutableLiveData<Unit> = MutableLiveData()
     private val _locateCityLiveData: MutableLiveData<Unit> = MutableLiveData()
-    val isNetworkAvailableLiveData: MutableLiveData<Boolean> = MutableLiveData()
 
     val getWeatherForecastLiveData: LiveData<WeatherForecastDomainModel>
         get() = _getWeatherForecastLiveData
@@ -76,36 +73,25 @@ class WeatherForecastViewModel(
      */
     fun downloadWeatherForecast(temperatureType: TemperatureType, city: String?, location: Location?) {
         try {
-            if (isNetworkAvailable(app)) {
-                _showProgressBarLiveData.postValue(true)
-                viewModelScope.launch(exceptionHandler) {
-                    // Downloading a weather forecast from network
-                    val result: WeatherForecastDomainModel =
-                        if (!city.isNullOrBlank()) {
-                            weatherForecastRemoteInteractor.loadForecastForCity(temperatureType, city)
-                        } else {
-                            weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
-                                temperatureType,
-                                location?.latitude ?: 0.0,
-                                location?.longitude ?: 0.0
-                            )
-                        }
-                    if (result.serverError.isBlank()) {
-                        // Saving it to database
-                        weatherForecastLocalInteractor.saveForecast(result)
-                        _getWeatherForecastLiveData.postValue(result)
+            _showProgressBarLiveData.postValue(true)
+            viewModelScope.launch(exceptionHandler) {
+                // Downloading a weather forecast from network
+                val result: WeatherForecastDomainModel =
+                    if (!city.isNullOrBlank()) {
+                        weatherForecastRemoteInteractor.loadForecastForCity(temperatureType, city)
                     } else {
-                        _showErrorLiveData.postValue(result.serverError)
+                        weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
+                            temperatureType,
+                            location?.latitude ?: 0.0,
+                            location?.longitude ?: 0.0
+                        )
                     }
-                }
-            } else {
-                // When network is not available,
-                viewModelScope.launch(exceptionHandler) {
-                    // Download forecast from database
-                    val result = weatherForecastLocalInteractor.loadForecast(city ?: "")
+                if (result.serverError.isBlank()) {
+                    // Saving it to database
+                    weatherForecastLocalInteractor.saveForecast(result)
                     _getWeatherForecastLiveData.postValue(result)
-                    Log.d("WeatherForecastViewModel", result.toString())
-                    _showErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
+                } else {
+                    _showErrorLiveData.postValue(result.serverError)
                 }
             }
         } catch (ex: Exception) {
@@ -113,32 +99,32 @@ class WeatherForecastViewModel(
         }
     }
 
-    fun notifyAboutNetworkAvailability(callback: suspend () -> Unit) {
-        if (isNetworkAvailableLiveData.value == true) {
-            viewModelScope.launch {
-                callback.invoke()
-            }
-            // _networkAvailableLiveData.postValue(true)
-        } else {
-            _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-        }
-    }
-
-    fun onNetworkAvailable(isAvailable: Boolean) {
+    fun requestPermissionOrDownloadForecast(isAvailable: Boolean) {
+        // Log.d("NetworkConnectionLiveData3", connectivityManager.isNetworkAvailable.value.toString())
         if (isAvailable) {
-            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
+            // _showStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
             _showProgressBarLiveData.postValue(true)
             if (ActivityCompat.checkSelfPermission(app.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED
             ) {
                 _requestPermissionLiveData.postValue(Unit)
             } else {
-                Log.d("WeatherForecastViewModel3","!!!")
                 locateCityOrDownloadForecastData()
             }
         } else {
-            sharedPreferences.edit().putString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, "").apply()
-            _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+            // When network is not available,
+            viewModelScope.launch(exceptionHandler) {
+                val city = sharedPreferences.getString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, "")
+                if (!city.isNullOrBlank()) {
+                    // Download forecast from database
+                    val result = weatherForecastLocalInteractor.loadForecast(city ?: "")
+                    _getWeatherForecastLiveData.postValue(result)
+                    Log.d("WeatherForecastViewModel", result.toString())
+                    _showErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
+                } else {
+                    _showErrorLiveData.postValue(app.applicationContext.getString(R.string.default_city_absent))
+                }
+            }
         }
     }
 
@@ -149,6 +135,7 @@ class WeatherForecastViewModel(
             _showStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
             _locateCityLiveData.postValue(Unit)
         } else {
+            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.network_forecast_downloading_text))
             downloadWeatherForecast(
                 TemperatureType.CELSIUS,
                 city,

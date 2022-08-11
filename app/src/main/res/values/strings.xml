@@ -12,12 +12,15 @@
     <string name="current_date_example">Current date</string>
     <string name="error_text_example">Some error</string>
     <string name="network_available_text">Network available</string>
+    <string name="network_lost_error_text">Network connection lost, check connection</string>
     <string name="network_not_available_error_text">Network is not available, check connection</string>
     <string name="location_fail_error_text">Cannot get location, check network connection</string>
     <string name="location_defining_text">Geo location defining…</string>
-    <string name="forecast_pending_text">Weather forecast pending…</string>
+    <string name="network_forecast_downloading_for_city_text">Weather forecast for %s downloading…</string>
+    <string name="network_forecast_downloading_text">Weather forecast downloading…</string>
     <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
     <string name="database_city_downloading">No network connection, database last city has been loaded</string>
+    <string name="default_city_absent">City was not defined earlier, cannot load from DB, turn connection on</string>
     <string name="database_records_not_found">Database records, matching %s, not found</string>
     <string name="forecast_for_city">Provided for city %s</string>
     <string name="bad_date_format">Bad date format</string>
