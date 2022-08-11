@@ -47,7 +47,6 @@ class CitiesNamesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fragmentDataBinding = FragmentCitiesNamesBinding.bind(view)
-        // viewModel = (activity as WeatherForecastActivity).citiesNamesViewModel
         autoSuggestAdapter = AutoSuggestAdapter(activity as Context, android.R.layout.select_dialog_item)
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
@@ -63,7 +62,8 @@ class CitiesNamesFragment : Fragment() {
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) {
             Log.e("CitiesNamesFragment",it)
             fragmentDataBinding.toolbar.subtitle = it
-            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
+            PresentationUtils.setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, it)
+            fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
         }
         viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) {
             val bundle = Bundle().apply {
@@ -76,7 +76,7 @@ class CitiesNamesFragment : Fragment() {
         }
         networkConnectionLiveData.observe(viewLifecycleOwner) {
             viewModel._isNetworkAvailable.value = it
-            viewModel.notifyAboutNetworkAvailability { onNetworkAvailable() }
+            viewModel.notifyAboutNetworkAvailability { onNetworkAvailable(it) }
         }
     }
 
@@ -87,13 +87,13 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.autocompleteCity.addTextChangedListener(textChangeListener)
     }
 
-    private fun onNetworkAvailable() {
-        if (viewModel._isNetworkAvailable.value == true) {
+    private fun onNetworkAvailable(isAvailable: Boolean) {
+        if (isAvailable) {
             fragmentDataBinding.toolbar.subtitle = getString(R.string.network_available_text)
-            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorPrimary))
+            fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorPrimary))
         } else {
             fragmentDataBinding.toolbar.subtitle = getString(R.string.network_not_available_error_text)
-            fragmentDataBinding.toolbar.setBackgroundColor(resources.getColor(R.color.colorAccent))
+            fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
         }
     }
 

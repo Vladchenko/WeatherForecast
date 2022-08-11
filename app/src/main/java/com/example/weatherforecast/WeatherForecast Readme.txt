@@ -8,15 +8,15 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
-    - OnNetworkAvailable вынести во вью модель
-    - Downloading repeats twice
-    - When app starts for the very first time, its progress bar spins forever
+    - okhttp3.ResponseBody$Companion$asResponseBody$1@a4cae72
+    - Activity leaking persists
+    - Put most code from fragments to viewmodels
+    - When app starts for the very first time and one selects a city, then geolocation alert pops up, but should not
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
         - Emptying a views doesn't help
             - Tried in onViewCreated and in onPause
         ! Probably, one has to remove fragment
 
-    - resources.getColor replace with not deprecated analog
     - Put all texts to string.xml
     - Remove all superfluous Log.d
     - Check statuses

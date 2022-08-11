@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
@@ -60,7 +61,7 @@ class CitiesNamesViewModel(
                     _getCitiesNamesLiveData.postValue(response)
                 }
             } else {
-                _showErrorLiveData.postValue("No internet connection, trying to download from database...")
+                _showErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
                 // Trying to download a chosen city from database
                 viewModelScope.launch(exceptionHandler) {
                     val result = CitiesNamesDomainModel(
@@ -76,7 +77,12 @@ class CitiesNamesViewModel(
                         _getCitiesNamesLiveData.postValue(result)
                         Log.d("CitiesNamesViewModel4", result.cities[0].toString())
                     } else {
-                        _showErrorLiveData.postValue("Database records, matching $city, not found.")
+                        _showErrorLiveData.postValue(
+                            app.applicationContext.getString(
+                                R.string.database_records_not_found,
+                                city
+                            )
+                        )
                     }
                 }
             }
@@ -97,7 +103,7 @@ class CitiesNamesViewModel(
                 callback.invoke()
             }
         } else {
-            _showErrorLiveData.value = ("Network not available")
+            _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
         }
     }
 }

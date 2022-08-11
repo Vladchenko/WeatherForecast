@@ -16,6 +16,9 @@
     <string name="location_fail_error_text">Cannot get location, check network connection</string>
     <string name="location_defining_text">Geo location defining…</string>
     <string name="forecast_pending_text">Weather forecast pending…</string>
-    <string name="database_downloading">No network connection, database last location forecast has been loaded.</string>
+    <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
+    <string name="database_city_downloading">No network connection, database last city has been loaded</string>
+    <string name="database_records_not_found">Database records, matching %s, not found</string>
+    <string name="forecast_for_city">Provided for city %s</string>
     <string name="bad_date_format">Bad date format</string>
 </resources>
