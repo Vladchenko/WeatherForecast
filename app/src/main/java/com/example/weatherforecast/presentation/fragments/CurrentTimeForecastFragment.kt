@@ -30,7 +30,6 @@ import com.example.weatherforecast.presentation.fragments.PresentationUtils.getW
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.setToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
@@ -40,9 +39,8 @@ import kotlin.system.exitProcess
 @AndroidEntryPoint
 class CurrentTimeForecastFragment : Fragment() {
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
+    { isGranted ->
         if (isGranted) {
             viewModel.locateCityOrDownloadForecastData()
         } else {
@@ -65,8 +63,8 @@ class CurrentTimeForecastFragment : Fragment() {
     @Inject
     lateinit var connectionLiveData: ConnectionLiveData
 
-    // @Inject      // TODO Remove ?
-    // lateinit var permissionDelegate: GeoLocationPermissionDelegate
+    @Inject
+    lateinit var geoLocationListener: GeoLocationListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,7 +107,7 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         viewModel.showStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
-        viewModel.showAlertDialogLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
+        viewModel.onLocationSuccessLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCity() }
     }
@@ -137,7 +135,7 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun showStatus(statusMessage: String) {
-        Log.e("CurrentTimeForecastFragment", statusMessage)
+        Log.d("CurrentTimeForecastFragment", statusMessage)
         setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, statusMessage)
         fragmentDataBinding.toolbar.subtitle = statusMessage
         fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorPrimary))
@@ -149,7 +147,7 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun locateCity() {
         Log.d("CurrentTimeForecastFragment", "Locating city...")
-        geoLocator.getCityByLocation(requireActivity(), GeoLocationListenerImpl())
+        geoLocator.getCityByLocation(requireActivity(), geoLocationListener)
     }
 
     private fun toggleProgressBar(isVisible: Boolean) {
@@ -165,30 +163,16 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun showAlertDialog() {
+        Log.d("CurrentTimeForecastFragment", "showAlertDialog")
         alertDialogDelegate = AlertDialogDelegate(
             sharedPreferences.getString(CITY_ARGUMENT_KEY, "") ?: "",
             CityApprovalAlertDialogListenerImpl()
         )
-        alertDialogDelegate?.showAlertDialog(WeakReference(activity as Activity))
+        alertDialogDelegate?.showAlertDialog(requireContext())
     }
 
     companion object {
         const val CITY_ARGUMENT_KEY = "CITY"
-    }
-
-    inner class GeoLocationListenerImpl : GeoLocationListener {
-        override fun onGeoLocationSuccess(
-            location: Location,
-            locationName: String
-        ) {
-            sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, locationName).apply()
-            localLocation = location
-            viewModel.onGeoLocationSuccess()
-        }
-
-        override fun onGeoLocationFail() {
-            showError(getString(R.string.location_fail_error_text))
-        }
     }
 
     inner class CityApprovalAlertDialogListenerImpl : AlertDialogClickListener {

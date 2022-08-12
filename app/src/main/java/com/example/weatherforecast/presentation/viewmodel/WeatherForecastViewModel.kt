@@ -38,7 +38,7 @@ class WeatherForecastViewModel(
     private val _showErrorLiveData: MutableLiveData<String> = MutableLiveData()
     private val _showStatusLiveData: MutableLiveData<String> = MutableLiveData()
     private val _showProgressBarLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    private val _onSuccessLocationLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()     // TODO onSuccessLocationLiveData
+    private val _onLocationSuccessLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _requestPermissionLiveData: MutableLiveData<Unit> = MutableLiveData()
     private val _locateCityLiveData: MutableLiveData<Unit> = MutableLiveData()
 
@@ -54,8 +54,8 @@ class WeatherForecastViewModel(
     val showProgressBarLiveData: LiveData<Boolean>
         get() = _showProgressBarLiveData
 
-    val showAlertDialogLiveData: LiveData<Unit>
-        get() = _onSuccessLocationLiveData
+    val onLocationSuccessLiveData: LiveData<Unit>
+        get() = _onLocationSuccessLiveData
 
     val requestPermissionLiveData: LiveData<Unit>
         get() = _requestPermissionLiveData
@@ -164,7 +164,12 @@ class WeatherForecastViewModel(
     }
 
     fun onGeoLocationSuccess() {
-        _onSuccessLocationLiveData.postValue(Unit)
+        Log.d("WeatherForecastViewModel", "onGeoLocationSuccess")
+        _onLocationSuccessLiveData.postValue(Unit)
+    }
+
+    fun onGeoLocationFail(error: String) {
+        _showErrorLiveData.postValue(error)
     }
 
     companion object {

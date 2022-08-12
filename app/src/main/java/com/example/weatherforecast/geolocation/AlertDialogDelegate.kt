@@ -1,10 +1,8 @@
 package com.example.weatherforecast.geolocation
 
-import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
-import java.lang.ref.WeakReference
 
 /**
  * Shows alert dialog and processes its buttons clicks
@@ -17,8 +15,8 @@ class AlertDialogDelegate(private val city: String,
     /**
      * Show alert dialog using [android.content.Context]
      */
-    fun showAlertDialog(weakReference: WeakReference<Activity>) {
-        val builder = AlertDialog.Builder(weakReference.get() as Context)
+    fun showAlertDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
         builder.setTitle("Area geo location")
         builder.setMessage("Google Maps defined your location as $city. Do you agree ?")
         builder.setPositiveButton(android.R.string.ok) { _dialogInterface, _ ->
