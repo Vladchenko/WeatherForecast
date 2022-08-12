@@ -154,8 +154,8 @@ class CurrentTimeForecastFragment : Fragment() {
         geoLocator.getCityByLocation(WeakReference(activity as Activity), GeoLocationListenerImpl())
     }
 
-    private fun toggleProgressBar(isVisible: Boolean) {
-        if (isVisible) {
+    private fun toggleProgressBar(isNetworkVisible: Boolean) {
+        if (isNetworkVisible) {
             fragmentDataBinding.progressBar.alpha = 0.7f
             fragmentDataBinding.progressBar.visibility = View.VISIBLE
         } else {

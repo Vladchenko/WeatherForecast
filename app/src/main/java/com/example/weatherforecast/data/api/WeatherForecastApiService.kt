@@ -1,6 +1,8 @@
 package com.example.weatherforecast.data.api
 
 import com.example.weatherforecast.BuildConfig
+import com.example.weatherforecast.data.api.customexceptions.ExceptionsMapper
+import com.example.weatherforecast.data.api.customexceptions.WeatherForecastExceptionMapper
 import com.example.weatherforecast.data.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.data.models.data.WeatherForecastResponse
 import retrofit2.Response
@@ -16,6 +18,7 @@ interface WeatherForecastApiService {
      * Receive cities names that match the requested criteria, i.e. [city]
      */
     @GET("geo/1.0/direct")
+    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
     suspend fun getCityNames(
         @Query("q")
         city:String,
@@ -32,6 +35,7 @@ interface WeatherForecastApiService {
      * (from https://openweathermap.org/current#other)
      */
     @GET("data/2.5/weather")
+    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
     suspend fun getWeatherForecastResponseForCity(
         @Query("q")
         city:String,
@@ -43,6 +47,7 @@ interface WeatherForecastApiService {
      * Receive weather forecast data for current [Location]
      */
     @GET("data/2.5/weather")
+    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
     suspend fun getWeatherForecastResponseForLocation(
         @Query("lat")
         lat:Double,

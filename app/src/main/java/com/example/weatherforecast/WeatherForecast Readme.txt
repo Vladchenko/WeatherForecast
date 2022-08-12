@@ -8,7 +8,16 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
-    - okhttp3.ResponseBody$Companion$asResponseBody$1@a4cae72
+    - Make Singlelive event for alertdialog
+    - Leave only
+    ActivityCompat.requestPermissions(
+                    activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQUEST_CODE_ASK_PERMISSIONS
+                )
+    in fragment, all the rest to Viewmodel
+    - SharedPrefs move to viewmodel and provide from DI with interface
+    - Remove weak reference
+    - For okhttp3.ResponseBody$Companion$asResponseBody$1@a4cae72, throw exception in exception handler
     - Activity leaking persists
     - Put most code from fragments to viewmodels
     - When app starts for the very first time and one selects a city, then geolocation alert pops up, but should not
