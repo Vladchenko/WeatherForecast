@@ -8,7 +8,6 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
-    - Make Singlelive event for alertdialog
     - Leave only
     ActivityCompat.requestPermissions(
                     activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),

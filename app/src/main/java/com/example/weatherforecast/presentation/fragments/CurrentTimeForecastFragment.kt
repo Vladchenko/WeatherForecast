@@ -1,8 +1,6 @@
 package com.example.weatherforecast.presentation.fragments
 
 import android.Manifest
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.app.Activity
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
@@ -27,6 +25,7 @@ import com.example.weatherforecast.geolocation.AlertDialogDelegate
 import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.network.ConnectionLiveData
+import com.example.weatherforecast.presentation.fragments.PresentationUtils.animateFadeOut
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.setToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
@@ -97,6 +96,7 @@ class CurrentTimeForecastFragment : Fragment() {
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
         toggleProgressBar(true)
         initLiveDataObservers()
+        viewModel.requestPermissionOrDownloadForecast()
     }
 
     override fun onDestroy() {
@@ -112,10 +112,6 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.showAlertDialogLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCity() }
-        connectionLiveData.observe(viewLifecycleOwner) {
-            Log.d("NetworkConnectionLiveData2", it.toString())
-            viewModel.requestPermissionOrDownloadForecast(it)
-        }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -134,6 +130,7 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun showError(errorMessage: String) {
         Log.e("CurrentTimeForecastFragment", errorMessage)
+        toggleProgressBar(false)
         setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, errorMessage)
         fragmentDataBinding.toolbar.subtitle = errorMessage
         fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
@@ -151,11 +148,12 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun locateCity() {
-        geoLocator.getCityByLocation(WeakReference(activity as Activity), GeoLocationListenerImpl())
+        Log.d("CurrentTimeForecastFragment", "Locating city...")
+        geoLocator.getCityByLocation(requireActivity(), GeoLocationListenerImpl())
     }
 
-    private fun toggleProgressBar(isNetworkVisible: Boolean) {
-        if (isNetworkVisible) {
+    private fun toggleProgressBar(isVisible: Boolean) {
+        if (isVisible) {
             fragmentDataBinding.progressBar.alpha = 0.7f
             fragmentDataBinding.progressBar.visibility = View.VISIBLE
         } else {
@@ -163,19 +161,6 @@ class CurrentTimeForecastFragment : Fragment() {
                 fragmentDataBinding.progressBar,
                 resources.getInteger(android.R.integer.config_mediumAnimTime)
             )
-        }
-    }
-
-    private fun animateFadeOut(view: View, shortAnimationDuration: Int) {
-        view.apply {
-            animate()
-                .alpha(0f)
-                .setDuration(shortAnimationDuration.toLong())
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        view.visibility = View.GONE
-                    }
-                })
         }
     }
 
@@ -198,7 +183,7 @@ class CurrentTimeForecastFragment : Fragment() {
         ) {
             sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, locationName).apply()
             localLocation = location
-            viewModel.showAlertDialog()
+            viewModel.onGeoLocationSuccess()
         }
 
         override fun onGeoLocationFail() {

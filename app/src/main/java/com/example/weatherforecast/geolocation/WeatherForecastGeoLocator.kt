@@ -11,7 +11,6 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
-import java.lang.ref.WeakReference
 import java.util.Locale
 
 /**
@@ -22,11 +21,11 @@ class WeatherForecastGeoLocator(private val permissionDelegate: GeoLocationPermi
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     /**
-     * Define device geo location, using [weakReference] and deliver callback through [locationListener].
+     * Define device geo location, using [activity] and deliver callback through [locationListener].
      */
-    fun getCityByLocation(weakReference: WeakReference<Activity>, locationListener: GeoLocationListener) {
+    fun getCityByLocation(activity: Activity, locationListener: GeoLocationListener) {
         try {
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(weakReference.get() as Context)
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity as Context)
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
                 override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
                 override fun isCancellationRequested() = false
@@ -36,16 +35,22 @@ class WeatherForecastGeoLocator(private val permissionDelegate: GeoLocationPermi
                     locationListener.onGeoLocationFail()
                 } else {
                     Log.d("WeatherForecastGeoLocator", location.toString())
-                        val geoCoder = Geocoder(weakReference.get() as Context, Locale.getDefault())
+                        val geoCoder = Geocoder(activity as Context, Locale.getDefault())
                         locationListener.onGeoLocationSuccess(
                             location,
                             geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
                         )
                 }
+            }.addOnFailureListener {
+                // TODO Throw exception and process it on upper level
+                Log.e("WeatherForecastGeoLocator",it.message.toString())
+            }.addOnCanceledListener {
+                // TODO Throw exception and process it on upper level
+                Log.e("WeatherForecastGeoLocator", "Cancelled")
             }
         } catch (sec: SecurityException) {
-            permissionDelegate.getPermissionForGeoLocation(weakReference.get() as Activity)
-            getCityByLocation(weakReference, locationListener)
+            permissionDelegate.getPermissionForGeoLocation(activity)
+            getCityByLocation(activity, locationListener)
         }
     }
 }
