@@ -1,10 +1,10 @@
 package com.example.weatherforecast.presentation.fragments
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -22,16 +22,14 @@ import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
 import com.example.weatherforecast.geolocation.AlertDialogClickListener
 import com.example.weatherforecast.geolocation.AlertDialogDelegate
-import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.network.ConnectionLiveData
+import com.example.weatherforecast.presentation.fragments.PresentationUtils.SHARED_PREFERENCES_KEY
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.animateFadeOut
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.setToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import kotlin.system.exitProcess
+import java.util.Locale
 
 /**
  * Fragment representing a weather forecast for current time.
@@ -44,7 +42,7 @@ class CurrentTimeForecastFragment : Fragment() {
         if (isGranted) {
             viewModel.locateCityOrDownloadForecastData()
         } else {
-            exitProcess(0)  //TODO Inform user that app cannot proceed
+            showError(getString(R.string.no_permission_app_cannot_proceed)) //TODO Show alert dialog instead
         }
     }
 
@@ -57,18 +55,11 @@ class CurrentTimeForecastFragment : Fragment() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
-    @Inject
-    lateinit var geoLocator: WeatherForecastGeoLocator
-
-    @Inject
-    lateinit var connectionLiveData: ConnectionLiveData
-
-    @Inject
-    lateinit var geoLocationListener: GeoLocationListener
+    private lateinit var geoLocator: WeatherForecastGeoLocator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedPreferences = (activity as Activity).getPreferences(MODE_PRIVATE)
+        sharedPreferences = requireActivity().application.getSharedPreferences(SHARED_PREFERENCES_KEY, MODE_PRIVATE)
         arguments?.let {
             val city = it.getString(CITY_ARGUMENT_KEY) ?: ""
             Log.d("CurrentTimeForecastFragment", "city = $city")
@@ -93,6 +84,7 @@ class CurrentTimeForecastFragment : Fragment() {
         )
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
         toggleProgressBar(true)
+        geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is it correct ?
         initLiveDataObservers()
         viewModel.requestPermissionOrDownloadForecast()
     }
@@ -108,8 +100,9 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.showStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
         viewModel.onLocationSuccessLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
+        viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
-        viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCity() }
+        viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCityByGeoLocation() }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -145,14 +138,20 @@ class CurrentTimeForecastFragment : Fragment() {
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    private fun locateCity() {
+    private fun locateCityByGeoLocation() {
         Log.d("CurrentTimeForecastFragment", "Locating city...")
-        geoLocator.getCityByLocation(requireActivity(), geoLocationListener)
+        geoLocator.getCityByLocation(requireActivity())
+    }
+
+    private fun defineCityByLatLong(location: Location) {
+        val geoCoder = Geocoder(activity as Context, Locale.getDefault())
+        val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+        viewModel.onGeoLocationSuccess(locality)
     }
 
     private fun toggleProgressBar(isVisible: Boolean) {
         if (isVisible) {
-            fragmentDataBinding.progressBar.alpha = 0.7f
+            fragmentDataBinding.progressBar.alpha = resources.getFloat(R.dimen.progressbar_background_transparency)
             fragmentDataBinding.progressBar.visibility = View.VISIBLE
         } else {
             animateFadeOut(

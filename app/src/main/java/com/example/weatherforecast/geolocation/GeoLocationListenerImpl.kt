@@ -23,7 +23,7 @@ class GeoLocationListenerImpl(
         Log.d("GeoLocationListenerImpl", "onGeoLocationSuccess")
         sharedPreferences.edit().putString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, locationName).apply()
         // localLocation = location
-        viewModel.onGeoLocationSuccess()
+        viewModel.onGeoLocationSuccess(locationName)
     }
 
     override fun onGeoLocationFail() {

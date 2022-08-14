@@ -15,11 +15,9 @@ import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
-import com.example.weatherforecast.network.ConnectionLiveData
 import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 /**
  * Represents a feature of choosing a city to further have a weather forecast on.
@@ -27,15 +25,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
 
-    private val viewModel by activityViewModels<CitiesNamesViewModel>()
-
     private var city = ""
+
+    private val viewModel by activityViewModels<CitiesNamesViewModel>()
 
     private lateinit var autoSuggestAdapter: AutoSuggestAdapter
     private lateinit var fragmentDataBinding: FragmentCitiesNamesBinding
-
-    @Inject
-    lateinit var connectionLiveData: ConnectionLiveData
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,10 +69,6 @@ class CitiesNamesFragment : Fragment() {
                 bundle
             )
         }
-        connectionLiveData.observe(viewLifecycleOwner) {
-            viewModel._isNetworkAvailable.value = it
-            viewModel.notifyAboutNetworkAvailability { onNetworkAvailable(it) }
-        }
     }
 
     private fun initSearch() {
@@ -85,16 +76,6 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.autocompleteCity.threshold = 2
         fragmentDataBinding.autocompleteCity.onItemClickListener = clickListener
         fragmentDataBinding.autocompleteCity.addTextChangedListener(textChangeListener)
-    }
-
-    private fun onNetworkAvailable(isAvailable: Boolean) {
-        if (isAvailable) {
-            fragmentDataBinding.toolbar.subtitle = getString(R.string.network_available_text)
-            fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorPrimary))
-        } else {
-            fragmentDataBinding.toolbar.subtitle = getString(R.string.network_not_available_error_text)
-            fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
-        }
     }
 
     private val textChangeListener = object: TextWatcher {

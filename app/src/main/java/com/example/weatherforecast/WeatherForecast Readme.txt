@@ -8,17 +8,9 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
-    - Leave only
-    ActivityCompat.requestPermissions(
-                    activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    REQUEST_CODE_ASK_PERMISSIONS
-                )
-    in fragment, all the rest to Viewmodel
-    - SharedPrefs move to viewmodel and provide from DI with interface
-    - Remove weak reference
+    - SharedPrefs move to datasource and provide from DI with interface (CORRECT) to repo - interactor - viewmodel
     - For okhttp3.ResponseBody$Companion$asResponseBody$1@a4cae72, throw exception in exception handler
     - Activity leaking persists
-    - Put most code from fragments to viewmodels
     - When app starts for the very first time and one selects a city, then geolocation alert pops up, but should not
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
         - Emptying a views doesn't help

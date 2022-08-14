@@ -8,12 +8,12 @@ import androidx.appcompat.widget.Toolbar
 import com.example.weatherforecast.R
 
 /**
- *
+ * Presentation layer utility class.
  */
 object PresentationUtils {
 
     /**
-     *
+     * Set font size for [toolbar], depending on its [subtitle] size.
      */
     fun setToolbarSubtitleFontSize(toolbar: Toolbar, subtitle: String) {
         if (subtitle.length > 50) {
@@ -24,7 +24,8 @@ object PresentationUtils {
     }
 
     /**
-     *
+     * Weather type icon retrieving from [resources], having a path to this icon, i.e. [packageName] and weather
+     * description, i.e. [weatherType] specified.
      */
     fun getWeatherTypeIcon(resources: Resources, packageName: String, weatherType: String) =
         resources.getIdentifier(
@@ -34,7 +35,7 @@ object PresentationUtils {
         )
 
     /**
-     *
+     * [view]'s fading out animating within a [shortAnimationDuration] time span
      */
     fun animateFadeOut(view: View, shortAnimationDuration: Int) {
         view.apply {
@@ -49,6 +50,7 @@ object PresentationUtils {
         }
     }
 
+    const val SHARED_PREFERENCES_KEY = "Shared preferences key"
     private const val ICON_PREFIX = "icon_"
     private const val DRAWABLE_RESOURCE_TYPE = "drawable"
 }

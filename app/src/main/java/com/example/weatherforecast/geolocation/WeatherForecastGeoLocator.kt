@@ -1,56 +1,50 @@
 package com.example.weatherforecast.geolocation
 
-import android.app.Activity
 import android.content.Context
-import android.location.Geocoder
 import android.location.Location
 import android.util.Log
+import com.example.weatherforecast.R
+import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
-import java.util.Locale
 
 /**
  * Defines location of a device.
  */
-class WeatherForecastGeoLocator(private val permissionDelegate: GeoLocationPermissionDelegate) {
+class WeatherForecastGeoLocator(private val viewModel: WeatherForecastViewModel) {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     /**
-     * Define device geo location, using [activity] and deliver callback through [locationListener].
+     * Define device geo location, using [context].
      */
-    fun getCityByLocation(activity: Activity, locationListener: GeoLocationListener) {
+    fun getCityByLocation(context: Context) {
         try {
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity as Context)
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
                 override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
                 override fun isCancellationRequested() = false
             }).addOnSuccessListener { location: Location? ->
                 Log.d("WeatherForecastGeoLocator", location.toString())
                 if (location == null) {
-                    locationListener.onGeoLocationFail()
+                    viewModel.onGeoLocationFail(context.getString(R.string.location_fail_error_text))
                 } else {
                     Log.d("WeatherForecastGeoLocator", location.toString())
-                        val geoCoder = Geocoder(activity as Context, Locale.getDefault())
-                        locationListener.onGeoLocationSuccess(
-                            location,
-                            geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-                        )
+                    viewModel.onDefineCityByGeoLocation(location)
                 }
             }.addOnFailureListener {
-                // TODO Throw exception and process it on upper level
                 Log.e("WeatherForecastGeoLocator",it.message.toString())
+                viewModel.onShowError(it.message?:"")
             }.addOnCanceledListener {
-                // TODO Throw exception and process it on upper level
                 Log.e("WeatherForecastGeoLocator", "Cancelled")
+                viewModel.onShowError(context.getString(R.string.city_locating_cancelled))
             }
         } catch (sec: SecurityException) {
-            permissionDelegate.getPermissionForGeoLocation(activity)
-            getCityByLocation(activity, locationListener)
+            viewModel.onGetPermissionForGeoLocation()
         }
     }
 }

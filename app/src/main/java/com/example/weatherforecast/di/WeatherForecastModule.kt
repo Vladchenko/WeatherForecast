@@ -27,13 +27,7 @@ import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
-import com.example.weatherforecast.geolocation.GeoLocationListener
-import com.example.weatherforecast.geolocation.GeoLocationListenerImpl
-import com.example.weatherforecast.geolocation.GeoLocationPermissionDelegate
-import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.network.ConnectionLiveData
 import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
 import dagger.Module
 import dagger.Provides
@@ -206,36 +200,11 @@ class WeatherForecastModule {
         )
     }
 
-    @Singleton
-    @Provides
-    fun provideWeatherForecastGeoLocator(permissionDelegate: GeoLocationPermissionDelegate): WeatherForecastGeoLocator {
-        return WeatherForecastGeoLocator(permissionDelegate)
-    }
-
-    @Singleton
-    @Provides
-    fun provideGeoLocationPermissionDelegate(): GeoLocationPermissionDelegate {
-        return GeoLocationPermissionDelegate()
-    }
-
-    @Singleton
-    @Provides
-    fun provideConnectionLiveData(@ApplicationContext context: Context): ConnectionLiveData {
-        return ConnectionLiveData(context)
-    }
-
     @Provides
     @Singleton
     @Nullable
     fun provideSharedPreference(@ApplicationContext context: Context): SharedPreferences? {
         return context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
-    }
-
-    @Singleton
-    @Provides
-    fun provideGeoLocationListener(factory: WeatherForecastViewModelFactory,
-                                   @Nullable sharedPreferences: SharedPreferences): GeoLocationListener {
-        return GeoLocationListenerImpl(factory.create(WeatherForecastViewModel::class.java), sharedPreferences)
     }
 
     companion object {
