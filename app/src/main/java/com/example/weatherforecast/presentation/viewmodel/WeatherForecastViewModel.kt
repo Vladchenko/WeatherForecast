@@ -74,6 +74,7 @@ class WeatherForecastViewModel(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("WeatherForecastViewModel", throwable.message!!)
+        Log.e("WeatherForecastViewModel", throwable.stackTrace.toString())
         _showErrorLiveData.postValue(throwable.message!!)
     }
 
@@ -142,6 +143,7 @@ class WeatherForecastViewModel(
                 )
             }
         } catch (ex: Exception) {
+            Log.e("WeatherForecastViewModel", ex.stackTraceToString())
             _showErrorLiveData.postValue(ex.message)
         }
     }
@@ -168,6 +170,7 @@ class WeatherForecastViewModel(
             saveForecastToDatabase(result)
         } else {
             _showErrorLiveData.postValue(result.serverError)
+            Log.e("WeatherForecastViewModel8", result.serverError)
         }
     }
 

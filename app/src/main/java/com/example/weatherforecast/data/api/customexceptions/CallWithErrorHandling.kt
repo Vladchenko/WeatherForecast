@@ -8,7 +8,7 @@ import retrofit2.Response
 import java.io.IOException
 
 /**
- *
+ * Provides custom error handling for network requests.
  */
 class CallWithErrorHandling(
     private val delegate: Call<Any>

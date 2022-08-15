@@ -7,6 +7,7 @@ import androidx.annotation.Nullable
 import androidx.room.Room
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
+import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
 import com.example.weatherforecast.data.converter.CitiesNamesDataToDomainConverter
 import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
 import com.example.weatherforecast.data.database.CitiesNamesDAO
@@ -59,6 +60,7 @@ class WeatherForecastModule {
             connectTimeout(5, TimeUnit.SECONDS)
         }.build()
         return Retrofit.Builder()
+            .addCallAdapterFactory(ErrorsCallAdapterFactory())
             .addConverterFactory(GsonConverterFactory.create())
             .baseUrl(BuildConfig.API_BASE_URL)
             .client(client)
