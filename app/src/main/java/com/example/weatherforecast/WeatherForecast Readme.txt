@@ -9,7 +9,7 @@ JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
     - SharedPrefs move to datasource and provide from DI with interface (CORRECT) to repo - interactor - viewmodel
-    - For okhttp3.ResponseBody$Companion$asResponseBody$1@a4cae72, throw exception in exception handler
+    - Alert dialog, when city not found (from backend) case
     - Activity leaking persists
     - When app starts for the very first time and one selects a city, then geolocation alert pops up, but should not
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time

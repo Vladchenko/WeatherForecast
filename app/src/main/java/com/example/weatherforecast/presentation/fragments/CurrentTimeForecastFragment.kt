@@ -20,7 +20,6 @@ import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
-import com.example.weatherforecast.geolocation.AlertDialogClickListener
 import com.example.weatherforecast.geolocation.AlertDialogDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.presentation.fragments.PresentationUtils.SHARED_PREFERENCES_KEY
@@ -103,6 +102,7 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCityByGeoLocation() }
+        viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -143,6 +143,10 @@ class CurrentTimeForecastFragment : Fragment() {
         geoLocator.getCityByLocation(requireActivity())
     }
 
+    private fun gotoCitySelection() {
+        findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
+    }
+
     private fun defineCityByLatLong(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
@@ -165,27 +169,12 @@ class CurrentTimeForecastFragment : Fragment() {
         Log.d("CurrentTimeForecastFragment", "showAlertDialog")
         alertDialogDelegate = AlertDialogDelegate(
             sharedPreferences.getString(CITY_ARGUMENT_KEY, "") ?: "",
-            CityApprovalAlertDialogListenerImpl()
+            CityApprovalAlertDialogListenerImpl(viewModel, requireContext())
         )
         alertDialogDelegate?.showAlertDialog(requireContext())
     }
 
     companion object {
         const val CITY_ARGUMENT_KEY = "CITY"
-    }
-
-    inner class CityApprovalAlertDialogListenerImpl : AlertDialogClickListener {
-        override fun onPositiveClick(locationName: String) {
-            showStatus(getString(R.string.network_forecast_downloading_for_city_text, locationName))
-            viewModel.downloadWeatherForecast(
-                TemperatureType.CELSIUS,
-                locationName,
-                localLocation
-            )
-        }
-
-        override fun onNegativeClick() {
-            findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
-        }
     }
 }

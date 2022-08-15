@@ -12,6 +12,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
+import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
 import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
@@ -44,6 +45,7 @@ class WeatherForecastViewModel(
     private val _onGeoLocationSuccessLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _requestPermissionLiveData: MutableLiveData<Unit> = MutableLiveData()
     private val _locateCityLiveData: MutableLiveData<Unit> = MutableLiveData()
+    private val _gotoCitySelectionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     //endregion livedata fields
 
     //region livedata getters fields
@@ -70,11 +72,18 @@ class WeatherForecastViewModel(
 
     val locateCityLiveData: LiveData<Unit>
         get() = _locateCityLiveData
+
+    val gotoCitySelectionLiveData: LiveData<Unit>
+        get() = _gotoCitySelectionLiveData
     //endregion livedata getters fields
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("WeatherForecastViewModel", throwable.message!!)
-        Log.e("WeatherForecastViewModel", throwable.stackTrace.toString())
+        if (throwable is CityNotFoundException) {
+
+        }
+        throwable.stackTrace.forEach {
+            Log.e("WeatherForecastViewModel", it.toString()) }
         _showErrorLiveData.postValue(throwable.message!!)
     }
 
@@ -219,5 +228,13 @@ class WeatherForecastViewModel(
      */
     fun onShowError(error: String) {
         _showErrorLiveData.postValue(error)
+    }
+
+    fun onUpdateStatus(statusMessage: String) {
+        _showStatusLiveData.postValue(statusMessage)
+    }
+
+    fun onGotoCitySelection() {
+        _gotoCitySelectionLiveData.call()
     }
 }
