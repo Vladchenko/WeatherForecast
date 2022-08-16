@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments
+package com.example.weatherforecast.presentation.fragments.cityselection
 
 import android.content.Context
 import android.widget.ArrayAdapter

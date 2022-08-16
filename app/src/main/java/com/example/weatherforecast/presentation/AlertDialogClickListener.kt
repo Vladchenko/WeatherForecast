@@ -1,4 +1,4 @@
-package com.example.weatherforecast.geolocation
+package com.example.weatherforecast.presentation
 
 /**
  * Alert dialog buttons click listener

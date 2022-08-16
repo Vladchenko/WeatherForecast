@@ -4,10 +4,10 @@ import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.R
-import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
-import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
+import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

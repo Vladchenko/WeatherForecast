@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments
+package com.example.weatherforecast.presentation.fragments.cityselection
 
 import android.content.Context
 import android.os.Bundle
@@ -15,8 +15,9 @@ import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
-import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
-import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModel
+import com.example.weatherforecast.presentation.PresentationUtils
+import com.example.weatherforecast.presentation.fragments.forecast.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
+import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

@@ -5,8 +5,8 @@ import android.location.Location
 import android.util.Log
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.WeatherForecastApp
-import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
+import com.example.weatherforecast.presentation.fragments.forecast.CurrentTimeForecastFragment
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 
 /**
  * TODO

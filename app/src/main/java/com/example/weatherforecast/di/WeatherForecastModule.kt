@@ -28,8 +28,8 @@ import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
-import com.example.weatherforecast.presentation.viewmodel.CitiesNamesViewModelFactory
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/citiesNamesFragment"
-        android:name="com.example.weatherforecast.presentation.fragments.CitiesNamesFragment"
+        android:name="com.example.weatherforecast.presentation.fragments.cityselection.CitiesNamesFragment"
         android:label="CitiesNamesFragment">
         <action
             android:id="@+id/action_citiesNamesFragment_to_currentTimeForecastFragment"
@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/currentTimeForecastFragment"
-        android:name="com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment"
+        android:name="com.example.weatherforecast.presentation.fragments.forecast.CurrentTimeForecastFragment"
         android:label="CurrentTimeForecastFragment">
         <action
             android:id="@+id/action_currentTimeForecastFragment_to_citiesNamesFragment"

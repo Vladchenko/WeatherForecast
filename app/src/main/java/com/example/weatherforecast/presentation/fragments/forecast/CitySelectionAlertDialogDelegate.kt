@@ -1,14 +1,15 @@
-package com.example.weatherforecast.geolocation
+package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
+import com.example.weatherforecast.presentation.AlertDialogClickListener
 
 /**
  * Shows alert dialog and processes its buttons clicks
  */
-class AlertDialogDelegate(private val city: String,
-                          private val clickListener: AlertDialogClickListener) {
+class CitySelectionAlertDialogDelegate(private val city: String,
+                                       private val clickListener: AlertDialogClickListener) {
 
     private lateinit var alertDialog: AlertDialog
 
@@ -17,15 +18,10 @@ class AlertDialogDelegate(private val city: String,
      */
     fun showAlertDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Area geo location")
-        builder.setMessage("Google Maps defined your location as $city. Do you agree ?")
+        builder.setTitle("City forecast failed")
+        builder.setMessage("Forecast for city $city is not available, please choose another city")
         builder.setPositiveButton(android.R.string.ok) { _dialogInterface, _ ->
             positiveButtonClick(
-                _dialogInterface
-            )
-        }
-        builder.setNegativeButton(android.R.string.cancel) { _dialogInterface, _ ->
-            negativeButtonClick(
                 _dialogInterface
             )
         }

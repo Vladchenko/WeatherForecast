@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.viewmodel
+package com.example.weatherforecast.presentation.viewmodel.forecast
 
 import android.Manifest
 import android.app.Application
@@ -18,8 +18,9 @@ import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
-import com.example.weatherforecast.presentation.fragments.CurrentTimeForecastFragment
-import com.example.weatherforecast.presentation.fragments.PresentationUtils.SHARED_PREFERENCES_KEY
+import com.example.weatherforecast.presentation.PresentationUtils.SHARED_PREFERENCES_KEY
+import com.example.weatherforecast.presentation.fragments.forecast.CurrentTimeForecastFragment
+import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
@@ -46,6 +47,7 @@ class WeatherForecastViewModel(
     private val _requestPermissionLiveData: MutableLiveData<Unit> = MutableLiveData()
     private val _locateCityLiveData: MutableLiveData<Unit> = MutableLiveData()
     private val _gotoCitySelectionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
+    private val _chooseAnotherCity: SingleLiveEvent<Unit> = SingleLiveEvent()
     //endregion livedata fields
 
     //region livedata getters fields
@@ -64,7 +66,7 @@ class WeatherForecastViewModel(
     val defineCityByGeoLocationLiveData: LiveData<Location>
         get() = _defineCityByGeoLocationLiveData
 
-    val onLocationSuccessLiveData: LiveData<Unit>
+    val locationSuccessLiveData: LiveData<Unit>
         get() = _onGeoLocationSuccessLiveData
 
     val requestPermissionLiveData: LiveData<Unit>
@@ -75,12 +77,17 @@ class WeatherForecastViewModel(
 
     val gotoCitySelectionLiveData: LiveData<Unit>
         get() = _gotoCitySelectionLiveData
+
+    val chooseAnotherCity: LiveData<Unit>
+        get() = _chooseAnotherCity
     //endregion livedata getters fields
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("WeatherForecastViewModel", throwable.message!!)
         if (throwable is CityNotFoundException) {
-
+            //TODO Provide city name
+            onUpdateStatus(app.applicationContext.getString(R.string.network_forecast_downloading_for_city_text, ""))
+            _chooseAnotherCity.call()
         }
         throwable.stackTrace.forEach {
             Log.e("WeatherForecastViewModel", it.toString()) }
@@ -100,25 +107,19 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * Checking if there is a permission for city locating.
+     * Request geo location permission, or if its granted - locate a city.
      */
-    fun onGetPermissionForGeoLocation() =
-        if (ActivityCompat.checkSelfPermission(app.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            _requestPermissionLiveData.postValue(Unit)
-            true
-        } else {
-            false
-        }
-
-    private fun requestLocationPermissionOrLocateCity() {
-        if (onGetPermissionForGeoLocation()) {
+    fun requestLocationPermissionOrLocateCity() {
+        if (hasPermissionForGeoLocation()) {
             _requestPermissionLiveData.postValue(Unit)
         } else {
             locateCityOrDownloadForecastData()
         }
     }
+
+    private fun hasPermissionForGeoLocation() =
+        (ActivityCompat.checkSelfPermission(app.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED)
 
     /**
      * Locating city or, if its already located, download its forecast

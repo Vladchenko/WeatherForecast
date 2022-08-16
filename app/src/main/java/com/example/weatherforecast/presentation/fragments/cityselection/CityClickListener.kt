@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments
+package com.example.weatherforecast.presentation.fragments.cityselection
 
 import android.view.View
 import androidx.navigation.NavController

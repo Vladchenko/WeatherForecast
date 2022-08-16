@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments
+package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.Manifest
 import android.content.Context
@@ -20,13 +20,15 @@ import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
-import com.example.weatherforecast.geolocation.AlertDialogDelegate
+import com.example.weatherforecast.geolocation.GeoLocationAlertDialogDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.presentation.fragments.PresentationUtils.SHARED_PREFERENCES_KEY
-import com.example.weatherforecast.presentation.fragments.PresentationUtils.animateFadeOut
-import com.example.weatherforecast.presentation.fragments.PresentationUtils.getWeatherTypeIcon
-import com.example.weatherforecast.presentation.fragments.PresentationUtils.setToolbarSubtitleFontSize
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
+import com.example.weatherforecast.presentation.PresentationUtils.SHARED_PREFERENCES_KEY
+import com.example.weatherforecast.presentation.PresentationUtils.animateFadeOut
+import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
+import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubtitleFontSize
+import com.example.weatherforecast.presentation.fragments.cityselection.CityApprovalAlertDialogListenerImpl
+import com.example.weatherforecast.presentation.fragments.cityselection.CityClickListener
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 
@@ -48,7 +50,7 @@ class CurrentTimeForecastFragment : Fragment() {
     private val viewModel by activityViewModels<WeatherForecastViewModel>()
 
     private var localLocation: Location? = Location("")
-    private var alertDialogDelegate: AlertDialogDelegate? = null
+    private var mGeoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
     private var temperatureType: TemperatureType = TemperatureType.CELSIUS
 
     private lateinit var sharedPreferences: SharedPreferences
@@ -90,7 +92,7 @@ class CurrentTimeForecastFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        alertDialogDelegate?.dismissAlertDialog()
+        mGeoLocationAlertDialogDelegate?.dismissAlertDialog()
     }
 
     private fun initLiveDataObservers() {
@@ -98,11 +100,12 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         viewModel.showStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
-        viewModel.onLocationSuccessLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
+        viewModel.locationSuccessLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
         viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCityByGeoLocation() }
         viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
+        viewModel.chooseAnotherCity.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity() }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -147,6 +150,14 @@ class CurrentTimeForecastFragment : Fragment() {
         findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
     }
 
+    private fun showAlertDialogToChooseAnotherCity() {
+        //TODO Provide city
+        CitySelectionAlertDialogDelegate(
+            "",
+            CityWrongAlertDialogListenerImpl(viewModel, requireContext())
+        ).showAlertDialog(requireContext())
+    }
+
     private fun defineCityByLatLong(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
@@ -167,11 +178,11 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun showAlertDialog() {
         Log.d("CurrentTimeForecastFragment", "showAlertDialog")
-        alertDialogDelegate = AlertDialogDelegate(
+        mGeoLocationAlertDialogDelegate = GeoLocationAlertDialogDelegate(
             sharedPreferences.getString(CITY_ARGUMENT_KEY, "") ?: "",
             CityApprovalAlertDialogListenerImpl(viewModel, requireContext())
         )
-        alertDialogDelegate?.showAlertDialog(requireContext())
+        mGeoLocationAlertDialogDelegate?.showAlertDialog(requireContext())
     }
 
     companion object {

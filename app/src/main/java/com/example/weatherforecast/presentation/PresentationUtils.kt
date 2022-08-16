@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments
+package com.example.weatherforecast.presentation
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -8,7 +8,7 @@ import androidx.appcompat.widget.Toolbar
 import com.example.weatherforecast.R
 
 /**
- * Presentation layer utility class.
+ * Presentation layer utility methods.
  */
 object PresentationUtils {
 
@@ -35,7 +35,7 @@ object PresentationUtils {
         )
 
     /**
-     * [view]'s fading out animating within a [shortAnimationDuration] time span
+     * [view]'s fading out animating within a [shortAnimationDuration] time span.
      */
     fun animateFadeOut(view: View, shortAnimationDuration: Int) {
         view.apply {

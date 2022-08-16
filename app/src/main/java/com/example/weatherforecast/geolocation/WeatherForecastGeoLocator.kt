@@ -4,7 +4,7 @@ import android.content.Context
 import android.location.Location
 import android.util.Log
 import com.example.weatherforecast.R
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -44,7 +44,7 @@ class WeatherForecastGeoLocator(private val viewModel: WeatherForecastViewModel)
                 viewModel.onShowError(context.getString(R.string.city_locating_cancelled))
             }
         } catch (sec: SecurityException) {
-            viewModel.onGetPermissionForGeoLocation()
+            viewModel.requestLocationPermissionOrLocateCity()
         }
     }
 }

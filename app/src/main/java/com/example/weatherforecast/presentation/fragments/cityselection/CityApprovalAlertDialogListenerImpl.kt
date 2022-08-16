@@ -1,11 +1,11 @@
-package com.example.weatherforecast.presentation.fragments
+package com.example.weatherforecast.presentation.fragments.cityselection
 
 import android.content.Context
 import android.location.Location
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.util.TemperatureType
-import com.example.weatherforecast.geolocation.AlertDialogClickListener
-import com.example.weatherforecast.presentation.viewmodel.WeatherForecastViewModel
+import com.example.weatherforecast.presentation.AlertDialogClickListener
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 
 /**
  * Alert dialog that asks user if the geo located city is a proper one to provide a weather forecast on.
