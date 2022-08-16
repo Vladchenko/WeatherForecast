@@ -25,5 +25,5 @@
     <string name="forecast_for_city">Provided for city %s</string>
     <string name="bad_date_format">Bad date format</string>
     <string name="city_locating_cancelled">City locating cancelled</string>
-    <string name="no_permission_app_cannot_proceed">No permission provided, app cannot proceed.</string>
+    <string name="no_permission_app_cannot_proceed">Permission not granted, app cannot proceed.</string>
 </resources>

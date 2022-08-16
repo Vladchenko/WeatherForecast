@@ -2,8 +2,6 @@ package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.Manifest
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
@@ -15,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
@@ -22,7 +21,6 @@ import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
 import com.example.weatherforecast.geolocation.GeoLocationAlertDialogDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.presentation.PresentationUtils.SHARED_PREFERENCES_KEY
 import com.example.weatherforecast.presentation.PresentationUtils.animateFadeOut
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubtitleFontSize
@@ -47,27 +45,21 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    private val viewModel by activityViewModels<WeatherForecastViewModel>()
+    private lateinit var chosenCity: String
 
+    private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
+    private val viewModel by activityViewModels<WeatherForecastViewModel>()
     private var localLocation: Location? = Location("")
-    private var mGeoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
+    private var geoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
     private var temperatureType: TemperatureType = TemperatureType.CELSIUS
 
-    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     private lateinit var geoLocator: WeatherForecastGeoLocator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedPreferences = requireActivity().application.getSharedPreferences(SHARED_PREFERENCES_KEY, MODE_PRIVATE)
-        arguments?.let {
-            val city = it.getString(CITY_ARGUMENT_KEY) ?: ""
-            Log.d("CurrentTimeForecastFragment", "city = $city")
-            if (city.isNotBlank()) {
-                sharedPreferences.edit().putString(CITY_ARGUMENT_KEY, city).apply()
-            }
-        }
+        chosenCity = arguments.chosenCity
     }
 
     override fun onCreateView(
@@ -79,20 +71,24 @@ class CurrentTimeForecastFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
+        geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is this instantiating correct ?
+
         fragmentDataBinding.cityNameTextView.setOnClickListener(
             CityClickListener(findNavController())
         )
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
         toggleProgressBar(true)
-        geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is it correct ?
+
         initLiveDataObservers()
-        viewModel.requestPermissionOrDownloadForecast()
+
+        viewModel.downloadWeatherForecast(chosenCity)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mGeoLocationAlertDialogDelegate?.dismissAlertDialog()
+        geoLocationAlertDialogDelegate?.dismissAlertDialog()
     }
 
     private fun initLiveDataObservers() {
@@ -105,7 +101,7 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCityByGeoLocation() }
         viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
-        viewModel.chooseAnotherCity.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity() }
+        viewModel.chooseAnotherCity.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -150,10 +146,10 @@ class CurrentTimeForecastFragment : Fragment() {
         findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
     }
 
-    private fun showAlertDialogToChooseAnotherCity() {
+    private fun showAlertDialogToChooseAnotherCity(city: String) {
         //TODO Provide city
         CitySelectionAlertDialogDelegate(
-            "",
+            city,
             CityWrongAlertDialogListenerImpl(viewModel, requireContext())
         ).showAlertDialog(requireContext())
     }
@@ -178,11 +174,11 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun showAlertDialog() {
         Log.d("CurrentTimeForecastFragment", "showAlertDialog")
-        mGeoLocationAlertDialogDelegate = GeoLocationAlertDialogDelegate(
-            sharedPreferences.getString(CITY_ARGUMENT_KEY, "") ?: "",
+        geoLocationAlertDialogDelegate = GeoLocationAlertDialogDelegate(
+            viewModel.downloadChosenCity() ?: "",
             CityApprovalAlertDialogListenerImpl(viewModel, requireContext())
         )
-        mGeoLocationAlertDialogDelegate?.showAlertDialog(requireContext())
+        geoLocationAlertDialogDelegate?.showAlertDialog(requireContext())
     }
 
     companion object {

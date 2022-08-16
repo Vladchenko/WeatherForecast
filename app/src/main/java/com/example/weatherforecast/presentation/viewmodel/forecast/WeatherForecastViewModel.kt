@@ -47,7 +47,7 @@ class WeatherForecastViewModel(
     private val _requestPermissionLiveData: MutableLiveData<Unit> = MutableLiveData()
     private val _locateCityLiveData: MutableLiveData<Unit> = MutableLiveData()
     private val _gotoCitySelectionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
-    private val _chooseAnotherCity: SingleLiveEvent<Unit> = SingleLiveEvent()
+    private val _chooseAnotherCity: SingleLiveEvent<String> = SingleLiveEvent()
     //endregion livedata fields
 
     //region livedata getters fields
@@ -78,7 +78,7 @@ class WeatherForecastViewModel(
     val gotoCitySelectionLiveData: LiveData<Unit>
         get() = _gotoCitySelectionLiveData
 
-    val chooseAnotherCity: LiveData<Unit>
+    val chooseAnotherCity: LiveData<String>
         get() = _chooseAnotherCity
     //endregion livedata getters fields
 
@@ -86,8 +86,8 @@ class WeatherForecastViewModel(
         Log.e("WeatherForecastViewModel", throwable.message!!)
         if (throwable is CityNotFoundException) {
             //TODO Provide city name
-            onUpdateStatus(app.applicationContext.getString(R.string.network_forecast_downloading_for_city_text, ""))
-            _chooseAnotherCity.call()
+            onUpdateStatus(throwable.message)
+            _chooseAnotherCity.postValue(throwable.city)
         }
         throwable.stackTrace.forEach {
             Log.e("WeatherForecastViewModel", it.toString()) }
@@ -95,14 +95,30 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * Requesting permission or if its available, proceed to forecast downloading.
+     * Download weather forecast on a [city].
      */
-    fun requestPermissionOrDownloadForecast() {
-        if (isNetworkAvailable(app.applicationContext)) {
-            requestLocationPermissionOrLocateCity()
+    fun downloadWeatherForecast(city: String) {
+        var chosenCity = city
+        // If city was not chosen on a "city choosing screen",
+        if (chosenCity.isBlank()) {
+            // then try loading it from a saved one.
+            chosenCity = downloadChosenCity()?:""
+        }
+
+        // If there is a chosen or a saved city,
+        if (chosenCity.isNotBlank()) {
+            Log.d("WeatherForecastViewModel", "city = $chosenCity")
+            // persist it
+            persistChosenCity(chosenCity)
+            // and download its forecast
+            downloadWeatherForecast(
+                TemperatureType.CELSIUS,
+                chosenCity,
+                Location("")  // localLocation   // TODO
+            )
         } else {
-            val city = sharedPreferences.getString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, "")
-            downloadWeatherForecastFromDatabase(city)
+            // else the apps runs for the first time and it has to pass through all the steps -
+            requestLocationPermissionOrLocateCity()
         }
     }
 
@@ -110,7 +126,7 @@ class WeatherForecastViewModel(
      * Request geo location permission, or if its granted - locate a city.
      */
     fun requestLocationPermissionOrLocateCity() {
-        if (hasPermissionForGeoLocation()) {
+        if (!hasPermissionForGeoLocation()) {
             _requestPermissionLiveData.postValue(Unit)
         } else {
             locateCityOrDownloadForecastData()
@@ -119,17 +135,16 @@ class WeatherForecastViewModel(
 
     private fun hasPermissionForGeoLocation() =
         (ActivityCompat.checkSelfPermission(app.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED)
+            == PackageManager.PERMISSION_GRANTED)
 
     /**
      * Locating city or, if its already located, download its forecast
      */
     fun locateCityOrDownloadForecastData() {
-        val city = sharedPreferences.getString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, "")
+        val city = downloadChosenCity()
         Log.d("WeatherForecastViewModel2", "city = $city")
         if (city.isNullOrBlank()) {
-            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
-            _locateCityLiveData.postValue(Unit)
+            locateCityOrDownloadLocalForecast()
         } else {
             _showStatusLiveData.postValue(app.applicationContext.getString(R.string.network_forecast_downloading_text))
             downloadWeatherForecast(
@@ -139,6 +154,24 @@ class WeatherForecastViewModel(
             )
         }
     }
+
+    private fun locateCityOrDownloadLocalForecast() {
+        if (isNetworkAvailable(app.applicationContext)) {
+            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
+            _locateCityLiveData.postValue(Unit)
+        } else {
+            downloadWeatherForecastFromDatabase(downloadChosenCity())
+        }
+    }
+
+    /**
+     * TODO
+     */
+    fun persistChosenCity(chosenCity: String) {
+        sharedPreferences.edit().putString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, chosenCity).apply()
+    }
+
+    fun downloadChosenCity() = sharedPreferences.getString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, "")
 
     /**
      * Retrieve and save to database if retrieval is successful of city weather forecast, using [temperatureType],
@@ -206,7 +239,7 @@ class WeatherForecastViewModel(
      */
     fun onGeoLocationSuccess(locality: String) {
         Log.d("WeatherForecastViewModel", "onGeoLocationSuccess")
-        sharedPreferences.edit().putString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, locality).apply()
+        persistChosenCity(locality)
         _onGeoLocationSuccessLiveData.postValue(Unit)
     }
 

@@ -9,7 +9,7 @@ class WeatherForecastExceptionMapper(arguments: List<String>) : HttpExceptionMap
 
     override fun map(httpException: HttpException): Exception? {
         return if (httpException.code() == 404) {
-            CityNotFoundException(callArguments[0] + " - city is not found")
+            CityNotFoundException(callArguments[0], callArguments[0] + " - city is not found")
         } else {
             httpException
         }

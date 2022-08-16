@@ -16,7 +16,6 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
 import com.example.weatherforecast.presentation.PresentationUtils
-import com.example.weatherforecast.presentation.fragments.forecast.CurrentTimeForecastFragment.Companion.CITY_ARGUMENT_KEY
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
 
-    private var city = ""
+    private var chosenCity = ""
 
     private val viewModel by activityViewModels<CitiesNamesViewModel>()
 
@@ -62,13 +61,7 @@ class CitiesNamesFragment : Fragment() {
             fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
         }
         viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) {
-            val bundle = Bundle().apply {
-                putSerializable(CITY_ARGUMENT_KEY, city)
-            }
-            findNavController().navigate(
-                R.id.action_citiesNamesFragment_to_currentTimeForecastFragment,
-                bundle
-            )
+            gotoForecastFragment(chosenCity)
         }
     }
 
@@ -96,14 +89,13 @@ class CitiesNamesFragment : Fragment() {
         }
 
     private val clickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-        city = autoSuggestAdapter.getItem(position)
-        viewModel.saveChosenCity(CityDomainModel(city,0.0,0.0,"",""))
-        val bundle = Bundle().apply {
-            putSerializable(CITY_ARGUMENT_KEY, city)
-        }
-        findNavController().navigate(
-            R.id.action_citiesNamesFragment_to_currentTimeForecastFragment,
-            bundle
-        )
+        chosenCity = autoSuggestAdapter.getItem(position)
+        viewModel.saveChosenCity(CityDomainModel(chosenCity,0.0,0.0,"",""))
+        gotoForecastFragment(chosenCity)
+    }
+
+    private fun gotoForecastFragment(chosenCity: String) {
+        val action = CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(chosenCity)
+        findNavController().navigate(action)
     }
 }

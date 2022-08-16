@@ -8,7 +8,7 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
-    - Provide a city to alert dialog, when there is an exception 404.
+    - Show alert dialog instead of error in toolbar, when locating permission was not granted
     - SharedPrefs move to datasource and provide from DI with interface (CORRECT) to repo - interactor - viewmodel
     - When app starts for the very first time and one selects a city, then geolocation alert pops up, but should not
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
@@ -25,5 +25,5 @@ TODO:
                     android:gravity="center"
                     android:textAlignment="center"
     - Make data source to return a data not domain model
-    - Add "light intensity shower rain", "heavy intensity rain" to weather images
+    - Add "moderate rain", "light intensity shower rain", "heavy intensity rain" to weather images
     - Add unit tests
