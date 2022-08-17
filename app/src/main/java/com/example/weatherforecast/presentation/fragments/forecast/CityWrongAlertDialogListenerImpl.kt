@@ -1,6 +1,7 @@
 package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.content.Context
+import android.location.Location
 import com.example.weatherforecast.presentation.AlertDialogClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 
@@ -13,7 +14,7 @@ class CityWrongAlertDialogListenerImpl(
     val context: Context
 ) : AlertDialogClickListener {
 
-    override fun onPositiveClick(locationName: String) {
+    override fun onPositiveClick(locationName: String, location: Location?) {
         viewModel.onGotoCitySelection()
     }
 

@@ -2,8 +2,8 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import android.util.Log
 import com.example.weatherforecast.data.api.WeatherForecastApiService
-import com.example.weatherforecast.data.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
+import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import retrofit2.Response
 
 /**

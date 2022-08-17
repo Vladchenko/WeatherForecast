@@ -13,8 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
+import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,19 +50,9 @@ class CitiesNamesFragment : Fragment() {
     }
 
     private fun initLiveDataObservers() {
-        viewModel.getCitiesNamesLiveData.observe(viewLifecycleOwner) {
-            autoSuggestAdapter.setData(it.cities)
-            autoSuggestAdapter.notifyDataSetChanged()
-        }
-        viewModel.showErrorLiveData.observe(viewLifecycleOwner) {
-            Log.e("CitiesNamesFragment",it)
-            fragmentDataBinding.toolbar.subtitle = it
-            PresentationUtils.setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, it)
-            fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
-        }
-        viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) {
-            gotoForecastFragment(chosenCity)
-        }
+        viewModel.getCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
+        viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) { gotoForecastFragment(chosenCity) }
     }
 
     private fun initSearch() {
@@ -72,25 +62,42 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.autocompleteCity.addTextChangedListener(textChangeListener)
     }
 
-    private val textChangeListener = object: TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Not used
-            }
+    private fun showError(errorMessage: String) {
+        Log.e("CitiesNamesFragment", errorMessage)
+        fragmentDataBinding.toolbar.subtitle = errorMessage
+        PresentationUtils.setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, errorMessage)
+        fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
+    }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!s.isNullOrBlank()) {
-                    viewModel.getCitiesNames(s.toString())
-                }
-            }
+    private fun showStatus(message: String) {
+        PresentationUtils.setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, message)
+        fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorPrimary))
+    }
 
-            override fun afterTextChanged(s: Editable?) {
-                // Not used
+    private fun showCitiesList(citiesModel: CitiesNamesDomainModel) {
+        showStatus(getString(R.string.choose_city_from_dropdown))
+        autoSuggestAdapter.setData(citiesModel.cities)
+        autoSuggestAdapter.notifyDataSetChanged()
+    }
+
+    private val textChangeListener = object : TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            // Not used
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            if (!s.isNullOrBlank()) {
+                viewModel.getCitiesNames(s.toString())
             }
         }
 
+        override fun afterTextChanged(s: Editable?) {
+            // Not used
+        }
+    }
+
     private val clickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
         chosenCity = autoSuggestAdapter.getItem(position)
-        viewModel.saveChosenCity(CityDomainModel(chosenCity,0.0,0.0,"",""))
         gotoForecastFragment(chosenCity)
     }
 

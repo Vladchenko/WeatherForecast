@@ -7,9 +7,9 @@ import retrofit2.HttpException
  */
 class WeatherForecastExceptionMapper(arguments: List<String>) : HttpExceptionMapper(arguments) {
 
-    override fun map(httpException: HttpException): Exception? {
+    override fun map(httpException: HttpException): Exception {
         return if (httpException.code() == 404) {
-            CityNotFoundException(callArguments[0], callArguments[0] + " - city is not found")
+            CityNotFoundException(callArguments[0], "${callArguments[0]} - city is not found")
         } else {
             httpException
         }

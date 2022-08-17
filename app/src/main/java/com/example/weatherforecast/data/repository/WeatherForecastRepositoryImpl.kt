@@ -1,11 +1,11 @@
 package com.example.weatherforecast.data.repository
 
 import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
-import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
+import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

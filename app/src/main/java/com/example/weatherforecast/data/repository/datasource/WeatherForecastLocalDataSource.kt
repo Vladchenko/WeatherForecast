@@ -1,6 +1,6 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 
 /**
  * Local data source interface

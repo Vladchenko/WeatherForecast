@@ -15,12 +15,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
 import com.example.weatherforecast.geolocation.GeoLocationAlertDialogDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
+import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils.animateFadeOut
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubtitleFontSize
@@ -49,7 +50,6 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
     private val viewModel by activityViewModels<WeatherForecastViewModel>()
-    private var localLocation: Location? = Location("")
     private var geoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
     private var temperatureType: TemperatureType = TemperatureType.CELSIUS
 
@@ -96,8 +96,8 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         viewModel.showStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
-        viewModel.locationSuccessLiveData.observe(viewLifecycleOwner) { showAlertDialog() }
-        viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
+        viewModel.locationSuccessLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
+        viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { locateCityByLatLong(it) }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCityByGeoLocation() }
         viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
@@ -147,17 +147,16 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun showAlertDialogToChooseAnotherCity(city: String) {
-        //TODO Provide city
         CitySelectionAlertDialogDelegate(
             city,
             CityWrongAlertDialogListenerImpl(viewModel, requireContext())
         ).showAlertDialog(requireContext())
     }
 
-    private fun defineCityByLatLong(location: Location) {
+    private fun locateCityByLatLong(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-        viewModel.onGeoLocationSuccess(locality)
+        viewModel.onGeoLocationSuccess(locality, location)
     }
 
     private fun toggleProgressBar(isVisible: Boolean) {
@@ -172,16 +171,19 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    private fun showAlertDialog() {
+    private fun showGeoLocationAlertDialog(cityLocationModel: CityLocationModel) {
         Log.d("CurrentTimeForecastFragment", "showAlertDialog")
         geoLocationAlertDialogDelegate = GeoLocationAlertDialogDelegate(
-            viewModel.downloadChosenCity() ?: "",
+            cityLocationModel.city,
+            cityLocationModel.location,
             CityApprovalAlertDialogListenerImpl(viewModel, requireContext())
         )
         geoLocationAlertDialogDelegate?.showAlertDialog(requireContext())
     }
 
     companion object {
-        const val CITY_ARGUMENT_KEY = "CITY"
+        const val CITY_ARGUMENT_KEY = "City argument"
+        const val CITY_LATITUDE_ARGUMENT_KEY = "City latitude argument"
+        const val CITY_LONGITUDE_ARGUMENT_KEY = "City longitude argument"
     }
 }

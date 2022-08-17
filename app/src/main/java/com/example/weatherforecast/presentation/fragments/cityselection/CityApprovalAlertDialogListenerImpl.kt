@@ -16,12 +16,12 @@ class CityApprovalAlertDialogListenerImpl(
     val context: Context
 ) : AlertDialogClickListener {
 
-    override fun onPositiveClick(locationName: String) {
+    override fun onPositiveClick(locationName: String, location: Location?) {
         viewModel.onUpdateStatus(context.getString(R.string.network_forecast_downloading_for_city_text, locationName))
         viewModel.downloadWeatherForecast(
             TemperatureType.CELSIUS,
             locationName,
-            Location("")    //TODO
+            location
         )
     }
 

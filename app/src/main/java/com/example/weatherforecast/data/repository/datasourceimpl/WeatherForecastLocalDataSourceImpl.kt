@@ -2,9 +2,9 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import android.util.Log
 import com.example.weatherforecast.data.database.WeatherForecastDAO
-import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
+import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 
 /**
  * [WeatherForecastRemoteDataSource] implementation.

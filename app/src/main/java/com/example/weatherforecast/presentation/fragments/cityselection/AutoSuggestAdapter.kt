@@ -5,7 +5,7 @@ import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.annotation.Nullable
-import com.example.weatherforecast.data.models.domain.CityDomainModel
+import com.example.weatherforecast.models.domain.CityDomainModel
 
 /**
  * Adapts the [List<CityDomainModel>] for appropriate presentation inside of [AutoCompleteTextView].

@@ -2,8 +2,8 @@ package com.example.weatherforecast.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.weatherforecast.data.models.domain.CityDomainModel
-import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.CityDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 
 /**
  * Database for weather forecast

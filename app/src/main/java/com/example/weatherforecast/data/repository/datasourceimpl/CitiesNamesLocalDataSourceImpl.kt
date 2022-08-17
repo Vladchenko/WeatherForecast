@@ -2,8 +2,8 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import android.util.Log
 import com.example.weatherforecast.data.database.CitiesNamesDAO
-import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
+import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 

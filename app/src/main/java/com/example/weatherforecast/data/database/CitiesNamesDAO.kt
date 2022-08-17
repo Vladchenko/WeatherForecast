@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.weatherforecast.data.models.domain.CityDomainModel
+import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.coroutines.flow.Flow
 
 /**

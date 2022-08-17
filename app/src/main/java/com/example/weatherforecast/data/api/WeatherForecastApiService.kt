@@ -3,8 +3,8 @@ package com.example.weatherforecast.data.api
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.customexceptions.ExceptionsMapper
 import com.example.weatherforecast.data.api.customexceptions.WeatherForecastExceptionMapper
-import com.example.weatherforecast.data.models.data.WeatherForecastCityResponse
-import com.example.weatherforecast.data.models.data.WeatherForecastResponse
+import com.example.weatherforecast.models.data.WeatherForecastCityResponse
+import com.example.weatherforecast.models.data.WeatherForecastResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

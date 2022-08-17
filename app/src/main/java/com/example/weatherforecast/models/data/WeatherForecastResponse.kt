@@ -1,10 +1,11 @@
-package com.example.weatherforecast.data.models.data
+package com.example.weatherforecast.models.data
 // To parse the JSON, install kotlin's serialization plugin and do:
 //
 // val json    = Json(JsonConfiguration.Stable)
 // val welcome = json.parse(Welcome.serializer(), jsonString)
 
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Weather forecast server response model.

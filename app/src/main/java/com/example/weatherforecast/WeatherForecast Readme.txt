@@ -15,6 +15,7 @@ TODO:
         - Emptying a views doesn't help
             - Tried in onViewCreated and in onPause
         ! Probably, one has to remove fragment
+    - When permission is not granted (user tapped outside of permission alert), following app opening behaves like permission was given
 
     - Put all texts to string.xml
     - Remove all superfluous Log.d

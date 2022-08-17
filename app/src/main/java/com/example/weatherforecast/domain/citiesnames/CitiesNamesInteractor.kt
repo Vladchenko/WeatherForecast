@@ -1,7 +1,7 @@
 package com.example.weatherforecast.domain.citiesnames
 
-import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.data.models.domain.CityDomainModel
+import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
+import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.coroutines.flow.Flow
 
 /**

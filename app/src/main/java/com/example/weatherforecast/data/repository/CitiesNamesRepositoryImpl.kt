@@ -1,10 +1,10 @@
 package com.example.weatherforecast.data.repository
 
 import com.example.weatherforecast.data.converter.CitiesNamesDataToDomainConverter
-import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
+import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

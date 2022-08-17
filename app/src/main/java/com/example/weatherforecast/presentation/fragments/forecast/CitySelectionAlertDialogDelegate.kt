@@ -28,12 +28,8 @@ class CitySelectionAlertDialogDelegate(private val city: String,
         alertDialog = builder.show()
     }
 
-    fun dismissAlertDialog() {
-        alertDialog.dismiss()
-    }
-
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onPositiveClick(city)
+        clickListener.onPositiveClick(city, null)
         dialogInterface.dismiss()
     }
 

@@ -7,9 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.data.models.domain.CityDomainModel
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
+import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
+import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.network.NetworkUtils
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.asFlow
@@ -45,8 +45,8 @@ class CitiesNamesViewModel(
         get() = _gotoOutdatedForecastLiveData
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e("CitiesNamesViewModel", throwable.message!!)
-        _showErrorLiveData.postValue(throwable.message!!)
+        Log.e("CitiesNamesViewModel", throwable.message ?: "")
+        _showErrorLiveData.postValue(throwable.message ?: "")
     }
 
     /**

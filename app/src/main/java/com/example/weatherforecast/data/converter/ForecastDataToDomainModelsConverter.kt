@@ -1,10 +1,10 @@
 package com.example.weatherforecast.data.converter
 
-import com.example.weatherforecast.data.models.data.WeatherForecastResponse
-import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCelsiusFromKelvinTemperature
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getFahrenheitFromKelvinTemperature
+import com.example.weatherforecast.models.data.WeatherForecastResponse
+import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import retrofit2.Response
 import kotlin.math.roundToInt
 
@@ -14,7 +14,7 @@ import kotlin.math.roundToInt
 class ForecastDataToDomainModelsConverter {
 
     /**
-     * Convert server response to domain model
+     * Convert server response to domain model, having a [temperatureType] and [city] provided.
      */
     fun convert(
         temperatureType: TemperatureType,

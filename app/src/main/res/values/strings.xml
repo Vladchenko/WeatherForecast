@@ -5,7 +5,7 @@
     <string name="default_degrees_type">C</string>
     <string name="weather_image_content_description">Weather type</string>
     <string name="city_selection_title">City selection</string>
-    <string name="city_typing_title">Type your city:</string>
+    <string name="city_typing_title">Type city, to provide forecast for:</string>
     <string name="city_typing_hint">First several letters is enough</string>
     <string name="weather_type_example">weather type</string>
     <string name="city_name_example">City name</string>
@@ -25,5 +25,6 @@
     <string name="forecast_for_city">Provided for city %s</string>
     <string name="bad_date_format">Bad date format</string>
     <string name="city_locating_cancelled">City locating cancelled</string>
-    <string name="no_permission_app_cannot_proceed">Permission not granted, app cannot proceed.</string>
+    <string name="no_permission_app_cannot_proceed">Permission not granted, app cannot proceed</string>
+    <string name="choose_city_from_dropdown">Choose a city from a dropdown list</string>
 </resources>

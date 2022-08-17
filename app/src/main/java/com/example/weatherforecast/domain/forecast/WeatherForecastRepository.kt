@@ -1,7 +1,7 @@
 package com.example.weatherforecast.domain.forecast
 
-import com.example.weatherforecast.data.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 
 /**
  * Weather forecast repository.
