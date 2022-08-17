@@ -40,7 +40,7 @@ class CurrentTimeForecastFragment : Fragment() {
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
     { isGranted ->
         if (isGranted) {
-            viewModel.locateCityOrDownloadForecastData()
+            viewModel.downloadWeatherForecast(chosenCity, TemperatureType.CELSIUS)
         } else {
             showError(getString(R.string.no_permission_app_cannot_proceed)) //TODO Show alert dialog instead
         }
@@ -51,7 +51,6 @@ class CurrentTimeForecastFragment : Fragment() {
     private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
     private val viewModel by activityViewModels<WeatherForecastViewModel>()
     private var geoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
-    private var temperatureType: TemperatureType = TemperatureType.CELSIUS
 
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
@@ -83,8 +82,7 @@ class CurrentTimeForecastFragment : Fragment() {
 
         initLiveDataObservers()
 
-        viewModel.checkNetworkConnectionAvailability()
-        viewModel.downloadWeatherForecast(chosenCity)
+        viewModel.downloadWeatherForecast(chosenCity, TemperatureType.CELSIUS)
     }
 
     override fun onDestroy() {
@@ -183,8 +181,11 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     companion object {
-        const val CITY_ARGUMENT_KEY = "City argument"
-        const val CITY_LATITUDE_ARGUMENT_KEY = "City latitude argument"
-        const val CITY_LONGITUDE_ARGUMENT_KEY = "City longitude argument"
+        const val SAVED_CITY_ARGUMENT_KEY = "Saved city argument"
+        const val CHOSEN_CITY_ARGUMENT_KEY = "Chosen city argument"
+        const val SAVED_CITY_LATITUDE_ARGUMENT_KEY = "Saved city latitude argument"
+        const val SAVED_CITY_LONGITUDE_ARGUMENT_KEY = "Saved city longitude argument"
+        const val CHOSEN_CITY_LATITUDE_ARGUMENT_KEY = "City latitude argument"
+        const val CHOSEN_CITY_LONGITUDE_ARGUMENT_KEY = "City longitude argument"
     }
 }

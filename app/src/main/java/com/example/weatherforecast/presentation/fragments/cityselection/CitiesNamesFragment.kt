@@ -53,6 +53,7 @@ class CitiesNamesFragment : Fragment() {
     private fun initLiveDataObservers() {
         viewModel.getCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        viewModel.updateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
         viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) { gotoForecastFragment(chosenCity) }
     }
 
@@ -70,13 +71,14 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
     }
 
-    private fun showStatus(message: String) {
-        PresentationUtils.setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, message)
+    private fun updateStatus(statusMessage: String) {
+        fragmentDataBinding.toolbar.subtitle = statusMessage
+        PresentationUtils.setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, statusMessage)
         fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorPrimary))
     }
 
     private fun showCitiesList(citiesModel: CitiesNamesDomainModel) {
-        showStatus(getString(R.string.choose_city_from_dropdown))
+        updateStatus(getString(R.string.choose_city_from_dropdown))
         autoSuggestAdapter.setData(citiesModel.cities)
         autoSuggestAdapter.notifyDataSetChanged()
     }

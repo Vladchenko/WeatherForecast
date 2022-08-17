@@ -11,7 +11,6 @@ import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.models.domain.CityDomainModel
-import com.example.weatherforecast.network.NetworkUtils
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.asFlow
@@ -32,11 +31,15 @@ class CitiesNamesViewModel(
 ) : AndroidViewModel(app) {
 
     private val _showErrorLiveData = MutableLiveData<String>()
+    private val _updateStatusLiveData = MutableLiveData<String>()
     private val _gotoOutdatedForecastLiveData = MutableLiveData<Unit>()
     private val _getCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
 
     val showErrorLiveData: LiveData<String>
         get() = _showErrorLiveData
+
+    val updateStatusLiveData: LiveData<String>
+        get() = _updateStatusLiveData
 
     val getCitiesNamesLiveData: LiveData<CitiesNamesDomainModel>
         get() = _getCitiesNamesLiveData
@@ -58,7 +61,7 @@ class CitiesNamesViewModel(
     fun getCitiesNames(city: String) {
         Log.d("CitiesNamesViewModel1", city)
         try {
-            if (NetworkUtils.isNetworkAvailable(app)) {
+            if (isNetworkAvailable(app)) {
                 viewModelScope.launch(exceptionHandler) {
                     val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
                     _getCitiesNamesLiveData.postValue(response)
@@ -103,6 +106,8 @@ class CitiesNamesViewModel(
     fun checkNetworkConnectionAvailability() {
         if (!isNetworkAvailable(app.applicationContext)) {
             _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+        } else {
+            _updateStatusLiveData.postValue(app.applicationContext.getString(R.string.city_selection_title))
         }
     }
 }

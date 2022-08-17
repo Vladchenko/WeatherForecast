@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
@@ -86,7 +85,7 @@ class WeatherForecastViewModel(
     //endregion livedata getters fields
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e("WeatherForecastViewModel", throwable.message?:"")
+        Log.e("WeatherForecastViewModel", throwable.message ?: "")
         if (throwable is CityNotFoundException) {
             onUpdateStatus(throwable.message)
             _chooseAnotherCity.postValue(throwable.city)
@@ -97,43 +96,41 @@ class WeatherForecastViewModel(
         throwable.stackTrace.forEach {
             Log.e("WeatherForecastViewModel", it.toString())
         }
-        _showErrorLiveData.postValue(throwable.message?:"")
-    }
-
-    fun checkNetworkConnectionAvailability() {
-        if (!isNetworkAvailable(app.applicationContext)) {
-            _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-        }
+        _showErrorLiveData.postValue(throwable.message ?: "")
     }
 
     /**
-     * Download weather forecast on a [city].
+     * Download weather forecast on a [chosenCity].
      */
-    fun downloadWeatherForecast(city: String) {
-        var chosenCity = city
-        var location = Location(LocationManager.GPS_PROVIDER)
-        // If city was not chosen on a "city choosing screen",
-        if (chosenCity.isBlank()) {
-            // then try loading it from a saved one.
-            chosenCity = downloadChosenCity() ?: ""
-            location = downloadChosenCityLocation()
+    fun downloadWeatherForecast(chosenCity: String, temperatureType: TemperatureType) {
+        if (isNetworkAvailable(app.applicationContext)) {
+            if (chosenCity.isNotBlank()) {
+                val location = downloadSavedCityLocation()
+                persistSavedCity(chosenCity, location)
+                downloadWeatherForecast(
+                    temperatureType,
+                    chosenCity,
+                    location
+                )
+            } else {
+                val savedCity = downloadSavedCity()
+                if (savedCity.isNullOrBlank()) {
+                    requestLocationPermissionOrLocateCity()
+                } else {
+                    downloadWeatherForecast(
+                        temperatureType,
+                        savedCity,
+                        downloadSavedCityLocation()
+                    )
+                }
+            }
         } else {
-            // persist it
-            persistChosenCity(chosenCity, location)     // TODO Is it really needed ?
-        }
-
-        // If there is a chosen or a saved city,
-        if (chosenCity.isNotBlank()) {
-            Log.d("WeatherForecastViewModel", "city = $chosenCity")
-            // download its forecast
-            downloadWeatherForecast(
-                TemperatureType.CELSIUS,
-                chosenCity,
-                location
-            )
-        } else {
-            // else the app runs for the first time and it has to pass through all the steps -
-            requestLocationPermissionOrLocateCity()
+            val savedCity = downloadSavedCity()
+            if (savedCity.isNullOrBlank()) {
+                _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+            } else {
+                downloadWeatherForecastFromDatabase(savedCity)
+            }
         }
     }
 
@@ -142,9 +139,11 @@ class WeatherForecastViewModel(
      */
     fun requestLocationPermissionOrLocateCity() {
         if (!hasPermissionForGeoLocation()) {
+            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location__permission_required))
             _requestPermissionLiveData.postValue(Unit)
         } else {
-            locateCityOrDownloadForecastData()
+            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
+            _locateCityLiveData.postValue(Unit)
         }
     }
 
@@ -152,50 +151,53 @@ class WeatherForecastViewModel(
         (ActivityCompat.checkSelfPermission(app.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED)
 
-    /**
-     * Locating city or, if its already located, download its forecast
-     */
-    fun locateCityOrDownloadForecastData() {
-        val city = downloadChosenCity()
-        Log.d("WeatherForecastViewModel2", "city = $city")
-        if (city.isNullOrBlank()) {
-            locateCityOrDownloadLocalForecast()
-        } else {
-            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.network_forecast_downloading_text))
-            downloadWeatherForecast(
-                TemperatureType.CELSIUS,
-                city,
-                downloadChosenCityLocation()
-            )
-        }
-    }
-
-    private fun locateCityOrDownloadLocalForecast() {
-        if (isNetworkAvailable(app.applicationContext)) {
-            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
-            _locateCityLiveData.postValue(Unit)
-        } else {
-            downloadWeatherForecastFromDatabase(downloadChosenCity())
-        }
-    }
-
     private fun persistChosenCity(chosenCity: String, location: Location) {
-        sharedPreferences.edit().putString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, chosenCity).apply()
+        sharedPreferences.edit().putString(CurrentTimeForecastFragment.CHOSEN_CITY_ARGUMENT_KEY, chosenCity).apply()
         sharedPreferences.edit()
-            .putString(CurrentTimeForecastFragment.CITY_LATITUDE_ARGUMENT_KEY, location.latitude.toString()).apply()
+            .putString(CurrentTimeForecastFragment.CHOSEN_CITY_LATITUDE_ARGUMENT_KEY, location.latitude.toString())
+            .apply()
         sharedPreferences.edit()
-            .putString(CurrentTimeForecastFragment.CITY_LONGITUDE_ARGUMENT_KEY, location.longitude.toString()).apply()
+            .putString(CurrentTimeForecastFragment.CHOSEN_CITY_LONGITUDE_ARGUMENT_KEY, location.longitude.toString())
+            .apply()
     }
 
-    private fun downloadChosenCity() = sharedPreferences.getString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, "")
+    private fun persistSavedCity(chosenCity: String, location: Location) {
+        sharedPreferences.edit().putString(CurrentTimeForecastFragment.SAVED_CITY_ARGUMENT_KEY, chosenCity).apply()
+        sharedPreferences.edit()
+            .putString(CurrentTimeForecastFragment.SAVED_CITY_LATITUDE_ARGUMENT_KEY, location.latitude.toString())
+            .apply()
+        sharedPreferences.edit()
+            .putString(CurrentTimeForecastFragment.SAVED_CITY_LONGITUDE_ARGUMENT_KEY, location.longitude.toString())
+            .apply()
+    }
+
+    private fun downloadChosenCity() =
+        sharedPreferences.getString(CurrentTimeForecastFragment.CHOSEN_CITY_ARGUMENT_KEY, "")
+
+    private fun downloadSavedCity() =
+        sharedPreferences.getString(CurrentTimeForecastFragment.SAVED_CITY_ARGUMENT_KEY, "")
 
     private fun downloadChosenCityLocation(): Location {
         val location = Location("")
         location.latitude =
-            (sharedPreferences.getString(CurrentTimeForecastFragment.CITY_LATITUDE_ARGUMENT_KEY, "0d")?.toDouble()
+            (sharedPreferences.getString(CurrentTimeForecastFragment.CHOSEN_CITY_LATITUDE_ARGUMENT_KEY, "0d")
+                ?.toDouble()
                 ?: 0.0)
         location.longitude =
-            (sharedPreferences.getString(CurrentTimeForecastFragment.CITY_LONGITUDE_ARGUMENT_KEY, "0d")?.toDouble()
+            (sharedPreferences.getString(CurrentTimeForecastFragment.CHOSEN_CITY_LONGITUDE_ARGUMENT_KEY, "0d")
+                ?.toDouble()
+                ?: 0.0)
+        return location
+    }
+
+    private fun downloadSavedCityLocation(): Location {
+        val location = Location("")
+        location.latitude =
+            (sharedPreferences.getString(CurrentTimeForecastFragment.SAVED_CITY_LATITUDE_ARGUMENT_KEY, "0d")?.toDouble()
+                ?: 0.0)
+        location.longitude =
+            (sharedPreferences.getString(CurrentTimeForecastFragment.SAVED_CITY_LONGITUDE_ARGUMENT_KEY, "0d")
+                ?.toDouble()
                 ?: 0.0)
         return location
     }
@@ -251,16 +253,12 @@ class WeatherForecastViewModel(
         weatherForecastLocalInteractor.saveForecast(result)
     }
 
-    private fun downloadWeatherForecastFromDatabase(city: String?) {
+    private fun downloadWeatherForecastFromDatabase(city: String) {
         viewModelScope.launch(exceptionHandler) {
-            if (!city.isNullOrBlank()) {
-                val result = weatherForecastLocalInteractor.loadForecast(city)
-                _getWeatherForecastLiveData.postValue(result)
-                Log.d("WeatherForecastViewModel", result.toString())
-                _showErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
-            } else {
-                _showErrorLiveData.postValue(app.applicationContext.getString(R.string.default_city_absent))
-            }
+            val result = weatherForecastLocalInteractor.loadForecast(city)
+            _getWeatherForecastLiveData.postValue(result)
+            Log.d("WeatherForecastViewModel", result.toString())
+            _showErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
         }
     }
 
@@ -269,7 +267,7 @@ class WeatherForecastViewModel(
      */
     fun onGeoLocationSuccess(locality: String, location: Location) {
         Log.d("WeatherForecastViewModel", "onGeoLocationSuccess")
-        persistChosenCity(locality, location)
+        persistSavedCity(locality, location)
         _onGeoLocationSuccessLiveData.postValue(
             CityLocationModel(locality, location)
         )

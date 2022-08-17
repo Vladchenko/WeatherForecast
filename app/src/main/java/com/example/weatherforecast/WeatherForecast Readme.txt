@@ -16,6 +16,8 @@ TODO:
             - Tried in onViewCreated and in onPause
         ! Probably, one has to remove fragment
     - When permission is not granted (user tapped outside of permission alert), following app opening behaves like permission was given
+    - When selecting a city and user taps back, the main fragment loads a Kazan forecast, but should just show a dialog on geolocation
+    - isNetworkAvailable doesn't check network appearing fast enough
 
     - When network connection appears, app is not aware about that.
     - Put all texts to string.xml
