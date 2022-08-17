@@ -47,6 +47,7 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
+        viewModel.checkNetworkConnectionAvailability()
     }
 
     private fun initLiveDataObservers() {

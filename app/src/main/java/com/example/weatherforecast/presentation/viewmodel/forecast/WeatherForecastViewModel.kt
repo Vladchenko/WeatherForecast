@@ -14,6 +14,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
+import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
@@ -85,15 +86,24 @@ class WeatherForecastViewModel(
     //endregion livedata getters fields
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e("WeatherForecastViewModel", throwable.message!!)
+        Log.e("WeatherForecastViewModel", throwable.message?:"")
         if (throwable is CityNotFoundException) {
             onUpdateStatus(throwable.message)
             _chooseAnotherCity.postValue(throwable.city)
         }
+        if (throwable is NoInternetException) {
+            _showErrorLiveData.postValue(throwable.cause.toString())
+        }
         throwable.stackTrace.forEach {
             Log.e("WeatherForecastViewModel", it.toString())
         }
-        _showErrorLiveData.postValue(throwable.message!!)
+        _showErrorLiveData.postValue(throwable.message?:"")
+    }
+
+    fun checkNetworkConnectionAvailability() {
+        if (!isNetworkAvailable(app.applicationContext)) {
+            _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+        }
     }
 
     /**
@@ -169,9 +179,6 @@ class WeatherForecastViewModel(
         }
     }
 
-    /**
-     * TODO
-     */
     private fun persistChosenCity(chosenCity: String, location: Location) {
         sharedPreferences.edit().putString(CurrentTimeForecastFragment.CITY_ARGUMENT_KEY, chosenCity).apply()
         sharedPreferences.edit()

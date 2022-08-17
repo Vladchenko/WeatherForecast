@@ -49,7 +49,7 @@ class CallWithErrorHandling(
         httpExceptionsMapper: HttpExceptionMapper? = null
     ): Exception {
         return when (remoteException) {
-            is IOException -> NoInternetException()
+            is IOException -> NoInternetException(remoteException.message?:"")
             is HttpException -> httpExceptionsMapper?.map(remoteException) ?: ApiException(remoteException.code().toString())
             else -> UnexpectedException(remoteException as java.lang.Exception)
         }

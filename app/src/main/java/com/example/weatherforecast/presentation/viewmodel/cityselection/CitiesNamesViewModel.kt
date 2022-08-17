@@ -7,10 +7,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
+import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.network.NetworkUtils
+import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flatMapConcat
@@ -33,8 +35,6 @@ class CitiesNamesViewModel(
     private val _gotoOutdatedForecastLiveData = MutableLiveData<Unit>()
     private val _getCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
 
-    val _isNetworkAvailable: MutableLiveData<Boolean> = MutableLiveData()
-
     val showErrorLiveData: LiveData<String>
         get() = _showErrorLiveData
 
@@ -46,6 +46,9 @@ class CitiesNamesViewModel(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message ?: "")
+        if (throwable is NoInternetException) {
+            _showErrorLiveData.postValue(throwable.cause.toString())
+        }
         _showErrorLiveData.postValue(throwable.message ?: "")
     }
 
@@ -97,12 +100,8 @@ class CitiesNamesViewModel(
         }
     }
 
-    fun notifyAboutNetworkAvailability(callback: suspend () -> Unit) {
-        if (_isNetworkAvailable.value == true) {
-            viewModelScope.launch {
-                callback.invoke()
-            }
-        } else {
+    fun checkNetworkConnectionAvailability() {
+        if (!isNetworkAvailable(app.applicationContext)) {
             _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
         }
     }

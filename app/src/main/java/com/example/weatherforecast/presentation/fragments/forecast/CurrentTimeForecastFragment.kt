@@ -83,6 +83,7 @@ class CurrentTimeForecastFragment : Fragment() {
 
         initLiveDataObservers()
 
+        viewModel.checkNetworkConnectionAvailability()
         viewModel.downloadWeatherForecast(chosenCity)
     }
 

@@ -17,6 +17,7 @@ TODO:
         ! Probably, one has to remove fragment
     - When permission is not granted (user tapped outside of permission alert), following app opening behaves like permission was given
 
+    - When network connection appears, app is not aware about that.
     - Put all texts to string.xml
     - Remove all superfluous Log.d
     - Check statuses
