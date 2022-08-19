@@ -14,7 +14,7 @@ class CityWrongAlertDialogListenerImpl(
     val context: Context
 ) : AlertDialogClickListener {
 
-    override fun onPositiveClick(locationName: String, location: Location?) {
+    override fun onPositiveClick(city: String, location: Location?) {
         viewModel.onGotoCitySelection()
     }
 

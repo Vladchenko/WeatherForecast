@@ -43,7 +43,7 @@ class WeatherForecastViewModel(
     //region livedata fields
     private val _showWeatherForecastLiveData: MutableLiveData<WeatherForecastDomainModel> = MutableLiveData()
     private val _showErrorLiveData: MutableLiveData<String> = MutableLiveData()
-    private val _showStatusLiveData: MutableLiveData<String> = MutableLiveData()
+    private val _updateStatusLiveData: MutableLiveData<String> = MutableLiveData()
     private val _showProgressBarLiveData: MutableLiveData<Boolean> = MutableLiveData()
     private val _defineCityByGeoLocationLiveData: SingleLiveEvent<Location> = SingleLiveEvent()
     private val _showGeoLocationAlertDialogLiveData: SingleLiveEvent<CityLocationModel> = SingleLiveEvent()
@@ -61,8 +61,8 @@ class WeatherForecastViewModel(
     val showErrorLiveData: LiveData<String>
         get() = _showErrorLiveData
 
-    val showStatusLiveData: LiveData<String>
-        get() = _showStatusLiveData
+    val updateStatusLiveData: LiveData<String>
+        get() = _updateStatusLiveData
 
     val showProgressBarLiveData: LiveData<Boolean>
         get() = _showProgressBarLiveData
@@ -116,21 +116,28 @@ class WeatherForecastViewModel(
             } else {
                 viewModelScope.launch(exceptionHandler) {
                     cityModel = chosenCityInteractor.loadChosenCityModel()
-                    Log.d("WeatherForecastViewModel", "loaded city = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}")
+                    Log.d(
+                        "WeatherForecastViewModel",
+                        "loaded city = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}"
+                    )
                 }
                 if (cityModel?.city.isNullOrBlank()) {
                     onNoLocationPermission()
                 } else {
                     downloadWeatherForecast(
                         temperatureType,
-                        cityModel?.location ?: Location("")
+                        cityModel?.location ?: Location(""),
+                        cityModel?.city ?: ""
                     )
                 }
             }
         } else {
             viewModelScope.launch(exceptionHandler) {
                 cityModel = chosenCityInteractor.loadChosenCityModel()
-                Log.d("WeatherForecastViewModel", "loaded city = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}")
+                Log.d(
+                    "WeatherForecastViewModel",
+                    "loaded city = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}" //TODO Move to strings.xml
+                )
             }
             if (cityModel?.city.isNullOrBlank()) {
                 _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
@@ -145,10 +152,10 @@ class WeatherForecastViewModel(
      */
     override fun onNoLocationPermission() {
         if (!hasPermissionForGeoLocation()) {
-            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location__permission_required))
+            _updateStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location__permission_required))
             _requestPermissionLiveData.postValue(Unit)
         } else {
-            _showStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
+            _updateStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
             _defineCurrentGeoLocationLiveData.postValue(chosenCity)    //TODO
         }
     }
@@ -161,21 +168,51 @@ class WeatherForecastViewModel(
      * Retrieve and save to database if retrieval is successful of city weather forecast, using [temperatureType]
      * and [location], otherwise show error.
      */
-    fun downloadWeatherForecast(temperatureType: TemperatureType, location: Location) {
+    fun downloadWeatherForecast(temperatureType: TemperatureType, location: Location, city: String) {
         try {
-            _showProgressBarLiveData.postValue(true)
-            viewModelScope.launch(exceptionHandler) {
-                showForecastDataOrProcessServerError(
-                    weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
-                        temperatureType,
-                        location.latitude,
-                        location.longitude
-                    )
-                )
-            }
+            downloadWeatherForecastForCity(temperatureType, city)
         } catch (ex: Exception) {
+            Log.e(
+                "WeatherForecastViewModel",
+                "Downloading weather forecast for a city is not successful, trying for geo location"    // TODO Move to strings.xml
+            )
             Log.e("WeatherForecastViewModel", ex.stackTraceToString())
             _showErrorLiveData.postValue(ex.message)
+            try {
+                downloadWeatherForecast(temperatureType, location)
+            } catch (ex: Exception) {
+                Log.e(
+                    "WeatherForecastViewModel",
+                    "Downloading weather forecast for a city and location is not successful!"   // TODO Move to strings.xml
+                )
+                Log.e("WeatherForecastViewModel", ex.stackTraceToString())
+                _showErrorLiveData.postValue(ex.message)
+            }
+        }
+    }
+
+    private fun downloadWeatherForecast(temperatureType: TemperatureType, location: Location) {
+        _showProgressBarLiveData.postValue(true)
+        viewModelScope.launch(exceptionHandler) {
+            showForecastDataOrProcessServerError(
+                weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
+                    temperatureType,
+                    location.latitude,
+                    location.longitude
+                )
+            )
+        }
+    }
+
+    private fun downloadWeatherForecastForCity(temperatureType: TemperatureType, city: String) {
+        _showProgressBarLiveData.postValue(true)
+        viewModelScope.launch(exceptionHandler) {
+            showForecastDataOrProcessServerError(
+                weatherForecastRemoteInteractor.loadRemoteForecastForCity(
+                    temperatureType,
+                    city
+                )
+            )
         }
     }
 
@@ -207,7 +244,7 @@ class WeatherForecastViewModel(
      * City locating successful callback, receiving city name as [locality] and its latitude, longitude in [location].
      */
     fun onDefineCityByGeoLocationSuccess(locality: String, location: Location) {
-        Log.d("WeatherForecastViewModel","Location defined successfully")
+        Log.d("WeatherForecastViewModel", "Location defined successfully")
         Log.d("WeatherForecastViewModel", "city = $locality, location = $location")
         viewModelScope.launch(exceptionHandler) {
             chosenCityInteractor.saveChosenCity(locality, location)
@@ -218,19 +255,19 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * TODO
+     * Save a [city] and its [location] and download its forecast.
      */
-    fun onDefineLocationByCitySuccess(locality: String, location: Location) {
-        Log.d("WeatherForecastViewModel","City defined successfully")
-        Log.d("WeatherForecastViewModel", "city = $locality, location = $location")
+    fun onGeoLocationByCitySuccess(city: String, location: Location) {
+        Log.d("WeatherForecastViewModel", "City defined successfully")
+        Log.d("WeatherForecastViewModel", "city = $city, location = $location")
         viewModelScope.launch(exceptionHandler) {
-            chosenCityInteractor.saveChosenCity(locality, location)
+            chosenCityInteractor.saveChosenCity(city, location)
         }
         downloadWeatherForecast(TemperatureType.CELSIUS, location)
     }
 
     /**
-     * Define a city be the succeeded geo location.
+     * Define a city by the succeeded geo location.
      */
     override fun onGeoLocationSuccess(location: Location, chosenCity: String) {
         if (chosenCity.isNotBlank()) {
@@ -258,7 +295,7 @@ class WeatherForecastViewModel(
     }
 
     fun onUpdateStatus(statusMessage: String) {
-        _showStatusLiveData.postValue(statusMessage)
+        _updateStatusLiveData.postValue(statusMessage)
     }
 
     fun onGotoCitySelection() {

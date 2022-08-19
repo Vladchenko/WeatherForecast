@@ -10,7 +10,7 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
  */
 class WeatherForecastRemoteInteractor(private val weatherForecastRepository: WeatherForecastRepository) {
 
-    suspend fun loadForecastForCity(temperatureType: TemperatureType, city: String): WeatherForecastDomainModel {
+    suspend fun loadRemoteForecastForCity(temperatureType: TemperatureType, city: String): WeatherForecastDomainModel {
         return weatherForecastRepository.loadRemoteForecastForCity(temperatureType, city)
     }
 

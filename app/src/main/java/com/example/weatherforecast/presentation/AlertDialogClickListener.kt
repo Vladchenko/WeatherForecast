@@ -7,9 +7,9 @@ import android.location.Location
  */
 interface AlertDialogClickListener {
     /**
-     * Positive button click, having a [locationName] and its lat long coordinate as [location] passed
+     * Positive button click, having a [city] and its lat long coordinate as [location] passed
      */
-    fun onPositiveClick(locationName:String, location: Location?)
+    fun onPositiveClick(city:String, location: Location?)
 
     /**
      * Negative button click

@@ -94,7 +94,7 @@ class CurrentTimeForecastFragment : Fragment() {
     private fun initLiveDataObservers() {
         viewModel.getWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
-        viewModel.showStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
+        viewModel.updateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
         viewModel.showGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
         viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { locateCityByLatLong(it) }
@@ -159,7 +159,7 @@ class CurrentTimeForecastFragment : Fragment() {
         Log.d("CurrentTimeForecastFragment", "city = $city")
         val address = geoCoder.getFromLocationName(city, 1).first()
         Log.d("CurrentTimeForecastFragment", "address = $address")
-        viewModel.onDefineLocationByCitySuccess(city, getLocationByAddress(address))
+        viewModel.onGeoLocationByCitySuccess(city, getLocationByAddress(address))
     }
 
     private fun getLocationByAddress(address: Address): Location {
