@@ -84,7 +84,7 @@ class CurrentTimeForecastFragment : Fragment() {
 
         initLiveDataObservers()
 
-        viewModel.downloadWeatherForecast(chosenCity, TemperatureType.CELSIUS)
+        viewModel.requestGeoLocationPermission()
     }
 
     override fun onDestroy() {
@@ -101,7 +101,7 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { locateCityByLatLong(it) }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.defineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation(it) }
-        viewModel.defineGeoLocationLiveData.observe(viewLifecycleOwner) { defineLocationForCity(it) }
+        viewModel.defineGeoLocationByCityLiveData.observe(viewLifecycleOwner) { defineLocationByCity(it) }
         viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
         viewModel.chooseAnotherCityLiveData.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
     }
@@ -155,15 +155,15 @@ class CurrentTimeForecastFragment : Fragment() {
         ).showAlertDialog(requireContext())
     }
 
-    private fun defineLocationForCity(city: String) {
+    private fun defineLocationByCity(city: String) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         Log.d("CurrentTimeForecastFragment", "city = $city")
         val address: Address?
         try {
             address = geoCoder.getFromLocationName(city, 1).first()
-            viewModel.onGeoLocationByCitySuccess(city, getLocationByAddress(address))
+            viewModel.onDefineGeoLocationByCitySuccess(city, getLocationByAddress(address))
         } catch (ioex: IOException) {
-            viewModel.onGeoLocationByCityFail(ioex.message.toString())
+            viewModel.onDefineGeoLocationByCityFail(ioex.message.toString())
         }
     }
 
