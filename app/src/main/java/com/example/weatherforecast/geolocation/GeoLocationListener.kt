@@ -14,5 +14,10 @@ interface GeoLocationListener {
     /**
      * When geo location failed.
      */
-    fun onGeoLocationFail()
+    fun onGeoLocationFail(errorMessage: String)
+
+    /**
+     * When no permission for geo location.
+     */
+    fun onNoLocationPermission()
 }

@@ -25,7 +25,11 @@ data class WeatherForecastResponse (
     val id: Long,
     val name: String,
     val cod: Long
-)
+) {
+    override fun toString(): String {
+        return "WeatherForecastResponse(coord=$coord, weather=$weather, base='$base', main=$main, visibility=$visibility, wind=$wind, clouds=$clouds, dt=$dt, sys=$sys, timezone=$timezone, id=$id, name='$name', cod=$cod)"
+    }
+}
 
 @Serializable
 data class Clouds (
@@ -34,8 +38,8 @@ data class Clouds (
 
 @Serializable
 data class Coord (
-    val lon: Double,
-    val lat: Double
+    val lat: Double,
+    val lon: Double
 )
 
 @Serializable

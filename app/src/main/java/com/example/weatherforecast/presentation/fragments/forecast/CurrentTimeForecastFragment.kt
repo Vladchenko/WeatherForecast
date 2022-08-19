@@ -2,6 +2,7 @@ package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.Manifest
 import android.content.Context
+import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
@@ -95,12 +96,13 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         viewModel.showStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
-        viewModel.locationSuccessLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
+        viewModel.showGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
         viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { locateCityByLatLong(it) }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
-        viewModel.locateCityLiveData.observe(viewLifecycleOwner) { locateCityByGeoLocation() }
+        viewModel.defineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation(it) }
+        viewModel.defineGeoLocationLiveData.observe(viewLifecycleOwner) { defineLocationForCity(it) }
         viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
-        viewModel.chooseAnotherCity.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
+        viewModel.chooseAnotherCityLiveData.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -136,9 +138,9 @@ class CurrentTimeForecastFragment : Fragment() {
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    private fun locateCityByGeoLocation() {
+    private fun defineCurrentGeoLocation(chosenCity: String) {
         Log.d("CurrentTimeForecastFragment", "Locating city...")
-        geoLocator.getCityByLocation(requireActivity())
+        geoLocator.defineCurrentLocation(requireActivity(), chosenCity)
     }
 
     private fun gotoCitySelection() {
@@ -152,10 +154,26 @@ class CurrentTimeForecastFragment : Fragment() {
         ).showAlertDialog(requireContext())
     }
 
+    private fun defineLocationForCity(city: String) {
+        val geoCoder = Geocoder(activity as Context, Locale.getDefault())
+        Log.d("CurrentTimeForecastFragment", "city = $city")
+        val address = geoCoder.getFromLocationName(city, 1).first()
+        Log.d("CurrentTimeForecastFragment", "address = $address")
+        viewModel.onDefineLocationByCitySuccess(city, getLocationByAddress(address))
+    }
+
+    private fun getLocationByAddress(address: Address): Location {
+        val location = Location("")
+        location.latitude = address.latitude
+        location.longitude = address.longitude
+        return location
+    }
+
     private fun locateCityByLatLong(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-        viewModel.onGeoLocationSuccess(locality, location)
+        Log.d("CurrentTimeForecastFragment", "locality is $locality")
+        viewModel.onDefineCityByGeoLocationSuccess(locality, location)
     }
 
     private fun toggleProgressBar(isVisible: Boolean) {
@@ -171,21 +189,12 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun showGeoLocationAlertDialog(cityLocationModel: CityLocationModel) {
-        Log.d("CurrentTimeForecastFragment", "showAlertDialog")
+        Log.d("CurrentTimeForecastFragment", "AlertDialog shown")
         geoLocationAlertDialogDelegate = GeoLocationAlertDialogDelegate(
             cityLocationModel.city,
             cityLocationModel.location,
             CityApprovalAlertDialogListenerImpl(viewModel, requireContext())
         )
         geoLocationAlertDialogDelegate?.showAlertDialog(requireContext())
-    }
-
-    companion object {
-        const val SAVED_CITY_ARGUMENT_KEY = "Saved city argument"
-        const val CHOSEN_CITY_ARGUMENT_KEY = "Chosen city argument"
-        const val SAVED_CITY_LATITUDE_ARGUMENT_KEY = "Saved city latitude argument"
-        const val SAVED_CITY_LONGITUDE_ARGUMENT_KEY = "Saved city longitude argument"
-        const val CHOSEN_CITY_LATITUDE_ARGUMENT_KEY = "City latitude argument"
-        const val CHOSEN_CITY_LONGITUDE_ARGUMENT_KEY = "City longitude argument"
     }
 }

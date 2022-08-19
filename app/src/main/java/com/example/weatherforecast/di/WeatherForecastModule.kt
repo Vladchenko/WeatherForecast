@@ -13,21 +13,27 @@ import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConv
 import com.example.weatherforecast.data.database.CitiesNamesDAO
 import com.example.weatherforecast.data.database.WeatherForecastDAO
 import com.example.weatherforecast.data.database.WeatherForecastDataBase
+import com.example.weatherforecast.data.repository.ChosenCityRepositoryImpl
 import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
+import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
+import com.example.weatherforecast.data.repository.datasourceimpl.ChosenCityLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastRemoteDataSourceImpl
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
+import com.example.weatherforecast.domain.city.ChosenCityInteractor
+import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
+import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import dagger.Module
@@ -87,10 +93,18 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
+    fun provideCityDataSource(app: Application): ChosenCityDataSource {
+        return ChosenCityLocalDataSourceImpl(
+            app.getSharedPreferences(PresentationUtils.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+        )
+    }
+
+    @Singleton
+    @Provides
     fun provideArticlesDataBase(app: Application): WeatherForecastDataBase {
         return Room
             .databaseBuilder(app, WeatherForecastDataBase::class.java, "WeatherForecastDataBase")
-            // .fallbackToDestructiveMigration()   // For migration from old database to a new one
+            .fallbackToDestructiveMigration()   // For migration from old database to a new one
             .build()
     }
 
@@ -122,6 +136,12 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
+    fun provideCityRepository(chosenCityDataSource: ChosenCityDataSource): ChosenCityRepository {
+        return ChosenCityRepositoryImpl(chosenCityDataSource)
+    }
+
+    @Singleton
+    @Provides
     fun provideWeatherForecastRemoteInteractor(weatherForecastRepository: WeatherForecastRepository): WeatherForecastRemoteInteractor {
         return WeatherForecastRemoteInteractor(weatherForecastRepository)
     }
@@ -134,13 +154,21 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
+    fun provideCityInteractor(chosenCityRepository: ChosenCityRepository): ChosenCityInteractor {
+        return ChosenCityInteractor(chosenCityRepository)
+    }
+
+    @Singleton
+    @Provides
     fun provideViewModelFactory(
         app: Application,
+        chosenCityInteractor: ChosenCityInteractor,
         weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor,
         weatherForecastLocalInteractor: WeatherForecastLocalInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
+            chosenCityInteractor,
             weatherForecastRemoteInteractor,
             weatherForecastLocalInteractor
         )

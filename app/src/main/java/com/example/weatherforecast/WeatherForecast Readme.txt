@@ -29,5 +29,5 @@ TODO:
                     android:gravity="center"
                     android:textAlignment="center"
     - Make data source to return a data not domain model
-    - Add "moderate rain", "light intensity shower rain", "heavy intensity rain" to weather images
+    - Add "fog", "moderate rain", "light intensity shower rain", "heavy intensity rain" to weather images
     - Add unit tests

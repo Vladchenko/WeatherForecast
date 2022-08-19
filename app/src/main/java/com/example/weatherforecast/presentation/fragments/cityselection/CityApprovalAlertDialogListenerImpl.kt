@@ -20,8 +20,7 @@ class CityApprovalAlertDialogListenerImpl(
         viewModel.onUpdateStatus(context.getString(R.string.network_forecast_downloading_for_city_text, locationName))
         viewModel.downloadWeatherForecast(
             TemperatureType.CELSIUS,
-            locationName,
-            location
+            location?: Location("")     //TODO
         )
     }
 

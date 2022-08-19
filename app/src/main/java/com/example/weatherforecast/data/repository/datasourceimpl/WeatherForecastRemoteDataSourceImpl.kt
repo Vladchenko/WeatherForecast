@@ -11,19 +11,19 @@ import retrofit2.Response
  *
  * @property apiService Retrofit service to download weather data
  */
-class WeatherForecastRemoteDataSourceImpl(private val apiService: WeatherForecastApiService) :
-    WeatherForecastRemoteDataSource {
+class WeatherForecastRemoteDataSourceImpl(private val apiService: WeatherForecastApiService) : WeatherForecastRemoteDataSource {
 
     override suspend fun getWeatherForecastDataForCity(city: String): Response<WeatherForecastResponse> {
+        Log.d("WeatherForecastRemoteDataSourceImpl", "response for city = $city, follows next")
         val model = apiService.getWeatherForecastResponseForCity(city)
-        Log.d("WeatherForecastRemoteDataSourceImpl", model.toString())
+        Log.d("WeatherForecastRemoteDataSourceImpl", model.body().toString())
         return model
     }
 
-    override suspend fun getWeatherForecastForLocation(latitude: Double, longitude: Double)
-    : Response<WeatherForecastResponse> {
+    override suspend fun getWeatherForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse> {
+        Log.d("WeatherForecastRemoteDataSourceImpl", "response for latitude = $latitude, and longitude = $longitude, follows next")
         val model = apiService.getWeatherForecastResponseForLocation(latitude, longitude)
-        Log.d("WeatherForecastRemoteDataSourceImpl", model.toString())
+        Log.d("WeatherForecastRemoteDataSourceImpl", model.body().toString())
         return model
     }
 }

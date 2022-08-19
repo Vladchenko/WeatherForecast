@@ -8,7 +8,7 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 /**
  * Database for weather forecast
  */
-@Database(entities = [WeatherForecastDomainModel::class, CityDomainModel::class], version = 1)
+@Database(entities = [WeatherForecastDomainModel::class, CityDomainModel::class], version = 2)
 abstract class WeatherForecastDataBase : RoomDatabase() {
     abstract fun getCitiesNamesInstance(): CitiesNamesDAO
     abstract fun getWeatherForecastInstance(): WeatherForecastDAO

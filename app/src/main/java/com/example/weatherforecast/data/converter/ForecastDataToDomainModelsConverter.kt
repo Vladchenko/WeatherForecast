@@ -4,6 +4,7 @@ import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCelsiusFromKelvinTemperature
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getFahrenheitFromKelvinTemperature
 import com.example.weatherforecast.models.data.WeatherForecastResponse
+import com.example.weatherforecast.models.domain.Coordinate
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import retrofit2.Response
 import kotlin.math.roundToInt
@@ -24,6 +25,10 @@ class ForecastDataToDomainModelsConverter {
         val serverError = response.errorBody().toString()
         return WeatherForecastDomainModel(
             city,
+            coordinate = Coordinate(
+                latitude = response.body()?.coord?.lat ?: 0.0,
+                longitude = response.body()?.coord?.lon ?: 0.0
+            ),
             date = response.body()?.dt.toString(),
             temperature = defineTemperature(temperatureType, response),
             weatherType = response.body()?.weather?.get(0)?.description ?: "",
