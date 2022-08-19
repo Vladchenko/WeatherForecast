@@ -28,4 +28,6 @@
     <string name="no_permission_app_cannot_proceed">Permission not granted, app cannot proceed</string>
     <string name="geo_location__permission_required">Geo location permission required</string>
     <string name="choose_city_from_dropdown">Choose a city from a dropdown list</string>
+    <string name="forecast_download_for_city_failed">Downloading weather forecast for a city is not successful, trying for geo location</string>
+    <string name="forecast_downloading_for_city_succeded">Downloading weather forecast for a city and location is not successful!</string>
 </resources>

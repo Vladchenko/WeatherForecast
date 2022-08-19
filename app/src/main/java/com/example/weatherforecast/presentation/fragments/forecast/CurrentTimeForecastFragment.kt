@@ -30,6 +30,7 @@ import com.example.weatherforecast.presentation.fragments.cityselection.CityAppr
 import com.example.weatherforecast.presentation.fragments.cityselection.CityClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.IOException
 import java.util.Locale
 
 /**
@@ -157,9 +158,13 @@ class CurrentTimeForecastFragment : Fragment() {
     private fun defineLocationForCity(city: String) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         Log.d("CurrentTimeForecastFragment", "city = $city")
-        val address = geoCoder.getFromLocationName(city, 1).first()
-        Log.d("CurrentTimeForecastFragment", "address = $address")
-        viewModel.onGeoLocationByCitySuccess(city, getLocationByAddress(address))
+        val address: Address?
+        try {
+            address = geoCoder.getFromLocationName(city, 1).first()
+            viewModel.onGeoLocationByCitySuccess(city, getLocationByAddress(address))
+        } catch (ioex: IOException) {
+            viewModel.onGeoLocationByCityFail(ioex.message.toString())
+        }
     }
 
     private fun getLocationByAddress(address: Address): Location {

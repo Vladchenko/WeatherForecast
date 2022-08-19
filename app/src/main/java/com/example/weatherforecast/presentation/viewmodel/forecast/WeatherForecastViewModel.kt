@@ -174,7 +174,7 @@ class WeatherForecastViewModel(
         } catch (ex: Exception) {
             Log.e(
                 "WeatherForecastViewModel",
-                "Downloading weather forecast for a city is not successful, trying for geo location"    // TODO Move to strings.xml
+                app.applicationContext.getString(R.string.forecast_download_for_city_failed)
             )
             Log.e("WeatherForecastViewModel", ex.stackTraceToString())
             _showErrorLiveData.postValue(ex.message)
@@ -183,7 +183,7 @@ class WeatherForecastViewModel(
             } catch (ex: Exception) {
                 Log.e(
                     "WeatherForecastViewModel",
-                    "Downloading weather forecast for a city and location is not successful!"   // TODO Move to strings.xml
+                    app.applicationContext.getString(R.string.forecast_downloading_for_city_succeded)
                 )
                 Log.e("WeatherForecastViewModel", ex.stackTraceToString())
                 _showErrorLiveData.postValue(ex.message)
@@ -264,6 +264,11 @@ class WeatherForecastViewModel(
             chosenCityInteractor.saveChosenCity(city, location)
         }
         downloadWeatherForecast(TemperatureType.CELSIUS, location)
+    }
+
+    fun onGeoLocationByCityFail(errorMessage: String) {
+        Log.e("WeatherForecastViewModel", errorMessage)
+        _showErrorLiveData.postValue(errorMessage)
     }
 
     /**
