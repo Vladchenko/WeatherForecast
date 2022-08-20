@@ -42,7 +42,9 @@ class CurrentTimeForecastFragment : Fragment() {
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
     { isGranted ->
         if (isGranted) {
-            viewModel.downloadWeatherForecast(chosenCity, TemperatureType.CELSIUS)
+            Log.d("CurrentTimeForecastFragment","Chosen city for a permission granted callback is = $chosenCity")
+            Log.d("CurrentTimeForecastFragment",this.toString())
+            viewModel.getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
         } else {
             showError(getString(R.string.no_permission_app_cannot_proceed)) //TODO Show alert dialog instead
         }
@@ -61,6 +63,8 @@ class CurrentTimeForecastFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         chosenCity = arguments.chosenCity
+        Log.d("CurrentTimeForecastFragment","Chosen city from a city selection screen = $chosenCity")
+        Log.d("CurrentTimeForecastFragment",this.toString())
     }
 
     override fun onCreateView(
@@ -84,7 +88,11 @@ class CurrentTimeForecastFragment : Fragment() {
 
         initLiveDataObservers()
 
-        viewModel.requestGeoLocationPermission()
+        if (chosenCity.isBlank()) {
+            viewModel.requestGeoLocationPermission()
+        } else {
+            viewModel.getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
+        }
     }
 
     override fun onDestroy() {
@@ -98,9 +106,10 @@ class CurrentTimeForecastFragment : Fragment() {
         viewModel.updateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
         viewModel.showGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
-        viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { locateCityByLatLong(it) }
+        viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
+        viewModel.defineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByCurrentLocation(it) }
         viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
-        viewModel.defineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation(it) }
+        viewModel.defineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation() }
         viewModel.defineGeoLocationByCityLiveData.observe(viewLifecycleOwner) { defineLocationByCity(it) }
         viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
         viewModel.chooseAnotherCityLiveData.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
@@ -139,9 +148,9 @@ class CurrentTimeForecastFragment : Fragment() {
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    private fun defineCurrentGeoLocation(chosenCity: String) {
+    private fun defineCurrentGeoLocation() {
         Log.d("CurrentTimeForecastFragment", "Locating city...")
-        geoLocator.defineCurrentLocation(requireActivity(), chosenCity)
+        geoLocator.defineCurrentLocation(requireActivity())
     }
 
     private fun gotoCitySelection() {
@@ -174,11 +183,18 @@ class CurrentTimeForecastFragment : Fragment() {
         return location
     }
 
-    private fun locateCityByLatLong(location: Location) {
+    private fun defineCityByLatLong(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
         Log.d("CurrentTimeForecastFragment", "locality is $locality")
         viewModel.onDefineCityByGeoLocationSuccess(locality, location)
+    }
+
+    private fun defineCityByCurrentLocation(location: Location) {
+        val geoCoder = Geocoder(activity as Context, Locale.getDefault())
+        val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+        Log.d("CurrentTimeForecastFragment", "locality is $locality")
+        viewModel.onDefineCityByCurrentGeoLocationSuccess(locality, location)
     }
 
     private fun toggleProgressBar(isVisible: Boolean) {

@@ -18,7 +18,7 @@ class WeatherForecastGeoLocator(private val locationListener: GeoLocationListene
     /**
      * Define current geo location for [chosenCity], using [context].
      */
-    fun defineCurrentLocation(context: Context, chosenCity: String) {
+    fun defineCurrentLocation(context: Context) {
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
@@ -27,20 +27,20 @@ class WeatherForecastGeoLocator(private val locationListener: GeoLocationListene
             }).addOnSuccessListener { location: Location? ->
                 Log.d("WeatherForecastGeoLocator", location.toString())
                 if (location == null) {
-                    locationListener.onGeoLocationFail(context.getString(R.string.location_fail_error_text))
+                    locationListener.onCurrentGeoLocationFail(context.getString(R.string.location_fail_error_text))
                 } else {
                     Log.d("WeatherForecastGeoLocator", location.toString())
-                    locationListener.onGeoLocationSuccess(location, chosenCity)
+                    locationListener.onCurrentGeoLocationSuccess(location)
                 }
             }.addOnFailureListener {
                 Log.e("WeatherForecastGeoLocator",it.message.toString())
-                locationListener.onGeoLocationFail(it.message?:"")
+                locationListener.onCurrentGeoLocationFail(it.message?:"")
             }.addOnCanceledListener {
                 Log.e("WeatherForecastGeoLocator", "Cancelled")
-                locationListener.onGeoLocationFail(context.getString(R.string.city_locating_cancelled))
+                locationListener.onCurrentGeoLocationFail(context.getString(R.string.city_locating_cancelled))
             }
         } catch (sec: SecurityException) {
-            locationListener.onNoLocationPermission()
+            locationListener.onNoGeoLocationPermission()
         }
     }
 }
