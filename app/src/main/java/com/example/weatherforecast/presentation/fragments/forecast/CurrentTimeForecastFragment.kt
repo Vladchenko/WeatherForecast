@@ -31,7 +31,7 @@ import com.example.weatherforecast.presentation.fragments.cityselection.CityClic
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
-import java.util.Locale
+import java.util.*
 
 /**
  * Fragment representing a weather forecast for current time.
@@ -43,8 +43,9 @@ class CurrentTimeForecastFragment : Fragment() {
     { isGranted ->
         if (isGranted) {
             Log.d("CurrentTimeForecastFragment","Chosen city for a permission granted callback is = $chosenCity")
-            Log.d("CurrentTimeForecastFragment",this.toString())
-            viewModel.getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
+            if (chosenCity.isBlank()) {
+                viewModel.getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
+            }
         } else {
             showError(getString(R.string.no_permission_app_cannot_proceed)) //TODO Show alert dialog instead
         }
@@ -64,7 +65,6 @@ class CurrentTimeForecastFragment : Fragment() {
         super.onCreate(savedInstanceState)
         chosenCity = arguments.chosenCity
         Log.d("CurrentTimeForecastFragment","Chosen city from a city selection screen = $chosenCity")
-        Log.d("CurrentTimeForecastFragment",this.toString())
     }
 
     override fun onCreateView(
@@ -90,7 +90,9 @@ class CurrentTimeForecastFragment : Fragment() {
 
         if (chosenCity.isBlank()) {
             viewModel.requestGeoLocationPermission()
+            Log.d("CurrentTimeForecastFragment", "onViewCreated requestGeoLocationPermission")
         } else {
+            Log.d("CurrentTimeForecastFragment", "onViewCreated getWeatherForecast for city $chosenCity")
             viewModel.getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
         }
     }
@@ -186,14 +188,14 @@ class CurrentTimeForecastFragment : Fragment() {
     private fun defineCityByLatLong(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-        Log.d("CurrentTimeForecastFragment", "locality is $locality")
+        Log.d("CurrentTimeForecastFragment", "City for $location is defined as $locality")
         viewModel.onDefineCityByGeoLocationSuccess(locality, location)
     }
 
     private fun defineCityByCurrentLocation(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
         val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-        Log.d("CurrentTimeForecastFragment", "locality is $locality")
+        Log.d("CurrentTimeForecastFragment", "City for current location defined as $locality")
         viewModel.onDefineCityByCurrentGeoLocationSuccess(locality, location)
     }
 

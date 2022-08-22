@@ -19,6 +19,7 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteracto
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.domain.Coordinate
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
@@ -48,9 +49,9 @@ class WeatherForecastViewModel(
     private val _defineCityByGeoLocationLiveData: SingleLiveEvent<Location> = SingleLiveEvent()
     private val _defineCityCurrentByGeoLocationLiveData: SingleLiveEvent<Location> = SingleLiveEvent()
     private val _showGeoLocationAlertDialogLiveData: SingleLiveEvent<CityLocationModel> = SingleLiveEvent()
-    private val _requestPermissionLiveData: MutableLiveData<Unit> = MutableLiveData()
-    private val _defineGeoLocationByCityLiveData: MutableLiveData<String> = MutableLiveData()
-    private val _defineCurrentGeoLocationLiveData: MutableLiveData<Unit> = MutableLiveData()
+    private val _requestPermissionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
+    private val _defineGeoLocationByCityLiveData: SingleLiveEvent<String> = SingleLiveEvent()
+    private val _defineCurrentGeoLocationLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _gotoCitySelectionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _chooseAnotherCityLiveData: SingleLiveEvent<String> = SingleLiveEvent()
     //endregion livedata fields
@@ -125,13 +126,13 @@ class WeatherForecastViewModel(
                     cityModel = chosenCityInteractor.loadChosenCityModel()
                     Log.d(
                         "WeatherForecastViewModel",
-                        "City loaded from database = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}"
+                        "Chosen city loaded from database = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}"
                     )
                 }
                 // When there is no loaded city model from database,
                 if (cityModel?.city.isNullOrBlank()) {
                     // Define local city and try downloading a forecast for it
-                    _updateStatusLiveData.postValue(app.applicationContext.getString(R.string.location_defining_text))
+                    _updateStatusLiveData.postValue(app.applicationContext.getString(R.string.current_location_defining_text))
                     // Following row defines a city and displays an alert
                     _defineCurrentGeoLocationLiveData.postValue(Unit)
                 } else {
@@ -139,20 +140,26 @@ class WeatherForecastViewModel(
                 }
             }
         } else {
-            // Try loading a city model from DB
-            viewModelScope.launch(exceptionHandler) {
-                cityModel = chosenCityInteractor.loadChosenCityModel()
-                Log.d(
-                    "WeatherForecastViewModel",
-                    "loaded city = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}" //TODO Move to strings.xml
-                )
-            }
-            // If it is null, show error
-            if (cityModel?.city.isNullOrBlank()) {
-                _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-                // Else download a forecast from database
+            if (chosenCity.isBlank()) {
+                // Try loading a city model from DB
+                viewModelScope.launch(exceptionHandler) {
+                    cityModel = chosenCityInteractor.loadChosenCityModel()
+                    Log.d(
+                        "WeatherForecastViewModel",
+                        "Downloaded from database: city = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}" //TODO Move to strings.xml
+                    )
+                }
+                // If it is null, show error
+                if (cityModel?.city.isNullOrBlank()) {
+                    _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+                    // Else download a forecast from database
+                } else {
+                    downloadForecastFromDatabase(cityModel?.city ?: "")
+                }
             } else {
-                downloadForecastFromDatabase(cityModel?.city ?: "")
+                viewModelScope.launch(exceptionHandler) {
+                    downloadForecastFromDatabase(chosenCity)
+                }
             }
         }
     }
@@ -196,14 +203,12 @@ class WeatherForecastViewModel(
         _showProgressBarLiveData.postValue(true)
         try {
             viewModelScope.launch(exceptionHandler) {
-                var result = weatherForecastRemoteInteractor.loadRemoteForecastForCity(
+                val result = weatherForecastRemoteInteractor.loadRemoteForecastForCity(
                     temperatureType,
                     city
                 )
-                // City in response is different than city in request
-                result = result.copy(city = city)
-                saveForecastToDatabase(result)
                 showForecastDataOrProcessServerError(result)
+                saveForecastToDatabase(result)
             }
         } catch (ex: Exception) {
             Log.e(
@@ -216,20 +221,33 @@ class WeatherForecastViewModel(
         }
     }
 
-    private suspend fun showForecastDataOrProcessServerError(result: WeatherForecastDomainModel) {
+    private fun getWeatherForecastResultStub() =    // TODO Is it ok ?
+        WeatherForecastDomainModel(
+            "",
+            Coordinate(0.0, 0.0),
+            "",
+            "",
+            "",
+            "",
+            ""
+        )
+
+    private fun showForecastDataOrProcessServerError(result: WeatherForecastDomainModel) {
         if (result.serverError.isBlank()) {
             Log.d("WeatherForecastViewModel", result.toString())
             _showWeatherForecastLiveData.postValue(result)
-            saveForecastToDatabase(result)
         } else {
             _showErrorLiveData.postValue(result.serverError)
             Log.e("WeatherForecastViewModel8", result.serverError)
         }
     }
 
-    private suspend fun saveForecastToDatabase(result: WeatherForecastDomainModel) {
+    private fun saveForecastToDatabase(result: WeatherForecastDomainModel) {
         Log.d("WeatherForecastViewModel", "Saving forecast to database $result")
-        weatherForecastLocalInteractor.saveForecast(result)
+        viewModelScope.launch(exceptionHandler) {
+            weatherForecastLocalInteractor.saveForecast(result)
+        }
+        Log.d("WeatherForecastViewModel", "Forecast saved successfully")
     }
 
     private fun downloadForecastFromDatabase(city: String) {
@@ -245,7 +263,7 @@ class WeatherForecastViewModel(
      * City locating successful callback, receiving [city] and its latitude, longitude as [location].
      */
     fun onDefineCityByGeoLocationSuccess(city: String, location: Location) {
-        Log.d("WeatherForecastViewModel", "Location defined successfully")
+        Log.d("WeatherForecastViewModel", "City defined successfully by geo location")
         Log.d("WeatherForecastViewModel", "city = $city, location = $location")
         viewModelScope.launch(exceptionHandler) {
             chosenCityInteractor.saveChosenCity(city, location)
@@ -253,10 +271,10 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * TODO
+     * City defining by current geo location successful callback.
      */
     fun onDefineCityByCurrentGeoLocationSuccess(city: String, location: Location) {
-        Log.d("WeatherForecastViewModel", "Location defined successfully")
+        Log.d("WeatherForecastViewModel", "City defined successfully by CURRENT geo location")
         Log.d("WeatherForecastViewModel", "city = $city, location = $location")
         viewModelScope.launch(exceptionHandler) {
             chosenCityInteractor.saveChosenCity(city, location)
@@ -270,7 +288,7 @@ class WeatherForecastViewModel(
      * Save a [city] and its [location] and download its forecast.
      */
     fun onDefineGeoLocationByCitySuccess(city: String, location: Location) {
-        Log.d("WeatherForecastViewModel", "City defined successfully")
+        Log.d("WeatherForecastViewModel", "Geo location defined successfully by city")
         Log.d("WeatherForecastViewModel", "city = $city, location = $location")
         viewModelScope.launch(exceptionHandler) {
             chosenCityInteractor.saveChosenCity(city, location)
@@ -310,5 +328,17 @@ class WeatherForecastViewModel(
      */
     fun onGotoCitySelection() {
         _gotoCitySelectionLiveData.call()
+    }
+
+    fun getChosenCity(): CityLocationModel {
+        var cityModel = CityLocationModel("", Location(""))
+        viewModelScope.launch(exceptionHandler) {
+            cityModel = chosenCityInteractor.loadChosenCityModel()
+            Log.d(
+                "WeatherForecastViewModel",
+                "City loaded from database = ${cityModel?.city}, lat = ${cityModel?.location?.latitude}, lon = ${cityModel?.location?.longitude}"
+            )
+        }
+        return cityModel
     }
 }
