@@ -104,18 +104,18 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun initLiveDataObservers() {
-        viewModel.getWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
-        viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
-        viewModel.updateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
-        viewModel.showProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
-        viewModel.showGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
-        viewModel.defineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
-        viewModel.defineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByCurrentLocation(it) }
-        viewModel.requestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
-        viewModel.defineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation() }
-        viewModel.defineGeoLocationByCityLiveData.observe(viewLifecycleOwner) { defineLocationByCity(it) }
-        viewModel.gotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
-        viewModel.chooseAnotherCityLiveData.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
+        viewModel.onGetWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
+        viewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        viewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
+        viewModel.onShowProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
+        viewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
+        viewModel.onDefineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
+        viewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByCurrentLocation(it) }
+        viewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
+        viewModel.onDefineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation() }
+        viewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) { defineLocationByCity(it) }
+        viewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
+        viewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {

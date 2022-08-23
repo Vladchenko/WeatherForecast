@@ -1,10 +1,6 @@
 package com.example.weatherforecast.data.api.customexceptions
 
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.HttpException
-import retrofit2.Invocation
-import retrofit2.Response
+import retrofit2.*
 import java.io.IOException
 
 /**
@@ -49,6 +45,7 @@ class CallWithErrorHandling(
         httpExceptionsMapper: HttpExceptionMapper? = null
     ): Exception {
         return when (remoteException) {
+            is NoSuchDatabaseEntryException -> NoSuchDatabaseEntryException(remoteException.message?:"")
             is IOException -> NoInternetException(remoteException.message?:"")
             is HttpException -> httpExceptionsMapper?.map(remoteException) ?: ApiException(remoteException.code().toString())
             else -> UnexpectedException(remoteException as java.lang.Exception)

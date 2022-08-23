@@ -29,5 +29,6 @@
     <string name="geo_location__permission_required">Geo location permission required</string>
     <string name="choose_city_from_dropdown">Choose a city from a dropdown list</string>
     <string name="forecast_download_for_city_failed">Downloading weather forecast for a city is not successful, trying for geo location</string>
-    <string name="forecast_downloading_for_city_succeded">Downloading weather forecast for a city and location is not successful!</string>
+    <string name="forecast_downloading_for_city_succeeded">Downloading weather forecast for a city and location is not successful!</string>
+    <string name="database_record_for_city_not_found">Forecast for city %s is not present in database</string>
 </resources>

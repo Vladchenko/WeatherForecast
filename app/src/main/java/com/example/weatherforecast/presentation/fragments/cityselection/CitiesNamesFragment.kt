@@ -51,10 +51,9 @@ class CitiesNamesFragment : Fragment() {
     }
 
     private fun initLiveDataObservers() {
-        viewModel.getCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
-        viewModel.showErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
-        viewModel.updateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
-        viewModel.gotoOutdatedForecastLiveData.observe(viewLifecycleOwner) { gotoForecastFragment(chosenCity) }
+        viewModel.onGetCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
+        viewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        viewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
     }
 
     private fun initSearch() {
@@ -90,7 +89,7 @@ class CitiesNamesFragment : Fragment() {
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             if (!s.isNullOrBlank()) {
-                viewModel.getCitiesNames(s.toString())
+                viewModel.getCitiesNamesForMask(s.toString())
             }
         }
 

@@ -1,11 +1,6 @@
 package com.example.weatherforecast.data.database
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.coroutines.flow.Flow
 
@@ -25,8 +20,8 @@ interface CitiesNamesDAO {
     suspend fun deleteCityName(cityName: CityDomainModel): Int   // Returns a number of rows deleted
 
     @Query("SELECT * FROM citiesNames WHERE name MATCH " + ":token")
-    fun getCitiesNames(token: String): Flow<List<CityDomainModel>> // Flow is used to get several items
+    fun getCitiesNames(token: String): Flow<CityDomainModel> // Flow is used to get several items
 
     @Query("SELECT * FROM citiesNames")
-    fun getAllCitiesNames(): Flow<List<CityDomainModel>> // Flow is used to get several items
+    fun getAllCitiesNames(): Flow<CityDomainModel> // Flow is used to get several items
 }

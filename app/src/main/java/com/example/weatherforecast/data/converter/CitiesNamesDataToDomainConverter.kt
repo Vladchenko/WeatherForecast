@@ -16,7 +16,7 @@ class CitiesNamesDataToDomainConverter {
      */
     fun convert(dataModel: Response<List<WeatherForecastCityResponse>>): CitiesNamesDomainModel {
         val converted = CitiesNamesDomainModel(
-            if (dataModel.body().isNullOrEmpty()) {     //FIXME This might be shortened
+            if (dataModel.body().isNullOrEmpty()) {
                 listOf(CityDomainModel(
                     name = "",
                     lat = 0.0,

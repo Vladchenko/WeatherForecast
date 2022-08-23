@@ -10,13 +10,11 @@ JSON data to data-class conversion - https://app.quicktype.io/
 TODO:
     - TemperatureType is passed all over around. Make it not so.
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
-    - Attempt to invoke virtual method 'java.lang.String com.example.weatherforecast.models.domain.WeatherForecastDomainModel.getCity()' on a null object reference
     - Show alert dialog instead of error in toolbar, when locating permission was not granted
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
         - Emptying a views doesn't help
             - Tried in onViewCreated and in onPause
         ! Probably, one has to remove fragment
-    - When permission is not granted (user tapped outside of permission alert), following app opening behaves like permission was given
     - When selecting a city and user taps back, the main fragment loads a Kazan forecast, but should just show a dialog on geolocation
     - isNetworkAvailable doesn't check network appearing fast enough
 

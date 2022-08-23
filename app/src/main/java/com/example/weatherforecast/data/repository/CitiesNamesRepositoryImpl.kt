@@ -25,10 +25,6 @@ class CitiesNamesRepositoryImpl(
             modelsConverter.convert(remoteDataSource.getCityNames(token))
         }
 
-    override fun loadLocalCitiesNames(token: String): Flow<List<CityDomainModel>> =
+    override fun loadLocalCitiesNames(token: String): Flow<CityDomainModel> =
         localDataSource.getCitiesNames(token)
-
-    override suspend fun saveCity(city: CityDomainModel) {
-        localDataSource.saveCity(city)
-    }
 }

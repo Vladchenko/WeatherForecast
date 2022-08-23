@@ -16,10 +16,5 @@ interface CitiesNamesRepository {
     /**
      * Retrieve local cities names for [token].
      */
-    fun loadLocalCitiesNames(token: String): Flow<List<CityDomainModel>>
-
-    /**
-     * Save [city] to database.
-     */
-    suspend fun saveCity(city: CityDomainModel)
+    fun loadLocalCitiesNames(token: String): Flow<CityDomainModel>
 }

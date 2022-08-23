@@ -1,6 +1,7 @@
 package com.example.weatherforecast.data.repository.datasourceimpl
 
 import android.util.Log
+import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.data.database.WeatherForecastDAO
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
@@ -15,6 +16,9 @@ class WeatherForecastLocalDataSourceImpl(private val dao: WeatherForecastDAO) : 
 
     override suspend fun loadWeatherForecastData(city:String): WeatherForecastDomainModel {
         val model = dao.getCityForecast(city)
+        if (model == null) {
+            throw NoSuchDatabaseEntryException(city)
+        }
         Log.d("WeatherForecastLocalDataSourceImpl", "${model.city} city forecast loaded successfully")
         return model
     }

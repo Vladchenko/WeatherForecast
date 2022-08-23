@@ -8,14 +8,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
+import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
@@ -30,60 +27,54 @@ class CitiesNamesViewModel(
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AndroidViewModel(app) {
 
-    private val _showErrorLiveData = MutableLiveData<String>()
-    private val _updateStatusLiveData = MutableLiveData<String>()
-    private val _gotoOutdatedForecastLiveData = MutableLiveData<Unit>()
-    private val _getCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
+    private val _OnShowErrorLiveData = MutableLiveData<String>()
+    private val _OnUpdateStatusLiveData = MutableLiveData<String>()
+    private val _OnGetCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
 
-    val showErrorLiveData: LiveData<String>
-        get() = _showErrorLiveData
+    val onShowErrorLiveData: LiveData<String>
+        get() = _OnShowErrorLiveData
 
-    val updateStatusLiveData: LiveData<String>
-        get() = _updateStatusLiveData
+    val onUpdateStatusLiveData: LiveData<String>
+        get() = _OnUpdateStatusLiveData
 
-    val getCitiesNamesLiveData: LiveData<CitiesNamesDomainModel>
-        get() = _getCitiesNamesLiveData
-
-    val gotoOutdatedForecastLiveData: LiveData<Unit>
-        get() = _gotoOutdatedForecastLiveData
+    val onGetCitiesNamesLiveData: LiveData<CitiesNamesDomainModel>
+        get() = _OnGetCitiesNamesLiveData
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message ?: "")
         if (throwable is NoInternetException) {
-            _showErrorLiveData.postValue(throwable.cause.toString())
+            _OnShowErrorLiveData.postValue(throwable.cause.toString())
         }
-        _showErrorLiveData.postValue(throwable.message ?: "")
+        if (throwable is NoSuchDatabaseEntryException) {
+            _OnShowErrorLiveData.postValue("Forecast for city ${throwable.message} is not present in database")
+        }
+        _OnShowErrorLiveData.postValue(throwable.message ?: "")
     }
 
     /**
-     * Download a cities names matching a token [city]
+     * Download a cities names matching string mask [city]
      */
-    fun getCitiesNames(city: String) {
+    fun getCitiesNamesForMask(city: String) {
         Log.d("CitiesNamesViewModel1", city)
         try {
             if (isNetworkAvailable(app)) {
                 viewModelScope.launch(exceptionHandler) {
                     val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
-                    _getCitiesNamesLiveData.postValue(response)
+                    _OnGetCitiesNamesLiveData.postValue(response)
                 }
             } else {
-                _showErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
+                _OnShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
                 // Trying to download a chosen city from database
                 viewModelScope.launch(exceptionHandler) {
                     val result = CitiesNamesDomainModel(
-                        citiesNamesInteractor.loadLocalCitiesNames("").flatMapConcat {
-                            it.asFlow().map {
-                                Log.d("CitiesNamesViewModel2", it.name)
-                            }
-                            it.asFlow()
-                        }.toList()
+                        citiesNamesInteractor.loadLocalCitiesNames(city).toList()
                     )
                     Log.d("CitiesNamesViewModel3", result.cities.size.toString())
                     if (result.cities.isNotEmpty()) {
-                        _getCitiesNamesLiveData.postValue(result)
+                        _OnGetCitiesNamesLiveData.postValue(result)
                         Log.d("CitiesNamesViewModel4", result.cities[0].toString())
                     } else {
-                        _showErrorLiveData.postValue(
+                        _OnShowErrorLiveData.postValue(
                             app.applicationContext.getString(
                                 R.string.database_records_not_found,
                                 city
@@ -93,21 +84,15 @@ class CitiesNamesViewModel(
                 }
             }
         } catch (ex: Exception) {
-            _showErrorLiveData.postValue(ex.message)
-        }
-    }
-
-    fun saveChosenCity(city: CityDomainModel) {
-        viewModelScope.launch(exceptionHandler) {
-            citiesNamesInteractor.saveCitiesNames(city)
+            _OnShowErrorLiveData.postValue(ex.message)
         }
     }
 
     fun checkNetworkConnectionAvailability() {
         if (!isNetworkAvailable(app.applicationContext)) {
-            _showErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+            _OnShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
         } else {
-            _updateStatusLiveData.postValue(app.applicationContext.getString(R.string.city_selection_title))
+            _OnUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.city_selection_title))
         }
     }
 }
