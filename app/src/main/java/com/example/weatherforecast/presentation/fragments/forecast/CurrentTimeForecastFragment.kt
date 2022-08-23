@@ -5,6 +5,7 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -179,7 +180,7 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun getLocationByAddress(address: Address): Location {
-        val location = Location("")
+        val location = Location(LocationManager.NETWORK_PROVIDER)
         location.latitude = address.latitude
         location.longitude = address.longitude
         return location

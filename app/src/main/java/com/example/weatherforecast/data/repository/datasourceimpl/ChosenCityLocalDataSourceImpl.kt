@@ -2,6 +2,7 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import android.content.SharedPreferences
 import android.location.Location
+import android.location.LocationManager
 import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSource
 import com.example.weatherforecast.models.domain.CityLocationModel
 
@@ -24,7 +25,7 @@ class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPrefere
     }
 
     private fun getChosenCityLocation(): Location {
-        val location = Location("")
+        val location = Location(LocationManager.NETWORK_PROVIDER)
         location.latitude =
             (sharedPreferences.getString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, "0d")
                 ?.toDouble()

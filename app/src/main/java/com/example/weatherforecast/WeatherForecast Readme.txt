@@ -8,12 +8,10 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
+    - TemperatureType is passed all over around. Make it not so.
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
-    - !!! Make so that alert dialog offering auto defined city won't appear when city is chosen
     - Attempt to invoke virtual method 'java.lang.String com.example.weatherforecast.models.domain.WeatherForecastDomainModel.getCity()' on a null object reference
     - Show alert dialog instead of error in toolbar, when locating permission was not granted
-    - SharedPrefs move to datasource and provide from DI with interface (CORRECT) to repo - interactor - viewmodel
-    - When app starts for the very first time and one selects a city, then geolocation alert pops up, but should not
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
         - Emptying a views doesn't help
             - Tried in onViewCreated and in onPause
