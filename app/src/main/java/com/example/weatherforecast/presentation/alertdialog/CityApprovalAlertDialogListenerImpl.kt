@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.cityselection
+package com.example.weatherforecast.presentation.alertdialog
 
 import android.content.Context
 import android.location.Location

@@ -9,6 +9,7 @@ JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
     - TemperatureType is passed all over around. Make it not so.
+        - Put it to shared prefs and further, make it data->domain->presentation ?
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
     - Show alert dialog instead of error in toolbar, when locating permission was not granted
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
@@ -30,3 +31,12 @@ TODO:
     - Make data source to return a data not domain model
     - Add "fog", "moderate rain", "light intensity shower rain", "heavy intensity rain" to weather images
     - Add unit tests
+
+    ?
+    - Should settings be kept in a separate storage (shared prefs in data->domain->presentation)
+    CurrentTimeForecastFragment
+        - geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is this instantiating correct ?
+        - What can be moved out of it and how
+    ViewModel
+        - What can be moved out of it and how
+        - Should AlertDialogs refer to interface, but not to viewModel itself

@@ -120,6 +120,23 @@ class WeatherForecastViewModel(
     }
 
     /**
+     * Requests a geo location or downloads a forecast, depending on a presense of a [chosenCity],
+     * having [temperatureType] provided.
+     */
+    fun requestGeoLocationPermissionOrDownloadWeatherForecast(
+        temperatureType: TemperatureType,
+        chosenCity: String
+    ) {
+        if (chosenCity.isBlank()) {
+            requestGeoLocationPermission()
+            Log.d("WeatherForecastViewModel", "requestGeoLocationPermission")
+        } else {
+            Log.d("WeatherForecastViewModel", "getWeatherForecast for city $chosenCity")
+            getWeatherForecast(temperatureType, chosenCity)
+        }
+    }
+
+    /**
      * Download weather forecast on a [temperatureType] and [chosenCity].
      */
     fun getWeatherForecast(temperatureType: TemperatureType, chosenCity: String) {
@@ -191,6 +208,21 @@ class WeatherForecastViewModel(
                     cityModel1?.city ?: ""
                 )
             }
+        }
+    }
+
+    fun onPermissionResolution(isGranted: Boolean, chosenCity: String) {
+        if (isGranted) {
+            Log.d(
+                "CurrentTimeForecastFragment",
+                "Chosen city for a permission granted callback is = $chosenCity"
+            )
+            if (chosenCity.isBlank()) {
+                getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
+            }
+        } else {
+            //TODO Show alert dialog instead
+            _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.no_permission_app_cannot_proceed))
         }
     }
 

@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast
+package com.example.weatherforecast.presentation.alertdialog
 
 import android.content.Context
 import android.location.Location
@@ -6,8 +6,8 @@ import com.example.weatherforecast.presentation.AlertDialogClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 
 /**
- * Alert dialog that asks user if the geo located city is a proper one to provide a weather forecast on.
- * If a user agrees to the located city, its forecast is downloaded, otherwise, user is suggested to choose another city.
+ * Alert dialog that tells user a forecast for city is not available and if user wishes to check
+ * another city.
  */
 class CityWrongAlertDialogListenerImpl(
     val viewModel: WeatherForecastViewModel,

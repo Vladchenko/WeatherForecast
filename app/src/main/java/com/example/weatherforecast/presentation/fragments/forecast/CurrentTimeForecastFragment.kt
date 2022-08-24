@@ -20,14 +20,16 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
-import com.example.weatherforecast.geolocation.GeoLocationAlertDialogDelegate
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils.animateFadeOut
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubtitleFontSize
-import com.example.weatherforecast.presentation.fragments.cityselection.CityApprovalAlertDialogListenerImpl
+import com.example.weatherforecast.presentation.alertdialog.CityApprovalAlertDialogListenerImpl
+import com.example.weatherforecast.presentation.alertdialog.CitySelectionAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.CityWrongAlertDialogListenerImpl
+import com.example.weatherforecast.presentation.alertdialog.GeoLocationAlertDialogDelegate
 import com.example.weatherforecast.presentation.fragments.cityselection.CityClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,33 +42,17 @@ import java.util.*
 @AndroidEntryPoint
 class CurrentTimeForecastFragment : Fragment() {
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission())
-    { isGranted ->
-        if (isGranted) {
-            Log.d("CurrentTimeForecastFragment","Chosen city for a permission granted callback is = $chosenCity")
-            if (chosenCity.isBlank()) {
-                viewModel.getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
-            }
-        } else {
-            showError(getString(R.string.no_permission_app_cannot_proceed)) //TODO Show alert dialog instead
-        }
-    }
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission())
+        { isGranted -> viewModel.onPermissionResolution(isGranted, chosenCity) }
 
     private lateinit var chosenCity: String
+    private lateinit var geoLocator: WeatherForecastGeoLocator
+    private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
     private val viewModel by activityViewModels<WeatherForecastViewModel>()
     private var geoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
-
-    private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
-
-    private lateinit var geoLocator: WeatherForecastGeoLocator
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        chosenCity = arguments.chosenCity
-        Log.d("CurrentTimeForecastFragment","Chosen city from a city selection screen = $chosenCity")
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -78,24 +64,15 @@ class CurrentTimeForecastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        chosenCity = arguments.chosenCity
+
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
         geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is this instantiating correct ?
 
-        fragmentDataBinding.cityNameTextView.setOnClickListener(
-            CityClickListener(findNavController())
-        )
-        fragmentDataBinding.toolbar.title = getString(R.string.app_name)
-        toggleProgressBar(true)
-
+        initViews()
         initLiveDataObservers()
 
-        if (chosenCity.isBlank()) {
-            viewModel.requestGeoLocationPermission()
-            Log.d("CurrentTimeForecastFragment", "onViewCreated requestGeoLocationPermission")
-        } else {
-            Log.d("CurrentTimeForecastFragment", "onViewCreated getWeatherForecast for city $chosenCity")
-            viewModel.getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
-        }
+        viewModel.requestGeoLocationPermissionOrDownloadWeatherForecast(TemperatureType.CELSIUS, chosenCity)
     }
 
     override fun onDestroy() {
@@ -103,24 +80,49 @@ class CurrentTimeForecastFragment : Fragment() {
         geoLocationAlertDialogDelegate?.dismissAlertDialog()
     }
 
+    private fun initViews() {
+        fragmentDataBinding.cityNameTextView.setOnClickListener(
+            CityClickListener(findNavController())
+        )
+        fragmentDataBinding.toolbar.title = getString(R.string.app_name)
+        toggleProgressBar(true)
+    }
+
     private fun initLiveDataObservers() {
         viewModel.onGetWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
         viewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         viewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
         viewModel.onShowProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
-        viewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) { showGeoLocationAlertDialog(it) }
-        viewModel.onDefineCityByGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByLatLong(it) }
-        viewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCityByCurrentLocation(it) }
+        viewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
+            showGeoLocationAlertDialog(
+                it
+            )
+        }
+        viewModel.onDefineCityByGeoLocationLiveData.observe(viewLifecycleOwner) {
+            defineCityByLatLong(
+                it
+            )
+        }
+        viewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) {
+            defineCityByCurrentLocation(
+                it
+            )
+        }
         viewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         viewModel.onDefineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation() }
         viewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) { defineLocationByCity(it) }
         viewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
-        viewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) { showAlertDialogToChooseAnotherCity(it) }
+        viewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
+            showAlertDialogToChooseAnotherCity(
+                it
+            )
+        }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
         showStatus(getString(R.string.forecast_for_city, dataModel.city))
-        fragmentDataBinding.dateTextView.text = getCurrentDate(dataModel.date, getString(R.string.bad_date_format))
+        fragmentDataBinding.dateTextView.text =
+            getCurrentDate(dataModel.date, getString(R.string.bad_date_format))
         fragmentDataBinding.cityNameTextView.text = dataModel.city
         fragmentDataBinding.degreesValueTextView.text = dataModel.temperature
         fragmentDataBinding.degreesTypeTextView.text = dataModel.temperatureType
@@ -188,21 +190,24 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun defineCityByLatLong(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
-        val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+        val locality =
+            geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
         Log.d("CurrentTimeForecastFragment", "City for $location is defined as $locality")
         viewModel.onDefineCityByGeoLocationSuccess(locality, location)
     }
 
     private fun defineCityByCurrentLocation(location: Location) {
         val geoCoder = Geocoder(activity as Context, Locale.getDefault())
-        val locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+        val locality =
+            geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
         Log.d("CurrentTimeForecastFragment", "City for current location defined as $locality")
         viewModel.onDefineCityByCurrentGeoLocationSuccess(locality, location)
     }
 
     private fun toggleProgressBar(isVisible: Boolean) {
         if (isVisible) {
-            fragmentDataBinding.progressBar.alpha = resources.getFloat(R.dimen.progressbar_background_transparency)
+            fragmentDataBinding.progressBar.alpha =
+                resources.getFloat(R.dimen.progressbar_background_transparency)
             fragmentDataBinding.progressBar.visibility = View.VISIBLE
         } else {
             animateFadeOut(

@@ -1,4 +1,4 @@
-package com.example.weatherforecast.geolocation
+package com.example.weatherforecast.presentation.alertdialog
 
 import android.content.Context
 import android.content.DialogInterface
@@ -7,7 +7,8 @@ import androidx.appcompat.app.AlertDialog
 import com.example.weatherforecast.presentation.AlertDialogClickListener
 
 /**
- * Shows alert dialog and processes its buttons clicks
+ * Alert dialog that asks user if the geo located city is a proper one to provide a weather forecast on.
+ * If a user agrees to the located city, its forecast is downloaded, otherwise, user is suggested to choose another city.
  *
  * @param city to point what city geo location has defined.
  * @param location that geo location has defined
