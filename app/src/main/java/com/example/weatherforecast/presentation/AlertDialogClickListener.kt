@@ -1,15 +1,13 @@
 package com.example.weatherforecast.presentation
 
-import android.location.Location
-
 /**
  * Alert dialog buttons click listener
  */
 interface AlertDialogClickListener {
     /**
-     * Positive button click, having a [city] and its lat long coordinate as [location] passed
+     * Positive button click, having a [city] passed
      */
-    fun onPositiveClick(city:String, location: Location?)
+    fun onPositiveClick(city:String)
 
     /**
      * Negative button click

@@ -2,7 +2,6 @@ package com.example.weatherforecast.presentation.alertdialog
 
 import android.content.Context
 import android.content.DialogInterface
-import android.location.Location
 import androidx.appcompat.app.AlertDialog
 import com.example.weatherforecast.presentation.AlertDialogClickListener
 
@@ -11,11 +10,9 @@ import com.example.weatherforecast.presentation.AlertDialogClickListener
  * If a user agrees to the located city, its forecast is downloaded, otherwise, user is suggested to choose another city.
  *
  * @param city to point what city geo location has defined.
- * @param location that geo location has defined
  * @param clickListener for alert dialog buttons
  */
 class GeoLocationAlertDialogDelegate(private val city: String,
-                                     private val location: Location,
                                      private val clickListener: AlertDialogClickListener) {
 
     private lateinit var alertDialog: AlertDialog
@@ -45,7 +42,7 @@ class GeoLocationAlertDialogDelegate(private val city: String,
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onPositiveClick(city, location)
+        clickListener.onPositiveClick(city)
         dialogInterface.dismiss()
     }
 

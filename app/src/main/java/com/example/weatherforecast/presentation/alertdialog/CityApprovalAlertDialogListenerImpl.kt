@@ -1,9 +1,7 @@
 package com.example.weatherforecast.presentation.alertdialog
 
 import android.content.Context
-import android.location.Location
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.presentation.AlertDialogClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 
@@ -16,12 +14,9 @@ class CityApprovalAlertDialogListenerImpl(
     val context: Context
 ) : AlertDialogClickListener {
 
-    override fun onPositiveClick(city: String, location: Location?) {
+    override fun onPositiveClick(city: String) {
         viewModel.onUpdateStatus(context.getString(R.string.network_forecast_downloading_for_city_text, city))
-        viewModel.getWeatherForecast(
-            TemperatureType.CELSIUS,
-            city
-        )
+        viewModel.getWeatherForecast(city)
     }
 
     override fun onNegativeClick() {

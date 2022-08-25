@@ -8,6 +8,7 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
+    - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.
     - TemperatureType is passed all over around. Make it not so.
         - Put it to shared prefs and further, make it data->domain->presentation ?
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
@@ -31,6 +32,7 @@ TODO:
     - Add unit tests
 
     ?
+    - Should one process a database exceptions
     - Should settings be kept in a separate storage (shared prefs in data->domain->presentation)
     CurrentTimeForecastFragment
         - geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is this instantiating correct ?

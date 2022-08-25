@@ -37,7 +37,7 @@ class LocationPermissionAlertDialogDelegate(private val clickListener: AlertDial
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onPositiveClick("", null)
+        clickListener.onPositiveClick("")
         dialogInterface.dismiss()
     }
 
