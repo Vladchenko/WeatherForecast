@@ -2,15 +2,19 @@ package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -26,15 +30,14 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils.animateFadeOut
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubtitleFontSize
-import com.example.weatherforecast.presentation.alertdialog.CityApprovalAlertDialogListenerImpl
-import com.example.weatherforecast.presentation.alertdialog.CitySelectionAlertDialogDelegate
-import com.example.weatherforecast.presentation.alertdialog.CityWrongAlertDialogListenerImpl
-import com.example.weatherforecast.presentation.alertdialog.GeoLocationAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.*
 import com.example.weatherforecast.presentation.fragments.cityselection.CityClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
 import java.util.*
+import kotlin.system.exitProcess
+
 
 /**
  * Fragment representing a weather forecast for current time.
@@ -72,7 +75,10 @@ class CurrentTimeForecastFragment : Fragment() {
         initViews()
         initLiveDataObservers()
 
-        viewModel.requestGeoLocationPermissionOrDownloadWeatherForecast(TemperatureType.CELSIUS, chosenCity)
+        viewModel.requestGeoLocationPermissionOrDownloadWeatherForecast(
+            TemperatureType.CELSIUS,
+            chosenCity
+        )
     }
 
     override fun onDestroy() {
@@ -98,6 +104,9 @@ class CurrentTimeForecastFragment : Fragment() {
                 it
             )
         }
+        viewModel.onShowLocationPermissionAlertDialogLiveData.observe(viewLifecycleOwner) {
+            showLocationPermissionAlertDialog()
+        }
         viewModel.onDefineCityByGeoLocationLiveData.observe(viewLifecycleOwner) {
             defineCityByLatLong(
                 it
@@ -109,6 +118,7 @@ class CurrentTimeForecastFragment : Fragment() {
             )
         }
         viewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
+        viewModel.onRequestPermissionDeniedLiveData.observe(viewLifecycleOwner) { showToastAndOpenAppSettingsOpen() }
         viewModel.onDefineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation() }
         viewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) { defineLocationByCity(it) }
         viewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
@@ -151,6 +161,26 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun requestLocationPermission() {
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    private fun showToastAndOpenAppSettingsOpen() {
+        val intent = Intent(
+            ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.parse("package:" + activity?.packageName)
+        )
+        startActivity(intent)
+        showToast(getString(R.string.geo_location_permission_denied))
+        showToast(getString(R.string.geo_location_permission_denied))
+        showToast(getString(R.string.geo_location_permission_denied))
+        exitProcess(0)
+    }
+
+    private fun showToast(toastMessage: String) {
+        Toast.makeText(
+            requireContext(),
+            toastMessage,
+            Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun defineCurrentGeoLocation() {
@@ -218,12 +248,20 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun showGeoLocationAlertDialog(cityLocationModel: CityLocationModel) {
-        Log.d("CurrentTimeForecastFragment", "AlertDialog shown")
+        Log.d("CurrentTimeForecastFragment", "Geo location AlertDialog shown")
         geoLocationAlertDialogDelegate = GeoLocationAlertDialogDelegate(
             cityLocationModel.city,
             cityLocationModel.location,
             CityApprovalAlertDialogListenerImpl(viewModel, requireContext())
         )
         geoLocationAlertDialogDelegate?.showAlertDialog(requireContext())
+    }
+
+    private fun showLocationPermissionAlertDialog() {
+        Log.d("CurrentTimeForecastFragment", "Permission not granted AlertDialog shown")
+        val locationPermissionAlertDialogDelegate = LocationPermissionAlertDialogDelegate(
+            LocationPermissionAlertDialogListenerImpl(viewModel, requireContext())
+        )
+        locationPermissionAlertDialogDelegate.showAlertDialog(requireContext())
     }
 }

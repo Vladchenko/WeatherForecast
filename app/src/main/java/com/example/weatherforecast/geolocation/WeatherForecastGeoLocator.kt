@@ -27,7 +27,7 @@ class WeatherForecastGeoLocator(private val locationListener: GeoLocationListene
             }).addOnSuccessListener { location: Location? ->
                 Log.d("WeatherForecastGeoLocator", location.toString())
                 if (location == null) {
-                    locationListener.onCurrentGeoLocationFail(context.getString(R.string.location_fail_error_text))
+                    locationListener.onCurrentGeoLocationFail(context.getString(R.string.geo_location_fail_error_text))
                 } else {
                     Log.d("WeatherForecastGeoLocator", location.toString())
                     locationListener.onCurrentGeoLocationSuccess(location)

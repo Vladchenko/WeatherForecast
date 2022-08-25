@@ -6,13 +6,12 @@ import androidx.appcompat.app.AlertDialog
 import com.example.weatherforecast.presentation.AlertDialogClickListener
 
 /**
- * Shows alert dialog and processes its buttons clicks
+ * Shows alert dialog when geo location permission is not granted
  *
  * @param city to have a weather forecast for
  * @param clickListener for alert dialog
  */
-class CitySelectionAlertDialogDelegate(private val city: String,
-                                       private val clickListener: AlertDialogClickListener) {
+class LocationPermissionAlertDialogDelegate(private val clickListener: AlertDialogClickListener) {
 
     private lateinit var alertDialog: AlertDialog
 
@@ -21,10 +20,16 @@ class CitySelectionAlertDialogDelegate(private val city: String,
      */
     fun showAlertDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("City forecast failed")
-        builder.setMessage("Forecast for city $city is not available, please choose another city")
+        builder.setTitle("Geo location permission not granted")
+        builder.setMessage("This app requires geo location permission to find out your location. " +
+                "Please agree to grant permission or quit.")
         builder.setPositiveButton(android.R.string.ok) { _dialogInterface, _ ->
             positiveButtonClick(
+                _dialogInterface
+            )
+        }
+        builder.setNegativeButton(android.R.string.cancel) { _dialogInterface, _ ->
+            negativeButtonClick(
                 _dialogInterface
             )
         }
@@ -32,7 +37,7 @@ class CitySelectionAlertDialogDelegate(private val city: String,
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onPositiveClick(city, null)
+        clickListener.onPositiveClick("", null)
         dialogInterface.dismiss()
     }
 

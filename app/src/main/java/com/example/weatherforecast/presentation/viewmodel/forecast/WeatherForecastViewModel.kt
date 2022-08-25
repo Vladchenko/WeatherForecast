@@ -41,6 +41,7 @@ class WeatherForecastViewModel(
 ) : AndroidViewModel(app), GeoLocationListener {
 
     private var chosenCity: String = ""
+    private var permissionRequests = 0
 
     //region livedata fields
     private val _onChosenCityNotFoundLiveData: SingleLiveEvent<String> = SingleLiveEvent()
@@ -51,8 +52,11 @@ class WeatherForecastViewModel(
         SingleLiveEvent()
     private val _onDefineCityByCurrentGeoLocationSuccessLiveData: SingleLiveEvent<CityLocationModel> =
         SingleLiveEvent()
+    private val _onShowLocationPermissionAlertDialogLiveData: SingleLiveEvent<Unit> =
+        SingleLiveEvent()
     private val _onGotoCitySelectionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _onRequestPermissionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
+    private val _onRequestPermissionDeniedLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _onShowErrorLiveData: MutableLiveData<String> = MutableLiveData()
     private val _onShowProgressBarLiveData: MutableLiveData<Boolean> = MutableLiveData()
     private val _onShowWeatherForecastLiveData: MutableLiveData<WeatherForecastDomainModel> =
@@ -85,6 +89,9 @@ class WeatherForecastViewModel(
     val onRequestPermissionLiveData: LiveData<Unit>
         get() = _onRequestPermissionLiveData
 
+    val onRequestPermissionDeniedLiveData: LiveData<Unit>
+        get() = _onRequestPermissionDeniedLiveData
+
     val onShowErrorLiveData: LiveData<String>
         get() = _onShowErrorLiveData
 
@@ -93,6 +100,9 @@ class WeatherForecastViewModel(
 
     val onShowGeoLocationAlertDialogLiveData: LiveData<CityLocationModel>
         get() = _onDefineCityByCurrentGeoLocationSuccessLiveData
+
+    val onShowLocationPermissionAlertDialogLiveData: LiveData<Unit>
+        get() = _onShowLocationPermissionAlertDialogLiveData
 
     val onUpdateStatusLiveData: LiveData<String>
         get() = _onUpdateStatusLiveData
@@ -120,7 +130,7 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * Requests a geo location or downloads a forecast, depending on a presense of a [chosenCity],
+     * Requests a geo location or downloads a forecast, depending on a presence of a [chosenCity],
      * having [temperatureType] provided.
      */
     fun requestGeoLocationPermissionOrDownloadWeatherForecast(
@@ -221,8 +231,8 @@ class WeatherForecastViewModel(
                 getWeatherForecast(TemperatureType.CELSIUS, chosenCity)
             }
         } else {
-            //TODO Show alert dialog instead
-            _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.no_permission_app_cannot_proceed))
+            _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.geo_location_no_permission))
+            _onShowLocationPermissionAlertDialogLiveData.call()
         }
     }
 
@@ -238,8 +248,13 @@ class WeatherForecastViewModel(
      */
     fun requestGeoLocationPermission() {
         if (!hasPermissionForGeoLocation()) {
-            _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location__permission_required))
-            _onRequestPermissionLiveData.call()
+            _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location_permission_required))
+            permissionRequests++
+            if (permissionRequests > 2) {
+                _onRequestPermissionDeniedLiveData.call()
+            } else {
+                _onRequestPermissionLiveData.call()
+            }
         } else {
             getWeatherForecast(TemperatureType.CELSIUS, chosenCity)    //TODO
         }

@@ -16,16 +16,8 @@ import com.example.weatherforecast.data.database.WeatherForecastDataBase
 import com.example.weatherforecast.data.repository.ChosenCityRepositoryImpl
 import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
-import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSource
-import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
-import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
-import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
-import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
-import com.example.weatherforecast.data.repository.datasourceimpl.ChosenCityLocalDataSourceImpl
-import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
-import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
-import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl
-import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastRemoteDataSourceImpl
+import com.example.weatherforecast.data.repository.datasource.*
+import com.example.weatherforecast.data.repository.datasourceimpl.*
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
@@ -45,7 +37,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -63,7 +54,6 @@ class WeatherForecastModule {
         }
         val client = OkHttpClient.Builder().apply {
             addInterceptor(loggingInterceptor)
-            connectTimeout(5, TimeUnit.SECONDS)
         }.build()
         return Retrofit.Builder()
             .addCallAdapterFactory(ErrorsCallAdapterFactory())
