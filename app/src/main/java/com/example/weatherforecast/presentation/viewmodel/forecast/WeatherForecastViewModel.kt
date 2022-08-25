@@ -7,9 +7,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
@@ -22,7 +20,9 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteract
 import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.network.NetworkConnectionListener
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
+import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -38,7 +38,7 @@ class WeatherForecastViewModel(
     private val chosenCityInteractor: ChosenCityInteractor,
     private val weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor,
     private val weatherForecastLocalInteractor: WeatherForecastLocalInteractor
-) : AndroidViewModel(app), GeoLocationListener {
+) : AbstractViewModel(app), GeoLocationListener, NetworkConnectionListener {
 
     private var chosenCity: String = ""
     private var permissionRequests = 0
@@ -57,11 +57,9 @@ class WeatherForecastViewModel(
     private val _onGotoCitySelectionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _onRequestPermissionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _onRequestPermissionDeniedLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
-    private val _onShowErrorLiveData: MutableLiveData<String> = MutableLiveData()
-    private val _onShowProgressBarLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    private val _onShowWeatherForecastLiveData: MutableLiveData<WeatherForecastDomainModel> =
-        MutableLiveData()
-    private val _onUpdateStatusLiveData: MutableLiveData<String> = MutableLiveData()
+    private val _onShowProgressBarLiveData: SingleLiveEvent<Boolean> = SingleLiveEvent()
+    private val _onShowWeatherForecastLiveData: SingleLiveEvent<WeatherForecastDomainModel> =
+        SingleLiveEvent()
     //endregion livedata fields
 
     //region livedata getters fields
@@ -92,9 +90,6 @@ class WeatherForecastViewModel(
     val onRequestPermissionDeniedLiveData: LiveData<Unit>
         get() = _onRequestPermissionDeniedLiveData
 
-    val onShowErrorLiveData: LiveData<String>
-        get() = _onShowErrorLiveData
-
     val onShowProgressBarLiveData: LiveData<Boolean>
         get() = _onShowProgressBarLiveData
 
@@ -103,15 +98,12 @@ class WeatherForecastViewModel(
 
     val onShowLocationPermissionAlertDialogLiveData: LiveData<Unit>
         get() = _onShowLocationPermissionAlertDialogLiveData
-
-    val onUpdateStatusLiveData: LiveData<String>
-        get() = _onUpdateStatusLiveData
     //endregion livedata getters fields
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("WeatherForecastViewModel", throwable.message ?: "")
         if (throwable is CityNotFoundException) {
-            onUpdateStatus(throwable.message)
+            _onShowErrorLiveData.postValue(throwable.message)
             _onChosenCityNotFoundLiveData.postValue(throwable.city)
         }
         if (throwable is NoInternetException) {
@@ -129,6 +121,27 @@ class WeatherForecastViewModel(
         }
     }
 
+    override fun onNetworkConnectionAvailable() {
+        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
+        requestGeoLocationPermissionOrDownloadWeatherForecast(TemperatureType.CELSIUS, chosenCity)
+    }
+
+    override fun onNetworkConnectionLost() {
+        _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+    }
+
+    override fun onNoGeoLocationPermission() {
+        requestGeoLocationPermissionOrLoadForecast()
+    }
+
+    override fun onCurrentGeoLocationSuccess(location: Location) {
+        _onDefineCityCurrentByGeoLocationLiveData.postValue(location)
+    }
+
+    override fun onCurrentGeoLocationFail(errorMessage: String) {
+        _onShowErrorLiveData.postValue(errorMessage)
+    }
+
     /**
      * Requests a geo location or downloads a forecast, depending on a presence of a [chosenCity],
      * having [temperatureType] provided.
@@ -138,8 +151,7 @@ class WeatherForecastViewModel(
         chosenCity: String
     ) {
         if (chosenCity.isBlank()) {
-            requestGeoLocationPermission()
-            Log.d("WeatherForecastViewModel", "requestGeoLocationPermission")
+            requestGeoLocationPermissionOrLoadForecast()
         } else {
             Log.d("WeatherForecastViewModel", "getWeatherForecast for city $chosenCity")
             getWeatherForecast(temperatureType, chosenCity)
@@ -150,48 +162,17 @@ class WeatherForecastViewModel(
      * Download weather forecast on a [temperatureType] and [chosenCity].
      */
     fun getWeatherForecast(temperatureType: TemperatureType, chosenCity: String) {
-        val cityModel: CityLocationModel? = null
         if (isNetworkAvailable(app.applicationContext)) {
-            getForecastWhenNetworkAvailable(chosenCity, temperatureType, cityModel)
+            getForecastWhenNetworkAvailable(chosenCity, temperatureType)
         } else {
-            getForecastWhenNetworkNotAvailable(chosenCity, cityModel)
-        }
-    }
-
-    private fun getForecastWhenNetworkNotAvailable(
-        chosenCity: String,
-        cityModel: CityLocationModel?
-    ) {
-        var cityModel1 = cityModel
-        if (chosenCity.isBlank()) {
-            // Try loading a city model from DB
-            viewModelScope.launch(exceptionHandler) {
-                cityModel1 = chosenCityInteractor.loadChosenCityModel()
-                Log.d(
-                    "WeatherForecastViewModel",
-                    "Downloaded from database: city = ${cityModel1?.city}, lat = ${cityModel1?.location?.latitude}, lon = ${cityModel1?.location?.longitude}" //TODO Move to strings.xml
-                )
-            }
-            // If it is null, show error
-            if (cityModel1?.city.isNullOrBlank()) {
-                _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-                // Else download a forecast from database
-            } else {
-                downloadForecastFromDatabase(cityModel1?.city ?: "")
-            }
-        } else {
-            viewModelScope.launch(exceptionHandler) {
-                downloadForecastFromDatabase(chosenCity)
-            }
+            getForecastWhenNetworkNotAvailable(chosenCity)
         }
     }
 
     private fun getForecastWhenNetworkAvailable(
         chosenCity: String,
-        temperatureType: TemperatureType,
-        cityModel: CityLocationModel?
+        temperatureType: TemperatureType
     ) {
-        var cityModel1 = cityModel
         if (chosenCity.isNotBlank()) {
             Log.d("WeatherForecastViewModel", "Chosen city is $chosenCity")
             this.chosenCity = chosenCity
@@ -200,23 +181,47 @@ class WeatherForecastViewModel(
             Log.d("WeatherForecastViewModel", "Chosen city is empty")
             // Try loading a city model from DB
             viewModelScope.launch(exceptionHandler) {
-                cityModel1 = chosenCityInteractor.loadChosenCityModel()
+                val cityModel = chosenCityInteractor.loadChosenCityModel()
                 Log.d(
                     "WeatherForecastViewModel",
-                    "Chosen city loaded from database = ${cityModel1?.city}, lat = ${cityModel1?.location?.latitude}, lon = ${cityModel1?.location?.longitude}"
+                    "Chosen city loaded from database = ${cityModel.city}, lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
                 )
+                // When there is no loaded city model from database,
+                if (cityModel.city.isBlank()) {
+                    // Define local city and try downloading a forecast for it
+                    _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.current_location_defining_text))
+                    // Following row defines a city and displays an alert
+                    _onDefineCurrentGeoLocationLiveData.postValue(Unit)
+                } else {
+                    downloadWeatherForecastForCityOrGeoLocation(
+                        temperatureType,
+                        cityModel?.city ?: ""
+                    )
+                }
             }
-            // When there is no loaded city model from database,
-            if (cityModel1?.city.isNullOrBlank()) {
-                // Define local city and try downloading a forecast for it
-                _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.current_location_defining_text))
-                // Following row defines a city and displays an alert
-                _onDefineCurrentGeoLocationLiveData.call()
-            } else {
-                downloadWeatherForecastForCityOrGeoLocation(
-                    temperatureType,
-                    cityModel1?.city ?: ""
+        }
+    }
+
+    private fun getForecastWhenNetworkNotAvailable(chosenCity: String) {
+        if (chosenCity.isBlank()) {
+            // Try loading a city model from DB
+            viewModelScope.launch(exceptionHandler) {
+                val cityModel = chosenCityInteractor.loadChosenCityModel()
+                Log.d(
+                    "WeatherForecastViewModel",
+                    "Downloaded from database: city = ${cityModel.city}, lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}" //TODO Move to strings.xml
                 )
+                // If it is null, show error
+                if (cityModel.city.isBlank()) {
+                    _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+                    // Else download a forecast from database
+                } else {
+                    downloadForecastFromDatabase(cityModel.city ?: "")
+                }
+            }
+        } else {
+            viewModelScope.launch(exceptionHandler) {
+                downloadForecastFromDatabase(chosenCity)
             }
         }
     }
@@ -237,23 +242,17 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * Request geo location permission, or if its granted - locate a city.
-     */
-    override fun onNoGeoLocationPermission() {
-        requestGeoLocationPermission()
-    }
-
-    /**
      * Request geo location permission, when it is not granted.
      */
-    fun requestGeoLocationPermission() {
+    fun requestGeoLocationPermissionOrLoadForecast() {
         if (!hasPermissionForGeoLocation()) {
             _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location_permission_required))
             permissionRequests++
             if (permissionRequests > 2) {
                 _onRequestPermissionDeniedLiveData.call()
             } else {
-                _onRequestPermissionLiveData.call()
+                _onRequestPermissionLiveData.postValue(Unit)
+                Log.d("WeatherForecastViewModel", "requestGeoLocationPermission")
             }
         } else {
             getWeatherForecast(TemperatureType.CELSIUS, chosenCity)    //TODO
@@ -404,30 +403,16 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * Define a city by the succeeded geo location.
-     */
-    override fun onCurrentGeoLocationSuccess(location: Location) {
-        _onDefineCityCurrentByGeoLocationLiveData.postValue(location)
-    }
-
-    /**
-     * City locating failed callback. Informs user with an [errorMessage] message.
-     */
-    override fun onCurrentGeoLocationFail(errorMessage: String) {
-        _onShowErrorLiveData.postValue(errorMessage)
-    }
-
-    /**
-     * Update status message.
-     */
-    fun onUpdateStatus(statusMessage: String) {
-        _onUpdateStatusLiveData.postValue(statusMessage)
-    }
-
-    /**
      * Go to city selection screen.
      */
     fun onGotoCitySelection() {
         _onGotoCitySelectionLiveData.call()
+    }
+
+    /**
+     * Set chosen city
+     */
+    fun setChosenCity(city:String) {
+        chosenCity = city
     }
 }

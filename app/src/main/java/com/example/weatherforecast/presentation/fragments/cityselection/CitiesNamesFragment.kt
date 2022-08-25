@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
+import com.example.weatherforecast.network.NetworkMonitor
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,7 +48,7 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
-        viewModel.checkNetworkConnectionAvailability()
+        NetworkMonitor(requireContext(), viewModel)
     }
 
     private fun initLiveDataObservers() {

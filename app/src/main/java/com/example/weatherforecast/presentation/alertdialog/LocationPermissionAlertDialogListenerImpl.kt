@@ -21,7 +21,7 @@ class LocationPermissionAlertDialogListenerImpl(
 
     override fun onPositiveClick(city: String, location: Location?) {
         viewModel.onUpdateStatus(context.getString(R.string.geo_location_permission_required))
-        viewModel.requestGeoLocationPermission()
+        viewModel.requestGeoLocationPermissionOrLoadForecast()
     }
 
     override fun onNegativeClick() {

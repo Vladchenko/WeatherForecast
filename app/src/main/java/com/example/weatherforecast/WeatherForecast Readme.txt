@@ -11,7 +11,6 @@ TODO:
     - TemperatureType is passed all over around. Make it not so.
         - Put it to shared prefs and further, make it data->domain->presentation ?
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
-    - Show alert dialog instead of error in toolbar, when locating permission was not granted
     - When city is chosen and city forecast fragment shows up, old forecast is diplayed for some time
         - Emptying a views doesn't help
             - Tried in onViewCreated and in onPause
@@ -19,7 +18,6 @@ TODO:
     - When selecting a city and user taps back, the main fragment loads a Kazan forecast, but should just show a dialog on geolocation
     - isNetworkAvailable doesn't check network appearing fast enough
 
-    - When network connection appears, app is not aware about that.
     - Put all texts to string.xml
     - Remove all superfluous Log.d
     - Check statuses
