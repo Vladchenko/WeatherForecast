@@ -19,6 +19,9 @@ interface CitiesNamesDAO {
     @Delete
     suspend fun deleteCityName(cityName: CityDomainModel): Int   // Returns a number of rows deleted
 
+    @Query("DELETE FROM citiesNames")
+    suspend fun deleteAll(): Int
+
     @Query("SELECT * FROM citiesNames WHERE name MATCH " + ":token")
     fun getCitiesNames(token: String): Flow<CityDomainModel> // Flow is used to get several items
 

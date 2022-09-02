@@ -49,14 +49,19 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
-        { isGranted -> viewModel.onPermissionResolution(isGranted, chosenCity) }
+        { isGranted ->
+            forecastViewModel.onPermissionResolution(isGranted, chosenCity, savedCity)
+        }
 
-    private lateinit var chosenCity: String
+    private var savedCity: String = ""
+    private var chosenCity: String = ""
     private lateinit var geoLocator: WeatherForecastGeoLocator
     private lateinit var fragmentDataBinding: FragmentCurrentTimeForecastBinding
 
     private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
+    private val persistenceViewModel by activityViewModels<PersistenceViewModel>()
+    private val networkConnectionViewModel by activityViewModels<NetworkConnectionViewModel>()
     private var geoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
 
     override fun onCreateView(
@@ -74,7 +79,8 @@ class CurrentTimeForecastFragment : Fragment() {
         forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
 
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
-        geoLocator = WeatherForecastGeoLocator(forecastViewModel)   //TODO Is this instantiating correct ?
+        geoLocator =
+            WeatherForecastGeoLocator(forecastViewModel)   //TODO Is this instantiating correct ?
         NetworkMonitor(requireContext(), forecastViewModel)   //TODO Is this instantiating correct ?
 
         initViews()
@@ -95,10 +101,21 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun initLiveDataObservers() {
-        forecastViewModel.onGetWeatherForecastLiveData.observe(viewLifecycleOwner) { showForecastData(it) }
+        persistenceViewModel.onCityDownloadedLiveData.observe(viewLifecycleOwner) {
+            savedCity = it.city
+        }
+        forecastViewModel.onGetWeatherForecastLiveData.observe(viewLifecycleOwner) {
+            showAndSaveForecastData(
+                it
+            )
+        }
         forecastViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         forecastViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
-        forecastViewModel.onShowProgressBarLiveData.observe(viewLifecycleOwner) { toggleProgressBar(it) }
+        forecastViewModel.onShowProgressBarLiveData.observe(viewLifecycleOwner) {
+            toggleProgressBar(
+                it
+            )
+        }
         forecastViewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
             showGeoLocationAlertDialog(
                 it
@@ -117,16 +134,29 @@ class CurrentTimeForecastFragment : Fragment() {
                 it
             )
         }
+//        forecastViewModel.onLoadCityFromDatabaseLiveData.observe(viewLifecycleOwner) {
+//            checkCityInDataBase()
+//        }
         forecastViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) { requestLocationPermission() }
         forecastViewModel.onRequestPermissionDeniedLiveData.observe(viewLifecycleOwner) { showToastAndOpenAppSettings() }
         forecastViewModel.onDefineCurrentGeoLocationLiveData.observe(viewLifecycleOwner) { defineCurrentGeoLocation() }
-        forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) { defineLocationByCity(it) }
+        forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) {
+            defineLocationByCity(
+                it
+            )
+        }
         forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
         forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
             showAlertDialogToChooseAnotherCity(
                 it
             )
         }
+    }
+
+    private fun showAndSaveForecastData(dataModel: WeatherForecastDomainModel) {
+        showForecastData(dataModel)
+        persistenceViewModel.saveForecastToDatabase(dataModel)
+        persistenceViewModel.saveChosenCity(dataModel)
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
@@ -263,4 +293,8 @@ class CurrentTimeForecastFragment : Fragment() {
         )
         locationPermissionAlertDialogDelegate.showAlertDialog(requireContext())
     }
+
+//    private fun checkCityInDataBase() {
+//        persistenceViewModel.loadChosenCity()
+//    }
 }

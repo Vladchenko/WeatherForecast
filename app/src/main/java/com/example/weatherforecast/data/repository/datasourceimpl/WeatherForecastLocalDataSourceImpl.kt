@@ -15,10 +15,7 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 class WeatherForecastLocalDataSourceImpl(private val dao: WeatherForecastDAO) : WeatherForecastLocalDataSource {
 
     override suspend fun loadWeatherForecastData(city:String): WeatherForecastDomainModel {
-        val model = dao.getCityForecast(city)
-        if (model == null) {
-            throw NoSuchDatabaseEntryException(city)
-        }
+        val model = dao.getCityForecast(city) ?: throw NoSuchDatabaseEntryException(city)
         Log.d("WeatherForecastLocalDataSourceImpl", "${model.city} city forecast loaded successfully")
         return model
     }

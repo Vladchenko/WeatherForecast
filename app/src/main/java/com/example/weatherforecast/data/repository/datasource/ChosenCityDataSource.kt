@@ -16,4 +16,9 @@ interface ChosenCityDataSource {
      * Save [city] and its [location] to storage.
      */
     suspend fun saveCity(city: String, location: Location)
+
+    /**
+     * Remove city model from storage.
+     */
+    suspend fun removeCity()
 }

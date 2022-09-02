@@ -17,4 +17,8 @@ class ChosenCityRepositoryImpl(private val chosenCityNameDataSource: ChosenCityD
     override suspend fun saveChosenCity(city: String, location: Location) {
         chosenCityNameDataSource.saveCity(city, location)
     }
+
+    override suspend fun removeCity() {
+        chosenCityNameDataSource.removeCity()
+    }
 }

@@ -23,4 +23,11 @@ class ChosenCityInteractor(private val chosenChosenCityRepository: ChosenCityRep
     suspend fun saveChosenCity(city: String, location: Location) {
         chosenChosenCityRepository.saveChosenCity(city, location)
     }
+
+    /**
+     * Delete a city model from storage.
+     */
+    suspend fun removeCity() {
+        chosenChosenCityRepository.removeCity()
+    }
 }

@@ -53,6 +53,7 @@ class WeatherForecastViewModel(
         SingleLiveEvent()
     private val _onDefineCityByCurrentGeoLocationSuccessLiveData: SingleLiveEvent<String> =
         SingleLiveEvent()
+    private val _onLoadCityFromDatabaseLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
     private val _onShowLocationPermissionAlertDialogLiveData: SingleLiveEvent<Unit> =
         SingleLiveEvent()
     private val _onGotoCitySelectionLiveData: SingleLiveEvent<Unit> = SingleLiveEvent()
@@ -84,6 +85,9 @@ class WeatherForecastViewModel(
 
     val onGetWeatherForecastLiveData: LiveData<WeatherForecastDomainModel>
         get() = _onShowWeatherForecastLiveData
+
+    val onLoadCityFromDatabaseLiveData: LiveData<Unit>
+        get() = _onLoadCityFromDatabaseLiveData
 
     val onRequestPermissionLiveData: LiveData<Unit>
         get() = _onRequestPermissionLiveData
@@ -221,14 +225,28 @@ class WeatherForecastViewModel(
         }
     }
 
-    fun onPermissionResolution(isGranted: Boolean, chosenCity: String) {
+    /**
+     * Proceed with a geo location permission result, having [isGranted] flag as a permission result,
+     * [chosenCity] as a previously chosen city on city selection screen,
+     * or a [savedCity] loaded from database.
+     */
+    fun onPermissionResolution(isGranted: Boolean, chosenCity: String, savedCity: String) {
         if (isGranted) {
             Log.d(
                 "CurrentTimeForecastFragment",
-                "Chosen city for a permission granted callback is = $chosenCity"
+                "Permission granted callback. Chosen city = $chosenCity, saved city = $savedCity"
             )
-            if (chosenCity.isBlank()) {
+            if (chosenCity.isNotBlank()) {
+                // Get weather forecast, when there is a chosen city (from a city selection fragment)
                 getWeatherForecast(chosenCity)
+            } else {
+                if (savedCity.isNotBlank()) {
+                    // Get weather forecast, when there is a saved city (from a database)
+                    getWeatherForecast(savedCity)
+                } else {
+                    // Else show alert dialog on a city defined by current geo location
+                    _onDefineCityByCurrentGeoLocationSuccessLiveData.call()
+                }
             }
         } else {
             _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.geo_location_no_permission))

@@ -24,6 +24,10 @@ class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPrefere
         sharedPreferences.edit().putString(SAVED_CITY_LONGITUDE_ARGUMENT_KEY, location.longitude.toString()).apply()
     }
 
+    override suspend fun removeCity() {
+        sharedPreferences.edit().clear().apply()
+    }
+
     private fun getChosenCityLocation(): Location {
         val location = Location(LocationManager.NETWORK_PROVIDER)
         location.latitude =

@@ -88,4 +88,13 @@ class CitiesNamesViewModel(
             _onShowErrorLiveData.postValue(ex.message)
         }
     }
+
+    /**
+     * Delete all cities names. Method is used on demand.
+     */
+    fun deleteAllCitiesNames() {
+        viewModelScope.launch(exceptionHandler) {
+            citiesNamesInteractor.deleteAllCitiesNames()
+        }
+    }
 }

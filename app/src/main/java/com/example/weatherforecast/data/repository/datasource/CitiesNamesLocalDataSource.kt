@@ -11,4 +11,9 @@ interface CitiesNamesLocalDataSource {
      * Retrieve cities names for [token].
      */
     fun getCitiesNames(token: String): Flow<CityDomainModel>
+
+    /**
+     * Delete all cities names.
+     */
+    suspend fun deleteAllCitiesNames()
 }

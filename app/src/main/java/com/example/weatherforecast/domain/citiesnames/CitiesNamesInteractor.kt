@@ -11,11 +11,24 @@ import kotlinx.coroutines.flow.Flow
  */
 class CitiesNamesInteractor(private val citiesNamesRepository: CitiesNamesRepository) {
 
-    suspend fun loadRemoteCitiesNames(city: String): CitiesNamesDomainModel {
-        return citiesNamesRepository.loadRemoteCitiesNames(city)
+    /**
+     * Retrieve remote cities names matching [token].
+     */
+    suspend fun loadRemoteCitiesNames(token: String): CitiesNamesDomainModel {
+        return citiesNamesRepository.loadRemoteCitiesNames(token)
     }
 
-    fun loadLocalCitiesNames(city: String): Flow<CityDomainModel> {
-        return citiesNamesRepository.loadLocalCitiesNames(city)
+    /**
+     * Retrieve local cities names matching [token].
+     */
+    fun loadLocalCitiesNames(token: String): Flow<CityDomainModel> {
+        return citiesNamesRepository.loadLocalCitiesNames(token)
+    }
+
+    /**
+     * Delete all cities names.
+     */
+    suspend fun deleteAllCitiesNames() {
+        citiesNamesRepository.deleteAllCitiesNames()
     }
 }

@@ -17,4 +17,9 @@ interface ChosenCityRepository {
      * Save [city] and its [location] to some storage.
      */
     suspend fun saveChosenCity(city: String, location: Location)
+
+    /**
+     * Remove city from storage.
+     */
+    suspend fun removeCity()
 }

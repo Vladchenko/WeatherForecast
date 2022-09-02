@@ -16,4 +16,8 @@ class CitiesNamesLocalDataSourceImpl(private val dao: CitiesNamesDAO) : CitiesNa
         Log.d("CitiesNamesLocalDataSourceImpl", model.toString())
         return model
     }
+
+    override suspend fun deleteAllCitiesNames() {
+        dao.deleteAll()
+    }
 }

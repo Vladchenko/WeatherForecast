@@ -27,4 +27,8 @@ class CitiesNamesRepositoryImpl(
 
     override fun loadLocalCitiesNames(token: String): Flow<CityDomainModel> =
         localDataSource.getCitiesNames(token)
+
+    override suspend fun deleteAllCitiesNames() {
+        localDataSource.deleteAllCitiesNames()
+    }
 }
