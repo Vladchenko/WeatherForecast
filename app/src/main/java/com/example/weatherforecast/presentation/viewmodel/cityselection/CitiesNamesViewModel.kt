@@ -10,7 +10,6 @@ import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.network.NetworkConnectionListener
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -26,7 +25,7 @@ import kotlinx.coroutines.launch
 class CitiesNamesViewModel(
     private val app: Application,
     private val citiesNamesInteractor: CitiesNamesInteractor,
-) : AbstractViewModel(app), NetworkConnectionListener {
+) : AbstractViewModel(app) {
     
     private val _onGetCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
 
@@ -42,14 +41,6 @@ class CitiesNamesViewModel(
             _onShowErrorLiveData.postValue("Forecast for city ${throwable.message} is not present in database")
         }
         _onShowErrorLiveData.postValue(throwable.message ?: "")
-    }
-
-    override fun onNetworkConnectionAvailable() {
-        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.city_selection_title))
-    }
-
-    override fun onNetworkConnectionLost() {
-        _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
     }
 
     /**

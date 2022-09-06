@@ -28,6 +28,9 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.network.NetworkConnectionViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.persistence.PersistenceViewModelFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -150,17 +153,49 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
+    fun providePersistenceViewModelFactory(
+        app: Application,
+        chosenCityInteractor: ChosenCityInteractor,
+        weatherForecastLocalInteractor: WeatherForecastLocalInteractor
+    ): PersistenceViewModelFactory {
+        return PersistenceViewModelFactory(
+            app,
+            chosenCityInteractor,
+            weatherForecastLocalInteractor
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideGeoLocationViewModelFactory(
+        app: Application
+    ): GeoLocationViewModelFactory {
+        return GeoLocationViewModelFactory(
+            app
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideNetworkConnectionViewModelFactory(
+        app: Application
+    ): NetworkConnectionViewModelFactory {
+        return NetworkConnectionViewModelFactory(
+            app
+        )
+    }
+
+    @Singleton
+    @Provides
     fun provideViewModelFactory(
         app: Application,
         chosenCityInteractor: ChosenCityInteractor,
-        weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor,
-        weatherForecastLocalInteractor: WeatherForecastLocalInteractor
+        weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
             chosenCityInteractor,
-            weatherForecastRemoteInteractor,
-            weatherForecastLocalInteractor
+            weatherForecastRemoteInteractor
         )
     }
 

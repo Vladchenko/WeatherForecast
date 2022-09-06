@@ -18,6 +18,7 @@ import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.network.NetworkMonitor
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
+import com.example.weatherforecast.presentation.viewmodel.network.NetworkConnectionViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -28,7 +29,8 @@ class CitiesNamesFragment : Fragment() {
 
     private var chosenCity = ""
 
-    private val viewModel by activityViewModels<CitiesNamesViewModel>()
+    private val citiesNamesViewModel by activityViewModels<CitiesNamesViewModel>()
+    private val networkConnectionViewModel by activityViewModels<NetworkConnectionViewModel>()
 
     private lateinit var autoSuggestAdapter: AutoSuggestAdapter
     private lateinit var fragmentDataBinding: FragmentCitiesNamesBinding
@@ -43,18 +45,32 @@ class CitiesNamesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fragmentDataBinding = FragmentCitiesNamesBinding.bind(view)
-        autoSuggestAdapter = AutoSuggestAdapter(activity as Context, android.R.layout.select_dialog_item)
+        autoSuggestAdapter =
+            AutoSuggestAdapter(activity as Context, android.R.layout.select_dialog_item)
         fragmentDataBinding.toolbar.title = getString(R.string.app_name)
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
-        NetworkMonitor(requireContext(), viewModel)
+        networkConnectionViewModel.checkNetworkAvailability()
+        //TODO Is this instantiating correct ?
+        NetworkMonitor(requireContext(), networkConnectionViewModel)
     }
 
     private fun initLiveDataObservers() {
-        viewModel.onGetCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
-        viewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
-        viewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
+        citiesNamesViewModel.onGetCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
+        citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        citiesNamesViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
+        networkConnectionViewModel.onNetworkConnectionAvailableLiveData.observe(viewLifecycleOwner) {
+            updateStatus(
+                getString(R.string.city_selection_title)
+            )
+        }
+        networkConnectionViewModel.onNetworkConnectionLostLiveData.observe(viewLifecycleOwner) {
+            showError(getString(R.string.network_not_available_error_text))
+        }
+        networkConnectionViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) {
+            showError(it)
+        }
     }
 
     private fun initSearch() {
@@ -90,7 +106,7 @@ class CitiesNamesFragment : Fragment() {
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             if (!s.isNullOrBlank()) {
-                viewModel.getCitiesNamesForMask(s.toString())
+                citiesNamesViewModel.getCitiesNamesForMask(s.toString())
             }
         }
 
@@ -105,7 +121,10 @@ class CitiesNamesFragment : Fragment() {
     }
 
     private fun gotoForecastFragment(chosenCity: String) {
-        val action = CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(chosenCity)
+        val action =
+            CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(
+                chosenCity
+            )
         findNavController().navigate(action)
     }
 }

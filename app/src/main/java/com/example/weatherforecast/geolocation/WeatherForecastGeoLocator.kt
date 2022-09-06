@@ -16,7 +16,7 @@ import com.google.android.gms.tasks.OnTokenCanceledListener
 class WeatherForecastGeoLocator(private val locationListener: GeoLocationListener) {
 
     /**
-     * Define current geo location for [chosenCity], using [context].
+     * Define current geo location using [context].
      */
     fun defineCurrentLocation(context: Context) {
         try {

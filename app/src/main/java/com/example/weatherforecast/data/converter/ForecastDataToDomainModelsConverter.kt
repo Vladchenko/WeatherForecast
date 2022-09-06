@@ -1,8 +1,8 @@
 package com.example.weatherforecast.data.converter
 
 import com.example.weatherforecast.data.util.TemperatureType
-import com.example.weatherforecast.data.util.WeatherForecastUtils.getCelsiusFromKelvinTemperature
-import com.example.weatherforecast.data.util.WeatherForecastUtils.getFahrenheitFromKelvinTemperature
+import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinToCelsiusDegrees
+import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinToFahrenheitDegrees
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 import com.example.weatherforecast.models.domain.Coordinate
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
@@ -46,10 +46,10 @@ class ForecastDataToDomainModelsConverter {
         response: Response<WeatherForecastResponse>
     ) = when (temperatureType) {
         TemperatureType.CELSIUS -> {
-            getCelsiusFromKelvinTemperature(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
+            convertKelvinToCelsiusDegrees(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
         }
         TemperatureType.FAHRENHEIT -> {
-            getFahrenheitFromKelvinTemperature(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
+            convertKelvinToFahrenheitDegrees(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
         }
         TemperatureType.KELVIN -> {
             response.body()!!.main.temp.roundToInt().toString()

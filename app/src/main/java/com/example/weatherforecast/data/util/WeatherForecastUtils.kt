@@ -1,26 +1,26 @@
 package com.example.weatherforecast.data.util
 
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 /**
- * TODO
+ * Utils helper methods.
  */
 object WeatherForecastUtils {
 
     /**
-     *
+     * Convert [kelvinTemp] to celsius degrees.
      */
-    fun getCelsiusFromKelvinTemperature(kelvinTemp: Double) = kelvinTemp - 273.15
+    fun convertKelvinToCelsiusDegrees(kelvinTemp: Double) = kelvinTemp - 273.15
 
     /**
-     *
+     * Convert [kelvinTemp] to fahrenheit degrees.
      */
-    fun getFahrenheitFromKelvinTemperature(kelvinTemp: Double) = 1.8 * (kelvinTemp - 273) + 32.0
+    fun convertKelvinToFahrenheitDegrees(kelvinTemp: Double) = 1.8 * (kelvinTemp - 273) + 32.0
 
     /**
-     *
+     * Format [time] (value in Long) to DATE_FORMAT presentation. Provide an [error] when formatting
+     * is not possible.
      */
     fun getCurrentDate(time: String, error: String): String {
         return try {
@@ -30,5 +30,5 @@ object WeatherForecastUtils {
         }
     }
 
-    private const val DATE_FORMAT = "dd/MM/yyyy"
+    private const val DATE_FORMAT = "dd/MM/yyyy HH:mm:ss"
 }

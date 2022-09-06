@@ -8,6 +8,8 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
+    - Sometimes geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+    throws IOException: dhmg: DEADLINE_EXCEEDED: Deadline exceeded after 4.999926154s.
     - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.
     - TemperatureType is passed all over around. Make it not so.
         - Put it to shared prefs and further, make it data->domain->presentation ?
@@ -32,6 +34,7 @@ TODO:
     - Add unit tests
 
     ?
+    - When I try add coroutines to geo location in view model, it says "inappropriate blocking method call"
     - Should one process a database exceptions
     - Should settings be kept in a separate storage (shared prefs in data->domain->presentation)
     CurrentTimeForecastFragment

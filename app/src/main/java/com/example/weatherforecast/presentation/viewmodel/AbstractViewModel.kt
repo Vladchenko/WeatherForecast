@@ -14,6 +14,7 @@ open class AbstractViewModel(private val app: Application) : AndroidViewModel(ap
     //region livedata fields
     protected val _onShowErrorLiveData: SingleLiveEvent<String> = SingleLiveEvent()
     protected val _onUpdateStatusLiveData: SingleLiveEvent<String> = SingleLiveEvent()
+    protected val _onShowProgressBarLiveData: SingleLiveEvent<Boolean> = SingleLiveEvent()
     //endregion livedata fields
 
     //region livedata getters fields
@@ -22,6 +23,9 @@ open class AbstractViewModel(private val app: Application) : AndroidViewModel(ap
 
     val onUpdateStatusLiveData: LiveData<String>
         get() = _onUpdateStatusLiveData
+
+    val onShowProgressBarLiveData: LiveData<Boolean>
+        get() = _onShowProgressBarLiveData
     //endregion livedata getters fields
 
     /**
