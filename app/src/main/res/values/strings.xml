@@ -3,6 +3,7 @@
     <string name="bad_date_format">Bad date format</string>
     <string name="current_date_example">Current date</string>
     <string name="city_name_example">City name</string>
+    <string name="city_name_is_wrong">City name is wrong, choose another one</string>
     <string name="city_selection_title">City selection</string>
     <string name="city_typing_title">Type city, to provide forecast for:</string>
     <string name="city_typing_hint">First several letters is enough</string>

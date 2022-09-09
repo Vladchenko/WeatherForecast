@@ -17,6 +17,7 @@ import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.network.NetworkMonitor
 import com.example.weatherforecast.presentation.PresentationUtils
+import com.example.weatherforecast.presentation.fragments.cityselection.CitiesNamesUtils.isCityNameValid
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import com.example.weatherforecast.presentation.viewmodel.network.NetworkConnectionViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -117,7 +118,11 @@ class CitiesNamesFragment : Fragment() {
 
     private val clickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
         chosenCity = autoSuggestAdapter.getItem(position)
-        gotoForecastFragment(chosenCity)
+        if (isCityNameValid(chosenCity)) {
+            gotoForecastFragment(chosenCity)
+        } else {
+            showError(getString(R.string.city_name_is_wrong))
+        }
     }
 
     private fun gotoForecastFragment(chosenCity: String) {

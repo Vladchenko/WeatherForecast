@@ -20,15 +20,12 @@ TODO:
         ! Probably, one has to remove fragment
     - When selecting a city and user taps back, the main fragment loads a Kazan forecast, but should just show a dialog on geolocation
     - isNetworkAvailable doesn't check network appearing fast enough
+    - When forecast fails to download, sometimes it calls cities screen for 2 times
+    - As for network connection availability, is there a way to remove double check ?
 
     - Put all texts to string.xml
     - Remove all superfluous Log.d
     - Check statuses
-    - ? Center a toolbar texts
-        Following attributes for toolbar and appbar layout do not help
-                    android:foregroundGravity="center"
-                    android:gravity="center"
-                    android:textAlignment="center"
     - Make data source to return a data not domain model
     - Add "fog", "moderate rain", "light intensity shower rain", "heavy intensity rain" to weather images
     - Add unit tests
@@ -43,3 +40,9 @@ TODO:
     ViewModel
         - What can be moved out of it and how
         - Should AlertDialogs refer to interface, but not to viewModel itself
+
+    - Center a toolbar texts (not a nice idea, after all, I suppose)
+                Following attributes for toolbar and appbar layout do not help
+                            android:foregroundGravity="center"
+                            android:gravity="center"
+                            android:textAlignment="center"

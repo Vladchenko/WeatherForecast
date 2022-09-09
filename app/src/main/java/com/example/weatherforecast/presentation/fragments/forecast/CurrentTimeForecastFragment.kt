@@ -77,7 +77,6 @@ class CurrentTimeForecastFragment : Fragment() {
 
         chosenCity = arguments.chosenCity
         persistenceViewModel.loadSavedCity()
-//        geoLocationViewModel.setChosenCity(chosenCity)
         forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
 
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
@@ -323,7 +322,6 @@ class CurrentTimeForecastFragment : Fragment() {
         val city = getLocation(geoCoder, location)
         toggleProgressBar(false)
         return city
-//        geoLocationViewModel.onDefineCityFromLocation(geoCoder, location)
     }
 
     private fun getLocation(geoCoder: Geocoder, location: Location):String {

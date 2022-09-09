@@ -107,7 +107,13 @@ class GeoLocationViewModel(private val app: Application) : AbstractViewModel(app
     }
 
     override fun onCurrentGeoLocationFail(errorMessage: String) {
-        _onShowErrorLiveData.postValue(errorMessage)
+        Log.e("GeoLocationViewModel",errorMessage)
+        // Since exception is not informative enough for user, replace it with a standard error one.
+        if (errorMessage.contains("permission")) {
+            _onShowErrorLiveData.postValue(app.getString(R.string.geo_location_permission_required))
+        } else {
+            _onShowErrorLiveData.postValue(errorMessage)
+        }
     }
 
     /**

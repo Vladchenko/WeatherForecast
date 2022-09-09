@@ -55,7 +55,7 @@ class CitiesNamesViewModel(
                     _onGetCitiesNamesLiveData.postValue(response)
                 }
             } else {
-                _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
+                _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_city_downloading))
                 // Trying to download a chosen city from database
                 viewModelScope.launch(exceptionHandler) {
                     val result = CitiesNamesDomainModel(
