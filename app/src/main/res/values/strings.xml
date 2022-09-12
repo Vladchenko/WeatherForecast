@@ -12,8 +12,10 @@
     <string name="current_location_defining_text">Current geo location defining…</string>
     <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
     <string name="database_city_downloading">No network connection, database last city has been loaded</string>
-    <string name="database_records_not_found">Database records, matching %s, not found</string>
-    <string name="database_record_for_city_not_found">Forecast for city %s is not present in database</string>
+    <string name="database_entries_not_found">Database records, matching %s, not found</string>
+    <string name="database_entry_loaded">Downloaded from database: city = %1$s, lat = %2$d, lon = %3$d</string>
+    <string name="database_city_loaded">Chosen city loaded from database = %1$s, lat = %2$d, lon = %3$d</string>
+    <string name="database_entry_for_city_not_found">Forecast for city %s is not present in database</string>
     <string name="default_city_absent">City was not defined earlier, cannot load from DB, turn connection on</string>
     <string name="degrees_values">Value of degrees for an air in Celsius of Fahrenheit</string>
     <string name="default_degrees_values">25</string>

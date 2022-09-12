@@ -8,5 +8,10 @@ object CitiesNamesUtils {
     /**
      * Check city name validity
      */
-    fun isCityNameValid(city: String) = city.isNotBlank() && !city.contains(',')
+    fun isCityNameValid(city: String):Boolean {
+        if ((city.length < 3) && city.contains(',')) {
+            return false
+        }
+        return true
+    }
 }

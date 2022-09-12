@@ -76,7 +76,7 @@ class WeatherForecastViewModel(
         if (throwable is NoSuchDatabaseEntryException) {
             _onShowErrorLiveData.postValue(
                 app.applicationContext.getString(
-                    R.string.database_record_for_city_not_found, throwable.message
+                    R.string.database_entry_for_city_not_found, throwable.message
                 )
             )
         }
@@ -99,7 +99,6 @@ class WeatherForecastViewModel(
     private fun getForecastWhenNetworkAvailable(chosenCity: String) {
         if (chosenCity.isNotBlank()) {
             Log.d("WeatherForecastViewModel", "Chosen city is $chosenCity")
-//            this.chosenCity = chosenCity
             downloadWeatherForecastForCityOrGeoLocation(chosenCity)
         } else {
             Log.d("WeatherForecastViewModel", "Chosen city is empty")
@@ -108,7 +107,12 @@ class WeatherForecastViewModel(
                 val cityModel = chosenCityInteractor.loadChosenCityModel()
                 Log.d(
                     "WeatherForecastViewModel",
-                    "Chosen city loaded from database = ${cityModel.city}, lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
+                    app.applicationContext.getString(
+                        R.string.database_city_loaded,
+                        cityModel.city,
+                        cityModel.location.latitude,
+                        cityModel.location.longitude
+                    )
                 )
                 // When there is no loaded city model from database,
                 if (cityModel.city.isBlank()) {
@@ -133,7 +137,12 @@ class WeatherForecastViewModel(
                 val cityModel = chosenCityInteractor.loadChosenCityModel()
                 Log.d(
                     "WeatherForecastViewModel",
-                    "Downloaded from database: city = ${cityModel.city}, lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}" //TODO Move to strings.xml
+                    app.applicationContext.getString(
+                        R.string.database_entry_loaded,
+                        cityModel.city,
+                        cityModel.location.latitude,
+                        cityModel.location.longitude
+                    )
                 )
                 // If it is null, show error
                 if (cityModel.city.isBlank()) {

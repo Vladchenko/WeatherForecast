@@ -28,8 +28,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
 
-    private var chosenCity = ""
-
     private val citiesNamesViewModel by activityViewModels<CitiesNamesViewModel>()
     private val networkConnectionViewModel by activityViewModels<NetworkConnectionViewModel>()
 
@@ -106,7 +104,7 @@ class CitiesNamesFragment : Fragment() {
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            if (!s.isNullOrBlank()) {
+            if (isCityNameValid(s.toString())) {
                 citiesNamesViewModel.getCitiesNamesForMask(s.toString())
             }
         }
@@ -117,7 +115,7 @@ class CitiesNamesFragment : Fragment() {
     }
 
     private val clickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-        chosenCity = autoSuggestAdapter.getItem(position)
+        val chosenCity = autoSuggestAdapter.getItem(position)
         if (isCityNameValid(chosenCity)) {
             gotoForecastFragment(chosenCity)
         } else {

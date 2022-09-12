@@ -68,7 +68,7 @@ class CitiesNamesViewModel(
                     } else {
                         _onShowErrorLiveData.postValue(
                             app.applicationContext.getString(
-                                R.string.database_records_not_found,
+                                R.string.database_entries_not_found,
                                 city
                             )
                         )

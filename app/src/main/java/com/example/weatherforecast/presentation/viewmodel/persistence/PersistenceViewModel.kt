@@ -47,7 +47,7 @@ class PersistenceViewModel(
         if (throwable is NoSuchDatabaseEntryException) {
             _onShowErrorLiveData.postValue(
                 app.applicationContext.getString(
-                    R.string.database_record_for_city_not_found, throwable.message
+                    R.string.database_entry_for_city_not_found, throwable.message
                 )
             )
         }
