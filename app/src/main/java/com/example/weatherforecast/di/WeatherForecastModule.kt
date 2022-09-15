@@ -25,12 +25,10 @@ import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
+import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
-import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
-import com.example.weatherforecast.presentation.viewmodel.network.NetworkConnectionViewModelFactory
-import com.example.weatherforecast.presentation.viewmodel.persistence.PersistenceViewModelFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -153,48 +151,24 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun providePersistenceViewModelFactory(
-        app: Application,
-        chosenCityInteractor: ChosenCityInteractor,
-        weatherForecastLocalInteractor: WeatherForecastLocalInteractor
-    ): PersistenceViewModelFactory {
-        return PersistenceViewModelFactory(
-            app,
-            chosenCityInteractor,
-            weatherForecastLocalInteractor
-        )
-    }
-
-    @Singleton
-    @Provides
-    fun provideGeoLocationViewModelFactory(
-        app: Application
-    ): GeoLocationViewModelFactory {
-        return GeoLocationViewModelFactory(
-            app
-        )
-    }
-
-    @Singleton
-    @Provides
-    fun provideNetworkConnectionViewModelFactory(
-        app: Application
-    ): NetworkConnectionViewModelFactory {
-        return NetworkConnectionViewModelFactory(
-            app
-        )
+    fun provideWeatherForecastGeoLocator(@ApplicationContext context: Context): WeatherForecastGeoLocator {
+        return WeatherForecastGeoLocator(context)
     }
 
     @Singleton
     @Provides
     fun provideViewModelFactory(
         app: Application,
+        geoLocator: WeatherForecastGeoLocator,
         chosenCityInteractor: ChosenCityInteractor,
+        weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
         weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
+            geoLocator,
             chosenCityInteractor,
+            weatherForecastLocalInteractor,
             weatherForecastRemoteInteractor
         )
     }

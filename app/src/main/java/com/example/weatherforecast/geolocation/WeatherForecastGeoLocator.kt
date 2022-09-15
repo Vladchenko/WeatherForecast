@@ -12,35 +12,48 @@ import com.google.android.gms.tasks.OnTokenCanceledListener
 
 /**
  * Defines location of a device.
+ *
+ * @param appContext android.content.Context
  */
-class WeatherForecastGeoLocator(private val locationListener: GeoLocationListener) {
+class WeatherForecastGeoLocator(private val appContext: Context) {
+
+    private var isReleased = false
 
     /**
-     * Define current geo location using [context].
+     * Define current geo location, sending callbacks through [locationListener].
      */
-    fun defineCurrentLocation(context: Context) {
+    fun defineCurrentLocation(locationListener: GeoLocationListener) {
+        if (isReleased) return
         try {
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(appContext)
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
                 override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
                 override fun isCancellationRequested() = false
             }).addOnSuccessListener { location: Location? ->
+                if (isReleased) return@addOnSuccessListener
                 Log.d("WeatherForecastGeoLocator", location.toString())
                 if (location == null) {
-                    locationListener.onCurrentGeoLocationFail(context.getString(R.string.geo_location_fail_error_text))
+                    locationListener.onCurrentGeoLocationFail(appContext.getString(R.string.geo_location_fail_error_text))
                 } else {
                     Log.d("WeatherForecastGeoLocator", location.toString())
                     locationListener.onCurrentGeoLocationSuccess(location)
                 }
             }.addOnFailureListener {
-                Log.e("WeatherForecastGeoLocator",it.message.toString())
-                locationListener.onCurrentGeoLocationFail(it.message?:"")
+                if (isReleased) return@addOnFailureListener
+                Log.e("WeatherForecastGeoLocator", it.message.toString())
+                locationListener.onCurrentGeoLocationFail(it.message ?: "")
             }.addOnCanceledListener {
+                if (isReleased) return@addOnCanceledListener
+
                 Log.e("WeatherForecastGeoLocator", "Cancelled")
-                locationListener.onCurrentGeoLocationFail(context.getString(R.string.city_locating_cancelled))
+                locationListener.onCurrentGeoLocationFail(appContext.getString(R.string.city_locating_cancelled))
             }
         } catch (sec: SecurityException) {
             locationListener.onNoGeoLocationPermission()
         }
+    }
+
+    fun release() {
+        isReleased = true
     }
 }

@@ -19,7 +19,6 @@ import com.example.weatherforecast.network.NetworkMonitor
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.fragments.cityselection.CitiesNamesUtils.isCityNameValid
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
-import com.example.weatherforecast.presentation.viewmodel.network.NetworkConnectionViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -29,7 +28,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
 
     private val citiesNamesViewModel by activityViewModels<CitiesNamesViewModel>()
-    private val networkConnectionViewModel by activityViewModels<NetworkConnectionViewModel>()
 
     private lateinit var autoSuggestAdapter: AutoSuggestAdapter
     private lateinit var fragmentDataBinding: FragmentCitiesNamesBinding
@@ -50,24 +48,24 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
-        networkConnectionViewModel.checkNetworkAvailability()
+//        networkConnectionViewModel.checkNetworkAvailability() //TODO Has to be removed
         //TODO Is this instantiating correct ?
-        NetworkMonitor(requireContext(), networkConnectionViewModel)
+        NetworkMonitor(requireContext(), citiesNamesViewModel)
     }
 
     private fun initLiveDataObservers() {
         citiesNamesViewModel.onGetCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
         citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         citiesNamesViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
-        networkConnectionViewModel.onNetworkConnectionAvailableLiveData.observe(viewLifecycleOwner) {
+        citiesNamesViewModel.onNetworkConnectionAvailableLiveData.observe(viewLifecycleOwner) {
             updateStatus(
                 getString(R.string.city_selection_title)
             )
         }
-        networkConnectionViewModel.onNetworkConnectionLostLiveData.observe(viewLifecycleOwner) {
+        citiesNamesViewModel.onNetworkConnectionLostLiveData.observe(viewLifecycleOwner) {
             showError(getString(R.string.network_not_available_error_text))
         }
-        networkConnectionViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) {
+        citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) {
             showError(it)
         }
     }

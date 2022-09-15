@@ -1,0 +1,37 @@
+package com.example.weatherforecast.presentation.fragments.forecast
+
+import android.content.Context
+import android.location.Geocoder
+import android.location.Location
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import java.io.IOException
+import java.util.*
+
+/**
+ * Helper methods for [android.location.Location]
+ *
+ * @param context android.content.Context
+ */
+class GeolocationHelper(
+    private val context: Context
+) {
+    /**
+     * Get area name (i.e. city) by location
+     */
+    suspend fun loadCityByLocation(location: Location): String = with(Dispatchers.IO) {
+        val geoCoder = Geocoder(context, Locale.getDefault())
+
+        var locality = ""
+        while (true) {
+            try {
+                locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+                break
+            } catch (e: IOException) {
+                delay(500)
+                continue
+            }
+        }
+        return locality
+    }
+}

@@ -3,7 +3,7 @@ package com.example.weatherforecast.presentation.alertdialog
 import android.content.Context
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.AlertDialogClickListener
-import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import kotlin.system.exitProcess
 
 /**
@@ -14,7 +14,7 @@ import kotlin.system.exitProcess
  * @param context to get string from app's resources
  */
 class LocationPermissionAlertDialogListenerImpl(
-    val viewModel: GeoLocationViewModel,
+    val viewModel: WeatherForecastViewModel,
     val context: Context
 ) : AlertDialogClickListener {
 

@@ -50,5 +50,7 @@ class WeatherForecastRepositoryImpl(
         }
 
     override suspend fun saveForecast(model: WeatherForecastDomainModel) =
-        weatherForecastLocalDataSource.saveWeatherForecastData(model)
+        withContext(ioDispatcher) {
+            weatherForecastLocalDataSource.saveWeatherForecastData(model)
+        }
 }

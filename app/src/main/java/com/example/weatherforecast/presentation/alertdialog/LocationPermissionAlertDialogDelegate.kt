@@ -3,7 +3,6 @@ package com.example.weatherforecast.presentation.alertdialog
 import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
-import com.example.weatherforecast.presentation.AlertDialogClickListener
 
 /**
  * Shows alert dialog when geo location permission is not granted
@@ -11,7 +10,10 @@ import com.example.weatherforecast.presentation.AlertDialogClickListener
  * @param city to have a weather forecast for
  * @param clickListener for alert dialog
  */
-class LocationPermissionAlertDialogDelegate(private val clickListener: AlertDialogClickListener) {
+class LocationPermissionAlertDialogDelegate(
+    private val onPositiveClick: (String) -> Unit,
+    private val onNegativeClick: () -> Unit
+) {
 
     private lateinit var alertDialog: AlertDialog
 
@@ -21,8 +23,10 @@ class LocationPermissionAlertDialogDelegate(private val clickListener: AlertDial
     fun showAlertDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Geo location permission not granted")
-        builder.setMessage("This app requires geo location permission to find out your location. " +
-                "Please agree to grant permission or quit.")
+        builder.setMessage(
+            "This app requires geo location permission to find out your location. " +
+                "Please agree to grant permission or quit."
+        )
         builder.setPositiveButton(android.R.string.ok) { _dialogInterface, _ ->
             positiveButtonClick(
                 _dialogInterface
@@ -37,12 +41,12 @@ class LocationPermissionAlertDialogDelegate(private val clickListener: AlertDial
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onPositiveClick("")
+        onPositiveClick("")
         dialogInterface.dismiss()
     }
 
     private fun negativeButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onNegativeClick()
+        onNegativeClick()
         dialogInterface.dismiss()
     }
 }

@@ -23,7 +23,7 @@
     <string name="error_text_example">Some error</string>
     <string name="forecast_for_city">Provided for city %s</string>
     <string name="forecast_download_for_city_failed">Downloading weather forecast for a city is not successful, trying for geo location</string>
-    <string name="forecast_downloading_for_city_succeeded">Downloading weather forecast for a city and location is not successful!</string>
+    <string name="forecast_downloading_for_city_succeeded">Downloading remote weather forecast for a city is not successful!</string>
     <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
     <string name="geo_location_no_permission">Permission not granted, app cannot proceed</string>
     <string name="geo_location_permission_denied">Permission denied. You may grant it by clicking permissions in following window and remove it from denied ones. You will be asked to grant permission again next time.</string>

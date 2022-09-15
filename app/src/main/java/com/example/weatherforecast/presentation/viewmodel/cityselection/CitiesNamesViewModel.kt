@@ -10,8 +10,10 @@ import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
+import com.example.weatherforecast.network.NetworkConnectionListener
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
+import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -25,12 +27,18 @@ import kotlinx.coroutines.launch
 class CitiesNamesViewModel(
     private val app: Application,
     private val citiesNamesInteractor: CitiesNamesInteractor,
-) : AbstractViewModel(app) {
-    
-    private val _onGetCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
+) : AbstractViewModel(app), NetworkConnectionListener {
 
     val onGetCitiesNamesLiveData: LiveData<CitiesNamesDomainModel>
         get() = _onGetCitiesNamesLiveData
+    val onNetworkConnectionAvailableLiveData: LiveData<Unit>
+        get() = _onNetworkConnectionAvailableLiveData
+    val onNetworkConnectionLostLiveData: LiveData<Unit>
+        get() = _onNetworkConnectionLostLiveData
+
+    private val _onGetCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
+    private val _onNetworkConnectionAvailableLiveData = SingleLiveEvent<Unit>()
+    private val _onNetworkConnectionLostLiveData = SingleLiveEvent<Unit>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message ?: "")
@@ -87,5 +95,15 @@ class CitiesNamesViewModel(
         viewModelScope.launch(exceptionHandler) {
             citiesNamesInteractor.deleteAllCitiesNames()
         }
+    }
+
+    override fun onNetworkConnectionAvailable() {
+        Log.d("CitiesNamesViewModel", "onNetworkConnectionAvailable")
+        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
+    }
+
+    override fun onNetworkConnectionLost() {
+        Log.d("CitiesNamesViewModel", "onNetworkConnectionLost")
+        _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
     }
 }

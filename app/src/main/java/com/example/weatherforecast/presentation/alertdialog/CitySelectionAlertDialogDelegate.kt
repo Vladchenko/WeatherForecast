@@ -3,16 +3,17 @@ package com.example.weatherforecast.presentation.alertdialog
 import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
-import com.example.weatherforecast.presentation.AlertDialogClickListener
 
 /**
  * Shows alert dialog and processes its buttons clicks
  *
  * @param city to have a weather forecast for
- * @param clickListener for alert dialog
+ * @param onPositiveClick ok button click callback
+ * @param onNegativeClick cancel button click callback
  */
 class CitySelectionAlertDialogDelegate(private val city: String,
-                                       private val clickListener: AlertDialogClickListener) {
+                                       private val onPositiveClick: (String) -> Unit,
+                                       private val onNegativeClick: () -> Unit) {
 
     private lateinit var alertDialog: AlertDialog
 
@@ -32,12 +33,12 @@ class CitySelectionAlertDialogDelegate(private val city: String,
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onPositiveClick(city)
+        onPositiveClick(city)
         dialogInterface.dismiss()
     }
 
     private fun negativeButtonClick(dialogInterface: DialogInterface) {
-        clickListener.onNegativeClick()
+        onNegativeClick()
         dialogInterface.dismiss()
     }
 }
