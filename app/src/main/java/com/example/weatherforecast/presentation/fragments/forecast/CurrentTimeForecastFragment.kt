@@ -25,7 +25,6 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils.animateFadeOut
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubtitleFontSize
-import com.example.weatherforecast.presentation.alertdialog.GeoLocationAlertDialogDelegate
 import com.example.weatherforecast.presentation.fragments.cityselection.CityClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,8 +51,6 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
 
     private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
-
-    private var geoLocationAlertDialogDelegate: GeoLocationAlertDialogDelegate? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -102,7 +99,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
                 onPositiveClick = {
                     forecastViewModel.onUpdateStatus(
                         getString(
-                            R.string.network_forecast_downloading_for_city_text,
+                            R.string.forecast_downloading_for_city_text,
                             it
                         )
                     )
@@ -201,12 +198,6 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
             city,
             geoCoder.getFromLocationName(city, 1).first().toLocation()
         )
-    }
-
-    private fun defineCityByGeoLocation(location: Location) = lifecycleScope.launchWhenCreated {
-        val locality = geolocationHelper.loadCityByLocation(location)
-        Log.d("CurrentTimeForecastFragment", "City for $location is defined as $locality")
-        forecastViewModel.onDefineCityByGeoLocationSuccess(locality, location)
     }
 
     private fun defineCityByCurrentLocation(location: Location) = lifecycleScope.launchWhenCreated {

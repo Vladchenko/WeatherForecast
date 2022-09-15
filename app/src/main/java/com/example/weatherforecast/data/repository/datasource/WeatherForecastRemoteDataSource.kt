@@ -11,10 +11,10 @@ interface WeatherForecastRemoteDataSource {
     /**
      * Receives data, having [city] as a request parameter.
      */
-    suspend fun getWeatherForecastDataForCity(city: String): Response<WeatherForecastResponse>
+    suspend fun loadWeatherForecastDataForCity(city: String): Response<WeatherForecastResponse>
 
     /**
      * Receives data, having [latitude] and [longitude] as a request parameter.
      */
-    suspend fun getWeatherForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse>
+    suspend fun loadWeatherForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse>
 }

@@ -10,12 +10,22 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
  */
 class WeatherForecastRemoteInteractor(private val weatherForecastRepository: WeatherForecastRepository) {
 
-    suspend fun loadRemoteForecastForCity(temperatureType: TemperatureType, city: String): WeatherForecastDomainModel {
-        return weatherForecastRepository.loadRemoteForecastForCity(temperatureType, city)
+    suspend fun loadForecastForCity(
+        temperatureType: TemperatureType,
+        city: String
+    ): Result<WeatherForecastDomainModel> {
+        return weatherForecastRepository.loadForecastForCity(temperatureType, city)
     }
 
-    suspend fun loadRemoteForecastForLocation(temperatureType: TemperatureType, latitude: Double, longitude: Double)
-        : WeatherForecastDomainModel {
-        return weatherForecastRepository.loadRemoteForecastForLocation(temperatureType, latitude, longitude)
+    suspend fun loadRemoteForecastForLocation(
+        temperatureType: TemperatureType,
+        latitude: Double,
+        longitude: Double
+    ): WeatherForecastDomainModel {
+        return weatherForecastRepository.loadRemoteForecastForLocation(
+            temperatureType,
+            latitude,
+            longitude
+        )
     }
 }

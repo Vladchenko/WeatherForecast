@@ -41,3 +41,79 @@ TODO:
                             android:foregroundGravity="center"
                             android:gravity="center"
                             android:textAlignment="center"
+
+
+    private fun downloadForecastWhenNetworkAvailable(chosenCity: String) {
+        if (chosenCity.isNotBlank()) {
+            Log.d("WeatherForecastViewModel", "Chosen city is $chosenCity")
+            downloadWeatherForecastForCityOrGeoLocation(chosenCity)
+        } else {
+            Log.d("WeatherForecastViewModel", "Chosen city is empty")
+            // Try loading a city model from DB
+            viewModelScope.launch(exceptionHandler) {
+                val cityModel = chosenCityInteractor.loadChosenCityModel()
+                Log.d(
+                    "WeatherForecastViewModel",
+                    app.applicationContext.getString(
+                        R.string.database_city_loaded,
+                        cityModel.city,
+                        cityModel.location.latitude,
+                        cityModel.location.longitude
+                    )
+                )
+                // When there is no loaded city model from database,
+                if (cityModel.city.isBlank()) {
+                    // Define local city and try downloading a forecast for it
+                    _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.current_location_defining_text))
+                    _onShowProgressBarLiveData.postValue(true)
+                    // Following row defines a city and displays an alert
+                    defineCurrentGeoLocation()
+                } else {
+                    downloadWeatherForecastForCityOrGeoLocation(cityModel.city)
+                }
+            }
+        }
+    }
+
+    private fun downloadForecastWhenNetworkNotAvailable(chosenCity: String) {
+        if (chosenCity.isBlank()) {
+            // Try loading a city model from DB
+            viewModelScope.launch(exceptionHandler) {
+                val cityModel = chosenCityInteractor.loadChosenCityModel()
+                Log.d(
+                    "WeatherForecastViewModel",
+                    app.applicationContext.getString(
+                        R.string.database_entry_loaded,
+                        cityModel.city,
+                        cityModel.location.latitude,
+                        cityModel.location.longitude
+                    )
+                )
+                // If it is null, show error
+                if (cityModel.city.isBlank()) {
+                    _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+                } else {
+                    // Else download a forecast from database
+                    downloadLocalForecast(cityModel.city)
+                }
+            }
+        } else {
+            downloadLocalForecast(chosenCity)
+        }
+    }
+
+    fun onNetworkNotAvailable(hasPermissionForGeoLocation: Boolean, city: String) {
+        if (!isNetworkAvailable(app.applicationContext)) {
+            if (!hasPermissionForGeoLocation) {
+                _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+            } else {
+                downloadWeatherForecastForCityOrGeoLocation(city)
+            }
+        }
+    }
+
+    private fun defineCityByGeoLocation(location: Location) = lifecycleScope.launchWhenCreated {
+        val locality = geolocationHelper.loadCityByLocation(location)
+        Log.d("CurrentTimeForecastFragment", "City for $location is defined as $locality")
+        forecastViewModel.onDefineCityByGeoLocationSuccess(locality, location)
+    }
