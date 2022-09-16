@@ -3,7 +3,6 @@ package com.example.weatherforecast.presentation.fragments.forecast
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
@@ -28,7 +27,6 @@ import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubt
 import com.example.weatherforecast.presentation.fragments.cityselection.CityClickListener
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
 import kotlin.system.exitProcess
 
 /**
@@ -57,7 +55,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
 
         chosenCity = arguments.chosenCity
         forecastViewModel.setChosenCity(chosenCity)
-        forecastViewModel.loadSavedCityAndRunNetworkMonitor()   // TODO Ask Alexei
+        forecastViewModel.loadSavedCityAndRunNetworkMonitor()   // TODO Ask about it
         forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
 
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
@@ -190,13 +188,14 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
         findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
     }
 
-    private fun defineLocationByCity(city: String) {
-        val geoCoder = Geocoder(requireContext(), Locale.getDefault())
-        Log.d("CurrentTimeForecastFragment", "city = $city")
-        forecastViewModel.onDefineGeoLocationByCitySuccess(
-            city,
-            geoCoder.getFromLocationName(city, 1).first().toLocation()
-        )
+    private fun defineLocationByCity(city: String) = lifecycleScope.launchWhenCreated {
+        try {
+            val location = geolocationHelper.defineLocationByCity(city)
+            Log.d("CurrentTimeForecastFragment", "Location for city = $city, is $location")
+            forecastViewModel.onDefineGeoLocationByCitySuccess(city, location)
+        } catch (nsee: NoSuchElementException) {
+            showError("Forecast for city $city is not available")
+        }
     }
 
     private fun defineCityByCurrentLocation(location: Location) = lifecycleScope.launchWhenCreated {

@@ -13,19 +13,17 @@ import java.util.*
  *
  * @param context android.content.Context
  */
-class GeolocationHelper(
-    private val context: Context
-) {
+class GeolocationHelper(private val context: Context) {
     /**
-     * Get area name (i.e. city) by location
+     * Get area name (i.e. city) by [location]
      */
     suspend fun loadCityByLocation(location: Location): String = with(Dispatchers.IO) {
         val geoCoder = Geocoder(context, Locale.getDefault())
-
-        var locality = ""
+        var locality: String
         while (true) {
             try {
-                locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+                locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1)
+                    .first().locality
                 break
             } catch (e: IOException) {
                 delay(500)
@@ -33,5 +31,23 @@ class GeolocationHelper(
             }
         }
         return locality
+    }
+
+    /**
+     * Define android.location.Location for [city]
+     */
+    suspend fun defineLocationByCity(city: String): Location = with(Dispatchers.IO) {
+        val geoCoder = Geocoder(context, Locale.getDefault())
+        var location: Location
+        while (true) {
+            try {
+                location = geoCoder.getFromLocationName(city, 1).first().toLocation()
+                break
+            } catch (e: IOException) {
+                delay(500)
+                continue
+            }
+        }
+        return location
     }
 }

@@ -8,15 +8,17 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
-    - When app run for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
-    - Sometimes geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-    throws IOException: dhmg: DEADLINE_EXCEEDED: Deadline exceeded after 4.999926154s.
-        - Ask Alexey if solution for this is ok
+    - When app runs for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
     - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
-    - isNetworkAvailable doesn't check network appearing fast enough
     - When forecast fails to download, sometimes it calls cities screen for 2 times
     - As for network connection availability, is there a way to remove double check ?
+    - Sometimes geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+        throws IOException: dhmg: DEADLINE_EXCEEDED: Deadline exceeded after 4.999926154s.
+            - Seems ok
+    - WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@f309362[WeatherForecastActivity] that was originally added here
+              at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797), when device location permission is asked
+    - App doesn't ask for permission when I remove it, after it was granted before
 
     - Put all texts to string.xml
     - Remove all superfluous Log.d
@@ -25,9 +27,10 @@ TODO:
     - Add unit tests
 
     ?
+    - "Ask about it"
+    - Ask about new Exception in exception handler
     - Network monitor is singleton in DI, but used for 2 viewmodels. Is there a conflict ?
     - Where to keep app settings? Shared prefs / XML / else ?
-    - When I try add coroutines to geo location in view model, it says "inappropriate blocking method call"
     - Should one process a database exceptions
     - Should settings be kept in a separate storage (shared prefs in data->domain->presentation)
     CurrentTimeForecastFragment
@@ -36,6 +39,7 @@ TODO:
     ViewModel
         - What can be moved out of it and how
         - Should AlertDialogs refer to interface, but not to viewModel itself
+            ! No need, since there is only one implementation of viewModel exists
 
     - Center a toolbar texts (not a nice idea, after all, I suppose)
                 Following attributes for toolbar and appbar layout do not help
