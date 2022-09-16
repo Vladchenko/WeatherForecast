@@ -1,5 +1,6 @@
 package com.example.weatherforecast.data.repository
 
+import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
@@ -38,43 +39,11 @@ class WeatherForecastRepositoryImpl(
                     weatherForecastRemoteDataSource.loadWeatherForecastDataForCity(city)
                 )
                 result = Result.success(response)
-            } catch (ex: Exception) {
-                response = weatherForecastLocalDataSource.loadWeatherForecastData(city)
+            } catch (ex: NoInternetException) {
+                response = loadLocalForecast(city)
                 result = Result.success(response.copy(serverError = ex.message.toString()))
             }
             return@withContext result
-        }
-
-    //TODO Might not be needed
-    override suspend fun loadForecastForLocation(
-        temperatureType: TemperatureType,
-        latitude: Double,
-        longitude: Double
-    ): Result<WeatherForecastDomainModel> =
-        withContext(ioDispatcher) {
-//            var response: WeatherForecastDomainModel
-            var result: Result<WeatherForecastDomainModel>? = null
-//            try {
-//                response = modelsConverter.convert(
-//                    temperatureType,
-//                    city,
-//                    weatherForecastRemoteDataSource.loadWeatherForecastForLocation(latitude, longitude)
-//                )
-//                result = Result.success(response)
-//            } catch (ex: Exception) {
-//                response = weatherForecastLocalDataSource.loadWeatherForecastData(latitude, longitude)
-//                result = Result.success(response)
-//            }
-            return@withContext result!!
-        }
-
-    override suspend fun loadRemoteForecastForCity(temperatureType: TemperatureType, city: String) =
-        withContext(ioDispatcher) {
-            modelsConverter.convert(
-                temperatureType,
-                city,
-                weatherForecastRemoteDataSource.loadWeatherForecastDataForCity(city)
-            )
         }
 
     override suspend fun loadRemoteForecastForLocation(

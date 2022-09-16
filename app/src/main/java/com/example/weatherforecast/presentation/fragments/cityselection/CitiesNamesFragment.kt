@@ -48,15 +48,12 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
-//        networkConnectionViewModel.checkNetworkAvailability() //TODO Has to be removed
         //TODO Is this instantiating correct ?
         NetworkMonitor(requireContext(), citiesNamesViewModel)
     }
 
     private fun initLiveDataObservers() {
         citiesNamesViewModel.onGetCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
-        citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
-        citiesNamesViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
         citiesNamesViewModel.onNetworkConnectionAvailableLiveData.observe(viewLifecycleOwner) {
             updateStatus(
                 getString(R.string.city_selection_title)
@@ -65,9 +62,8 @@ class CitiesNamesFragment : Fragment() {
         citiesNamesViewModel.onNetworkConnectionLostLiveData.observe(viewLifecycleOwner) {
             showError(getString(R.string.network_not_available_error_text))
         }
-        citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) {
-            showError(it)
-        }
+        citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        citiesNamesViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
     }
 
     private fun initSearch() {

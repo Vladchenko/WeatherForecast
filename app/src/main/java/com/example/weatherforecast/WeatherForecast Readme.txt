@@ -25,6 +25,7 @@ TODO:
     - Add unit tests
 
     ?
+    - Network monitor is singleton in DI, but used for 2 viewmodels. Is there a conflict ?
     - Where to keep app settings? Shared prefs / XML / else ?
     - When I try add coroutines to geo location in view model, it says "inappropriate blocking method call"
     - Should one process a database exceptions

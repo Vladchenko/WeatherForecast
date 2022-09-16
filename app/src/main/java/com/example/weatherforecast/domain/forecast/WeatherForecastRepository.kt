@@ -18,23 +18,6 @@ interface WeatherForecastRepository {
     ): Result<WeatherForecastDomainModel>
 
     /**
-     * Retrieve weather forecast model for [temperatureType] and [latitude], [longitude]
-     */
-    suspend fun loadForecastForLocation(
-        temperatureType: TemperatureType,
-        latitude: Double,
-        longitude: Double
-    ): Result<WeatherForecastDomainModel>
-
-    /**
-     * Retrieve remote weather forecast model for [temperatureType] and [city]
-     */
-    suspend fun loadRemoteForecastForCity(
-        temperatureType: TemperatureType,
-        city: String
-    ): WeatherForecastDomainModel
-
-    /**
      * Retrieve remote weather forecast model for [temperatureType] and [latitude], [longitude]
      */
     suspend fun loadRemoteForecastForLocation(

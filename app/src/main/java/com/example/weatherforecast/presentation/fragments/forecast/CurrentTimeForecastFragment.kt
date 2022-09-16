@@ -74,18 +74,6 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
     }
 
     private fun initLiveDataObservers() {
-        forecastViewModel.onGetWeatherForecastLiveData.observe(viewLifecycleOwner) {
-            showForecastData(it)
-        }
-        forecastViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
-        forecastViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
-        forecastViewModel.onShowProgressBarLiveData.observe(viewLifecycleOwner) {
-            toggleProgressBar(it)
-        }
-        forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) {
-            defineLocationByCity(it)
-        }
-        forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
         forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
             dialogHelper.showAlertDialogToChooseAnotherCity(
                 it,
@@ -93,6 +81,23 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
                 onNegativeClick = {/*pass*/ }
             )
         }
+        forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) {
+            defineLocationByCity(it)
+        }
+        forecastViewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) {
+            defineCityByCurrentLocation(it)
+        }
+        forecastViewModel.onGetWeatherForecastLiveData.observe(viewLifecycleOwner) {
+            showForecastData(it)
+        }
+        forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
+        forecastViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
+            requestLocationPermission()
+        }
+        forecastViewModel.onRequestPermissionDeniedLiveData.observe(viewLifecycleOwner) {
+            showToastAndOpenAppSettings()
+        }
+        forecastViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         forecastViewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
             dialogHelper.showGeoLocationAlertDialog(
                 it,
@@ -121,16 +126,10 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
                 }
             )
         }
-        forecastViewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) {
-            defineCityByCurrentLocation(it)
+        forecastViewModel.onShowProgressBarLiveData.observe(viewLifecycleOwner) {
+            toggleProgressBar(it)
         }
-        forecastViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
-            requestLocationPermission()
-        }
-        forecastViewModel.onRequestPermissionDeniedLiveData.observe(viewLifecycleOwner) {
-            showToastAndOpenAppSettings()
-        }
-        forecastViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
+        forecastViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
     }
 
     private fun showForecastData(dataModel: WeatherForecastDomainModel) {
