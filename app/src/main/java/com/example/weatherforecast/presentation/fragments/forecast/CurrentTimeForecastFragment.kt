@@ -55,8 +55,8 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
 
         chosenCity = arguments.chosenCity
         forecastViewModel.setChosenCity(chosenCity)
-        forecastViewModel.loadSavedCityAndRunNetworkMonitor()   // TODO Ask about it
         forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
+        forecastViewModel.initWeatherForecast()   // TODO Ask about it
 
         fragmentDataBinding = FragmentCurrentTimeForecastBinding.bind(view)
         initViews()

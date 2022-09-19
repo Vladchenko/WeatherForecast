@@ -55,7 +55,6 @@ class WeatherForecastViewModel(
     private val _onDefineCityByCurrentGeoLocationLiveData = SingleLiveEvent<Location>()
     private val _onDefineCityByCurrentGeoLocationSuccessLiveData = SingleLiveEvent<String>()
     private val _onGotoCitySelectionLiveData = SingleLiveEvent<Unit>()
-    private val _onLocalForecastDownloadedLiveData = SingleLiveEvent<WeatherForecastDomainModel>()
     private val _onRequestPermissionLiveData = SingleLiveEvent<Unit>()
     private val _onRequestPermissionDeniedLiveData = SingleLiveEvent<Unit>()
     private val _onShowLocationPermissionAlertDialogLiveData = SingleLiveEvent<Unit>()
@@ -132,7 +131,10 @@ class WeatherForecastViewModel(
     override fun onNetworkConnectionLost() {
         Log.d("NetworkConnectionViewModel", "onNetworkConnectionLost")
         _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-        downloadWeatherForecastForCityOrGeoLocation(chosenCity)   // TODO Maybe for a savedCity also ?
+        val city = chosenCity.ifBlank {
+            savedCity
+        }
+        downloadWeatherForecastForCityOrGeoLocation(city)
     }
 
     /**
@@ -193,9 +195,9 @@ class WeatherForecastViewModel(
     }
 
     /**
-     * Download previously saved city.
+     * Initialize weather forecast downloading.
      */
-    fun loadSavedCityAndRunNetworkMonitor() =
+    fun initWeatherForecast() =
         viewModelScope.launch(exceptionHandler) {
             val cityModel = chosenCityInteractor.loadChosenCityModel()
             Log.d(
@@ -205,7 +207,7 @@ class WeatherForecastViewModel(
             savedCity = cityModel.city
             NetworkMonitor(app.applicationContext, this@WeatherForecastViewModel)
             // Since NetworkMonitor doesn't check if app started with no inet, following check is required
-            if (!isNetworkAvailable(app.applicationContext)) {
+            if (!isNetworkAvailable(app.applicationContext)) {  //TODO Ask about it
                 requestGeoLocationPermissionOrDownloadWeatherForecast()
             }
         }
@@ -247,19 +249,6 @@ class WeatherForecastViewModel(
                 app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
             )
             processServerResponse(Result.success(result))
-        }
-    }
-
-    /**
-     * Download a local weather forecast for a [city].
-     */
-    private fun downloadLocalForecast(city: String) {
-        viewModelScope.launch(exceptionHandler) {
-            val result = weatherForecastLocalInteractor.loadForecast(city)
-            _onLocalForecastDownloadedLiveData.postValue(result)
-            _onShowWeatherForecastLiveData.postValue(result)
-            Log.d("WeatherForecastViewModel", "Local forecast downloaded $result")
-            _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
         }
     }
 
@@ -344,7 +333,7 @@ class WeatherForecastViewModel(
                 _onRequestPermissionDeniedLiveData.call()
             } else {
                 _onRequestPermissionLiveData.postValue(Unit)
-                Log.d("GeoLocationViewModel", "requestGeoLocationPermission")
+                Log.d("WeatherForecastViewModel", "Geo location permission requested")
             }
         } else {
             if (chosenCity.isBlank()) {
@@ -364,7 +353,7 @@ class WeatherForecastViewModel(
                 locationModel.city,
                 locationModel.location
             )
-            Log.d("PersistenceViewModel", "Chosen city saved to database: ${locationModel.city}")
+            Log.d("WeatherForecastViewModel", "Chosen city saved to database: ${locationModel.city}")
         }
     }
 
@@ -378,7 +367,7 @@ class WeatherForecastViewModel(
             }
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {
-                Log.e("GeoLocationViewModel", errorMessage)
+                Log.e("WeatherForecastViewModel", errorMessage)
                 // Since exception is not informative enough for user, replace it with a standard error one.
                 if (errorMessage.contains("permission")) {
                     _onShowErrorLiveData.postValue(app.getString(R.string.geo_location_permission_required))
@@ -388,7 +377,7 @@ class WeatherForecastViewModel(
             }
 
             override fun onNoGeoLocationPermission() {
-                Log.e("GeoLocationViewModel", "No geo location permission - requesting it")
+                Log.e("WeatherForecastViewModel", "No geo location permission - requesting it")
                 requestGeoLocationPermissionOrLoadForecast()
             }
         })

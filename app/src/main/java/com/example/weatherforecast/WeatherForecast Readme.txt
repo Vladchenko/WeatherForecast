@@ -8,9 +8,10 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
+    - When no inet, one needs to show all the saved cities, but not a filtered ones.
+
     - When app runs for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
     - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.
-    - When no inet, one needs to show all the saved cities, but not a filtered ones.
     - When forecast fails to download, sometimes it calls cities screen for 2 times
     - As for network connection availability, is there a way to remove double check ?
     - Sometimes geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
@@ -19,11 +20,12 @@ TODO:
     - WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@f309362[WeatherForecastActivity] that was originally added here
               at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797), when device location permission is asked
     - App doesn't ask for permission when I remove it, after it was granted before
+    - Location definition alert dialog is shown twice
 
     - Put all texts to string.xml
     - Remove all superfluous Log.d
     - Make data source to return a data not domain model
-    - Add "fog", "moderate rain", "light intensity shower rain", "heavy intensity rain" to weather images
+    - Add "fog", "light intensity shower rain", "heavy intensity rain" to weather images
     - Add unit tests
 
     ?
@@ -47,6 +49,19 @@ TODO:
                             android:gravity="center"
                             android:textAlignment="center"
 
+
+    /**
+     * Download a local weather forecast for a [city].
+     */
+    private fun downloadLocalForecast(city: String) {
+        viewModelScope.launch(exceptionHandler) {
+            val result = weatherForecastLocalInteractor.loadForecast(city)
+            _onLocalForecastDownloadedLiveData.postValue(result)
+            _onShowWeatherForecastLiveData.postValue(result)
+            Log.d("WeatherForecastViewModel", "Local forecast downloaded $result")
+            _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
+        }
+    }
 
     private fun downloadForecastWhenNetworkAvailable(chosenCity: String) {
         if (chosenCity.isNotBlank()) {

@@ -16,7 +16,7 @@ class AlertDialogHelper(
         onPositiveClick: (String) -> Unit,
         onNegativeClick: () -> Unit
     ) {
-        Log.d("CurrentTimeForecastFragment", "Permission not granted AlertDialog shown")
+        Log.d("AlertDialogHelper", "No location permission, respective alertDialog shown")
         val locationPermissionAlertDialogDelegate = LocationPermissionAlertDialogDelegate(
             onPositiveClick = onPositiveClick,
             onNegativeClick = onNegativeClick
@@ -29,7 +29,7 @@ class AlertDialogHelper(
         onPositiveClick: (String) -> Unit,
         onNegativeClick: () -> Unit
     ) {
-        Log.d("CurrentTimeForecastFragment", "Geo location AlertDialog shown")
+        Log.d("AlertDialogHelper", "Current geo location alertDialog shown")
         val geoLocationAlertDialogDelegate = GeoLocationAlertDialogDelegate(
             city,
             onPositiveClick = onPositiveClick,

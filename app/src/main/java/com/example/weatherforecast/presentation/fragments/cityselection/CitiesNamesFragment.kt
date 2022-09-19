@@ -48,7 +48,7 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
-        //TODO Is this instantiating correct ?
+        //TODO Ask about it - is this instantiating correct ?
         NetworkMonitor(requireContext(), citiesNamesViewModel)
     }
 
