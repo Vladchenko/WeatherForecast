@@ -14,9 +14,11 @@ import com.example.weatherforecast.network.NetworkConnectionListener
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * View model (MVVM component) for cities names presentation.
@@ -24,7 +26,8 @@ import kotlinx.coroutines.launch
  * @property app custom [Application] implementation for Hilt.
  * @property citiesNamesInteractor provides domain layer data.
  */
-class CitiesNamesViewModel(
+@HiltViewModel
+class CitiesNamesViewModel @Inject constructor(
     private val app: Application,
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(app), NetworkConnectionListener {

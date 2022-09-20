@@ -23,8 +23,10 @@ import com.example.weatherforecast.network.NetworkMonitor
 import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * View model (MVVM component) for weather forecast presentation.
@@ -35,7 +37,8 @@ import kotlinx.coroutines.launch
  * @param weatherForecastLocalInteractor local forecast data provider
  * @param weatherForecastRemoteInteractor local forecast data provider
  */
-class WeatherForecastViewModel(
+@HiltViewModel
+class WeatherForecastViewModel @Inject constructor(
     private val app: Application,
     private val geoLocator: WeatherForecastGeoLocator,
     private val chosenCityInteractor: ChosenCityInteractor,

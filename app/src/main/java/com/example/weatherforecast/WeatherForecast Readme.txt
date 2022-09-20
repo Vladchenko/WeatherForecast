@@ -21,6 +21,11 @@ TODO:
               at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797), when device location permission is asked
     - App doesn't ask for permission when I remove it, after it was granted before
     - Location definition alert dialog is shown twice
+    - 2022-09-20 15:12:57.064 1722-1722/? E/WeatherForecastViewModel: Kazan
+      2022-09-20 15:12:57.065 1722-1722/? E/WeatherForecastViewModel: Downloading weather forecast for a city failed, trying for geo location
+      2022-09-20 15:12:57.066 1722-1722/? E/WeatherForecastViewModel: com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException: Kazan
+              at com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl.loadWeatherForecastData(WeatherForecastLocalDataSourceImpl.kt:18)
+              at com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl$loadLocalForecast$2.invokeSuspend(WeatherForecastRepositoryImpl.kt:62)
 
     - Put all texts to string.xml
     - Remove all superfluous Log.d
