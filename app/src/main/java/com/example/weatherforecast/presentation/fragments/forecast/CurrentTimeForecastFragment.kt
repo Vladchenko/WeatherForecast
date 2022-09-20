@@ -22,6 +22,7 @@ import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.databinding.FragmentCurrentTimeForecastBinding
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils.animateFadeOut
+import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.PresentationUtils.setToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.fragments.cityselection.CityClickListener
@@ -34,6 +35,8 @@ import kotlin.system.exitProcess
  */
 @AndroidEntryPoint
 class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_forecast) {
+
+    var mainView: View? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
@@ -51,6 +54,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        mainView = view
         super.onViewCreated(view, savedInstanceState)
 
         chosenCity = arguments.chosenCity
@@ -73,11 +77,11 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
 
     private fun initLiveDataObservers() {
         forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
-            dialogHelper.showAlertDialogToChooseAnotherCity(
+            dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
                 it,
                 onPositiveClick = { forecastViewModel.onGotoCitySelection() },
                 onNegativeClick = {/*pass*/ }
-            )
+            ).show().closeWith(mainView!!)
         }
         forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) {
             defineLocationByCity(it)
@@ -97,7 +101,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
         }
         forecastViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         forecastViewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
-            dialogHelper.showGeoLocationAlertDialog(
+            dialogHelper.getGeoLocationAlertDialogBuilder(
                 it,
                 onPositiveClick = {
                     forecastViewModel.onUpdateStatus(
@@ -111,10 +115,10 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
                 onNegativeClick = {
                     forecastViewModel.onGotoCitySelection()
                 }
-            )
+            ).show().closeWith(mainView!!)
         }
         forecastViewModel.onShowLocationPermissionAlertDialogLiveData.observe(viewLifecycleOwner) {
-            dialogHelper.showLocationPermissionAlertDialog(
+            dialogHelper.getLocationPermissionAlertDialogBuilder(
                 onPositiveClick = {
                     forecastViewModel.onUpdateStatus(getString(R.string.geo_location_permission_required))
                     forecastViewModel.requestGeoLocationPermissionOrLoadForecast()
@@ -122,7 +126,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
                 onNegativeClick = {
                     activity?.finish()
                 }
-            )
+            ).show().closeWith(mainView!!)
         }
         forecastViewModel.onShowProgressBarLiveData.observe(viewLifecycleOwner) {
             toggleProgressBar(it)

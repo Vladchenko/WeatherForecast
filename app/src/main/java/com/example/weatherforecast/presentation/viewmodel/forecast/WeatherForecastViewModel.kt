@@ -333,7 +333,7 @@ class WeatherForecastViewModel @Inject constructor(
             _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location_permission_required))
             permissionRequests++
             if (permissionRequests > 2) {
-                _onRequestPermissionDeniedLiveData.call()
+                _onRequestPermissionDeniedLiveData.postValue(Unit)
             } else {
                 _onRequestPermissionLiveData.postValue(Unit)
                 Log.d("WeatherForecastViewModel", "Geo location permission requested")

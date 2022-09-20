@@ -4,7 +4,9 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.res.Resources
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.doOnDetach
 import com.example.weatherforecast.R
 
 /**
@@ -48,6 +50,10 @@ object PresentationUtils {
                     }
                 })
         }
+    }
+
+    fun AlertDialog.closeWith(view:View) {
+        view.doOnDetach { this.cancel() }
     }
 
     const val SHARED_PREFERENCES_KEY = "Shared preferences key"

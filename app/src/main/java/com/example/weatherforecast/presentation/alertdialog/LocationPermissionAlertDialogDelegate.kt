@@ -7,20 +7,18 @@ import androidx.appcompat.app.AlertDialog
 /**
  * Shows alert dialog when geo location permission is not granted
  *
- * @param city to have a weather forecast for
- * @param clickListener for alert dialog
+ * @param onPositiveClick positive click callback
+ * @param onNegativeClick negative click callback
  */
 class LocationPermissionAlertDialogDelegate(
     private val onPositiveClick: (String) -> Unit,
     private val onNegativeClick: () -> Unit
 ) {
 
-    private lateinit var alertDialog: AlertDialog
-
     /**
-     * Show alert dialog using [android.content.Context]
+     * Get alert dialog builder using [android.content.Context]
      */
-    fun showAlertDialog(context: Context) {
+    fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Geo location permission not granted")
         builder.setMessage(
@@ -37,7 +35,7 @@ class LocationPermissionAlertDialogDelegate(
                 _dialogInterface
             )
         }
-        alertDialog = builder.show()
+        return builder
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {

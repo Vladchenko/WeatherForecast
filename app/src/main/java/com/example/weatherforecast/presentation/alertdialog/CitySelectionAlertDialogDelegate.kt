@@ -15,12 +15,10 @@ class CitySelectionAlertDialogDelegate(private val city: String,
                                        private val onPositiveClick: (String) -> Unit,
                                        private val onNegativeClick: () -> Unit) {
 
-    private lateinit var alertDialog: AlertDialog
-
     /**
-     * Show alert dialog using [android.content.Context]
+     * Get alert dialog builder using [android.content.Context]
      */
-    fun showAlertDialog(context: Context) {
+    fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("City forecast failed")
         builder.setMessage("Forecast for city $city is not available, please choose another city")
@@ -29,7 +27,7 @@ class CitySelectionAlertDialogDelegate(private val city: String,
                 _dialogInterface
             )
         }
-        alertDialog = builder.show()
+        return builder
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
