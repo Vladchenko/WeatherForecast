@@ -18,14 +18,11 @@ import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.geolocation.hasPermissionForGeoLocation
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
-import com.example.weatherforecast.network.NetworkConnectionListener
-import com.example.weatherforecast.network.NetworkMonitor
-import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
+import com.example.weatherforecast.presentation.PresentationUtils.REPEAT_INTERVAL
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /**
@@ -44,13 +41,14 @@ class WeatherForecastViewModel @Inject constructor(
     private val chosenCityInteractor: ChosenCityInteractor,
     private val weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
     private val weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
-) : AbstractViewModel(app), NetworkConnectionListener {
+) : AbstractViewModel(app) {
 
     private var savedCity = ""
     private var chosenCity = ""
     private var permissionRequests = 0
     private var chosenLocation = Location("")
     private var temperatureType: TemperatureType? = null
+    private lateinit var weatherForecastDownloadJob: Job
 
     //region livedata fields
     private val _onChosenCityNotFoundLiveData = SingleLiveEvent<String>()
@@ -101,7 +99,11 @@ class WeatherForecastViewModel @Inject constructor(
             _onCityRequestFailedLiveData.postValue(throwable.city)
         }
         if (throwable is NoInternetException) {
-            _onShowErrorLiveData.postValue(throwable.message.toString())
+            _onShowErrorLiveData.postValue(throwable.message)
+            weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO) {
+                delay(REPEAT_INTERVAL)
+                requestGeoLocationPermissionOrDownloadWeatherForecast(false)
+            }
         }
         if (throwable is NoSuchDatabaseEntryException) {
             _onShowErrorLiveData.postValue(
@@ -123,21 +125,6 @@ class WeatherForecastViewModel @Inject constructor(
         throwable.stackTrace.forEach {
             Log.e("WeatherForecastViewModel", it.toString())
         }
-    }
-
-    override fun onNetworkConnectionAvailable() {
-        Log.d("NetworkConnectionViewModel", "onNetworkConnectionAvailable")
-        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
-        requestGeoLocationPermissionOrDownloadWeatherForecast()
-    }
-
-    override fun onNetworkConnectionLost() {
-        Log.d("NetworkConnectionViewModel", "onNetworkConnectionLost")
-        _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-        val city = chosenCity.ifBlank {
-            savedCity
-        }
-        downloadWeatherForecastForCityOrGeoLocation(city)
     }
 
     /**
@@ -176,6 +163,7 @@ class WeatherForecastViewModel @Inject constructor(
      * Go to city selection screen.
      */
     fun onGotoCitySelection() {
+        weatherForecastDownloadJob.cancel()
         _onGotoCitySelectionLiveData.call()
     }
 
@@ -208,22 +196,20 @@ class WeatherForecastViewModel @Inject constructor(
                 "Chosen city loaded from database = ${cityModel.city}, lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
             )
             savedCity = cityModel.city
-            NetworkMonitor(app.applicationContext, this@WeatherForecastViewModel)
-            // Since NetworkMonitor doesn't check if app started with no inet, following check is required
-            if (!isNetworkAvailable(app.applicationContext)) {  //TODO Ask about it
-                requestGeoLocationPermissionOrDownloadWeatherForecast()
-            }
+            requestGeoLocationPermissionOrDownloadWeatherForecast(true)
         }
 
     /**
      * Download weather forecast on a [city].
      */
-    fun downloadWeatherForecastForCityOrGeoLocation(city: String) {
+    fun downloadWeatherForecastForCityOrGeoLocation(city: String, showProgress: Boolean) {
         Log.d(
             "WeatherForecastViewModel",
             app.applicationContext.getString(R.string.forecast_downloading_for_city_text)
         )
-        _onShowProgressBarLiveData.postValue(true)
+        if (showProgress) {
+            _onShowProgressBarLiveData.postValue(true)
+        }
         viewModelScope.launch(exceptionHandler) {
             val result = weatherForecastRemoteInteractor.loadForecastForCity(
                 temperatureType ?: TemperatureType.CELSIUS,
@@ -262,6 +248,9 @@ class WeatherForecastViewModel @Inject constructor(
             val error = result.getOrNull()?.serverError
             if (error?.isNotBlank() == true) {
                 _onShowErrorLiveData.postValue(error)
+                if (error.contains("Unable to resolve host")) {
+                    throw NoInternetException(error)
+                }
             } else {
                 Log.d(
                     "WeatherForecastViewModel",
@@ -293,7 +282,7 @@ class WeatherForecastViewModel @Inject constructor(
      * Requests a geo location or downloads a forecast, depending on a presence of a [chosenCity]
      * or [savedCity], having [temperatureType] provided.
      */
-    private fun requestGeoLocationPermissionOrDownloadWeatherForecast() {
+    private fun requestGeoLocationPermissionOrDownloadWeatherForecast(showProgress: Boolean) {
         Log.d("WeatherForecastViewModel", "chosenCity = $chosenCity, savedCity = $savedCity")
         if (chosenCity.isBlank()
             && savedCity.isBlank()
@@ -303,7 +292,7 @@ class WeatherForecastViewModel @Inject constructor(
             val city = chosenCity.ifBlank {
                 savedCity
             }
-            downloadWeatherForecastForCityOrGeoLocation(city)
+            downloadWeatherForecastForCityOrGeoLocation(city, showProgress)
         }
     }
 
@@ -313,11 +302,11 @@ class WeatherForecastViewModel @Inject constructor(
     private fun loadWeatherForecastForChosenOrSavedCity(chosenCity: String) {
         if (chosenCity.isNotBlank()) {
             // Get weather forecast, when there is a chosen city (from a city selection fragment)
-            downloadWeatherForecastForCityOrGeoLocation(chosenCity)
+            downloadWeatherForecastForCityOrGeoLocation(chosenCity, true)
         } else {
             if (savedCity.isNotBlank()) {
                 // Get weather forecast, when there is a saved city (from a database)
-                downloadWeatherForecastForCityOrGeoLocation(savedCity)
+                downloadWeatherForecastForCityOrGeoLocation(savedCity, true)
             } else {
                 // Else show alert dialog on a city defined by current geo location
                 defineCurrentGeoLocation()
@@ -342,7 +331,7 @@ class WeatherForecastViewModel @Inject constructor(
             if (chosenCity.isBlank()) {
                 defineCurrentGeoLocation()
             } else {
-                downloadWeatherForecastForCityOrGeoLocation(chosenCity)
+                downloadWeatherForecastForCityOrGeoLocation(chosenCity, true)
             }
         }
     }
@@ -356,7 +345,10 @@ class WeatherForecastViewModel @Inject constructor(
                 locationModel.city,
                 locationModel.location
             )
-            Log.d("WeatherForecastViewModel", "Chosen city saved to database: ${locationModel.city}")
+            Log.d(
+                "WeatherForecastViewModel",
+                "Chosen city saved to database: ${locationModel.city}"
+            )
         }
     }
 

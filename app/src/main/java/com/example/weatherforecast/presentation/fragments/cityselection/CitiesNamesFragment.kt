@@ -15,7 +15,6 @@ import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.databinding.FragmentCitiesNamesBinding
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.network.NetworkMonitor
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.fragments.cityselection.CitiesNamesUtils.isCityNameValid
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
@@ -48,20 +47,10 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.subtitle = getString(R.string.city_selection_title)
         initLiveDataObservers()
         initSearch()
-        //TODO Ask about it - is this instantiating correct ?
-        NetworkMonitor(requireContext(), citiesNamesViewModel)
     }
 
     private fun initLiveDataObservers() {
         citiesNamesViewModel.onGetCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
-        citiesNamesViewModel.onNetworkConnectionAvailableLiveData.observe(viewLifecycleOwner) {
-            updateStatus(
-                getString(R.string.city_selection_title)
-            )
-        }
-        citiesNamesViewModel.onNetworkConnectionLostLiveData.observe(viewLifecycleOwner) {
-            showError(getString(R.string.network_not_available_error_text))
-        }
         citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
         citiesNamesViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
     }
@@ -99,6 +88,7 @@ class CitiesNamesFragment : Fragment() {
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             if (isCityNameValid(s.toString())) {
+                citiesNamesViewModel.setCityMask(s.toString())
                 citiesNamesViewModel.getCitiesNamesForMask(s.toString())
             }
         }

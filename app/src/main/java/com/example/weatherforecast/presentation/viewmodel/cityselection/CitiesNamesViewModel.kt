@@ -10,12 +10,12 @@ import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.network.NetworkConnectionListener
-import com.example.weatherforecast.network.NetworkUtils.isNetworkAvailable
+import com.example.weatherforecast.presentation.PresentationUtils.REPEAT_INTERVAL
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
-import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,23 +30,21 @@ import javax.inject.Inject
 class CitiesNamesViewModel @Inject constructor(
     private val app: Application,
     private val citiesNamesInteractor: CitiesNamesInteractor,
-) : AbstractViewModel(app), NetworkConnectionListener {
+) : AbstractViewModel(app) {
 
     val onGetCitiesNamesLiveData: LiveData<CitiesNamesDomainModel>
         get() = _onGetCitiesNamesLiveData
-    val onNetworkConnectionAvailableLiveData: LiveData<Unit>
-        get() = _onNetworkConnectionAvailableLiveData
-    val onNetworkConnectionLostLiveData: LiveData<Unit>
-        get() = _onNetworkConnectionLostLiveData
 
     private val _onGetCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
-    private val _onNetworkConnectionAvailableLiveData = SingleLiveEvent<Unit>()
-    private val _onNetworkConnectionLostLiveData = SingleLiveEvent<Unit>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message ?: "")
         if (throwable is NoInternetException) {
-            _onShowErrorLiveData.postValue(throwable.cause.toString())
+            _onShowErrorLiveData.postValue(throwable.message)
+            viewModelScope.launch(Dispatchers.IO) {
+                delay(REPEAT_INTERVAL)
+                getCitiesNamesForMask(cityMask)
+            }
         }
         if (throwable is NoSuchDatabaseEntryException) {
             _onShowErrorLiveData.postValue("Forecast for city ${throwable.message} is not present in database")
@@ -54,40 +52,42 @@ class CitiesNamesViewModel @Inject constructor(
         _onShowErrorLiveData.postValue(throwable.message ?: "")
     }
 
+    private lateinit var cityMask: String
+
     /**
      * Download a cities names matching string mask [city]
      */
     fun getCitiesNamesForMask(city: String) {
-        Log.d("CitiesNamesViewModel1", city)
+        Log.d("CitiesNamesViewModel", city)
         try {
-            if (isNetworkAvailable(app)) {
-                viewModelScope.launch(exceptionHandler) {
-                    val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
-                    _onGetCitiesNamesLiveData.postValue(response)
-                }
-            } else {
-                _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_city_downloading))
-                // Trying to download a chosen city from database
-                viewModelScope.launch(exceptionHandler) {
-                    val result = CitiesNamesDomainModel(
-                        citiesNamesInteractor.loadLocalCitiesNames(city).toList()
-                    )
-                    Log.d("CitiesNamesViewModel3", result.cities.size.toString())
-                    if (result.cities.isNotEmpty()) {
-                        _onGetCitiesNamesLiveData.postValue(result)
-                        Log.d("CitiesNamesViewModel4", result.cities[0].toString())
-                    } else {
-                        _onShowErrorLiveData.postValue(
-                            app.applicationContext.getString(
-                                R.string.database_entries_not_found,
-                                city
-                            )
-                        )
-                    }
-                }
+            viewModelScope.launch(exceptionHandler) {
+                val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
+                _onGetCitiesNamesLiveData.postValue(response)
             }
         } catch (ex: Exception) {
             _onShowErrorLiveData.postValue(ex.message)
+            // Trying to download a chosen city from database
+            viewModelScope.launch(exceptionHandler) {
+                val result = CitiesNamesDomainModel(
+                    citiesNamesInteractor.loadLocalCitiesNames(city).toList()
+                )
+                Log.d("CitiesNamesViewModel", result.cities.size.toString())
+                if (result.cities.isNotEmpty()) {
+                    _onGetCitiesNamesLiveData.postValue(result)
+                    _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_city_downloading))
+                    Log.d("CitiesNamesViewModel", result.cities[0].toString())
+                } else {
+                    _onShowErrorLiveData.postValue(
+                        app.applicationContext.getString(
+                            R.string.database_entries_not_found,
+                            city
+                        )
+                    )
+                }
+                if (ex is NoInternetException) {
+                    throw ex
+                }
+            }
         }
     }
 
@@ -100,13 +100,7 @@ class CitiesNamesViewModel @Inject constructor(
         }
     }
 
-    override fun onNetworkConnectionAvailable() {
-        Log.d("CitiesNamesViewModel", "onNetworkConnectionAvailable")
-        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
-    }
-
-    override fun onNetworkConnectionLost() {
-        Log.d("CitiesNamesViewModel", "onNetworkConnectionLost")
-        _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+    fun setCityMask(cityMask: String) {
+        this.cityMask = cityMask
     }
 }

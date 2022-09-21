@@ -110,7 +110,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
                             it
                         )
                     )
-                    forecastViewModel.downloadWeatherForecastForCityOrGeoLocation(it)
+                    forecastViewModel.downloadWeatherForecastForCityOrGeoLocation(it, true)
                 },
                 onNegativeClick = {
                     forecastViewModel.onGotoCitySelection()

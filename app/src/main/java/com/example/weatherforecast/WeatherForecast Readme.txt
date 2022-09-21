@@ -36,7 +36,6 @@ TODO:
     ?
     - "Ask about it"
     - Ask about new Exception in exception handler
-    - Network monitor is singleton in DI, but used for 2 viewmodels. Is there a conflict ?
     - Where to keep app settings? Shared prefs / XML / else ?
     - Should one process a database exceptions
     - Should settings be kept in a separate storage (shared prefs in data->domain->presentation)
@@ -54,6 +53,27 @@ TODO:
                             android:gravity="center"
                             android:textAlignment="center"
 
+
+//            NetworkMonitor(app.applicationContext, this@WeatherForecastViewModel)
+            // Since NetworkMonitor doesn't check if app started with no inet, following check is required
+//            if (!isNetworkAvailable(app.applicationContext)) {  //TODO Ask about it
+//                requestGeoLocationPermissionOrDownloadWeatherForecast()
+//            }
+
+    override fun onNetworkConnectionAvailable() {
+        Log.d("NetworkConnectionViewModel", "onNetworkConnectionAvailable")
+        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
+        requestGeoLocationPermissionOrDownloadWeatherForecast()
+    }
+
+    override fun onNetworkConnectionLost() {
+        Log.d("NetworkConnectionViewModel", "onNetworkConnectionLost")
+        _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
+        val city = chosenCity.ifBlank {
+            savedCity
+        }
+        downloadWeatherForecastForCityOrGeoLocation(city)
+    }
 
     /**
      * Download a local weather forecast for a [city].

@@ -56,7 +56,8 @@ object PresentationUtils {
         view.doOnDetach { this.cancel() }
     }
 
-    const val SHARED_PREFERENCES_KEY = "Shared preferences key"
+    const val REPEAT_INTERVAL = 5000L
     private const val ICON_PREFIX = "icon_"
     private const val DRAWABLE_RESOURCE_TYPE = "drawable"
+    const val SHARED_PREFERENCES_KEY = "Shared preferences key"
 }
