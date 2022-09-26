@@ -8,7 +8,8 @@ import com.google.gson.annotations.SerializedName
  * Data model for cities names retrieval.
  */
 data class CitiesNamesDomainModel(
-    val cities: List<CityDomainModel>
+    val cities: List<CityDomainModel>,
+    val error: String
 )
 
 /**

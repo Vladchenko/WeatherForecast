@@ -11,20 +11,25 @@ import retrofit2.Response
 class CitiesNamesDataToDomainConverter {
 
     /**
-     * Convert [dataModel] to domain-layer model
+     * Convert [dataModel] and [error] to domain-layer model
      * @return domain-layer model
      */
-    fun convert(dataModel: Response<List<WeatherForecastCityResponse>>): CitiesNamesDomainModel {
+    fun convert(
+        dataModel: Response<List<WeatherForecastCityResponse>>,
+        error: String
+    ): CitiesNamesDomainModel {
         val converted = CitiesNamesDomainModel(
             if (dataModel.body().isNullOrEmpty()) {
-                listOf(CityDomainModel(
-                    name = "",
-                    lat = 0.0,
-                    lon = 0.0,
-                    country = "",
-                    state = "",
-                    serverError = dataModel.errorBody()?.string()
-                ))
+                listOf(
+                    CityDomainModel(
+                        name = "",
+                        lat = 0.0,
+                        lon = 0.0,
+                        country = "",
+                        state = "",
+                        serverError = dataModel.errorBody()?.string()
+                    )
+                )
             } else {
                 dataModel.body()?.map {
                     CityDomainModel(
@@ -36,7 +41,8 @@ class CitiesNamesDataToDomainConverter {
                         serverError = ""
                     )
                 }
-            }.orEmpty()
+            }.orEmpty(),
+            error
         )
         return converted
     }

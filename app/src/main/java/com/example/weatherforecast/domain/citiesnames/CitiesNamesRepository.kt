@@ -12,7 +12,7 @@ interface CitiesNamesRepository {
     /**
      * Retrieve remote cities names for [token].
      */
-    suspend fun loadRemoteCitiesNames(token: String): CitiesNamesDomainModel
+    suspend fun loadCitiesNames(token: String): CitiesNamesDomainModel
 
     /**
      * Retrieve local cities names for [token].

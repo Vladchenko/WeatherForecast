@@ -39,54 +39,35 @@ class CitiesNamesViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message ?: "")
-        if (throwable is NoInternetException) {
-            _onShowErrorLiveData.postValue(throwable.message)
-            viewModelScope.launch(Dispatchers.IO) {
-                delay(REPEAT_INTERVAL)
-                getCitiesNamesForMask(cityMask)
+        when (throwable) {
+            is NoInternetException -> {
+                _onShowErrorLiveData.postValue(throwable.message)
+                viewModelScope.launch(Dispatchers.IO) {
+                    delay(REPEAT_INTERVAL)
+                    getCitiesNamesForMask(cityMask)
+                }
             }
+            is NoSuchDatabaseEntryException -> {
+                _onShowErrorLiveData.postValue("Forecast for city ${throwable.message} is not present in database")
+            }
+            is Exception -> _onShowErrorLiveData.postValue(throwable.message)
         }
-        if (throwable is NoSuchDatabaseEntryException) {
-            _onShowErrorLiveData.postValue("Forecast for city ${throwable.message} is not present in database")
-        }
-        _onShowErrorLiveData.postValue(throwable.message ?: "")
     }
 
     private lateinit var cityMask: String
 
     /**
-     * Download a cities names matching string mask [city]
+     * Download a cities names beginning with string mask [city]
      */
     fun getCitiesNamesForMask(city: String) {
         Log.d("CitiesNamesViewModel", city)
-        try {
-            viewModelScope.launch(exceptionHandler) {
-                val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
+        viewModelScope.launch(exceptionHandler) {
+            val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
+            _onGetCitiesNamesLiveData.postValue(response)
+            if (response.error.contains("Unable to resolve host")) {
                 _onGetCitiesNamesLiveData.postValue(response)
-            }
-        } catch (ex: Exception) {
-            _onShowErrorLiveData.postValue(ex.message)
-            // Trying to download a chosen city from database
-            viewModelScope.launch(exceptionHandler) {
-                val result = CitiesNamesDomainModel(
-                    citiesNamesInteractor.loadLocalCitiesNames(city).toList()
-                )
-                Log.d("CitiesNamesViewModel", result.cities.size.toString())
-                if (result.cities.isNotEmpty()) {
-                    _onGetCitiesNamesLiveData.postValue(result)
-                    _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_city_downloading))
-                    Log.d("CitiesNamesViewModel", result.cities[0].toString())
-                } else {
-                    _onShowErrorLiveData.postValue(
-                        app.applicationContext.getString(
-                            R.string.database_entries_not_found,
-                            city
-                        )
-                    )
-                }
-                if (ex is NoInternetException) {
-                    throw ex
-                }
+                Log.d("CitiesNamesViewModel", response.cities[0].toString())
+                throw NoInternetException(app.applicationContext.getString(R.string.database_city_downloading))
             }
         }
     }

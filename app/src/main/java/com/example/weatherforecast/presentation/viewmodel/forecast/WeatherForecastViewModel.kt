@@ -93,34 +93,36 @@ class WeatherForecastViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("WeatherForecastViewModel", throwable.message ?: "")
-        if (throwable is CityNotFoundException) {
-            _onShowErrorLiveData.postValue(throwable.message)
-            // Try downloading a forecast by location
-            _onCityRequestFailedLiveData.postValue(throwable.city)
-        }
-        if (throwable is NoInternetException) {
-            _onShowErrorLiveData.postValue(throwable.message)
-            weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO) {
-                delay(REPEAT_INTERVAL)
-                requestGeoLocationPermissionOrDownloadWeatherForecast(false)
+        when(throwable) {
+            is CityNotFoundException -> {
+                _onShowErrorLiveData.postValue(throwable.message)
+                // Try downloading a forecast by location
+                _onCityRequestFailedLiveData.postValue(throwable.city)
             }
-        }
-        if (throwable is NoSuchDatabaseEntryException) {
-            _onShowErrorLiveData.postValue(
-                app.applicationContext.getString(
-                    R.string.database_entry_for_city_not_found, throwable.message
+            is NoInternetException -> {
+                _onShowErrorLiveData.postValue(throwable.message)
+                weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO) {
+                    delay(REPEAT_INTERVAL)
+                    requestGeoLocationPermissionOrDownloadWeatherForecast(false)
+                }
+            }
+            is NoSuchDatabaseEntryException -> {
+                _onShowErrorLiveData.postValue(
+                    app.applicationContext.getString(
+                        R.string.database_entry_for_city_not_found, throwable.message
+                    )
                 )
-            )
-        }
-        if (throwable is Exception) {   //TODO Ask about it
-            Log.e(
-                "WeatherForecastViewModel",
-                app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
-            )
-            Log.e("WeatherForecastViewModel", throwable.stackTraceToString())
-            _onShowErrorLiveData.postValue(throwable.message)
-            //In fact, defines location and loads forecast for it
-            _onCityRequestFailedLiveData.postValue(chosenCity)
+            }
+            else  -> {
+                Log.e(
+                    "WeatherForecastViewModel",
+                    app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
+                )
+                Log.e("WeatherForecastViewModel", throwable.stackTraceToString())
+                _onShowErrorLiveData.postValue(throwable.message)
+                //In fact, defines location and loads forecast for it
+                _onCityRequestFailedLiveData.postValue(chosenCity)
+            }
         }
         throwable.stackTrace.forEach {
             Log.e("WeatherForecastViewModel", it.toString())
@@ -205,7 +207,7 @@ class WeatherForecastViewModel @Inject constructor(
     fun downloadWeatherForecastForCityOrGeoLocation(city: String, showProgress: Boolean) {
         Log.d(
             "WeatherForecastViewModel",
-            app.applicationContext.getString(R.string.forecast_downloading_for_city_text)
+            app.applicationContext.getString(R.string.forecast_downloading_for_city_text, city)
         )
         if (showProgress) {
             _onShowProgressBarLiveData.postValue(true)
@@ -249,7 +251,7 @@ class WeatherForecastViewModel @Inject constructor(
             if (error?.isNotBlank() == true) {
                 _onShowErrorLiveData.postValue(error)
                 if (error.contains("Unable to resolve host")) {
-                    throw NoInternetException(error)
+                    throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
                 }
             } else {
                 Log.d(

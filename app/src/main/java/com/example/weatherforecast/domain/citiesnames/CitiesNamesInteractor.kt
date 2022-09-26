@@ -15,7 +15,7 @@ class CitiesNamesInteractor(private val citiesNamesRepository: CitiesNamesReposi
      * Retrieve remote cities names matching [token].
      */
     suspend fun loadRemoteCitiesNames(token: String): CitiesNamesDomainModel {
-        return citiesNamesRepository.loadRemoteCitiesNames(token)
+        return citiesNamesRepository.loadCitiesNames(token)
     }
 
     /**
