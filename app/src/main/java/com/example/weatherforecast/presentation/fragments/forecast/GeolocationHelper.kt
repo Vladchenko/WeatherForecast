@@ -3,6 +3,7 @@ package com.example.weatherforecast.presentation.fragments.forecast
 import android.content.Context
 import android.location.Geocoder
 import android.location.Location
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import java.io.IOException
@@ -23,10 +24,11 @@ class GeolocationHelper(private val context: Context) {
         while (true) {
             try {
                 locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1)
-                    .first().locality
+                    ?.first()?.locality ?: ""
                 break
-            } catch (e: IOException) {
+            } catch (ex: IOException) {
                 delay(500)
+                Log.e("GeoLocationHelper", ex.toString())
                 continue
             }
         }
@@ -41,7 +43,8 @@ class GeolocationHelper(private val context: Context) {
         var location: Location
         while (true) {
             try {
-                location = geoCoder.getFromLocationName(city, 1).first().toLocation()
+                location =
+                    geoCoder.getFromLocationName(city, 1)?.first()?.toLocation() ?: Location("")
                 break
             } catch (e: IOException) {
                 delay(500)

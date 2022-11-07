@@ -8,6 +8,7 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
+    - Work out a case, when city not defined for first app running
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
 
     - When app runs for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
