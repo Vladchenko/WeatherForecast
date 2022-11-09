@@ -15,7 +15,7 @@ class CityApprovalAlertDialogListenerImpl(
 ) : AlertDialogClickListener {
 
     override fun onPositiveClick(city: String) {
-        viewModel.onUpdateStatus(context.getString(R.string.forecast_downloading_for_city_text, city))
+        viewModel.onShowStatus(context.getString(R.string.forecast_downloading_for_city_text, city))
         viewModel.downloadWeatherForecastForCityOrGeoLocation(city, true)
     }
 

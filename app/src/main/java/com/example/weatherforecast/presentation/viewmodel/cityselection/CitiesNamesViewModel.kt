@@ -16,7 +16,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,16 +40,16 @@ class CitiesNamesViewModel @Inject constructor(
         Log.e("CitiesNamesViewModel", throwable.message ?: "")
         when (throwable) {
             is NoInternetException -> {
-                _onShowErrorLiveData.postValue(throwable.message)
+                onShowError(throwable.message.toString())
                 viewModelScope.launch(Dispatchers.IO) {
                     delay(REPEAT_INTERVAL)
                     getCitiesNamesForMask(cityMask)
                 }
             }
             is NoSuchDatabaseEntryException -> {
-                _onShowErrorLiveData.postValue("Forecast for city ${throwable.message} is not present in database")
+                onShowError("Forecast for city ${throwable.message} is not present in database")
             }
-            is Exception -> _onShowErrorLiveData.postValue(throwable.message)
+            is Exception -> onShowError(throwable.message.toString())
         }
     }
 

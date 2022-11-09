@@ -52,7 +52,7 @@ class CitiesNamesFragment : Fragment() {
     private fun initLiveDataObservers() {
         citiesNamesViewModel.onGetCitiesNamesLiveData.observe(viewLifecycleOwner) { showCitiesList(it) }
         citiesNamesViewModel.onShowErrorLiveData.observe(viewLifecycleOwner) { showError(it) }
-        citiesNamesViewModel.onUpdateStatusLiveData.observe(viewLifecycleOwner) { updateStatus(it) }
+        citiesNamesViewModel.onShowStatusLiveData.observe(viewLifecycleOwner) { showStatus(it) }
     }
 
     private fun initSearch() {
@@ -69,14 +69,14 @@ class CitiesNamesFragment : Fragment() {
         fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorAccent))
     }
 
-    private fun updateStatus(statusMessage: String) {
+    private fun showStatus(statusMessage: String) {
         fragmentDataBinding.toolbar.subtitle = statusMessage
         PresentationUtils.setToolbarSubtitleFontSize(fragmentDataBinding.toolbar, statusMessage)
         fragmentDataBinding.toolbar.setBackgroundColor((activity as Context).getColor(R.color.colorPrimary))
     }
 
     private fun showCitiesList(citiesModel: CitiesNamesDomainModel) {
-        updateStatus(getString(R.string.choose_city_from_dropdown))
+        showStatus(getString(R.string.choose_city_from_dropdown))
         autoSuggestAdapter.setData(citiesModel.cities)
         autoSuggestAdapter.notifyDataSetChanged()
     }

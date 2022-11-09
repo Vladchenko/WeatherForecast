@@ -8,8 +8,10 @@ Test request on a following link - http://api.openweathermap.org/data/2.5/weathe
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
+    - Add a ? picture for a case when a weather type image is not defined
     - Work out a case, when city not defined for first app running
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
+    - Remove unused classes, say some ListenerImpls
 
     - When app runs for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
     - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.
@@ -31,7 +33,7 @@ TODO:
     - Put all texts to string.xml
     - Remove all superfluous Log.d
     - Make data source to return a data not domain model
-    - Add "fog", "light intensity shower rain", "heavy intensity rain" to weather images
+    - Add "fog", "light intensity shower rain", "heavy intensity rain", "thunderstorm with light rain" to weather images
     - Add unit tests
 
     ?

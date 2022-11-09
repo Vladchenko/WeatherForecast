@@ -3,6 +3,8 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 import android.app.Application
 import android.location.Location
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
@@ -50,6 +52,8 @@ class WeatherForecastViewModel @Inject constructor(
     private var temperatureType: TemperatureType? = null
     private lateinit var weatherForecastDownloadJob: Job
 
+    val dataModelState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
+
     //region livedata fields
     private val _onChosenCityNotFoundLiveData = SingleLiveEvent<String>()
     private val _onCityRequestFailedLiveData = SingleLiveEvent<String>()
@@ -59,7 +63,6 @@ class WeatherForecastViewModel @Inject constructor(
     private val _onRequestPermissionLiveData = SingleLiveEvent<Unit>()
     private val _onRequestPermissionDeniedLiveData = SingleLiveEvent<Unit>()
     private val _onShowLocationPermissionAlertDialogLiveData = SingleLiveEvent<Unit>()
-    private val _onShowWeatherForecastLiveData = SingleLiveEvent<WeatherForecastDomainModel>()
     //endregion livedata fields
 
     //region livedata getters fields
@@ -74,9 +77,6 @@ class WeatherForecastViewModel @Inject constructor(
 
     val onGotoCitySelectionLiveData: LiveData<Unit>
         get() = _onGotoCitySelectionLiveData
-
-    val onGetWeatherForecastLiveData: LiveData<WeatherForecastDomainModel>
-        get() = _onShowWeatherForecastLiveData
 
     val onRequestPermissionLiveData: LiveData<Unit>
         get() = _onRequestPermissionLiveData
@@ -95,19 +95,19 @@ class WeatherForecastViewModel @Inject constructor(
         Log.e("WeatherForecastViewModel", throwable.message ?: "")
         when(throwable) {
             is CityNotFoundException -> {
-                _onShowErrorLiveData.postValue(throwable.message)
+                onShowError(throwable.message)
                 // Try downloading a forecast by location
                 _onCityRequestFailedLiveData.postValue(throwable.city)
             }
             is NoInternetException -> {
-                _onShowErrorLiveData.postValue(throwable.message)
+                onShowError(throwable.message.toString())
                 weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO) {
                     delay(REPEAT_INTERVAL)
                     requestGeoLocationPermissionOrDownloadWeatherForecast(false)
                 }
             }
             is NoSuchDatabaseEntryException -> {
-                _onShowErrorLiveData.postValue(
+                onShowError(
                     app.applicationContext.getString(
                         R.string.database_entry_for_city_not_found, throwable.message
                     )
@@ -119,7 +119,7 @@ class WeatherForecastViewModel @Inject constructor(
                     app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
                 )
                 Log.e("WeatherForecastViewModel", throwable.stackTraceToString())
-                _onShowErrorLiveData.postValue(throwable.message)
+                onShowError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
                 _onCityRequestFailedLiveData.postValue(chosenCity)
             }
@@ -157,7 +157,7 @@ class WeatherForecastViewModel @Inject constructor(
             Log.d("WeatherForecastViewModel", "City and its location saved successfully.")
             downloadWeatherForecastForLocation(cityModel)
         } catch (ex: Exception) {
-            _onShowErrorLiveData.postValue(ex.message)
+            onShowError(ex.message.toString())
         }
     }
 
@@ -182,7 +182,7 @@ class WeatherForecastViewModel @Inject constructor(
             )
             loadWeatherForecastForChosenOrSavedCity(chosenCity)
         } else {
-            _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.geo_location_no_permission))
+            onShowError(app.applicationContext.getString(R.string.geo_location_no_permission))
             _onShowLocationPermissionAlertDialogLiveData.call()
         }
     }
@@ -210,7 +210,7 @@ class WeatherForecastViewModel @Inject constructor(
             app.applicationContext.getString(R.string.forecast_downloading_for_city_text, city)
         )
         if (showProgress) {
-            _onShowProgressBarLiveData.postValue(true)
+            showProgressBarState.value = true
         }
         viewModelScope.launch(exceptionHandler) {
             val result = weatherForecastRemoteInteractor.loadForecastForCity(
@@ -226,7 +226,7 @@ class WeatherForecastViewModel @Inject constructor(
             "WeatherForecastViewModel",
             app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
         )
-        _onShowProgressBarLiveData.postValue(true)
+        showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             var result = weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
                 temperatureType ?: TemperatureType.CELSIUS,
@@ -246,10 +246,12 @@ class WeatherForecastViewModel @Inject constructor(
     private fun processServerResponse(result: Result<WeatherForecastDomainModel>) {
         if (result.isSuccess) {
             Log.d("WeatherForecastViewModel", result.toString())
-            _onShowWeatherForecastLiveData.postValue(result.getOrNull())
+            dataModelState.value = result.getOrNull()
+            showProgressBarState.value = false
+            onShowStatus(app.getString(R.string.forecast_for_city, dataModelState.value?.city))
             val error = result.getOrNull()?.serverError
             if (error?.isNotBlank() == true) {
-                _onShowErrorLiveData.postValue(error)
+                onShowError(error)
                 if (error.contains("Unable to resolve host")) {
                     throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
                 }
@@ -270,7 +272,7 @@ class WeatherForecastViewModel @Inject constructor(
                 )
             }
         } else {
-            _onShowErrorLiveData.postValue(result.getOrNull()?.serverError)
+            onShowError(result.getOrNull()?.serverError.toString())
             Log.e(
                 "WeatherForecastViewModel",
                 result.getOrNull()?.serverError ?: "No error description"
@@ -321,7 +323,7 @@ class WeatherForecastViewModel @Inject constructor(
      */
     fun requestGeoLocationPermissionOrLoadForecast() {
         if (!hasPermissionForGeoLocation(app.applicationContext)) {
-            _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.geo_location_permission_required))
+            onShowStatus(app.applicationContext.getString(R.string.geo_location_permission_required))
             permissionRequests++
             if (permissionRequests > 2) {
                 _onRequestPermissionDeniedLiveData.postValue(Unit)
@@ -355,21 +357,21 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun defineCurrentGeoLocation() {
-        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.current_location_defining_text))
+        onShowStatus(app.applicationContext.getString(R.string.current_location_defining_text))
         geoLocator.defineCurrentLocation(object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
                 this@WeatherForecastViewModel.chosenLocation = location
                 _onDefineCityByCurrentGeoLocationLiveData.postValue(location)
-                _onShowProgressBarLiveData.postValue(false)
+                showProgressBarState.value = false
             }
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {
                 Log.e("WeatherForecastViewModel", errorMessage)
                 // Since exception is not informative enough for user, replace it with a standard error one.
                 if (errorMessage.contains("permission")) {
-                    _onShowErrorLiveData.postValue(app.getString(R.string.geo_location_permission_required))
+                    onShowError(app.getString(R.string.geo_location_permission_required))
                 } else {
-                    _onShowErrorLiveData.postValue(errorMessage)
+                    onShowError(errorMessage)
                 }
             }
 
