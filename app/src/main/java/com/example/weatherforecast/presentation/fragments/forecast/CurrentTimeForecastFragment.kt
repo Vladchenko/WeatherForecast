@@ -32,7 +32,7 @@ import kotlin.system.exitProcess
  * Fragment representing a weather forecast for current time.
  */
 @AndroidEntryPoint
-class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_forecast) {
+class CurrentTimeForecastFragment : Fragment() {
 
     var mainView: View? = null
 
@@ -54,6 +54,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        forecastViewModel.toolbarSubtitleState.value = getString(R.string.forecast_downloading_for_city_text)
         return ComposeView(requireContext()).apply {
             setContent {
                 CurrentTimeForecastLayout(
@@ -69,7 +70,10 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
                         forecastViewModel.dataModelState.value?.weatherType.orEmpty()
                     ),
                     onCityClick = {
-                        findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
+                        gotoCitySelectionScreen()
+                    },
+                    onBackClick = {
+                        activity?.finish()
                     },
                     viewModel = forecastViewModel
                 )
@@ -103,7 +107,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
         forecastViewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) {
             defineCityByCurrentLocation(it)
         }
-        forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelection() }
+        forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelectionScreen() }
         forecastViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
             requestLocationPermission()
         }
@@ -164,7 +168,7 @@ class CurrentTimeForecastFragment : Fragment(R.layout.fragment_current_time_fore
         ).show()
     }
 
-    private fun gotoCitySelection() {
+    private fun gotoCitySelectionScreen() {
         findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
     }
 

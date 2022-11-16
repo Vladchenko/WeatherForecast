@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
-import kotlin.system.exitProcess
 
 /**
  * Layout for a main screen fragment
@@ -37,6 +36,7 @@ fun CurrentTimeForecastLayout(
     mainContentTextColor: Color,
     @DrawableRes weatherImageId: Int,
     onCityClick: (() -> Unit),
+    onBackClick: () -> Unit,
     viewModel: WeatherForecastViewModel
 ) {
     Scaffold(
@@ -59,7 +59,7 @@ fun CurrentTimeForecastLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { exitProcess(0) }) {
+                    IconButton(onClick = onBackClick) {
                         Icon(Icons.Filled.ArrowBack, "backIcon")
                     }
                 },

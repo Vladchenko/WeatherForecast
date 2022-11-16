@@ -8,7 +8,8 @@
     <string name="city_typing_title">Type city, to provide forecast for:</string>
     <string name="city_typing_hint">First several letters is enough</string>
     <string name="city_locating_cancelled">City locating cancelled</string>
-    <string name="choose_city_from_dropdown">Choose a city from a dropdown list</string>
+    <string name="city_selection_from_dropdown">Type city and pick one from a dropdown list below</string>
+    <string name="begin_city_typing">Begin typing city name …</string>
     <string name="current_location_defining_text">Current geo location defining…</string>
     <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
     <string name="database_city_downloading">No network connection, database last city has been loaded</string>
@@ -22,6 +23,7 @@
     <string name="default_degrees_type">C</string>
     <string name="error_text_example">Some error</string>
     <string name="forecast_for_city">Provided for city %s</string>
+    <string name="forecast_is_loaded">Weatherforecast is downloaded</string>
     <string name="forecast_downloading_for_city_text">Weather forecast for %s downloading…</string>
     <string name="forecast_downloading_for_location_text">Weather forecast for %s\'s location downloading…</string>
     <string name="forecast_downloading_for_city_failed">Downloading weather forecast for a city failed, trying for geo location</string>

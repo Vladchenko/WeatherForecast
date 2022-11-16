@@ -5,13 +5,15 @@ Project was amended with a DataBinding, Jetpack Navigation, Retrofit, Hilt, Room
 API for the project - https://openweathermap.org/current
 Test request on a following link - http://api.openweathermap.org/data/2.5/weather?q=Kazan&appid=a8f0e797059b7959399040200fd43231
 
+Autocompletetextview example taken from
+https://www.devbitsandbytes.com/jetpack-compose-a-simple-opiniated-autocompletetextview/
+
 JSON data to data-class conversion - https://app.quicktype.io/
 
 TODO:
     - Add a ? picture for a case when a weather type image is not defined
     - Work out a case, when city not defined for first app running
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
-    - Remove unused classes, say some ListenerImpls
 
     - When app runs for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
     - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.

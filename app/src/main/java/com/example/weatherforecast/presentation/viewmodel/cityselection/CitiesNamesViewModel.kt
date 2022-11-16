@@ -2,8 +2,8 @@ package com.example.weatherforecast.presentation.viewmodel.cityselection
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
@@ -11,11 +11,13 @@ import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntry
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils.REPEAT_INTERVAL
+import com.example.weatherforecast.presentation.fragments.cityselection.CityItem
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,10 +33,8 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(app) {
 
-    val onGetCitiesNamesLiveData: LiveData<CitiesNamesDomainModel>
-        get() = _onGetCitiesNamesLiveData
-
-    private val _onGetCitiesNamesLiveData = MutableLiveData<CitiesNamesDomainModel>()
+    val citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
+    val cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message ?: "")
@@ -55,6 +55,10 @@ class CitiesNamesViewModel @Inject constructor(
 
     private lateinit var cityMask: String
 
+    init {
+        toolbarSubtitleState.value = app.getString(R.string.city_selection_title)
+    }
+
     /**
      * Download a cities names beginning with string mask [city]
      */
@@ -62,9 +66,8 @@ class CitiesNamesViewModel @Inject constructor(
         Log.d("CitiesNamesViewModel", city)
         viewModelScope.launch(exceptionHandler) {
             val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
-            _onGetCitiesNamesLiveData.postValue(response)
+            citiesNamesState.value = response
             if (response.error.contains("Unable to resolve host")) {
-                _onGetCitiesNamesLiveData.postValue(response)
                 Log.d("CitiesNamesViewModel", response.cities[0].toString())
                 throw NoInternetException(app.applicationContext.getString(R.string.database_city_downloading))
             }
@@ -78,9 +81,5 @@ class CitiesNamesViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             citiesNamesInteractor.deleteAllCitiesNames()
         }
-    }
-
-    fun setCityMask(cityMask: String) {
-        this.cityMask = cityMask
     }
 }

@@ -129,6 +129,10 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
+    init {
+        toolbarSubtitleState.value = app.getString(R.string.forecast_is_loaded)
+    }
+
     /**
      * City defining by current geo location successful callback.
      */
@@ -394,5 +398,6 @@ class WeatherForecastViewModel @Inject constructor(
      */
     fun setChosenCity(city: String) {
         chosenCity = city
+        toolbarSubtitleState.value = app.getString(R.string.forecast_downloading_for_city_text, city)
     }
 }
