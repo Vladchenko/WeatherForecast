@@ -151,8 +151,8 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastGeoLocator(@ApplicationContext context: Context): WeatherForecastGeoLocator {
-        return WeatherForecastGeoLocator(context)
+    fun provideWeatherForecastGeoLocator(): WeatherForecastGeoLocator {
+        return WeatherForecastGeoLocator()
     }
 
     @Singleton

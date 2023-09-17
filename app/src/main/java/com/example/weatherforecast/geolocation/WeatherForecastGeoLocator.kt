@@ -12,17 +12,15 @@ import com.google.android.gms.tasks.OnTokenCanceledListener
 
 /**
  * Defines location of a device.
- *
- * @param appContext android.content.Context
  */
-class WeatherForecastGeoLocator(private val appContext: Context) {
+class WeatherForecastGeoLocator {
 
     private var isReleased = false
 
     /**
      * Define current geo location, sending callbacks through [locationListener].
      */
-    fun defineCurrentLocation(locationListener: GeoLocationListener) {
+    fun defineCurrentLocation(appContext: Context, locationListener: GeoLocationListener) {
         if (isReleased) return
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(appContext)

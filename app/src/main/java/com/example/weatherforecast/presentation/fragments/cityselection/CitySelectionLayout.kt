@@ -340,7 +340,7 @@ private fun AddressEdit(
             Text(
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colors.background)
+                    .background(MaterialTheme.colors.primary)
                     .padding(8.dp),
                 color = Color.Black,
                 text = with(it) {

@@ -24,7 +24,11 @@ import com.example.weatherforecast.presentation.PresentationUtils.REPEAT_INTERVA
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -45,12 +49,12 @@ class WeatherForecastViewModel @Inject constructor(
     private val weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
 ) : AbstractViewModel(app) {
 
-    private var savedCity = ""
-    private var chosenCity = ""
     private var permissionRequests = 0
+    private lateinit var savedCity: String
+    private lateinit var chosenCity: String
     private var chosenLocation = Location("")
-    private var temperatureType: TemperatureType? = null
     private lateinit var weatherForecastDownloadJob: Job
+    private lateinit var temperatureType: TemperatureType
 
     val dataModelState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
 
@@ -92,13 +96,14 @@ class WeatherForecastViewModel @Inject constructor(
     //endregion livedata getters fields
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e("WeatherForecastViewModel", throwable.message ?: "")
-        when(throwable) {
+        Log.e(TAG, throwable.message ?: "")
+        when (throwable) {
             is CityNotFoundException -> {
                 onShowError(throwable.message)
                 // Try downloading a forecast by location
                 _onCityRequestFailedLiveData.postValue(throwable.city)
             }
+
             is NoInternetException -> {
                 onShowError(throwable.message.toString())
                 weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO) {
@@ -106,6 +111,7 @@ class WeatherForecastViewModel @Inject constructor(
                     requestGeoLocationPermissionOrDownloadWeatherForecast(false)
                 }
             }
+
             is NoSuchDatabaseEntryException -> {
                 onShowError(
                     app.applicationContext.getString(
@@ -113,19 +119,17 @@ class WeatherForecastViewModel @Inject constructor(
                     )
                 )
             }
-            else  -> {
-                Log.e(
-                    "WeatherForecastViewModel",
-                    app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
-                )
-                Log.e("WeatherForecastViewModel", throwable.stackTraceToString())
+
+            else -> {
+                Log.e(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_failed))
+                Log.e(TAG, throwable.stackTraceToString())
                 onShowError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
                 _onCityRequestFailedLiveData.postValue(chosenCity)
             }
         }
         throwable.stackTrace.forEach {
-            Log.e("WeatherForecastViewModel", it.toString())
+            Log.e(TAG, it.toString())
         }
     }
 
@@ -137,10 +141,7 @@ class WeatherForecastViewModel @Inject constructor(
      * City defining by current geo location successful callback.
      */
     fun onDefineCityByCurrentGeoLocationSuccess(city: String) {
-        Log.d(
-            "WeatherForecastViewModel",
-            "City defined successfully by CURRENT geo location, city = $city, location = $chosenLocation"
-        )
+        Log.d(TAG, "City defined successfully by CURRENT geo location, city = $city, location = $chosenLocation")
         saveChosenCity(CityLocationModel(city, chosenLocation))
         _onDefineCityByCurrentGeoLocationSuccessLiveData.postValue(city)
         chosenCity = city
@@ -151,14 +152,11 @@ class WeatherForecastViewModel @Inject constructor(
      * Save a [city] and its [location] and download its forecast.
      */
     fun onDefineGeoLocationByCitySuccess(city: String, location: Location) {
-        Log.d(
-            "WeatherForecastViewModel",
-            "Geo location defined successfully by city = $city, location = $location"
-        )
+        Log.d(TAG, "Geo location defined successfully by city = $city, location = $location")
         try {
             val cityModel = CityLocationModel(city, location)
             saveChosenCity(cityModel)
-            Log.d("WeatherForecastViewModel", "City and its location saved successfully.")
+            Log.d(TAG, "City and its location saved successfully.")
             downloadWeatherForecastForLocation(cityModel)
         } catch (ex: Exception) {
             onShowError(ex.message.toString())
@@ -180,10 +178,7 @@ class WeatherForecastViewModel @Inject constructor(
      */
     fun onPermissionResolution(isGranted: Boolean, chosenCity: String) {
         if (isGranted) {
-            Log.d(
-                "WeatherForecastViewModel",
-                "Permission granted callback. Chosen city = $chosenCity, saved city = $savedCity"
-            )
+            Log.d(TAG, "Permission granted callback. Chosen city = $chosenCity, saved city = $savedCity")
             loadWeatherForecastForChosenOrSavedCity(chosenCity)
         } else {
             onShowError(app.applicationContext.getString(R.string.geo_location_no_permission))
@@ -198,8 +193,10 @@ class WeatherForecastViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             val cityModel = chosenCityInteractor.loadChosenCityModel()
             Log.d(
-                "WeatherForecastViewModel",
-                "Chosen city loaded from database = ${cityModel.city}, lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
+                TAG,
+                "Chosen city loaded from database = ${cityModel.city}," +
+                    " lat = ${cityModel.location.latitude}," +
+                    " lon = ${cityModel.location.longitude}"
             )
             savedCity = cityModel.city
             requestGeoLocationPermissionOrDownloadWeatherForecast(true)
@@ -209,10 +206,7 @@ class WeatherForecastViewModel @Inject constructor(
      * Download weather forecast on a [city].
      */
     fun downloadWeatherForecastForCityOrGeoLocation(city: String, showProgress: Boolean) {
-        Log.d(
-            "WeatherForecastViewModel",
-            app.applicationContext.getString(R.string.forecast_downloading_for_city_text, city)
-        )
+        Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_text, city))
         if (showProgress) {
             showProgressBarState.value = true
         }
@@ -226,10 +220,7 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun downloadWeatherForecastForLocation(cityModel: CityLocationModel) {
-        Log.e(
-            "WeatherForecastViewModel",
-            app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
-        )
+        Log.e(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             var result = weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
@@ -239,50 +230,45 @@ class WeatherForecastViewModel @Inject constructor(
             )
             // City in response is different than city in request
             result = result.copy(city = cityModel.city)
-            Log.e(
-                "WeatherForecastViewModel",
-                app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
-            )
+            Log.e(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
             processServerResponse(Result.success(result))
         }
     }
 
     private fun processServerResponse(result: Result<WeatherForecastDomainModel>) {
-        if (result.isSuccess) {
-            Log.d("WeatherForecastViewModel", result.toString())
-            dataModelState.value = result.getOrNull()
-            showProgressBarState.value = false
-            onShowStatus(app.getString(R.string.forecast_for_city, dataModelState.value?.city))
-            val error = result.getOrNull()?.serverError
-            if (error?.isNotBlank() == true) {
-                onShowError(error)
-                if (error.contains("Unable to resolve host")) {
-                    throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
+        result.getOrNull()?.let {   // Result is not null
+            if (result.isSuccess) {
+                Log.d(TAG, result.toString())
+                dataModelState.value = result.getOrNull()
+                showProgressBarState.value = false
+                onShowStatus(app.getString(R.string.forecast_for_city, dataModelState.value?.city))
+                val error = result.getOrNull()?.serverError
+                if (error?.isNotBlank() == true) {
+                    onShowError(error)
+                    if (error.contains("Unable to resolve host")) {
+                        throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
+                    }
+                } else {
+                    Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_succeeded))
+                }
+                viewModelScope.launch {
+                    weatherForecastLocalInteractor.saveForecast(it)
+                    chosenCityInteractor.saveChosenCity(
+                        it.city,
+                        getLocationByLatLon(
+                            result.getOrNull()?.coordinate?.latitude ?: 0.0,
+                            result.getOrNull()?.coordinate?.longitude ?: 0.0
+                        )
+                    )
                 }
             } else {
-                Log.d(
-                    "WeatherForecastViewModel",
-                    app.applicationContext.getString(R.string.forecast_downloading_for_city_succeeded)
-                )
+                onShowError(it.serverError)
+                Log.e(TAG, it.serverError)
+                // Try downloading a forecast by location
+                _onCityRequestFailedLiveData.postValue(it.city)
             }
-            viewModelScope.launch {
-                weatherForecastLocalInteractor.saveForecast(result.getOrNull()!!)
-                chosenCityInteractor.saveChosenCity(
-                    result.getOrNull()?.city ?: "",
-                    getLocationByLatLon(
-                        result.getOrNull()?.coordinate?.latitude ?: 0.0,
-                        result.getOrNull()?.coordinate?.longitude ?: 0.0
-                    )
-                )
-            }
-        } else {
-            onShowError(result.getOrNull()?.serverError.toString())
-            Log.e(
-                "WeatherForecastViewModel",
-                result.getOrNull()?.serverError ?: "No error description"
-            )
-            // Try downloading a forecast by location
-            _onCityRequestFailedLiveData.postValue(result.getOrNull()?.city ?: "")
+        } ?: run {// Result is null
+            onShowError("Result is null")
         }
     }
 
@@ -291,7 +277,7 @@ class WeatherForecastViewModel @Inject constructor(
      * or [savedCity], having [temperatureType] provided.
      */
     private fun requestGeoLocationPermissionOrDownloadWeatherForecast(showProgress: Boolean) {
-        Log.d("WeatherForecastViewModel", "chosenCity = $chosenCity, savedCity = $savedCity")
+        Log.d(TAG, "chosenCity = $chosenCity, savedCity = $savedCity")
         if (chosenCity.isBlank()
             && savedCity.isBlank()
         ) {
@@ -333,7 +319,7 @@ class WeatherForecastViewModel @Inject constructor(
                 _onRequestPermissionDeniedLiveData.postValue(Unit)
             } else {
                 _onRequestPermissionLiveData.postValue(Unit)
-                Log.d("WeatherForecastViewModel", "Geo location permission requested")
+                Log.d(TAG, "Geo location permission requested")
             }
         } else {
             if (chosenCity.isBlank()) {
@@ -353,16 +339,13 @@ class WeatherForecastViewModel @Inject constructor(
                 locationModel.city,
                 locationModel.location
             )
-            Log.d(
-                "WeatherForecastViewModel",
-                "Chosen city saved to database: ${locationModel.city}"
-            )
+            Log.d(TAG, "Chosen city saved to database: ${locationModel.city}")
         }
     }
 
     private fun defineCurrentGeoLocation() {
         onShowStatus(app.applicationContext.getString(R.string.current_location_defining_text))
-        geoLocator.defineCurrentLocation(object : GeoLocationListener {
+        geoLocator.defineCurrentLocation(app.applicationContext, object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
                 this@WeatherForecastViewModel.chosenLocation = location
                 _onDefineCityByCurrentGeoLocationLiveData.postValue(location)
@@ -370,7 +353,7 @@ class WeatherForecastViewModel @Inject constructor(
             }
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {
-                Log.e("WeatherForecastViewModel", errorMessage)
+                Log.e(TAG, errorMessage)
                 // Since exception is not informative enough for user, replace it with a standard error one.
                 if (errorMessage.contains("permission")) {
                     onShowError(app.getString(R.string.geo_location_permission_required))
@@ -380,7 +363,7 @@ class WeatherForecastViewModel @Inject constructor(
             }
 
             override fun onNoGeoLocationPermission() {
-                Log.e("WeatherForecastViewModel", "No geo location permission - requesting it")
+                Log.e(TAG, "No geo location permission - requesting it")
                 requestGeoLocationPermissionOrLoadForecast()
             }
         })
@@ -399,5 +382,9 @@ class WeatherForecastViewModel @Inject constructor(
     fun setChosenCity(city: String) {
         chosenCity = city
         toolbarSubtitleState.value = app.getString(R.string.forecast_downloading_for_city_text, city)
+    }
+
+    companion object {
+        private const val TAG = "WeatherForecastViewModel"
     }
 }

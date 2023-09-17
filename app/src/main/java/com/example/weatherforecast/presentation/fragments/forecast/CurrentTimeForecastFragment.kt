@@ -105,7 +105,7 @@ class CurrentTimeForecastFragment : Fragment() {
             defineLocationByCity(it)
         }
         forecastViewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) {
-            defineCityByCurrentLocation(it)
+            defineCityNameByCurrentLocation(it)
         }
         forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelectionScreen() }
         forecastViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
@@ -182,9 +182,9 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    private fun defineCityByCurrentLocation(location: Location) = lifecycleScope.launchWhenCreated {
+    private fun defineCityNameByCurrentLocation(location: Location) = lifecycleScope.launchWhenCreated {
         forecastViewModel.onShowStatus("Defining city from geo location")
-        val locality = geolocationHelper.loadCityByLocation(location)
+        val locality = geolocationHelper.loadCityNameByLocation(location)
         Log.d("CurrentTimeForecastFragment", "City for current location defined as $locality")
         forecastViewModel.onDefineCityByCurrentGeoLocationSuccess(locality)
     }

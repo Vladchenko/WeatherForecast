@@ -7,7 +7,7 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import java.io.IOException
-import java.util.*
+import java.util.Locale
 
 /**
  * Helper methods for [android.location.Location]
@@ -18,7 +18,7 @@ class GeolocationHelper(private val context: Context) {
     /**
      * Get area name (i.e. city) by [location]
      */
-    suspend fun loadCityByLocation(location: Location): String = with(Dispatchers.IO) {
+    suspend fun loadCityNameByLocation(location: Location): String = with(Dispatchers.IO) {
         val geoCoder = Geocoder(context, Locale.getDefault())
         var locality: String
         while (true) {
