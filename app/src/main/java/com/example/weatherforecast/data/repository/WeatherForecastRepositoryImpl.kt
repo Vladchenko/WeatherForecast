@@ -5,10 +5,9 @@ import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConv
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
@@ -17,19 +16,20 @@ import kotlinx.coroutines.withContext
  * @property weatherForecastRemoteDataSource source of remote data for domain layer
  * @property weatherForecastLocalDataSource source of local data for domain layer
  * @property modelsConverter converts server response to domain entity
+ * @property dispatchers for coroutines
  */
 class WeatherForecastRepositoryImpl(
     private val weatherForecastRemoteDataSource: WeatherForecastRemoteDataSource,
     private val weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
     private val modelsConverter: ForecastDataToDomainModelsConverter,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatchers: CoroutineDispatchers
 ) : WeatherForecastRepository {
 
     override suspend fun loadForecastForCity(
         temperatureType: TemperatureType,
         city: String
     ): Result<WeatherForecastDomainModel> =
-        withContext(ioDispatcher) {
+        withContext(dispatchers.io) {
             var response: WeatherForecastDomainModel
             var result: Result<WeatherForecastDomainModel>
             try {
@@ -51,19 +51,19 @@ class WeatherForecastRepositoryImpl(
         latitude: Double,
         longitude: Double
     ) =
-        withContext(ioDispatcher) {
+        withContext(dispatchers.io) {
             val model =
                 weatherForecastRemoteDataSource.loadWeatherForecastForLocation(latitude, longitude)
             modelsConverter.convert(temperatureType, model.body()!!.name, model)
         }
 
     override suspend fun loadLocalForecast(city: String) =
-        withContext(ioDispatcher) {
+        withContext(dispatchers.io) {
             weatherForecastLocalDataSource.loadWeatherForecastData(city)
         }
 
     override suspend fun saveForecast(model: WeatherForecastDomainModel) =
-        withContext(ioDispatcher) {
+        withContext(dispatchers.io) {
             weatherForecastLocalDataSource.saveWeatherForecastData(model)
         }
 }

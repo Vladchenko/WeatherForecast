@@ -34,7 +34,6 @@ TODO:
 
     - Put all texts to string.xml
     - Remove all superfluous Log.d
-    - Make data source to return a data not domain model
     - Add "fog", "light intensity shower rain", "heavy intensity rain", "thunderstorm with light rain" to weather images
     - Add unit tests
 

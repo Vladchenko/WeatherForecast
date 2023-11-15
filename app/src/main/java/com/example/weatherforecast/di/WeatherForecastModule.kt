@@ -18,6 +18,8 @@ import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
 import com.example.weatherforecast.data.repository.datasource.*
 import com.example.weatherforecast.data.repository.datasourceimpl.*
+import com.example.weatherforecast.dispatchers.CoroutineDispatchers
+import com.example.weatherforecast.dispatchers.CoroutineDispatchersImpl
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
@@ -113,15 +115,23 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
+    fun provideCoroutineDispatchers(): CoroutineDispatchers {
+        return CoroutineDispatchersImpl()
+    }
+
+    @Singleton
+    @Provides
     fun provideWeatherForecastRepository(
         weatherForecastRemoteDataSource: WeatherForecastRemoteDataSource,
         weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
-        converter: ForecastDataToDomainModelsConverter
+        converter: ForecastDataToDomainModelsConverter,
+        coroutineDispatchers: CoroutineDispatchers
     ): WeatherForecastRepository {
         return WeatherForecastRepositoryImpl(
             weatherForecastRemoteDataSource,
             weatherForecastLocalDataSource,
-            converter
+            converter,
+            coroutineDispatchers
         )
     }
 
