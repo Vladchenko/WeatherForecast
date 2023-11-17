@@ -25,6 +25,7 @@ import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -95,6 +96,13 @@ class WeatherForecastViewModel @Inject constructor(
         get() = _onShowLocationPermissionAlertDialogLiveData
     //endregion livedata getters fields
 
+    init {
+        weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO, CoroutineStart.LAZY) {
+            delay(REPEAT_INTERVAL)
+            requestGeoLocationPermissionOrDownloadWeatherForecast(false)
+        }
+    }
+
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
@@ -106,10 +114,7 @@ class WeatherForecastViewModel @Inject constructor(
 
             is NoInternetException -> {
                 onShowError(throwable.message.toString())
-                weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO) {
-                    delay(REPEAT_INTERVAL)
-                    requestGeoLocationPermissionOrDownloadWeatherForecast(false)
-                }
+                weatherForecastDownloadJob.start()
             }
 
             is NoSuchDatabaseEntryException -> {
