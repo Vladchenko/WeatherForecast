@@ -39,7 +39,7 @@ class WeatherForecastGeoLocator {
             }.addOnFailureListener {
                 if (isReleased) return@addOnFailureListener
                 Log.e("WeatherForecastGeoLocator", it.message.toString())
-                locationListener.onCurrentGeoLocationFail(it.message ?: "")
+                locationListener.onCurrentGeoLocationFail(it.message.orEmpty())
             }.addOnCanceledListener {
                 if (isReleased) return@addOnCanceledListener
 

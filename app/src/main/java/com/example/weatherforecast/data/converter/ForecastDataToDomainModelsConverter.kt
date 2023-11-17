@@ -22,7 +22,6 @@ class ForecastDataToDomainModelsConverter {
         city: String,
         response: Response<WeatherForecastResponse>
     ): WeatherForecastDomainModel {
-        val serverError = response.errorBody().toString()
         return WeatherForecastDomainModel(
             city,
             coordinate = Coordinate(
@@ -31,13 +30,9 @@ class ForecastDataToDomainModelsConverter {
             ),
             date = response.body()?.dt.toString(),
             temperature = defineTemperature(temperatureType, response),
-            weatherType = response.body()?.weather?.get(0)?.description ?: "",
+            weatherType = response.body()?.weather?.get(0)?.description.orEmpty(),
             temperatureType = defineTemperatureSign(temperatureType),
-            serverError = if (serverError != "null") {
-                serverError
-            } else {
-                ""
-            }
+            serverError = response.errorBody().toString().takeIf { it != "null" }.orEmpty()
         )
     }
 
@@ -48,9 +43,11 @@ class ForecastDataToDomainModelsConverter {
         TemperatureType.CELSIUS -> {
             convertKelvinToCelsiusDegrees(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
         }
+
         TemperatureType.FAHRENHEIT -> {
             convertKelvinToFahrenheitDegrees(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
         }
+
         TemperatureType.KELVIN -> {
             response.body()!!.main.temp.roundToInt().toString()
         }
@@ -58,14 +55,8 @@ class ForecastDataToDomainModelsConverter {
 
     private fun defineTemperatureSign(temperatureType: TemperatureType) =
         when (temperatureType) {
-            TemperatureType.CELSIUS -> {
-                "℃"
-            }
-            TemperatureType.FAHRENHEIT -> {
-                "℉"
-            }
-            TemperatureType.KELVIN -> {
-                "°K"
-            }
+            TemperatureType.CELSIUS -> "℃"
+            TemperatureType.FAHRENHEIT -> "℉"
+            TemperatureType.KELVIN -> "°K"
         }
 }

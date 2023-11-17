@@ -36,7 +36,7 @@ interface WeatherForecastApiService {
      */
     @GET("data/2.5/weather")
     @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun getWeatherForecastResponseForCity(
+    suspend fun loadWeatherForecastForCity(
         @Query("q")
         city:String,
         @Query("appid")
@@ -48,7 +48,7 @@ interface WeatherForecastApiService {
      */
     @GET("data/2.5/weather")
     @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun getWeatherForecastResponseForLocation(
+    suspend fun loadWeatherForecastForLocation(
         @Query("lat")
         lat:Double,
         @Query("lon")

@@ -24,7 +24,7 @@ class GeolocationHelper(private val context: Context) {
         while (true) {
             try {
                 locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1)
-                    ?.first()?.locality ?: ""
+                    ?.first()?.locality.orEmpty()
                 break
             } catch (ex: IOException) {
                 delay(500)

@@ -3,6 +3,7 @@ package com.example.weatherforecast.presentation.viewmodel.cityselection
 import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
@@ -18,6 +19,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,11 +35,16 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(app) {
 
-    val citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
-    val cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
+    private val _citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
+    private val _cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
+
+    val citiesNamesState: State<CitiesNamesDomainModel?>
+        get() = _citiesNamesState
+    val cityMaskState: StateFlow<CityItem>
+        get() = _cityMaskState
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e("CitiesNamesViewModel", throwable.message ?: "")
+        Log.e("CitiesNamesViewModel", throwable.message.orEmpty())
         when (throwable) {
             is NoInternetException -> {
                 onShowError(throwable.message.toString())
@@ -66,7 +73,7 @@ class CitiesNamesViewModel @Inject constructor(
         Log.d("CitiesNamesViewModel", city)
         viewModelScope.launch(exceptionHandler) {
             val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
-            citiesNamesState.value = response
+            _citiesNamesState.value = response
             if (response.error.contains("Unable to resolve host")) {
                 Log.d("CitiesNamesViewModel", response.cities[0].toString())
                 throw NoInternetException(app.applicationContext.getString(R.string.database_city_downloading))
@@ -81,5 +88,19 @@ class CitiesNamesViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             citiesNamesInteractor.deleteAllCitiesNames()
         }
+    }
+
+    /**
+     * Empty a mask that provides several cities names that match it.
+     */
+    fun emptyCityMask() {
+        _cityMaskState.value = CityItem("")
+    }
+
+    /**
+     * Empty a list of cities that are matching a mask.
+     */
+    fun emptyCitiesNames() {
+        _citiesNamesState.value = null
     }
 }

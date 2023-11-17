@@ -23,7 +23,7 @@
     <string name="default_degrees_type">C</string>
     <string name="error_text_example">Some error</string>
     <string name="forecast_for_city">Provided for city %s</string>
-    <string name="forecast_is_loaded">Weatherforecast is downloaded</string>
+    <string name="forecast_is_loading">Weatherforecast is downloading</string>
     <string name="forecast_downloading_for_city_text">Weather forecast for %s downloading…</string>
     <string name="forecast_downloading_for_location_text">Weather forecast for %s\'s location downloading…</string>
     <string name="forecast_downloading_for_city_failed">Downloading weather forecast for a city failed, trying for geo location</string>

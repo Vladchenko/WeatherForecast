@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -31,8 +30,8 @@ class CitiesNamesFragment : Fragment() {
                     toolbarTitle = getString(R.string.app_name),
                     citySelectionTitle = getString(R.string.city_selection_from_dropdown),
                     queryLabel = getString(R.string.begin_city_typing),
-                    { OnBackPressedDispatcher().onBackPressed() },
-                    { gotoForecastFragment(it) },   // This call should be done in viewmodel,
+                    { findNavController().popBackStack() },
+                    { openForecastFragment(it) },   // This call should be done in viewmodel,
                     // but in this very case, somehow, CitiesNamesViewModel's livedata that calls
                     // forecastscreen, fires right away when a CitiesNames screen is opened (
                     // i.e. CurrentForecast -> CitiesNames -> CurrentForecast call is performed)
@@ -42,7 +41,10 @@ class CitiesNamesFragment : Fragment() {
         }
     }
 
-    private fun gotoForecastFragment(chosenCity: String) {
+    /**
+     * Open forecast fragment to show it on a [chosenCity]
+     */
+    private fun openForecastFragment(chosenCity: String) {
         val action =
             CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(
                 chosenCity

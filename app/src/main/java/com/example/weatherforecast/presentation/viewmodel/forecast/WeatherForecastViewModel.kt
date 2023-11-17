@@ -96,7 +96,7 @@ class WeatherForecastViewModel @Inject constructor(
     //endregion livedata getters fields
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, throwable.message ?: "")
+        Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is CityNotFoundException -> {
                 onShowError(throwable.message)
@@ -134,7 +134,7 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     init {
-        toolbarSubtitleState.value = app.getString(R.string.forecast_is_loaded)
+        toolbarSubtitleState.value = app.getString(R.string.forecast_is_loading)
     }
 
     /**
@@ -179,7 +179,7 @@ class WeatherForecastViewModel @Inject constructor(
     fun onPermissionResolution(isGranted: Boolean, chosenCity: String) {
         if (isGranted) {
             Log.d(TAG, "Permission granted callback. Chosen city = $chosenCity, saved city = $savedCity")
-            loadWeatherForecastForChosenOrSavedCity(chosenCity)
+            loadWeatherForecastForCity(chosenCity)
         } else {
             onShowError(app.applicationContext.getString(R.string.geo_location_no_permission))
             _onShowLocationPermissionAlertDialogLiveData.call()
@@ -212,7 +212,7 @@ class WeatherForecastViewModel @Inject constructor(
         }
         viewModelScope.launch(exceptionHandler) {
             val result = weatherForecastRemoteInteractor.loadForecastForCity(
-                temperatureType ?: TemperatureType.CELSIUS,
+                temperatureType,
                 city
             )
             processServerResponse(result)
@@ -220,17 +220,17 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun downloadWeatherForecastForLocation(cityModel: CityLocationModel) {
-        Log.e(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
+        Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
-            var result = weatherForecastRemoteInteractor.loadRemoteForecastForLocation(
-                temperatureType ?: TemperatureType.CELSIUS,
+            var result = weatherForecastRemoteInteractor.loadForecastForLocation(
+                temperatureType,
                 cityModel.location.latitude,
                 cityModel.location.longitude
             )
             // City in response is different than city in request
             result = result.copy(city = cityModel.city)
-            Log.e(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
+            Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
             processServerResponse(Result.success(result))
         }
     }
@@ -242,24 +242,14 @@ class WeatherForecastViewModel @Inject constructor(
                 dataModelState.value = result.getOrNull()
                 showProgressBarState.value = false
                 onShowStatus(app.getString(R.string.forecast_for_city, dataModelState.value?.city))
-                val error = result.getOrNull()?.serverError
-                if (error?.isNotBlank() == true) {
-                    onShowError(error)
-                    if (error.contains("Unable to resolve host")) {
-                        throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
-                    }
-                } else {
-                    Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_succeeded))
-                }
+                processError(result.getOrNull()?.serverError)
                 viewModelScope.launch {
-                    weatherForecastLocalInteractor.saveForecast(it)
-                    chosenCityInteractor.saveChosenCity(
-                        it.city,
-                        getLocationByLatLon(
-                            result.getOrNull()?.coordinate?.latitude ?: 0.0,
-                            result.getOrNull()?.coordinate?.longitude ?: 0.0
-                        )
-                    )
+                    launch {
+                        weatherForecastLocalInteractor.saveForecast(it)
+                    }
+                    launch {
+                        saveChosenCity(it, result)
+                    }
                 }
             } else {
                 onShowError(it.serverError)
@@ -269,6 +259,30 @@ class WeatherForecastViewModel @Inject constructor(
             }
         } ?: run {// Result is null
             onShowError("Result is null")
+        }
+    }
+
+    private suspend fun saveChosenCity(
+        it: WeatherForecastDomainModel,
+        result: Result<WeatherForecastDomainModel>
+    ) {
+        chosenCityInteractor.saveChosenCity(
+            it.city,
+            getLocationByLatLon(
+                result.getOrNull()?.coordinate?.latitude ?: 0.0,
+                result.getOrNull()?.coordinate?.longitude ?: 0.0
+            )
+        )
+    }
+
+    private fun processError(error: String?) {
+        if (error?.isNotBlank() == true) {
+            onShowError(error)
+            if (error.contains("Unable to resolve host")) {
+                throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
+            }
+        } else {
+            Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_succeeded))
         }
     }
 
@@ -293,7 +307,7 @@ class WeatherForecastViewModel @Inject constructor(
     /**
      * Download a forecast for a [chosenCity] or a savedCity.
      */
-    private fun loadWeatherForecastForChosenOrSavedCity(chosenCity: String) {
+    private fun loadWeatherForecastForCity(chosenCity: String) {
         if (chosenCity.isNotBlank()) {
             // Get weather forecast, when there is a chosen city (from a city selection fragment)
             downloadWeatherForecastForCityOrGeoLocation(chosenCity, true)

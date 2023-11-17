@@ -13,7 +13,7 @@ class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPrefere
 
     override suspend fun getCity(): CityLocationModel {
         return CityLocationModel(
-            sharedPreferences.getString(SAVED_CITY_ARGUMENT_KEY, "") ?: "",
+            sharedPreferences.getString(SAVED_CITY_ARGUMENT_KEY, "").orEmpty(),
             getChosenCityLocation()
         )
     }

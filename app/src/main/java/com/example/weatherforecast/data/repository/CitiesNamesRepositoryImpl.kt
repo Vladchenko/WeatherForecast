@@ -26,11 +26,11 @@ class CitiesNamesRepositoryImpl(
     override suspend fun loadCitiesNames(token: String) =
         withContext(ioDispatcher) {
             return@withContext try {
-                modelsConverter.convert(remoteDataSource.getCityNames(token), "")
+                modelsConverter.convert(remoteDataSource.loadCityNames(token), "")
             } catch (ex: NoInternetException) {
                 CitiesNamesDomainModel(
                     localDataSource.getCitiesNames(token).toList(),
-                    ex.message ?: ""
+                    ex.message.orEmpty()
                 )
             }
         }

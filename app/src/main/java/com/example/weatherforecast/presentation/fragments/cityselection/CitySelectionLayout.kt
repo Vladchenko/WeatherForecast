@@ -145,19 +145,24 @@ private fun cityMaskAction(
                     )
                 }
             }
+
             is CityMaskAction.OnCityMaskChange -> {
                 scope.launch {
                     viewModel.getCitiesNamesForMask(action.cityMask)
                 }
             }
+
             is CityMaskAction.OnCityMaskAutoCompleteDone -> {
                 keyboardController?.hide()
             }
+
             is CityMaskAction.OnCityMaskAutoCompleteClear -> {
-                viewModel.cityMaskState.value = CityItem("")
+                viewModel.emptyCityMask()
+                viewModel.emptyCitiesNames()
             }
+
             is CityMaskAction.OnCitiesOptionsClear -> {
-                viewModel.citiesNamesState.value = null
+                viewModel.emptyCitiesNames()
             }
         }
     }
@@ -198,7 +203,6 @@ private fun QuerySearch(
 
             },
             keyboardActions = KeyboardActions(onDone = {
-
                 onDoneActionClick()
             }),
             keyboardOptions = KeyboardOptions(

@@ -3,7 +3,6 @@ package com.example.weatherforecast.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.annotation.Nullable
 import androidx.room.Room
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
@@ -241,7 +240,6 @@ class WeatherForecastModule {
 
     @Provides
     @Singleton
-    @Nullable
     fun provideSharedPreference(@ApplicationContext context: Context): SharedPreferences? {
         return context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
     }

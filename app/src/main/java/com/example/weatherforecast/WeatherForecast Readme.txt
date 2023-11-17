@@ -10,6 +10,9 @@ https://www.devbitsandbytes.com/jetpack-compose-a-simple-opiniated-autocompletet
 
 JSON data to data-class conversion - https://app.quicktype.io/
 
+Running a saving for a forecast and a chosen city in separate corotines instead of one, drastically shortened these operations.
+From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...code to measure... }
+
 TODO:
     - Add a ? picture for a case when a weather type image is not defined
     - Work out a case, when city not defined for first app running

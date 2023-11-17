@@ -21,10 +21,14 @@ class ChosenCityRepositoryImpl(
     }
 
     override suspend fun saveChosenCity(city: String, location: Location) {
-        chosenCityNameDataSource.saveCity(city, location)
+        withContext(ioDispatcher) {
+            chosenCityNameDataSource.saveCity(city, location)
+        }
     }
 
     override suspend fun removeCity() {
-        chosenCityNameDataSource.removeCity()
+        withContext(ioDispatcher) {
+            chosenCityNameDataSource.removeCity()
+        }
     }
 }

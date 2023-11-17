@@ -15,14 +15,14 @@ class WeatherForecastRemoteDataSourceImpl(private val apiService: WeatherForecas
 
     override suspend fun loadWeatherForecastDataForCity(city: String): Response<WeatherForecastResponse> {
         Log.d("WeatherForecastRemoteDataSourceImpl", "response for city = $city, follows next")
-        val model = apiService.getWeatherForecastResponseForCity(city)
+        val model = apiService.loadWeatherForecastForCity(city)
         Log.d("WeatherForecastRemoteDataSourceImpl", model.body().toString())
         return model
     }
 
     override suspend fun loadWeatherForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse> {
         Log.d("WeatherForecastRemoteDataSourceImpl", "response for latitude = $latitude, and longitude = $longitude, follows next")
-        val model = apiService.getWeatherForecastResponseForLocation(latitude, longitude)
+        val model = apiService.loadWeatherForecastForLocation(latitude, longitude)
         Log.d("WeatherForecastRemoteDataSourceImpl", model.body().toString())
         return model
     }

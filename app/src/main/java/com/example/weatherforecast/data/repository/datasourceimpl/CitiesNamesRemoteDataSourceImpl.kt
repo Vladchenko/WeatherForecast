@@ -11,7 +11,7 @@ import retrofit2.Response
  */
 class CitiesNamesRemoteDataSourceImpl(private val apiService: WeatherForecastApiService) : CitiesNamesRemoteDataSource {
 
-    override suspend fun getCityNames(token: String): Response<List<WeatherForecastCityResponse>> {
+    override suspend fun loadCityNames(token: String): Response<List<WeatherForecastCityResponse>> {
         val model = apiService.getCityNames(token)
         Log.d("CitiesNamesDataSourceImpl", model.body().toString())
         return model

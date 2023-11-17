@@ -17,7 +17,7 @@ class WeatherForecastRemoteInteractor(private val weatherForecastRepository: Wea
         return weatherForecastRepository.loadForecastForCity(temperatureType, city)
     }
 
-    suspend fun loadRemoteForecastForLocation(
+    suspend fun loadForecastForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
