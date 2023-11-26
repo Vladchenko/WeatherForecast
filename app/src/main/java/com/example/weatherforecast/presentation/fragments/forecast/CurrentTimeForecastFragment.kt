@@ -34,7 +34,7 @@ import kotlin.system.exitProcess
 @AndroidEntryPoint
 class CurrentTimeForecastFragment : Fragment() {
 
-    var mainView: View? = null
+    private var mainView: View? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())

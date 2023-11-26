@@ -24,8 +24,7 @@ interface WeatherForecastRepository {
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    )
-            : WeatherForecastDomainModel
+    ): Result<WeatherForecastDomainModel>
 
     /**
      * Retrieve local(database) forecast for [city]

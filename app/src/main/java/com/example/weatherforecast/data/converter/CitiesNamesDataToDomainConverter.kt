@@ -18,32 +18,16 @@ class CitiesNamesDataToDomainConverter {
         dataModel: Response<List<WeatherForecastCityResponse>>,
         error: String
     ): CitiesNamesDomainModel {
-        val converted = CitiesNamesDomainModel(
-            if (dataModel.body().isNullOrEmpty()) {
-                listOf(
-                    CityDomainModel(
-                        name = "",
-                        lat = 0.0,
-                        lon = 0.0,
-                        country = "",
-                        state = "",
-                        serverError = dataModel.errorBody()?.string()
-                    )
+        val cities = dataModel.body()?.map {
+                CityDomainModel(
+                    it.name,
+                    it.lat,
+                    it.lon,
+                    it.country,
+                    it.state,
+                    dataModel.errorBody()?.string() ?: error
                 )
-            } else {
-                dataModel.body()?.map {
-                    CityDomainModel(
-                        it.name,
-                        it.lat,
-                        it.lon,
-                        it.country,
-                        it.state,
-                        serverError = ""
-                    )
-                }
-            }.orEmpty(),
-            error
-        )
-        return converted
+        } ?: emptyList()
+        return CitiesNamesDomainModel(cities, error)
     }
 }

@@ -1,6 +1,8 @@
 package com.example.weatherforecast.data.api
 
 import com.example.weatherforecast.BuildConfig
+import com.example.weatherforecast.data.api.ApiConstants.GEO_DIRECT
+import com.example.weatherforecast.data.api.ApiConstants.WEATHER_DATA
 import com.example.weatherforecast.data.api.customexceptions.ExceptionsMapper
 import com.example.weatherforecast.data.api.customexceptions.WeatherForecastExceptionMapper
 import com.example.weatherforecast.models.data.WeatherForecastCityResponse
@@ -17,15 +19,12 @@ interface WeatherForecastApiService {
     /**
      * Receive cities names that match the requested criteria, i.e. [city]
      */
-    @GET("geo/1.0/direct")
+    @GET(GEO_DIRECT)
     @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
     suspend fun getCityNames(
-        @Query("q")
-        city:String,
-        @Query("limit")
-        limit: Int = 5,
-        @Query("appid")
-        apiKey: String = BuildConfig.API_KEY
+        @Query("q") city: String,
+        @Query("limit") limit: Int = 5,
+        @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<List<WeatherForecastCityResponse>>
 
     /**
@@ -34,26 +33,22 @@ interface WeatherForecastApiService {
      * Please note that built-in API requests by city name, zip-codes and city id will be deprecated soon.
      * (from https://openweathermap.org/current#other)
      */
-    @GET("data/2.5/weather")
+    @GET(WEATHER_DATA)
     @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
     suspend fun loadWeatherForecastForCity(
-        @Query("q")
-        city:String,
-        @Query("appid")
-        apiKey: String = BuildConfig.API_KEY
+        @Query("q") city: String,
+        @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<WeatherForecastResponse>
 
     /**
-     * Receive weather forecast data for current [Location]
+     * Receive weather forecast data for current location [latitude] and [longitude],
+     * having an [apiKey] provided.
      */
-    @GET("data/2.5/weather")
+    @GET(WEATHER_DATA)
     @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
     suspend fun loadWeatherForecastForLocation(
-        @Query("lat")
-        lat:Double,
-        @Query("lon")
-        lon:Double,
-        @Query("appid")
-        apiKey: String = BuildConfig.API_KEY
+        @Query("lat")  latitude: Double,
+        @Query("lon")  longitude: Double,
+        @Query("appid")  apiKey: String = BuildConfig.API_KEY
     ): Response<WeatherForecastResponse>
 }

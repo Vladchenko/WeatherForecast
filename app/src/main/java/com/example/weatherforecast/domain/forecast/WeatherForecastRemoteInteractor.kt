@@ -21,7 +21,7 @@ class WeatherForecastRemoteInteractor(private val weatherForecastRepository: Wea
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ): WeatherForecastDomainModel {
+    ): Result<WeatherForecastDomainModel> {
         return weatherForecastRepository.loadRemoteForecastForLocation(
             temperatureType,
             latitude,

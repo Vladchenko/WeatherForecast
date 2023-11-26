@@ -27,16 +27,9 @@ interface WeatherForecastDAO {
     @Query("DELETE FROM citiesForecasts") // Name of table is taken from WeatherForecastDomainModel.kt data class
     suspend fun deleteAll(): Int
 
-    @Query("SELECT * FROM citiesForecasts WHERE city = " + ":city")
-    fun getCityForecast(city: String): WeatherForecastDomainModel // This is not a suspend fun, since it returns LiveData
+    @Query("SELECT * FROM citiesForecasts WHERE city = :city")
+    fun getCityForecast(city: String): WeatherForecastDomainModel? // This is not a suspend fun, since it returns LiveData
 
     @Query("SELECT * FROM citiesForecasts")
     fun getAllCitiesForecasts(): Flow<List<WeatherForecastDomainModel>> // Flow is used to get several items
-
-    // @Insert
-    // fun insertSubscriber2(model: WeatherForecastDomainModel): Long  // This ordinary fun is used for an implementation different
-    // // to a coroutines one, say AsyncTask/Executors/JavaRX
-    //
-    // @Insert
-    // fun insertSubscriber2(model: List<WeatherForecastDomainModel>): List<Long>
 }

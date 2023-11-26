@@ -3,7 +3,6 @@ package com.example.weatherforecast.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.room.Room
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
@@ -94,10 +93,7 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideArticlesDataBase(app: Application): WeatherForecastDataBase {
-        return Room
-            .databaseBuilder(app, WeatherForecastDataBase::class.java, "WeatherForecastDataBase")
-            .fallbackToDestructiveMigration()   // For migration from old database to a new one
-            .build()
+        return WeatherForecastDataBase.getInstance(app.applicationContext)
     }
 
     @Singleton

@@ -54,7 +54,7 @@ class WeatherForecastViewModel @Inject constructor(
     private lateinit var savedCity: String
     private lateinit var chosenCity: String
     private var chosenLocation = Location("")
-    private lateinit var weatherForecastDownloadJob: Job
+    private var weatherForecastDownloadJob: Job
     private lateinit var temperatureType: TemperatureType
 
     val dataModelState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
@@ -98,7 +98,6 @@ class WeatherForecastViewModel @Inject constructor(
 
     init {
         weatherForecastDownloadJob = viewModelScope.launch(Dispatchers.IO, CoroutineStart.LAZY) {
-            delay(REPEAT_INTERVAL)
             requestGeoLocationPermissionOrDownloadWeatherForecast(false)
         }
     }
@@ -114,7 +113,10 @@ class WeatherForecastViewModel @Inject constructor(
 
             is NoInternetException -> {
                 onShowError(throwable.message.toString())
-                weatherForecastDownloadJob.start()
+                viewModelScope.launch(Dispatchers.IO) {
+                    delay(REPEAT_INTERVAL)
+                    weatherForecastDownloadJob.start()
+                }
             }
 
             is NoSuchDatabaseEntryException -> {
@@ -126,7 +128,10 @@ class WeatherForecastViewModel @Inject constructor(
             }
 
             else -> {
-                Log.e(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_failed))
+                Log.e(
+                    TAG,
+                    app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
+                )
                 Log.e(TAG, throwable.stackTraceToString())
                 onShowError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
@@ -146,7 +151,10 @@ class WeatherForecastViewModel @Inject constructor(
      * City defining by current geo location successful callback.
      */
     fun onDefineCityByCurrentGeoLocationSuccess(city: String) {
-        Log.d(TAG, "City defined successfully by CURRENT geo location, city = $city, location = $chosenLocation")
+        Log.d(
+            TAG,
+            "City defined successfully by CURRENT geo location, city = $city, location = $chosenLocation"
+        )
         saveChosenCity(CityLocationModel(city, chosenLocation))
         _onDefineCityByCurrentGeoLocationSuccessLiveData.postValue(city)
         chosenCity = city
@@ -183,7 +191,10 @@ class WeatherForecastViewModel @Inject constructor(
      */
     fun onPermissionResolution(isGranted: Boolean, chosenCity: String) {
         if (isGranted) {
-            Log.d(TAG, "Permission granted callback. Chosen city = $chosenCity, saved city = $savedCity")
+            Log.d(
+                TAG,
+                "Permission granted callback. Chosen city = $chosenCity, saved city = $savedCity"
+            )
             loadWeatherForecastForCity(chosenCity)
         } else {
             onShowError(app.applicationContext.getString(R.string.geo_location_no_permission))
@@ -200,8 +211,8 @@ class WeatherForecastViewModel @Inject constructor(
             Log.d(
                 TAG,
                 "Chosen city loaded from database = ${cityModel.city}," +
-                    " lat = ${cityModel.location.latitude}," +
-                    " lon = ${cityModel.location.longitude}"
+                        " lat = ${cityModel.location.latitude}," +
+                        " lon = ${cityModel.location.longitude}"
             )
             savedCity = cityModel.city
             requestGeoLocationPermissionOrDownloadWeatherForecast(true)
@@ -211,7 +222,10 @@ class WeatherForecastViewModel @Inject constructor(
      * Download weather forecast on a [city].
      */
     fun downloadWeatherForecastForCityOrGeoLocation(city: String, showProgress: Boolean) {
-        Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_text, city))
+        Log.d(
+            TAG,
+            app.applicationContext.getString(R.string.forecast_downloading_for_city_text, city)
+        )
         if (showProgress) {
             showProgressBarState.value = true
         }
@@ -225,7 +239,10 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun downloadWeatherForecastForLocation(cityModel: CityLocationModel) {
-        Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
+        Log.d(
+            TAG,
+            app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
+        )
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             var result = weatherForecastRemoteInteractor.loadForecastForLocation(
@@ -234,9 +251,12 @@ class WeatherForecastViewModel @Inject constructor(
                 cityModel.location.longitude
             )
             // City in response is different than city in request
-            result = result.copy(city = cityModel.city)
-            Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_location_text))
-            processServerResponse(Result.success(result))
+            result = Result.success(result.getOrNull()!!.copy(city = cityModel.city))
+            Log.d(
+                TAG,
+                app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
+            )
+            processServerResponse(result)
         }
     }
 
@@ -287,7 +307,10 @@ class WeatherForecastViewModel @Inject constructor(
                 throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
             }
         } else {
-            Log.d(TAG, app.applicationContext.getString(R.string.forecast_downloading_for_city_succeeded))
+            Log.d(
+                TAG,
+                app.applicationContext.getString(R.string.forecast_downloading_for_city_succeeded)
+            )
         }
     }
 
@@ -400,7 +423,8 @@ class WeatherForecastViewModel @Inject constructor(
      */
     fun setChosenCity(city: String) {
         chosenCity = city
-        toolbarSubtitleState.value = app.getString(R.string.forecast_downloading_for_city_text, city)
+        toolbarSubtitleState.value =
+            app.getString(R.string.forecast_downloading_for_city_text, city)
     }
 
     companion object {

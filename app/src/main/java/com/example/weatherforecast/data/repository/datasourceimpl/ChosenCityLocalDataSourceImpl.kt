@@ -19,9 +19,11 @@ class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPrefere
     }
 
     override suspend fun saveCity(city: String, location: Location) {
-        sharedPreferences.edit().putString(SAVED_CITY_ARGUMENT_KEY, city).apply()
-        sharedPreferences.edit().putString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, location.latitude.toString()).apply()
-        sharedPreferences.edit().putString(SAVED_CITY_LONGITUDE_ARGUMENT_KEY, location.longitude.toString()).apply()
+        sharedPreferences.edit().apply {
+            putString(SAVED_CITY_ARGUMENT_KEY, city)
+            putString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, location.latitude.toString())
+            putString(SAVED_CITY_LONGITUDE_ARGUMENT_KEY, location.longitude.toString())
+        }.apply()
     }
 
     override suspend fun removeCity() {
@@ -42,8 +44,8 @@ class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPrefere
     }
 
     companion object {
-        const val SAVED_CITY_ARGUMENT_KEY = "Saved city argument"
-        const val SAVED_CITY_LATITUDE_ARGUMENT_KEY = "Saved city latitude argument"
-        const val SAVED_CITY_LONGITUDE_ARGUMENT_KEY = "Saved city longitude argument"
+        const val SAVED_CITY_ARGUMENT_KEY = "Saved_city_argument"
+        const val SAVED_CITY_LATITUDE_ARGUMENT_KEY = "Saved_city_latitude_argument"
+        const val SAVED_CITY_LONGITUDE_ARGUMENT_KEY = "Saved_city_longitude_argument"
     }
 }

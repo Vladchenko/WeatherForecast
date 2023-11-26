@@ -14,44 +14,36 @@ import kotlin.math.roundToInt
  */
 class ForecastDataToDomainModelsConverter {
 
-    /**
-     * Convert server response to domain model, having a [temperatureType] and [city] provided.
-     */
     fun convert(
         temperatureType: TemperatureType,
         city: String,
         response: Response<WeatherForecastResponse>
     ): WeatherForecastDomainModel {
+        val responseBody = response.body()
+        val main = responseBody?.main
+        val weather = responseBody?.weather?.get(0)
+        val temperature = main?.temp ?: 0.0
+
         return WeatherForecastDomainModel(
             city,
             coordinate = Coordinate(
-                latitude = response.body()?.coord?.lat ?: 0.0,
-                longitude = response.body()?.coord?.lon ?: 0.0
+                latitude = responseBody?.coord?.lat ?: 0.0,
+                longitude = responseBody?.coord?.lon ?: 0.0
             ),
-            date = response.body()?.dt.toString(),
-            temperature = defineTemperature(temperatureType, response),
-            weatherType = response.body()?.weather?.get(0)?.description.orEmpty(),
+            date = responseBody?.dt.toString(),
+            temperature = convertTemperature(temperatureType, temperature),
+            weatherType = weather?.description.orEmpty(),
             temperatureType = defineTemperatureSign(temperatureType),
-            serverError = response.errorBody().toString().takeIf { it != "null" }.orEmpty()
+            serverError = response.errorBody()?.string().orEmpty()
         )
     }
 
-    private fun defineTemperature(
-        temperatureType: TemperatureType,
-        response: Response<WeatherForecastResponse>
-    ) = when (temperatureType) {
-        TemperatureType.CELSIUS -> {
-            convertKelvinToCelsiusDegrees(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
+    private fun convertTemperature(temperatureType: TemperatureType, temperature: Double) =
+        when (temperatureType) {
+            TemperatureType.CELSIUS -> "${convertKelvinToCelsiusDegrees(temperature).roundToInt()}"
+            TemperatureType.FAHRENHEIT -> "${convertKelvinToFahrenheitDegrees(temperature).roundToInt()}"
+            TemperatureType.KELVIN -> "${temperature.roundToInt()}"
         }
-
-        TemperatureType.FAHRENHEIT -> {
-            convertKelvinToFahrenheitDegrees(response.body()?.main?.temp ?: 0.0).roundToInt().toString()
-        }
-
-        TemperatureType.KELVIN -> {
-            response.body()!!.main.temp.roundToInt().toString()
-        }
-    }
 
     private fun defineTemperatureSign(temperatureType: TemperatureType) =
         when (temperatureType) {

@@ -54,7 +54,7 @@ class WeatherForecastRepositoryImpl(
         withContext(dispatchers.io) {
             val model =
                 weatherForecastRemoteDataSource.loadWeatherForecastForLocation(latitude, longitude)
-            modelsConverter.convert(temperatureType, model.body()!!.name, model)
+            Result.success(modelsConverter.convert(temperatureType, model.body()!!.name, model))
         }
 
     override suspend fun loadLocalForecast(city: String) =
