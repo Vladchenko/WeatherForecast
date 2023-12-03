@@ -25,6 +25,8 @@ import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
+import com.example.weatherforecast.geolocation.Geolocator
+import com.example.weatherforecast.geolocation.GeolocatorImpl
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
@@ -164,6 +166,7 @@ class WeatherForecastModule {
     @Provides
     fun provideViewModelFactory(
         app: Application,
+        geoLocationHelper: Geolocator,
         geoLocator: WeatherForecastGeoLocator,
         chosenCityInteractor: ChosenCityInteractor,
         weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
@@ -171,11 +174,18 @@ class WeatherForecastModule {
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
+            geoLocationHelper,
             geoLocator,
             chosenCityInteractor,
             weatherForecastLocalInteractor,
             weatherForecastRemoteInteractor
         )
+    }
+
+    @Singleton
+    @Provides
+    fun provideGeolocator(@ApplicationContext context: Context): Geolocator {
+        return GeolocatorImpl(context)
     }
 
     @Singleton

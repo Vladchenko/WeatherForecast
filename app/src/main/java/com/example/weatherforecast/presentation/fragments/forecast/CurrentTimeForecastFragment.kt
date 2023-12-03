@@ -6,7 +6,6 @@ import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,19 +34,14 @@ import kotlin.system.exitProcess
 class CurrentTimeForecastFragment : Fragment() {
 
     private var mainView: View? = null
-
+    private var chosenCity: String = ""
+    private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
+    private val dialogHelper by lazy { AlertDialogHelper(requireContext()) }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
         { isGranted ->
             forecastViewModel.onPermissionResolution(isGranted, chosenCity)
         }
-
-    private val dialogHelper by lazy { AlertDialogHelper(requireContext()) }
-    private val geolocationHelper by lazy { GeolocationHelper(requireContext()) }
-
-    private var chosenCity: String = ""
-
-    private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
 
     override fun onCreateView(
@@ -173,19 +167,10 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun defineLocationByCity(city: String) = lifecycleScope.launchWhenCreated {
-        try {
-            val location = geolocationHelper.defineLocationByCity(city)
-            Log.d("CurrentTimeForecastFragment", "Location for city = $city, is $location")
-            forecastViewModel.onDefineGeoLocationByCitySuccess(city, location)
-        } catch (nsee: NoSuchElementException) {
-            forecastViewModel.onShowError("Forecast for city $city is not available")
-        }
+        forecastViewModel.defineLocationByCity(city)
     }
 
     private fun defineCityNameByCurrentLocation(location: Location) = lifecycleScope.launchWhenCreated {
-        forecastViewModel.onShowStatus("Defining city from geo location")
-        val locality = geolocationHelper.loadCityNameByLocation(location)
-        Log.d("CurrentTimeForecastFragment", "City for current location defined as $locality")
-        forecastViewModel.onDefineCityByCurrentGeoLocationSuccess(locality)
+        forecastViewModel.defineCityNameByLocation(location)
     }
 }

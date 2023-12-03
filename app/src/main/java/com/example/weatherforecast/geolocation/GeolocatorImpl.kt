@@ -1,24 +1,26 @@
-package com.example.weatherforecast.presentation.fragments.forecast
+package com.example.weatherforecast.geolocation
 
 import android.content.Context
 import android.location.Geocoder
 import android.location.Location
 import android.util.Log
+import com.example.weatherforecast.presentation.fragments.forecast.toLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import java.io.IOException
 import java.util.Locale
 
 /**
- * Helper methods for [android.location.Location]
+ * Geolocator implementation
  *
  * @param context android.content.Context
  */
-class GeolocationHelper(private val context: Context) {
+class GeolocatorImpl(private val context: Context) : Geolocator {
+
     /**
      * Get area name (i.e. city) by [location]
      */
-    suspend fun loadCityNameByLocation(location: Location): String = with(Dispatchers.IO) {
+    override suspend fun defineCityNameByLocation(location: Location): String = with(Dispatchers.IO) {
         val geoCoder = Geocoder(context, Locale.getDefault())
         var locality: String
         while (true) {
@@ -38,7 +40,7 @@ class GeolocationHelper(private val context: Context) {
     /**
      * Define android.location.Location for [city]
      */
-    suspend fun defineLocationByCity(city: String): Location = with(Dispatchers.IO) {
+    override suspend fun defineLocationByCity(city: String): Location = with(Dispatchers.IO) {
         val geoCoder = Geocoder(context, Locale.getDefault())
         var location: Location
         while (true) {

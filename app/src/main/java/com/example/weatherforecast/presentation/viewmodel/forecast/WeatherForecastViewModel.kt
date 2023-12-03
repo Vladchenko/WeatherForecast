@@ -16,6 +16,7 @@ import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.geolocation.GeoLocationListener
+import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.geolocation.hasPermissionForGeoLocation
 import com.example.weatherforecast.models.domain.CityLocationModel
@@ -44,6 +45,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(
     private val app: Application,
+    private val geoLocationHelper: Geolocator,
     private val geoLocator: WeatherForecastGeoLocator,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
@@ -147,26 +149,11 @@ class WeatherForecastViewModel @Inject constructor(
         toolbarSubtitleState.value = app.getString(R.string.forecast_is_loading)
     }
 
-    /**
-     * City defining by current geo location successful callback.
-     */
-    fun onDefineCityByCurrentGeoLocationSuccess(city: String) {
-        Log.d(
-            TAG,
-            "City defined successfully by CURRENT geo location, city = $city, location = $chosenLocation"
-        )
-        saveChosenCity(CityLocationModel(city, chosenLocation))
-        _onDefineCityByCurrentGeoLocationSuccessLiveData.postValue(city)
-        chosenCity = city
-    }
-
-    /**
-     * Callback for successful geo location.
-     * Save a [city] and its [location] and download its forecast.
-     */
-    fun onDefineGeoLocationByCitySuccess(city: String, location: Location) {
-        Log.d(TAG, "Geo location defined successfully by city = $city, location = $location")
+    suspend fun defineLocationByCity(city: String) {
+        onShowStatus("Defining geo location for city $city")
         try {
+            val location = geoLocationHelper.defineLocationByCity(city)
+            Log.d(TAG, "Geo location defined successfully for city = $city, location = $location")
             val cityModel = CityLocationModel(city, location)
             saveChosenCity(cityModel)
             Log.d(TAG, "City and its location saved successfully.")
@@ -174,6 +161,18 @@ class WeatherForecastViewModel @Inject constructor(
         } catch (ex: Exception) {
             onShowError(ex.message.toString())
         }
+    }
+
+    suspend fun defineCityNameByLocation(location: Location) {
+        onShowStatus("Defining city from geo location")
+        val city = geoLocationHelper.defineCityNameByLocation(location)
+        Log.d(
+            TAG,
+            "City defined successfully by CURRENT geo location, city = $city, location = $chosenLocation"
+        )
+        saveChosenCity(CityLocationModel(city, chosenLocation))
+        _onDefineCityByCurrentGeoLocationSuccessLiveData.postValue(city)
+        chosenCity = city
     }
 
     /**
@@ -211,8 +210,8 @@ class WeatherForecastViewModel @Inject constructor(
             Log.d(
                 TAG,
                 "Chosen city loaded from database = ${cityModel.city}," +
-                        " lat = ${cityModel.location.latitude}," +
-                        " lon = ${cityModel.location.longitude}"
+                    " lat = ${cityModel.location.latitude}," +
+                    " lon = ${cityModel.location.longitude}"
             )
             savedCity = cityModel.city
             requestGeoLocationPermissionOrDownloadWeatherForecast(true)
