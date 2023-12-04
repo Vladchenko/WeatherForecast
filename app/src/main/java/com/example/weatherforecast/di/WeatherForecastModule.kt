@@ -31,6 +31,7 @@ import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
+import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -164,21 +165,33 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideViewModelFactory(
+    fun provideForecastViewModelFactory(
         app: Application,
-        geoLocationHelper: Geolocator,
-        geoLocator: WeatherForecastGeoLocator,
         chosenCityInteractor: ChosenCityInteractor,
         weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
         weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
-            geoLocationHelper,
-            geoLocator,
             chosenCityInteractor,
             weatherForecastLocalInteractor,
             weatherForecastRemoteInteractor
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideGeoLocationViewModelFactory(
+        app: Application,
+        geoLocationHelper: Geolocator,
+        geoLocator: WeatherForecastGeoLocator,
+        chosenCityInteractor: ChosenCityInteractor,
+    ): GeoLocationViewModelFactory {
+        return GeoLocationViewModelFactory(
+            app,
+            geoLocationHelper,
+            geoLocator,
+            chosenCityInteractor,
         )
     }
 

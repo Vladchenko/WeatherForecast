@@ -7,10 +7,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_ERROR_FONT_COLOR
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_STATUS_FONT_COLOR
 import com.example.weatherforecast.presentation.PresentationUtils.getToolbarSubtitleFontSize
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * View model (MVVM component) with common code to other viewModels.
@@ -19,10 +22,10 @@ import com.example.weatherforecast.presentation.PresentationUtils.getToolbarSubt
  */
 open class AbstractViewModel(private val app: Application) : AndroidViewModel(app) {
 
-    val showProgressBarState: MutableState<Boolean> =  mutableStateOf(true)
-    val toolbarSubtitleState: MutableState<String> =  mutableStateOf("")
-    val toolbarSubtitleColorState: MutableState<Color> =  mutableStateOf(Color.Unspecified)
-    val toolbarSubtitleFontSizeState: MutableState<Int> =  mutableStateOf(APPBAR_SUBTITLE_DEFAULT_FONT_SIZE)
+    val showProgressBarState: MutableState<Boolean> = mutableStateOf(true)
+    val toolbarSubtitleState: MutableState<String> = mutableStateOf("")
+    val toolbarSubtitleColorState: MutableState<Color> = mutableStateOf(Color.Unspecified)
+    val toolbarSubtitleFontSizeState: MutableState<Int> = mutableStateOf(APPBAR_SUBTITLE_DEFAULT_FONT_SIZE)
 
     //region livedata fields
     protected val _onShowErrorLiveData: SingleLiveEvent<String> = SingleLiveEvent()
@@ -48,6 +51,24 @@ open class AbstractViewModel(private val app: Application) : AndroidViewModel(ap
     }
 
     /**
+     * Show status message.
+     */
+    fun onShowStatus(resStringId: Int) {
+        viewModelScope.launch(Dispatchers.Main) {// TODO
+            onShowStatus(app.getString(resStringId))
+        }
+    }
+
+    /**
+     * Show status message.
+     */
+    fun onShowStatus(resStringId: Int, string: String) {    // TODO varargs are not displayed correctly
+        viewModelScope.launch(Dispatchers.Main) {// TODO
+            onShowStatus(app.getString(resStringId, string))
+        }
+    }
+
+    /**
      * Show error message.
      */
     fun onShowError(errorMessage: String) {
@@ -55,5 +76,14 @@ open class AbstractViewModel(private val app: Application) : AndroidViewModel(ap
         toolbarSubtitleColorState.value = APPBAR_SUBTITLE_ERROR_FONT_COLOR
         toolbarSubtitleState.value = errorMessage
         Log.e("AbstractViewModel", errorMessage)
+    }
+
+    /**
+     * Show error message.
+     */
+    fun onShowError(resStringId: Int, vararg args: String) {
+        viewModelScope.launch(Dispatchers.Main) {// TODO
+            onShowStatus(app.getString(resStringId, args))
+        }
     }
 }

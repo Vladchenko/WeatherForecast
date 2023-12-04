@@ -63,7 +63,7 @@ class CitiesNamesViewModel @Inject constructor(
     private lateinit var cityMask: String
 
     init {
-        toolbarSubtitleState.value = app.getString(R.string.city_selection_title)
+        onShowStatus(R.string.city_selection_title)
     }
 
     /**

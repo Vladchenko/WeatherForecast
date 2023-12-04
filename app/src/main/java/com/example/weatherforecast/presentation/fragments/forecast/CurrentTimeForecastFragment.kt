@@ -2,7 +2,6 @@ package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.Manifest
 import android.content.Intent
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -15,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
@@ -24,6 +22,7 @@ import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
+import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.system.exitProcess
 
@@ -34,15 +33,15 @@ import kotlin.system.exitProcess
 class CurrentTimeForecastFragment : Fragment() {
 
     private var mainView: View? = null
-    private var chosenCity: String = ""
     private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
     private val dialogHelper by lazy { AlertDialogHelper(requireContext()) }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
         { isGranted ->
-            forecastViewModel.onPermissionResolution(isGranted, chosenCity)
+            geoLocationViewModel.onPermissionResolution(isGranted)
         }
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
+    private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -78,16 +77,15 @@ class CurrentTimeForecastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
-
-        chosenCity = arguments.chosenCity
-        forecastViewModel.setChosenCity(chosenCity)
         forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
-        forecastViewModel.initWeatherForecast()   // TODO Make a looped downloading
-
+        forecastViewModel.launchWeatherForecast(arguments.chosenCity)   // TODO Make a looped downloading
         initLiveDataObservers()
     }
 
     private fun initLiveDataObservers() {
+        geoLocationViewModel.onLoadForecastLiveData.observe(viewLifecycleOwner) { city ->
+            forecastViewModel.downloadWeatherForecastForCity(city)
+        }
         forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
             dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
                 it,
@@ -96,46 +94,58 @@ class CurrentTimeForecastFragment : Fragment() {
             ).show().closeWith(mainView!!)
         }
         forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) {
-            defineLocationByCity(it)
-        }
-        forecastViewModel.onDefineCityByCurrentGeoLocationLiveData.observe(viewLifecycleOwner) {
-            defineCityNameByCurrentLocation(it)
+            geoLocationViewModel.defineLocationByCity(it)
         }
         forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelectionScreen() }
-        forecastViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
+        forecastViewModel.onChosenAndSavedCitiesBlankLiveData.observe(viewLifecycleOwner) {
+            geoLocationViewModel.defineCurrentGeoLocation()
+        }
+        geoLocationViewModel.onLoadWeatherForecastForLocationLiveData.observe(viewLifecycleOwner) {
+            forecastViewModel.downloadWeatherForecastForLocation(it)
+        }
+        geoLocationViewModel.onCurrentGeoLocationSuccessfulTriangulationLiveData.observe(viewLifecycleOwner) {
+            geoLocationViewModel.defineCityNameByLocation(it)
+        }
+        geoLocationViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
             requestLocationPermission()
         }
-        forecastViewModel.onRequestPermissionDeniedLiveData.observe(viewLifecycleOwner) {
+        geoLocationViewModel.onRequestPermissionDeniedLiveData.observe(viewLifecycleOwner) {
             showToastAndOpenAppSettings()
         }
-        forecastViewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
-            dialogHelper.getGeoLocationAlertDialogBuilder(
-                it,
-                onPositiveClick = {
-                    forecastViewModel.onShowStatus(
-                        getString(
-                            R.string.forecast_downloading_for_city_text,
-                            it
-                        )
-                    )
-                    forecastViewModel.downloadWeatherForecastForCityOrGeoLocation(it, true)
-                },
-                onNegativeClick = {
-                    forecastViewModel.onGotoCitySelection()
-                }
-            ).show().closeWith(mainView!!)
+        geoLocationViewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
+            locationDefinedAlertDialog(it)
         }
-        forecastViewModel.onShowLocationPermissionAlertDialogLiveData.observe(viewLifecycleOwner) {
-            dialogHelper.getLocationPermissionAlertDialogBuilder(
-                onPositiveClick = {
-                    forecastViewModel.onShowStatus(getString(R.string.geo_location_permission_required))
-                    forecastViewModel.requestGeoLocationPermissionOrLoadForecast()
-                },
-                onNegativeClick = {
-                    activity?.finish()
-                }
-            ).show().closeWith(mainView!!)
+        geoLocationViewModel.onShowNoPermissionForLocationTriangulatingAlertDialogLiveData.observe(viewLifecycleOwner) {
+            showNoPermissionAlertDialog()
         }
+    }
+
+    private fun locationDefinedAlertDialog(it: String) {
+        dialogHelper.getGeoLocationAlertDialogBuilder(
+            it,
+            onPositiveClick = {
+                forecastViewModel.onShowStatus(
+                    R.string.forecast_downloading_for_city_text,
+                    it
+                )
+                forecastViewModel.downloadWeatherForecastForCity(it)
+            },
+            onNegativeClick = {
+                forecastViewModel.onGotoCitySelection()
+            }
+        ).show().closeWith(mainView!!)
+    }
+
+    private fun showNoPermissionAlertDialog() {
+        dialogHelper.getLocationPermissionAlertDialogBuilder(
+            onPositiveClick = {
+                geoLocationViewModel.onShowStatus(getString(R.string.geo_location_permission_required))
+                geoLocationViewModel.requestGeoLocationPermission()
+            },
+            onNegativeClick = {
+                activity?.finish()
+            }
+        ).show().closeWith(mainView!!)
     }
 
     private fun requestLocationPermission() {
@@ -164,13 +174,5 @@ class CurrentTimeForecastFragment : Fragment() {
 
     private fun gotoCitySelectionScreen() {
         findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
-    }
-
-    private fun defineLocationByCity(city: String) = lifecycleScope.launchWhenCreated {
-        forecastViewModel.defineLocationByCity(city)
-    }
-
-    private fun defineCityNameByCurrentLocation(location: Location) = lifecycleScope.launchWhenCreated {
-        forecastViewModel.defineCityNameByLocation(location)
     }
 }

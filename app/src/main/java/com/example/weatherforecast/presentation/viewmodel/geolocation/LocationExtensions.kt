@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.viewmodel.forecast
+package com.example.weatherforecast.presentation.viewmodel.geolocation
 
 import android.location.Location
 import android.location.LocationManager

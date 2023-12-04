@@ -22,7 +22,7 @@
     <string name="default_degrees_values">25</string>
     <string name="default_degrees_type">C</string>
     <string name="error_text_example">Some error</string>
-    <string name="forecast_for_city">Provided for city %s</string>
+    <string name="forecast_for_city">Provided for city %1$s</string>
     <string name="forecast_is_loading">Weatherforecast is downloading</string>
     <string name="forecast_downloading_for_city_text">Weather forecast for %s downloading…</string>
     <string name="forecast_downloading_for_location_text">Weather forecast for %s\'s location downloading…</string>
@@ -33,7 +33,7 @@
     <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
     <string name="geo_location_no_permission">Permission not granted, app cannot proceed</string>
     <string name="geo_location_permission_denied">Permission denied. You may grant it by clicking permissions in following window and remove it from denied ones. You will be asked to grant permission again next time.</string>
-    <string name="geo_location_permission_required">Geo location permission required</string>
+    <string name="geo_location_permission_required">Local geo location triangulation permission required</string>
     <string name="network_available_text">Network available</string>
     <string name="network_lost_error_text">Network connection lost, check connection</string>
     <string name="network_not_available_error_text">Network is not available, check connection</string>

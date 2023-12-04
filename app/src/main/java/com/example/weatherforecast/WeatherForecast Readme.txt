@@ -14,7 +14,8 @@ Running a saving for a forecast and a chosen city in separate corotines instead 
 From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...code to measure... }
 
 TODO:
-    - Check why there is 2 geo location services (Geolocator and WeatherForecastGeoLocator)
+    - Provide coroutines dispatchers in Dagger
+    - When loaded remotely and no forecast in DB, an error is shown during this time.
     - Add a ? picture for a case when a weather type image is not defined
     - Work out a case, when city not defined for first app running
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
