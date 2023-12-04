@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils.REPEAT_INTERVAL
@@ -16,7 +17,6 @@ import com.example.weatherforecast.presentation.fragments.cityselection.CityItem
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,29 +26,31 @@ import javax.inject.Inject
 /**
  * View model (MVVM component) for cities names presentation.
  *
- * @property app custom [Application] implementation for Hilt.
- * @property citiesNamesInteractor provides domain layer data.
+ * @param app custom [Application] implementation for Hilt.
+ * @param coroutineDispatchers dispatchers for coroutines
+ * @param citiesNamesInteractor provides domain layer data.
  */
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
     private val app: Application,
+    private val coroutineDispatchers: CoroutineDispatchers,
     private val citiesNamesInteractor: CitiesNamesInteractor,
-) : AbstractViewModel(app) {
+) : AbstractViewModel(app, coroutineDispatchers) {
 
-    private val _citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
     private val _cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
+    private val _citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
 
-    val citiesNamesState: State<CitiesNamesDomainModel?>
-        get() = _citiesNamesState
     val cityMaskState: StateFlow<CityItem>
         get() = _cityMaskState
+    val citiesNamesState: State<CitiesNamesDomainModel?>
+        get() = _citiesNamesState
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message.orEmpty())
         when (throwable) {
             is NoInternetException -> {
                 onShowError(throwable.message.toString())
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch(coroutineDispatchers.io) {
                     delay(REPEAT_INTERVAL)
                     getCitiesNamesForMask(cityMask)
                 }

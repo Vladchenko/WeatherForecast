@@ -2,25 +2,29 @@ package com.example.weatherforecast.presentation.viewmodel
 
 import android.app.Application
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
+import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_ERROR_FONT_COLOR
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_STATUS_FONT_COLOR
 import com.example.weatherforecast.presentation.PresentationUtils.getToolbarSubtitleFontSize
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
  * View model (MVVM component) with common code to other viewModels.
  *
- * @property app custom [Application] required for its successors.
+ * @param app custom [Application] required for its successors.
+ * @param coroutineDispatchers dispatchers for coroutines
  */
-open class AbstractViewModel(private val app: Application) : AndroidViewModel(app) {
+open class AbstractViewModel(private val app: Application,
+                             private val coroutineDispatchers: CoroutineDispatchers
+) : AndroidViewModel(app) {
 
     val showProgressBarState: MutableState<Boolean> = mutableStateOf(true)
     val toolbarSubtitleState: MutableState<String> = mutableStateOf("")
@@ -28,8 +32,8 @@ open class AbstractViewModel(private val app: Application) : AndroidViewModel(ap
     val toolbarSubtitleFontSizeState: MutableState<Int> = mutableStateOf(APPBAR_SUBTITLE_DEFAULT_FONT_SIZE)
 
     //region livedata fields
-    protected val _onShowErrorLiveData: SingleLiveEvent<String> = SingleLiveEvent()
-    protected val _onShowStatusLiveData: SingleLiveEvent<String> = SingleLiveEvent()
+    private val _onShowErrorLiveData: SingleLiveEvent<String> = SingleLiveEvent()
+    private val _onShowStatusLiveData: SingleLiveEvent<String> = SingleLiveEvent()
     //endregion livedata fields
 
     //region livedata getters fields
@@ -51,25 +55,25 @@ open class AbstractViewModel(private val app: Application) : AndroidViewModel(ap
     }
 
     /**
-     * Show status message.
+     * Show status message, providing [stringResId].
      */
-    fun onShowStatus(resStringId: Int) {
-        viewModelScope.launch(Dispatchers.Main) {// TODO
-            onShowStatus(app.getString(resStringId))
+    fun onShowStatus(@StringRes stringResId: Int) {
+        viewModelScope.launch(coroutineDispatchers.main) {
+            onShowStatus(app.getString(stringResId))
         }
     }
 
     /**
-     * Show status message.
+     * Show status message, providing [stringResId] and [value] as argument.
      */
-    fun onShowStatus(resStringId: Int, string: String) {    // TODO varargs are not displayed correctly
-        viewModelScope.launch(Dispatchers.Main) {// TODO
-            onShowStatus(app.getString(resStringId, string))
+    fun onShowStatus(@StringRes stringResId: Int, value: String) {    // TODO varargs are not displayed correctly
+        viewModelScope.launch(coroutineDispatchers.main) {
+            onShowStatus(app.getString(stringResId, value))
         }
     }
 
     /**
-     * Show error message.
+     * Show [errorMessage].
      */
     fun onShowError(errorMessage: String) {
         toolbarSubtitleFontSizeState.value = getToolbarSubtitleFontSize(errorMessage)
@@ -79,11 +83,20 @@ open class AbstractViewModel(private val app: Application) : AndroidViewModel(ap
     }
 
     /**
-     * Show error message.
+     * Show error message, providing [stringResId].
      */
-    fun onShowError(resStringId: Int, vararg args: String) {
-        viewModelScope.launch(Dispatchers.Main) {// TODO
-            onShowStatus(app.getString(resStringId, args))
+    fun onShowError(@StringRes stringResId: Int) {
+        viewModelScope.launch(coroutineDispatchers.main) {
+            onShowError(app.getString(stringResId))
+        }
+    }
+
+    /**
+     * Show error message, providing [stringResId] and [value] as argument.
+     */
+    fun onShowError(@StringRes stringResId: Int, value: String) {
+        viewModelScope.launch(coroutineDispatchers.main) {
+            onShowError(app.getString(stringResId, value))
         }
     }
 }

@@ -135,8 +135,11 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideCityRepository(chosenCityDataSource: ChosenCityDataSource): ChosenCityRepository {
-        return ChosenCityRepositoryImpl(chosenCityDataSource)
+    fun provideCityRepository(
+        chosenCityDataSource: ChosenCityDataSource,
+        coroutineDispatchers: CoroutineDispatchers
+    ): ChosenCityRepository {
+        return ChosenCityRepositoryImpl(coroutineDispatchers, chosenCityDataSource,)
     }
 
     @Singleton
@@ -168,12 +171,14 @@ class WeatherForecastModule {
     fun provideForecastViewModelFactory(
         app: Application,
         chosenCityInteractor: ChosenCityInteractor,
+        coroutineDispatchers: CoroutineDispatchers,
         weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
         weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
             chosenCityInteractor,
+            coroutineDispatchers,
             weatherForecastLocalInteractor,
             weatherForecastRemoteInteractor
         )
@@ -186,19 +191,24 @@ class WeatherForecastModule {
         geoLocationHelper: Geolocator,
         geoLocator: WeatherForecastGeoLocator,
         chosenCityInteractor: ChosenCityInteractor,
+        coroutineDispatchers: CoroutineDispatchers,
     ): GeoLocationViewModelFactory {
         return GeoLocationViewModelFactory(
             app,
             geoLocationHelper,
             geoLocator,
             chosenCityInteractor,
+            coroutineDispatchers
         )
     }
 
     @Singleton
     @Provides
-    fun provideGeolocator(@ApplicationContext context: Context): Geolocator {
-        return GeolocatorImpl(context)
+    fun provideGeolocator(
+        @ApplicationContext context: Context,
+        coroutineDispatchers: CoroutineDispatchers
+    ): Geolocator {
+        return GeolocatorImpl(context, coroutineDispatchers)
     }
 
     @Singleton
@@ -228,11 +238,13 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideCitiesNamesRepository(
+        coroutineDispatchers: CoroutineDispatchers,
         converter: CitiesNamesDataToDomainConverter,
         citiesNamesLocalDataSource: CitiesNamesLocalDataSource,
         citiesNamesRemoteDataSource: CitiesNamesRemoteDataSource
     ): CitiesNamesRepository {
         return CitiesNamesRepositoryImpl(
+            coroutineDispatchers,
             citiesNamesLocalDataSource,
             citiesNamesRemoteDataSource,
             converter
@@ -249,10 +261,12 @@ class WeatherForecastModule {
     @Provides
     fun provideCitiesNamesViewModelFactory(
         app: Application,
+        coroutineDispatchers: CoroutineDispatchers,
         citiesNamesInteractor: CitiesNamesInteractor
     ): CitiesNamesViewModelFactory {
         return CitiesNamesViewModelFactory(
             app,
+            coroutineDispatchers,
             citiesNamesInteractor
         )
     }

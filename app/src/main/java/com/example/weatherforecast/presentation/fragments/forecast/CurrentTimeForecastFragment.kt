@@ -97,13 +97,13 @@ class CurrentTimeForecastFragment : Fragment() {
             geoLocationViewModel.defineLocationByCity(it)
         }
         forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelectionScreen() }
-        forecastViewModel.onChosenAndSavedCitiesBlankLiveData.observe(viewLifecycleOwner) {
+        forecastViewModel.onChosenCityBlankLiveData.observe(viewLifecycleOwner) {
             geoLocationViewModel.defineCurrentGeoLocation()
         }
-        geoLocationViewModel.onLoadWeatherForecastForLocationLiveData.observe(viewLifecycleOwner) {
+        geoLocationViewModel.onDefineGeoLocationByCitySuccessLiveData.observe(viewLifecycleOwner) {
             forecastViewModel.downloadWeatherForecastForLocation(it)
         }
-        geoLocationViewModel.onCurrentGeoLocationSuccessfulTriangulationLiveData.observe(viewLifecycleOwner) {
+        geoLocationViewModel.onDefineCurrentGeoLocationSuccessLiveData.observe(viewLifecycleOwner) {
             geoLocationViewModel.defineCityNameByLocation(it)
         }
         geoLocationViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
