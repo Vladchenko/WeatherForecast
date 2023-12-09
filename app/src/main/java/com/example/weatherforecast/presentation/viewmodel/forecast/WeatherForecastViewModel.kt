@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * View model for weather forecast downloading.
+ * ViewModel for weather forecast downloading.
  *
  * @param app custom [Application] implementation for Hilt
  * @param coroutineDispatchers geo location helper class
@@ -76,9 +76,10 @@ class WeatherForecastViewModel @Inject constructor(
 
     init {
         onShowStatus(R.string.forecast_is_loading)
-        weatherForecastDownloadJob = viewModelScope.launch(coroutineDispatchers.io, CoroutineStart.LAZY) {
-            downloadWeatherForecast(chosenCity.orEmpty())
-        }
+        weatherForecastDownloadJob =
+            viewModelScope.launch(coroutineDispatchers.io, CoroutineStart.LAZY) {
+                downloadWeatherForecast(chosenCity.orEmpty())
+            }
     }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -141,7 +142,7 @@ class WeatherForecastViewModel @Inject constructor(
                 Log.d(
                     TAG,
                     "No chosen city from picker fragment. Downloaded from database: city = ${cityModel.city}, " +
-                        "lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
+                            "lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
                 )
                 cityModel.city
             }
@@ -193,50 +194,65 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun processServerResponse(result: Result<WeatherForecastDomainModel>) {
-        result.getOrNull()?.let {   // Result is not null
+        result.getOrNull()?.let { forecastModel -> // Result is not null
             if (result.isSuccess) {
                 Log.d(TAG, result.toString())
-                dataModelState.value = it
+                dataModelState.value = forecastModel
                 showProgressBarState.value = false
                 onShowStatus(
                     R.string.forecast_for_city,
                     dataModelState.value?.city.orEmpty()
                 )
-                result.getOrNull()?.serverError?.let { error ->
-                    processError(error)
-                }
-                viewModelScope.launch {
-                    launch {
-                        forecastLocalInteractor.saveForecast(it)
-                    }
-                    launch {
-                        saveChosenCity(it, result)
-                    }
-                }
+                processServerError(forecastModel.serverError)
+                saveForecastAndChosenCityToDataBase(forecastModel)
             } else {
-                onShowError(it.serverError)
-                Log.e(TAG, it.serverError)
-                _onCityRequestFailedLiveData.postValue(it.city)
+                onShowError(forecastModel.serverError)
+                Log.e(TAG, forecastModel.serverError)
+                _onCityRequestFailedLiveData.postValue(forecastModel.city)
             }
         } ?: run {
-            onShowError("Server responded with $this")
+            processResponseError()
+        }
+    }
+
+    private fun processResponseError(): Job {
+        onShowError("Server responded with $this")
+        return viewModelScope.launch {
+            val cityLocationModel = chosenCityInteractor.loadChosenCityModel()
+            dataModelState.value = forecastLocalInteractor.loadForecast(cityLocationModel.city)
+        }
+    }
+
+    private fun saveForecastAndChosenCityToDataBase(
+        domainModel: WeatherForecastDomainModel
+    ) = viewModelScope.launch {
+        launch {
+            forecastLocalInteractor.saveForecast(domainModel)
+        }
+        launch {
+            saveChosenCity(
+                domainModel.city,
+                domainModel.coordinate.latitude,
+                domainModel.coordinate.longitude
+            )
         }
     }
 
     private suspend fun saveChosenCity(
-        it: WeatherForecastDomainModel,
-        result: Result<WeatherForecastDomainModel>
+        city: String,
+        latitude: Double,
+        longitude: Double,
     ) {
         chosenCityInteractor.saveChosenCity(
-            it.city,
+            city,
             getLocationByLatLon(
-                result.getOrNull()?.coordinate?.latitude ?: 0.0,
-                result.getOrNull()?.coordinate?.longitude ?: 0.0
+                latitude,
+                longitude
             )
         )
     }
 
-    private fun processError(error: String) {
+    private fun processServerError(error: String) {
         onShowError(error)
         if (error.contains("Unable to resolve host")) {
             throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))

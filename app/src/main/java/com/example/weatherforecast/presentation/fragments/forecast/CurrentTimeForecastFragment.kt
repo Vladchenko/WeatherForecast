@@ -77,9 +77,9 @@ class CurrentTimeForecastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
+        initLiveDataObservers()
         forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
         forecastViewModel.launchWeatherForecast(arguments.chosenCity)   // TODO Make a looped downloading
-        initLiveDataObservers()
     }
 
     private fun initLiveDataObservers() {
