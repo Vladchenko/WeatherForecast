@@ -1,11 +1,11 @@
-package com.example.weatherforecast.presentation.viewmodel.forecast
+package com.example.weatherforecast.presentation.viewmodel.persistence
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
-import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
+import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 
 /**
  * View model factory
@@ -13,20 +13,20 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteract
  * @param app custom [Application] implementation for Hilt
  * @param coroutineDispatchers coroutines dispatchers
  * @param chosenCityInteractor downloads a previously chosen city
- * @param weatherForecastRemoteInteractor provides domain layer data for weather forecast through network
+ * @param weatherForecastLocalInteractor  provides data for weather forecast through database
  */
-class WeatherForecastViewModelFactory(
+class PersistenceViewModelFactory(
     private val app: Application,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
+    private val weatherForecastLocalInteractor: WeatherForecastLocalInteractor
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return WeatherForecastViewModel(
+        return PersistenceViewModel(
             app,
             coroutineDispatchers,
             chosenCityInteractor,
-            weatherForecastRemoteInteractor
+            weatherForecastLocalInteractor
         ) as T
     }
 }

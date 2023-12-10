@@ -23,6 +23,7 @@ import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
+import com.example.weatherforecast.presentation.viewmodel.persistence.PersistenceViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.system.exitProcess
 
@@ -42,6 +43,7 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
     private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
+    private val persistenceViewModel by activityViewModels<PersistenceViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,9 +85,6 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun initLiveDataObservers() {
-        geoLocationViewModel.onLoadForecastLiveData.observe(viewLifecycleOwner) { city ->
-            forecastViewModel.downloadWeatherForecastForCity(city)
-        }
         forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
             dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
                 it,
@@ -99,6 +98,20 @@ class CurrentTimeForecastFragment : Fragment() {
         forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelectionScreen() }
         forecastViewModel.onChosenCityBlankLiveData.observe(viewLifecycleOwner) {
             geoLocationViewModel.defineCurrentGeoLocation()
+        }
+        forecastViewModel.onSaveForecastLiveData.observe(viewLifecycleOwner) { forecastModel ->
+            persistenceViewModel.saveForecastAndChosenCityToDataBase(forecastModel)
+        }
+        forecastViewModel.onLoadLocalForecastLiveData.observe(viewLifecycleOwner) { forecastModel ->
+            persistenceViewModel.loadLocalWeatherForecast(forecastModel)
+        }
+
+        persistenceViewModel.onLocalForecastLoadSuccessLiveData.observe(viewLifecycleOwner) { forecastModel ->
+            forecastViewModel.getLocalForecast(forecastModel)
+        }
+
+        geoLocationViewModel.onLoadForecastLiveData.observe(viewLifecycleOwner) { city ->
+            forecastViewModel.downloadWeatherForecastForCity(city)
         }
         geoLocationViewModel.onDefineGeoLocationByCitySuccessLiveData.observe(viewLifecycleOwner) {
             forecastViewModel.downloadWeatherForecastForLocation(it)
