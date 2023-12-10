@@ -89,7 +89,7 @@ class CurrentTimeForecastFragment : Fragment() {
         forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
             dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
                 it,
-                onPositiveClick = { forecastViewModel.onGotoCitySelection() },
+                onPositiveClick = { forecastViewModel.gotoCitySelection() },
                 onNegativeClick = {/*pass*/ }
             ).show().closeWith(mainView!!)
         }
@@ -124,14 +124,14 @@ class CurrentTimeForecastFragment : Fragment() {
         dialogHelper.getGeoLocationAlertDialogBuilder(
             it,
             onPositiveClick = {
-                forecastViewModel.onShowStatus(
+                forecastViewModel.showStatus(
                     R.string.forecast_downloading_for_city_text,
                     it
                 )
                 forecastViewModel.downloadWeatherForecastForCity(it)
             },
             onNegativeClick = {
-                forecastViewModel.onGotoCitySelection()
+                forecastViewModel.gotoCitySelection()
             }
         ).show().closeWith(mainView!!)
     }
@@ -139,7 +139,7 @@ class CurrentTimeForecastFragment : Fragment() {
     private fun showNoPermissionAlertDialog() {
         dialogHelper.getLocationPermissionAlertDialogBuilder(
             onPositiveClick = {
-                geoLocationViewModel.onShowStatus(getString(R.string.geo_location_permission_required))
+                geoLocationViewModel.showStatus(getString(R.string.geo_location_permission_required))
                 geoLocationViewModel.requestGeoLocationPermission()
             },
             onNegativeClick = {

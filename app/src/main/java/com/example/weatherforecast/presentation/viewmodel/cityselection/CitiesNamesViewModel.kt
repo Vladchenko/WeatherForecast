@@ -49,23 +49,23 @@ class CitiesNamesViewModel @Inject constructor(
         Log.e("CitiesNamesViewModel", throwable.message.orEmpty())
         when (throwable) {
             is NoInternetException -> {
-                onShowError(throwable.message.toString())
+                showError(throwable.message.toString())
                 viewModelScope.launch(coroutineDispatchers.io) {
                     delay(REPEAT_INTERVAL)
                     getCitiesNamesForMask(cityMask)
                 }
             }
             is NoSuchDatabaseEntryException -> {
-                onShowError("Forecast for city ${throwable.message} is not present in database")
+                showError("Forecast for city ${throwable.message} is not present in database")
             }
-            is Exception -> onShowError(throwable.message.toString())
+            is Exception -> showError(throwable.message.toString())
         }
     }
 
     private lateinit var cityMask: String
 
     init {
-        onShowStatus(R.string.city_selection_title)
+        showStatus(R.string.city_selection_title)
     }
 
     /**

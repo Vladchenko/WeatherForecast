@@ -75,7 +75,7 @@ class WeatherForecastViewModel @Inject constructor(
     //endregion livedata getters fields
 
     init {
-        onShowStatus(R.string.forecast_is_loading)
+        showStatus(R.string.forecast_is_loading)
         weatherForecastDownloadJob =
             viewModelScope.launch(coroutineDispatchers.io, CoroutineStart.LAZY) {
                 downloadWeatherForecast(chosenCity.orEmpty())
@@ -86,13 +86,12 @@ class WeatherForecastViewModel @Inject constructor(
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is CityNotFoundException -> {
-                onShowError(throwable.message)
-                // Try downloading a forecast by location
+                showError(throwable.message)
                 _onCityRequestFailedLiveData.postValue(throwable.city)
             }
 
             is NoInternetException -> {
-                onShowError(throwable.message.toString())
+                showError(throwable.message.toString())
                 viewModelScope.launch(coroutineDispatchers.io) {
                     delay(REPEAT_INTERVAL)
                     weatherForecastDownloadJob.start()
@@ -100,7 +99,7 @@ class WeatherForecastViewModel @Inject constructor(
             }
 
             is NoSuchDatabaseEntryException -> {
-                onShowError(
+                showError(
                     app.applicationContext.getString(
                         R.string.database_entry_for_city_not_found, throwable.message
                     )
@@ -113,7 +112,7 @@ class WeatherForecastViewModel @Inject constructor(
                     app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
                 )
                 Log.e(TAG, throwable.stackTraceToString())
-                onShowError(throwable.message.toString())
+                showError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
                 _onCityRequestFailedLiveData.postValue(chosenCity.orEmpty())    //TODO .orEmpty()
             }
@@ -126,7 +125,7 @@ class WeatherForecastViewModel @Inject constructor(
     /**
      * Go to city selection screen.
      */
-    fun onGotoCitySelection() {
+    fun gotoCitySelection() {
         weatherForecastDownloadJob.cancel()
         _onGotoCitySelectionLiveData.call()
     }
@@ -142,15 +141,11 @@ class WeatherForecastViewModel @Inject constructor(
                 Log.d(
                     TAG,
                     "No chosen city from picker fragment. Downloaded from database: city = ${cityModel.city}, " +
-                            "lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
+                        "lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
                 )
                 cityModel.city
             }
-            if (city.isBlank()) {
-                _onChosenCityBlankLiveData.call()
-            } else {
-                downloadWeatherForecast(city)
-            }
+            downloadWeatherForecast(city)
         }
 
     /**
@@ -199,14 +194,14 @@ class WeatherForecastViewModel @Inject constructor(
                 Log.d(TAG, result.toString())
                 dataModelState.value = forecastModel
                 showProgressBarState.value = false
-                onShowStatus(
+                showStatus(
                     R.string.forecast_for_city,
                     dataModelState.value?.city.orEmpty()
                 )
                 processServerError(forecastModel.serverError)
                 saveForecastAndChosenCityToDataBase(forecastModel)
             } else {
-                onShowError(forecastModel.serverError)
+                showError(forecastModel.serverError)
                 Log.e(TAG, forecastModel.serverError)
                 _onCityRequestFailedLiveData.postValue(forecastModel.city)
             }
@@ -216,7 +211,7 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun processResponseError(): Job {
-        onShowError("Server responded with $this")
+        showError("Server responded with $this")
         return viewModelScope.launch {
             val cityLocationModel = chosenCityInteractor.loadChosenCityModel()
             dataModelState.value = forecastLocalInteractor.loadForecast(cityLocationModel.city)
@@ -253,15 +248,14 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun processServerError(error: String) {
-        onShowError(error)
+        showError(error)
         if (error.contains("Unable to resolve host")) {
             throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
         }
     }
 
     /**
-     * Requests a geo location or downloads a forecast, depending on a presence of a [city],
-     * having [temperatureType] provided.
+     * Request a geo location or download a forecast, depending on a presence of a [city]
      */
     private fun downloadWeatherForecast(city: String) {
         if (city.isBlank()) {

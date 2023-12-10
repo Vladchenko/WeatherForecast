@@ -71,7 +71,7 @@ class GeoLocationViewModel @Inject constructor(
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is NoInternetException -> {
-                onShowError(throwable.message.toString())
+                showError(throwable.message.toString())
                 viewModelScope.launch(coroutineDispatchers.io) {
                     delay(PresentationUtils.REPEAT_INTERVAL)
                     // weatherForecastDownloadJob.start()
@@ -80,7 +80,7 @@ class GeoLocationViewModel @Inject constructor(
             }
 
             is NoSuchDatabaseEntryException -> {
-                onShowError(
+                showError(
                     app.applicationContext.getString(
                         R.string.database_entry_for_city_not_found, throwable.message
                     )
@@ -93,7 +93,7 @@ class GeoLocationViewModel @Inject constructor(
                     app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
                 )
                 Log.e(TAG, throwable.stackTraceToString())
-                onShowError(throwable.message.toString())
+                showError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
                 // _onCityRequestFailedLiveData.postValue(chosenCity)
                 // TODO What should go here ?
@@ -111,7 +111,7 @@ class GeoLocationViewModel @Inject constructor(
         if (hasPermissionForGeoLocation(app.applicationContext)) {
             defineCurrentGeoLocation()
         } else {
-            onShowStatus(app.applicationContext.getString(R.string.geo_location_permission_required))
+            showStatus(app.applicationContext.getString(R.string.geo_location_permission_required))
             permissionRequests++
             if (permissionRequests > 2) {
                 _onRequestPermissionDeniedLiveData.postValue(Unit)
@@ -123,7 +123,7 @@ class GeoLocationViewModel @Inject constructor(
     }
 
     fun defineCurrentGeoLocation() {
-        onShowStatus(app.applicationContext.getString(R.string.current_location_defining_text))
+        showStatus(app.applicationContext.getString(R.string.current_location_defining_text))
         geoLocator.defineCurrentLocation(app.applicationContext, object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
                 _onDefineCurrentGeoLocationSuccessLiveData.postValue(location)
@@ -132,7 +132,7 @@ class GeoLocationViewModel @Inject constructor(
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {
                 Log.e(TAG, errorMessage)
-                onShowError(errorMessage)
+                showError(errorMessage)
             }
 
             override fun onNoGeoLocationPermission() {
@@ -149,7 +149,7 @@ class GeoLocationViewModel @Inject constructor(
         if (isGranted) {
             defineCurrentGeoLocation()
         } else {
-            onShowError(app.applicationContext.getString(R.string.geo_location_no_permission))
+            showError(app.applicationContext.getString(R.string.geo_location_no_permission))
             _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData.call()
         }
     }
@@ -159,7 +159,7 @@ class GeoLocationViewModel @Inject constructor(
      */
     fun defineLocationByCity(city: String) {
         viewModelScope.launch(coroutineDispatchers.io) {
-            onShowStatus("Defining geo location for city $city")
+            showStatus("Defining geo location for city $city")
             try {
                 val location = geoLocationHelper.defineLocationByCity(city)
                 Log.d(TAG, "Geo location defined successfully for city = $city, location = $location")
@@ -168,7 +168,7 @@ class GeoLocationViewModel @Inject constructor(
                 Log.d(TAG, "City and its location saved successfully.")
                 _onDefineGeoLocationByCitySuccessLiveData.postValue(cityModel)
             } catch (ex: Exception) {
-                onShowError(ex.message.toString())
+                showError(ex.message.toString())
             }
         }
     }
@@ -191,7 +191,7 @@ class GeoLocationViewModel @Inject constructor(
      */
     fun defineCityNameByLocation(location: Location) {
         viewModelScope.launch(coroutineDispatchers.io) {
-            onShowStatus("Defining city from geo location")
+            showStatus("Defining city from geo location")
             val city = geoLocationHelper.defineCityNameByLocation(location)
             Log.d(
                 TAG,

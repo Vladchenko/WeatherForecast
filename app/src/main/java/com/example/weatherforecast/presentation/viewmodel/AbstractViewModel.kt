@@ -7,7 +7,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
@@ -31,23 +30,10 @@ open class AbstractViewModel(private val app: Application,
     val toolbarSubtitleColorState: MutableState<Color> = mutableStateOf(Color.Unspecified)
     val toolbarSubtitleFontSizeState: MutableState<Int> = mutableStateOf(APPBAR_SUBTITLE_DEFAULT_FONT_SIZE)
 
-    //region livedata fields
-    private val _onShowErrorLiveData: SingleLiveEvent<String> = SingleLiveEvent()
-    private val _onShowStatusLiveData: SingleLiveEvent<String> = SingleLiveEvent()
-    //endregion livedata fields
-
-    //region livedata getters fields
-    val onShowErrorLiveData: LiveData<String>
-        get() = _onShowErrorLiveData
-
-    val onShowStatusLiveData: LiveData<String>
-        get() = _onShowStatusLiveData
-    //endregion livedata getters fields
-
     /**
      * Show status message.
      */
-    fun onShowStatus(statusMessage: String) {
+    fun showStatus(statusMessage: String) {
         toolbarSubtitleFontSizeState.value = getToolbarSubtitleFontSize(statusMessage)
         toolbarSubtitleColorState.value = APPBAR_SUBTITLE_STATUS_FONT_COLOR
         toolbarSubtitleState.value = statusMessage
@@ -57,25 +43,25 @@ open class AbstractViewModel(private val app: Application,
     /**
      * Show status message, providing [stringResId].
      */
-    fun onShowStatus(@StringRes stringResId: Int) {
+    fun showStatus(@StringRes stringResId: Int) {
         viewModelScope.launch(coroutineDispatchers.main) {
-            onShowStatus(app.getString(stringResId))
+            showStatus(app.getString(stringResId))
         }
     }
 
     /**
      * Show status message, providing [stringResId] and [value] as argument.
      */
-    fun onShowStatus(@StringRes stringResId: Int, value: String) {    // TODO varargs are not displayed correctly
+    fun showStatus(@StringRes stringResId: Int, value: String) {    // TODO varargs are not displayed correctly
         viewModelScope.launch(coroutineDispatchers.main) {
-            onShowStatus(app.getString(stringResId, value))
+            showStatus(app.getString(stringResId, value))
         }
     }
 
     /**
      * Show [errorMessage].
      */
-    fun onShowError(errorMessage: String) {
+    fun showError(errorMessage: String) {
         toolbarSubtitleFontSizeState.value = getToolbarSubtitleFontSize(errorMessage)
         toolbarSubtitleColorState.value = APPBAR_SUBTITLE_ERROR_FONT_COLOR
         toolbarSubtitleState.value = errorMessage
@@ -85,18 +71,18 @@ open class AbstractViewModel(private val app: Application,
     /**
      * Show error message, providing [stringResId].
      */
-    fun onShowError(@StringRes stringResId: Int) {
+    fun showError(@StringRes stringResId: Int) {
         viewModelScope.launch(coroutineDispatchers.main) {
-            onShowError(app.getString(stringResId))
+            showError(app.getString(stringResId))
         }
     }
 
     /**
      * Show error message, providing [stringResId] and [value] as argument.
      */
-    fun onShowError(@StringRes stringResId: Int, value: String) {
+    fun showError(@StringRes stringResId: Int, value: String) {
         viewModelScope.launch(coroutineDispatchers.main) {
-            onShowError(app.getString(stringResId, value))
+            showError(app.getString(stringResId, value))
         }
     }
 }
