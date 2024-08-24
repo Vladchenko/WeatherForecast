@@ -4,12 +4,12 @@ import android.location.Location
 import com.example.weatherforecast.models.domain.CityLocationModel
 
 /**
- * Retrieve city name and its location that one need to have a forecast for.
+ * Retrieve city name and its location to provide a weather forecast for.
  */
 interface ChosenCityRepository {
 
     /**
-     * Download model of city, consisting its name and [Location]
+     * Download data model for city
      */
     suspend fun loadChosenCity(): CityLocationModel
 

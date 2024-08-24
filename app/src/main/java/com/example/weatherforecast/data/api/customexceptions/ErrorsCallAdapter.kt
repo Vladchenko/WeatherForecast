@@ -5,6 +5,8 @@ import retrofit2.CallAdapter
 
 /**
  * Adapter to process network requests.
+ *
+ * @property delegateAdapter to delegate network requests to.
  */
 class ErrorsCallAdapter(
     private val delegateAdapter: CallAdapter<Any, Call<*>>

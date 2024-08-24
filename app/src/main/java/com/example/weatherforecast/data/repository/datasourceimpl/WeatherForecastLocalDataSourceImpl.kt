@@ -10,17 +10,17 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 /**
  * [WeatherForecastRemoteDataSource] implementation.
  *
- * @property dao Retrofit DAO to download weather data
+ * @property dao of Retrofit library to download weather forecast data
  */
 class WeatherForecastLocalDataSourceImpl(private val dao: WeatherForecastDAO) : WeatherForecastLocalDataSource {
 
-    override suspend fun loadWeatherForecastData(city:String): WeatherForecastDomainModel {
+    override suspend fun loadForecastData(city:String): WeatherForecastDomainModel {
         val model = dao.getCityForecast(city) ?: throw NoSuchDatabaseEntryException(city)
         Log.d("WeatherForecastLocalDataSourceImpl", "${model.city} city forecast loaded successfully")
         return model
     }
 
-    override suspend fun saveWeatherForecastData(response: WeatherForecastDomainModel) {
+    override suspend fun saveForecastData(response: WeatherForecastDomainModel) {
         dao.insertCityForecast(response)
         Log.d("WeatherForecastLocalDataSourceImpl", "${response.city} city forecast saved successfully")
     }

@@ -4,16 +4,16 @@ import android.location.Location
 import com.example.weatherforecast.models.domain.CityLocationModel
 
 /**
- * Data source for city retrieval from storage.
+ * Data source for city retrieval/persistence in storage.
  */
 interface ChosenCityDataSource {
     /**
      * Retrieve city model.
      */
-    suspend fun getCity(): CityLocationModel
+    suspend fun loadCity(): CityLocationModel
 
     /**
-     * Save [city] and its [location] to storage.
+     * Save [city] and its [location] to some storage.
      */
     suspend fun saveCity(city: String, location: Location)
 

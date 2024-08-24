@@ -6,6 +6,9 @@ import com.google.gson.annotations.SerializedName
 
 /**
  * Data model for cities names retrieval.
+ *
+ * @property cities data models list
+ * @property error message if cities list failed to be fetched
  */
 data class CitiesNamesDomainModel(
     val cities: List<CityDomainModel>,
@@ -14,6 +17,13 @@ data class CitiesNamesDomainModel(
 
 /**
  * Data model for city geo location.
+ *
+ * @property name city name
+ * @property lat latitude for city
+ * @property lon longitude for city
+ * @property country that city located in
+ * @property state that city located in
+ * @property serverError message if data retrieval failed
  */
 @Entity(tableName = "citiesNames")
 data class CityDomainModel(

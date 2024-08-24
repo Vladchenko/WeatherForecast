@@ -10,10 +10,10 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteract
 /**
  * View model factory
  *
- * @param app custom [Application] implementation for Hilt
- * @param coroutineDispatchers coroutines dispatchers
- * @param chosenCityInteractor downloads a previously chosen city
- * @param weatherForecastRemoteInteractor provides domain layer data for weather forecast through network
+ * @property app custom [Application] implementation for Hilt
+ * @property coroutineDispatchers coroutines dispatchers
+ * @property chosenCityInteractor downloads a previously chosen city
+ * @property weatherForecastRemoteInteractor provides domain layer data for weather forecast through network
  */
 class WeatherForecastViewModelFactory(
     private val app: Application,

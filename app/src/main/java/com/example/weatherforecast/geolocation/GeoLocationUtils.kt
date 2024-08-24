@@ -11,7 +11,7 @@ import androidx.core.app.ActivityCompat
  * @param context android.content.Context
  */
 fun hasPermissionForGeoLocation(context: Context) =
-    (ActivityCompat.checkSelfPermission(
+    ActivityCompat.checkSelfPermission(
         context,
         Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED)
+    ) == PackageManager.PERMISSION_GRANTED

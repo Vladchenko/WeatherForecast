@@ -10,10 +10,10 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteracto
 /**
  * View model factory
  *
- * @param app custom [Application] implementation for Hilt
- * @param coroutineDispatchers coroutines dispatchers
- * @param chosenCityInteractor downloads a previously chosen city
- * @param weatherForecastLocalInteractor  provides data for weather forecast through database
+ * @property app custom [Application] implementation for Hilt
+ * @property coroutineDispatchers coroutines dispatchers
+ * @property chosenCityInteractor downloads a previously chosen city
+ * @property weatherForecastLocalInteractor  provides data for weather forecast through database
  */
 class PersistenceViewModelFactory(
     private val app: Application,

@@ -11,7 +11,7 @@ import java.io.IOException
 import java.util.Locale
 
 /**
- * Geolocator implementation
+ * [Geolocator] implementation
  *
  * @param context android.content.Context
  * @param coroutineDispatchers dispatchers for coroutines
@@ -22,7 +22,7 @@ class GeolocatorImpl(
 ) : Geolocator {
 
     /**
-     * Get area name (i.e. city) by [location]
+     * Get city(area) name by [location]
      */
     override suspend fun defineCityNameByLocation(location: Location): String =
         with(coroutineDispatchers.io) {
@@ -43,7 +43,7 @@ class GeolocatorImpl(
         }
 
     /**
-     * Define android.location.Location for [city]
+     * Define [android.location.Location] for [city]
      */
     override suspend fun defineLocationByCity(city: String): Location =
         with(coroutineDispatchers.io) {

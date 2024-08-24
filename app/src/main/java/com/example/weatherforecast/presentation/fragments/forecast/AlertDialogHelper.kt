@@ -8,9 +8,9 @@ import com.example.weatherforecast.presentation.alertdialog.GeoLocationAlertDial
 import com.example.weatherforecast.presentation.alertdialog.LocationPermissionAlertDialogDelegate
 
 /**
- * Location permission alert dialog.
+ * Permission to define location alert dialog.
  *
- * @param context android.context.Context
+ * @property context android.context.Context
  */
 class AlertDialogHelper(private val context: Context) {
 

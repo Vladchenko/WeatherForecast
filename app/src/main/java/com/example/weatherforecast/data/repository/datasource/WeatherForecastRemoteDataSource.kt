@@ -9,12 +9,12 @@ import retrofit2.Response
 interface WeatherForecastRemoteDataSource {
 
     /**
-     * Receives data, having [city] as a request parameter.
+     * Receive weather forecast for [city].
      */
-    suspend fun loadWeatherForecastDataForCity(city: String): Response<WeatherForecastResponse>
+    suspend fun loadForecastDataForCity(city: String): Response<WeatherForecastResponse>
 
     /**
-     * Receives data, having [latitude] and [longitude] as a request parameter.
+     * Receive weather forecast for a location defined by [latitude] and [longitude].
      */
-    suspend fun loadWeatherForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse>
+    suspend fun loadForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse>
 }

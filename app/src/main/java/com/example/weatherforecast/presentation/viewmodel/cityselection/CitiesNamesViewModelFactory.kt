@@ -9,9 +9,9 @@ import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 /**
  * Cities names view model factory
  *
- * @param app custom [Application] implementation for Hilt
- * @param coroutineDispatchers dispatchers for coroutines
- * @param citiesNamesInteractor provides domain layer data
+ * @property app custom [Application] implementation for Hilt
+ * @property coroutineDispatchers dispatchers for coroutines
+ * @property citiesNamesInteractor provides domain layer data
  */
 class CitiesNamesViewModelFactory(
     private val app: Application,

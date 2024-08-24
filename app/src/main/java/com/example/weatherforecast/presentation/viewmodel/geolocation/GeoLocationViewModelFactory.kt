@@ -11,10 +11,11 @@ import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 /**
  * View model factory
  *
- * @param app custom [Application] implementation for Hilt
- * @param geoLocationHelper provides geo location service
- * @param geoLocator provides geo location service
- * @param chosenCityInteractor downloads a previously chosen city
+ * @property app custom [Application] implementation for Hilt
+ * @property geoLocationHelper provides geo location service
+ * @property geoLocator provides geo location service
+ * @property chosenCityInteractor downloads a previously chosen city
+ * @property coroutineDispatchers dispatchers for coroutines
  */
 class GeoLocationViewModelFactory(
     private val app: Application,

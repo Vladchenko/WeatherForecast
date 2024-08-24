@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 
 /**
  * Data model for cities weather forecasts retrieval.
+ *
+ * @property cities to provide weather forecasts for.
  */
 @Serializable
 data class WeatherForecastCitiesResponse(
@@ -11,7 +13,7 @@ data class WeatherForecastCitiesResponse(
 )
 
 /**
- * Data model for city's weather forecast.
+ * Data model for city's information.
  */
 @Serializable
 data class WeatherForecastCityResponse (

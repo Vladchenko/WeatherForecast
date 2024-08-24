@@ -3,11 +3,11 @@ package com.example.weatherforecast.geolocation
 import android.location.Location
 
 /**
- * Defines location of a current device
+ * Defines geo location of a current device
  */
 interface Geolocator {
     /**
-     * Get city(area) name (i.e. city) by [location]
+     * Define city(area) name by [location]
      */
     suspend fun defineCityNameByLocation(location: Location): String
 

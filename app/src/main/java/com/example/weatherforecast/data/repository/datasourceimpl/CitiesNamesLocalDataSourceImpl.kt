@@ -7,11 +7,13 @@ import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Cities names retrieval from a local data source.
+ * [CitiesNamesLocalDataSource] implementation
+ *
+ * @property dao Room library data model to access data locally.
  */
 class CitiesNamesLocalDataSourceImpl(private val dao: CitiesNamesDAO) : CitiesNamesLocalDataSource {
 
-    override fun getCitiesNames(token: String): Flow<CityDomainModel> {
+    override fun loadCitiesNames(token: String): Flow<CityDomainModel> {
         val model = dao.getCitiesNames(token)
         Log.d("CitiesNamesLocalDataSourceImpl", model.toString())
         return model

@@ -27,7 +27,7 @@ class CitiesNamesDataToDomainConverter {
                     it.state,
                     dataModel.errorBody()?.string() ?: error
                 )
-        } ?: emptyList()
+        }.orEmpty()
         return CitiesNamesDomainModel(cities, error)
     }
 }

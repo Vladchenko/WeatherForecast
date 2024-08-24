@@ -17,10 +17,10 @@ import javax.inject.Inject
 /**
  * Saving and loading forecast and chosen city
  *
- * @param app custom [Application] implementation for Hilt
- * @param coroutineDispatchers geo location helper class
- * @param chosenCityInteractor city chosen by user persistence interactor
- * @param forecastLocalInteractor local forecast data provider
+ * @property app custom [Application] implementation for Hilt
+ * @property coroutineDispatchers geo location helper class
+ * @property chosenCityInteractor city chosen by user persistence interactor
+ * @property forecastLocalInteractor local forecast data provider
  */
 @HiltViewModel
 class PersistenceViewModel @Inject constructor(
@@ -45,7 +45,7 @@ class PersistenceViewModel @Inject constructor(
     /**
      * Save weather forecast [domainModel] and previously chosen city to data base
      */
-    fun saveForecastAndChosenCityToDataBase(
+    fun saveForecastAndChosenCity(
         domainModel: WeatherForecastDomainModel
     ) = viewModelScope.launch {
         launch {

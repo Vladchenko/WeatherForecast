@@ -5,6 +5,8 @@ import java.io.IOException
 
 /**
  * Provides custom error handling for network requests.
+ *
+ * @property delegate to send network request.
  */
 class CallWithErrorHandling(
     private val delegate: Call<Any>
@@ -40,13 +42,13 @@ class CallWithErrorHandling(
 
     override fun clone() = CallWithErrorHandling(delegate.clone())
 
-    fun mapToDomainException(
+    private fun mapToDomainException(
         remoteException: Throwable,
         httpExceptionsMapper: HttpExceptionMapper? = null
     ): Exception {
         return when (remoteException) {
-            is NoSuchDatabaseEntryException -> NoSuchDatabaseEntryException(remoteException.message?:"")
-            is IOException -> NoInternetException(remoteException.message?:"")
+            is NoSuchDatabaseEntryException -> NoSuchDatabaseEntryException(remoteException.message.orEmpty())
+            is IOException -> NoInternetException(remoteException.message.orEmpty())
             is HttpException -> httpExceptionsMapper?.map(remoteException) ?: ApiException(remoteException.code().toString())
             else -> UnexpectedException(remoteException as java.lang.Exception)
         }

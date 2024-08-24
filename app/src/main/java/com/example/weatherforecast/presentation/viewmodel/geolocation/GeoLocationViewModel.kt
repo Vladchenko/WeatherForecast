@@ -27,11 +27,11 @@ import javax.inject.Inject
 /**
  * View model for geo location or city name of a device.
  *
- * @param app custom [Application] implementation for Hilt
- * @param geoLocationHelper provides geo location service
- * @param geoLocator provides geo location service
- * @param chosenCityInteractor saves/loads chosen city
- * @param coroutineDispatchers dispatchers for coroutines
+ * @property app custom [Application] implementation for Hilt
+ * @property geoLocationHelper provides geo location service
+ * @property geoLocator provides geo location service
+ * @property chosenCityInteractor saves/loads chosen city
+ * @property coroutineDispatchers dispatchers for coroutines
  */
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(

@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 /**
- * CoroutineDispatchers implementation
+ * [CoroutineDispatchers] implementation
  */
 class CoroutineDispatchersImpl : CoroutineDispatchers {
     override val io: CoroutineDispatcher

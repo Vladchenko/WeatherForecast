@@ -7,8 +7,8 @@ import androidx.appcompat.app.AlertDialog
 /**
  * Shows alert dialog when geo location permission is not granted
  *
- * @param onPositiveClick positive click callback
- * @param onNegativeClick negative click callback
+ * @property onPositiveClick positive click callback
+ * @property onNegativeClick negative click callback
  */
 class LocationPermissionAlertDialogDelegate(
     private val onPositiveClick: (String) -> Unit,
@@ -16,7 +16,7 @@ class LocationPermissionAlertDialogDelegate(
 ) {
 
     /**
-     * Get alert dialog builder using [android.content.Context]
+     * Get [AlertDialog.Builder] using [android.content.Context]
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
@@ -25,14 +25,14 @@ class LocationPermissionAlertDialogDelegate(
             "This app requires geo location permission to find out your location. " +
                 "Please agree to grant permission or quit."
         )
-        builder.setPositiveButton(android.R.string.ok) { _dialogInterface, _ ->
+        builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
-                _dialogInterface
+                dialogInterface
             )
         }
-        builder.setNegativeButton(android.R.string.cancel) { _dialogInterface, _ ->
+        builder.setNegativeButton(android.R.string.cancel) { dialogInterface, _ ->
             negativeButtonClick(
-                _dialogInterface
+                dialogInterface
             )
         }
         return builder

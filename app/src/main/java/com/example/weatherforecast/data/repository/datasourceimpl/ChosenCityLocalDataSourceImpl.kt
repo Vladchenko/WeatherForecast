@@ -7,14 +7,16 @@ import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSour
 import com.example.weatherforecast.models.domain.CityLocationModel
 
 /**
- * Implementation of CityDataSource for local storage.
+ * [ChosenCityDataSource] implementation
+ *
+ * @property sharedPreferences local storage.
  */
 class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPreferences) : ChosenCityDataSource {
 
-    override suspend fun getCity(): CityLocationModel {
+    override suspend fun loadCity(): CityLocationModel {
         return CityLocationModel(
             sharedPreferences.getString(SAVED_CITY_ARGUMENT_KEY, "").orEmpty(),
-            getChosenCityLocation()
+            loadChosenCityLocationLocally()
         )
     }
 
@@ -30,7 +32,7 @@ class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPrefere
         sharedPreferences.edit().clear().apply()
     }
 
-    private fun getChosenCityLocation(): Location {
+    private fun loadChosenCityLocationLocally(): Location {
         val location = Location(LocationManager.NETWORK_PROVIDER)
         location.latitude =
             (sharedPreferences.getString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, "0d")

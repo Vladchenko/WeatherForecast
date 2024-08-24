@@ -16,27 +16,27 @@ import com.example.weatherforecast.presentation.PresentationUtils.getToolbarSubt
 import kotlinx.coroutines.launch
 
 /**
- * View model (MVVM component) with common code to other viewModels.
+ * View model (MVVM component) with code common to inherent viewModels.
  *
- * @param app custom [Application] required for its successors.
- * @param coroutineDispatchers dispatchers for coroutines
+ * @property app custom [Application] required for its successors.
+ * @property coroutineDispatchers dispatchers for coroutines
  */
 open class AbstractViewModel(private val app: Application,
                              private val coroutineDispatchers: CoroutineDispatchers
 ) : AndroidViewModel(app) {
 
     val showProgressBarState: MutableState<Boolean> = mutableStateOf(true)
-    val toolbarSubtitleState: MutableState<String> = mutableStateOf("")
+    val toolbarSubtitleTextState: MutableState<String> = mutableStateOf("")
     val toolbarSubtitleColorState: MutableState<Color> = mutableStateOf(Color.Unspecified)
     val toolbarSubtitleFontSizeState: MutableState<Int> = mutableStateOf(APPBAR_SUBTITLE_DEFAULT_FONT_SIZE)
 
     /**
-     * Show status message.
+     * Show [statusMessage].
      */
     fun showStatus(statusMessage: String) {
         toolbarSubtitleFontSizeState.value = getToolbarSubtitleFontSize(statusMessage)
         toolbarSubtitleColorState.value = APPBAR_SUBTITLE_STATUS_FONT_COLOR
-        toolbarSubtitleState.value = statusMessage
+        toolbarSubtitleTextState.value = statusMessage
         Log.d("AbstractViewModel", statusMessage)
     }
 
@@ -64,7 +64,7 @@ open class AbstractViewModel(private val app: Application,
     fun showError(errorMessage: String) {
         toolbarSubtitleFontSizeState.value = getToolbarSubtitleFontSize(errorMessage)
         toolbarSubtitleColorState.value = APPBAR_SUBTITLE_ERROR_FONT_COLOR
-        toolbarSubtitleState.value = errorMessage
+        toolbarSubtitleTextState.value = errorMessage
         Log.e("AbstractViewModel", errorMessage)
     }
 

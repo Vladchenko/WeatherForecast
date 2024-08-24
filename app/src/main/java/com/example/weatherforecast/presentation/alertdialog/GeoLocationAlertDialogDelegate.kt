@@ -17,20 +17,20 @@ class GeoLocationAlertDialogDelegate(private val city: String,
                                      private val onNegativeClick: () -> Unit) {
 
     /**
-     * Get alert dialog builder using [android.content.Context]
+     * Get [AlertDialog.Builder] using [android.content.Context]
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Area geo location")
         builder.setMessage("Google Maps defined your location as $city. Do you agree ?")
-        builder.setPositiveButton(android.R.string.ok) { _dialogInterface, _ ->
+        builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
-                _dialogInterface
+                dialogInterface
             )
         }
-        builder.setNegativeButton(android.R.string.cancel) { _dialogInterface, _ ->
+        builder.setNegativeButton(android.R.string.cancel) { dialogInterface, _ ->
             negativeButtonClick(
-                _dialogInterface
+                dialogInterface
             )
         }
         return builder

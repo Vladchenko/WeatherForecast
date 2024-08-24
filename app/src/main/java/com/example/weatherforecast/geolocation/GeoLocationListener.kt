@@ -7,12 +7,12 @@ import android.location.Location
  */
 interface GeoLocationListener {
     /**
-     * Retrieve a geo location with a lat,lon [location] provided.
+     * Callback for a geo location success. Feeds [location] with a latitude and longitude in it.
      */
     fun onCurrentGeoLocationSuccess(location: Location)
 
     /**
-     * When geo location failed.
+     * When geo location failed, inform about it with [errorMessage].
      */
     fun onCurrentGeoLocationFail(errorMessage: String)
 

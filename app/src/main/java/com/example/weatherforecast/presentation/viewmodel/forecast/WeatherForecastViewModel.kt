@@ -30,10 +30,10 @@ import javax.inject.Inject
 /**
  * ViewModel for weather forecast downloading.
  *
- * @param app custom [Application] implementation for Hilt
- * @param coroutineDispatchers geo location helper class
- * @param chosenCityInteractor city chosen by user persistence interactor
- * @param forecastRemoteInteractor remote forecast data provider
+ * @property app custom [Application] implementation for Hilt
+ * @property coroutineDispatchers for coroutines
+ * @property chosenCityInteractor city chosen by user persistence interactor
+ * @property forecastRemoteInteractor remote forecast data provider
  */
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(

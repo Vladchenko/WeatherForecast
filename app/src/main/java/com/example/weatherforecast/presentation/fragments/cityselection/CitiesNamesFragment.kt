@@ -13,7 +13,7 @@ import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNa
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Represents a feature of choosing a city to further have a weather forecast on.
+ * Represents a feature of choosing a city to have a weather forecast for it further on.
  */
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
@@ -42,7 +42,7 @@ class CitiesNamesFragment : Fragment() {
     }
 
     /**
-     * Open forecast fragment to show it on a [chosenCity]
+     * Open forecast fragment to show data on a [chosenCity] in it.
      */
     private fun openForecastFragment(chosenCity: String) {
         val action =

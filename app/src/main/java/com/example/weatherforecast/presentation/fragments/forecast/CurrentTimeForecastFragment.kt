@@ -49,7 +49,7 @@ class CurrentTimeForecastFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        forecastViewModel.toolbarSubtitleState.value = getString(R.string.forecast_downloading_for_city_text)
+        forecastViewModel.toolbarSubtitleTextState.value = getString(R.string.forecast_downloading_for_city_text)
         return ComposeView(requireContext()).apply {
             setContent {
                 CurrentTimeForecastLayout(
@@ -100,7 +100,7 @@ class CurrentTimeForecastFragment : Fragment() {
             geoLocationViewModel.defineCurrentGeoLocation()
         }
         forecastViewModel.onSaveForecastLiveData.observe(viewLifecycleOwner) { forecastModel ->
-            persistenceViewModel.saveForecastAndChosenCityToDataBase(forecastModel)
+            persistenceViewModel.saveForecastAndChosenCity(forecastModel)
         }
         forecastViewModel.onLoadLocalForecastLiveData.observe(viewLifecycleOwner) { forecastModel ->
             persistenceViewModel.loadLocalWeatherForecast(forecastModel)
@@ -138,8 +138,7 @@ class CurrentTimeForecastFragment : Fragment() {
             it,
             onPositiveClick = {
                 forecastViewModel.showStatus(
-                    R.string.forecast_downloading_for_city_text,
-                    it
+                    getString(R.string.forecast_downloading_for_city_text, it)
                 )
                 forecastViewModel.downloadWeatherForecastForCity(it)
             },

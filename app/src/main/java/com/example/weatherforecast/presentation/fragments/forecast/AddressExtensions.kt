@@ -7,7 +7,6 @@ import android.location.LocationManager
 /**
  * Helper methods for [android.location.Address]
  */
-
 fun Address.toLocation(): Location{
     val location = Location(LocationManager.NETWORK_PROVIDER)
     location.latitude = latitude

@@ -5,15 +5,21 @@ Project was amended with a DataBinding, Jetpack Navigation, Retrofit, Hilt, Room
 API for the project - https://openweathermap.org/current
 Test request on a following link - http://api.openweathermap.org/data/2.5/weather?q=Kazan&appid=a8f0e797059b7959399040200fd43231
 
-Autocompletetextview example taken from
+Autocompletetextview code sample taken from
 https://www.devbitsandbytes.com/jetpack-compose-a-simple-opiniated-autocompletetextview/
 
 JSON data to data-class conversion - https://app.quicktype.io/
 
-Running a saving for a forecast and a chosen city in separate corotines instead of one, drastically shortened these operations.
+Running a saving for a forecast and a chosen city in separate coroutines instead of one, drastically shortened these operations.
 From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...code to measure... }
 
 TODO:
+    - Implement WorkManager for it could download weather forecast data periodically, say 30min.
+    - defineChosenCityLocation method should be moved out of ChosenCityLocalDataSourceImpl, since ChosenCityLocalDataSourceImpl has 2 responsibilities and that breaks S in SOLID
+    - ! Create custom widget in Jetpack Compose, since it interviewers ask this technology
+    - ! IMHO, local and remote forecasts is not a good approach - they should be joined.
+    And have a sealed classes for a result - smth like Remote<Model>, Local<Model>
+    - ! Extract DI network module from current one
     - When loaded remotely and no forecast in DB, an error is shown during this time.
     - Add a ? picture for a case when a weather type image is not defined
     - Work out a case, when city not defined for first app running
@@ -25,7 +31,7 @@ TODO:
     - As for network connection availability, is there a way to remove double check ?
     - Sometimes geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
         throws IOException: dhmg: DEADLINE_EXCEEDED: Deadline exceeded after 4.999926154s.
-            - Seems ok
+            - Seems ok now
     - WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@f309362[WeatherForecastActivity] that was originally added here
               at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797), when device location permission is asked
     - App doesn't ask for permission when I remove it, after it was granted before
@@ -36,7 +42,6 @@ TODO:
               at com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl.loadWeatherForecastData(WeatherForecastLocalDataSourceImpl.kt:18)
               at com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl$loadLocalForecast$2.invokeSuspend(WeatherForecastRepositoryImpl.kt:62)
 
-    - Put all texts to string.xml
     - Remove all superfluous Log.d
     - Add "fog", "light intensity shower rain", "heavy intensity rain", "thunderstorm with light rain" to weather images
     - Add unit tests
@@ -51,6 +56,7 @@ TODO:
         - geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is this instantiating correct ?
         - What can be moved out of it and how
     ViewModel
+        - Try turning AndroidViewModel into ViewModel
         - What can be moved out of it and how
         - Should AlertDialogs refer to interface, but not to viewModel itself
             ! No need, since there is only one implementation of viewModel exists

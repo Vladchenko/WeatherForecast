@@ -14,6 +14,14 @@ import kotlin.math.roundToInt
  */
 class ForecastDataToDomainModelsConverter {
 
+    /**
+     * Convert [Response<WeatherForecastResponse>] to [WeatherForecastDomainModel].
+     *
+     * @param temperatureType Celsius / Kelvin / Fahrenheit
+     * @param city name
+     * @param response from remote server
+     * @return domain data model
+     */
     fun convert(
         temperatureType: TemperatureType,
         city: String,

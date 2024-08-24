@@ -7,24 +7,24 @@ import androidx.appcompat.app.AlertDialog
 /**
  * Shows alert dialog and processes its buttons clicks
  *
- * @param city to have a weather forecast for
- * @param onPositiveClick ok button click callback
- * @param onNegativeClick cancel button click callback
+ * @property city to have a weather forecast for
+ * @property onPositiveClick ok button click callback
+ * @property onNegativeClick cancel button click callback
  */
 class CitySelectionAlertDialogDelegate(private val city: String,
                                        private val onPositiveClick: (String) -> Unit,
                                        private val onNegativeClick: () -> Unit) {
 
     /**
-     * Get alert dialog builder using [android.content.Context]
+     * Get [AlertDialog.Builder] using [android.content.Context]
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle("City forecast failed")
         builder.setMessage("Forecast for city $city is not available, please choose another city")
-        builder.setPositiveButton(android.R.string.ok) { _dialogInterface, _ ->
+        builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
-                _dialogInterface
+                dialogInterface
             )
         }
         return builder

@@ -36,7 +36,7 @@ class WeatherForecastRepositoryImpl(
                 response = modelsConverter.convert(
                     temperatureType,
                     city,
-                    weatherForecastRemoteDataSource.loadWeatherForecastDataForCity(city)
+                    weatherForecastRemoteDataSource.loadForecastDataForCity(city)
                 )
                 result = Result.success(response)
             } catch (ex: NoInternetException) {
@@ -50,20 +50,18 @@ class WeatherForecastRepositoryImpl(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ) =
-        withContext(coroutineDispatchers.io) {
-            val model =
-                weatherForecastRemoteDataSource.loadWeatherForecastForLocation(latitude, longitude)
-            Result.success(modelsConverter.convert(temperatureType, model.body()!!.name, model))
-        }
+    ) = withContext(coroutineDispatchers.io) {
+        val model = weatherForecastRemoteDataSource.loadForecastForLocation(latitude, longitude)
+        Result.success(modelsConverter.convert(temperatureType, model.body()!!.name, model))
+    }
 
     override suspend fun loadLocalForecast(city: String) =
         withContext(coroutineDispatchers.io) {
-            weatherForecastLocalDataSource.loadWeatherForecastData(city)
+            weatherForecastLocalDataSource.loadForecastData(city)
         }
 
     override suspend fun saveForecast(model: WeatherForecastDomainModel) =
         withContext(coroutineDispatchers.io) {
-            weatherForecastLocalDataSource.saveWeatherForecastData(model)
+            weatherForecastLocalDataSource.saveForecastData(model)
         }
 }

@@ -10,5 +10,5 @@ interface CitiesNamesRemoteDataSource {
     /**
      * Retrieve cities names for [token].
      */
-    suspend fun loadCityNames(token: String): Response<List<WeatherForecastCityResponse>>
+    suspend fun loadCitiesNames(token: String): Response<List<WeatherForecastCityResponse>>
 }

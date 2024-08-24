@@ -15,10 +15,10 @@ import kotlinx.coroutines.withContext
 /**
  * CitiesNamesRepository implementation to retrieve cities names.
  *
- * @param coroutineDispatchers dispatchers for coroutines
- * @param localDataSource to download cities names from database
- * @param remoteDataSource to download cities names remotely
- * @param modelsConverter to convert data->domain models
+ * @property coroutineDispatchers dispatchers for coroutines
+ * @property localDataSource to download cities names from database
+ * @property remoteDataSource to download cities names remotely
+ * @property modelsConverter to convert data->domain models
  */
 class CitiesNamesRepositoryImpl(
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -30,21 +30,20 @@ class CitiesNamesRepositoryImpl(
     override suspend fun loadCitiesNames(token: String) =
         withContext(coroutineDispatchers.io) {
             return@withContext try {
-                modelsConverter.convert(remoteDataSource.loadCityNames(token), "")
+                modelsConverter.convert(remoteDataSource.loadCitiesNames(token), "")
             } catch (ex: NoInternetException) {
                 CitiesNamesDomainModel(
-                    localDataSource.getCitiesNames(token).toList(),
+                    localDataSource.loadCitiesNames(token).toList(),
                     ex.message.orEmpty()
                 )
             }
         }
 
-    override fun loadLocalCitiesNames(token: String): Flow<CityDomainModel> =
-        localDataSource.getCitiesNames(token)
+    override fun loadLocalCitiesNames(token: String) =
+        localDataSource.loadCitiesNames(token)
 
-    override suspend fun deleteAllCitiesNames() {
+    override suspend fun deleteAllCitiesNames() =
         withContext(coroutineDispatchers.io) {
             localDataSource.deleteAllCitiesNames()
         }
-    }
 }

@@ -35,7 +35,7 @@ fun CurrentTimeForecastLayout(
     currentDate: String,
     mainContentTextColor: Color,
     @DrawableRes weatherImageId: Int,
-    onCityClick: (() -> Unit),
+    onCityClick: () -> Unit,
     onBackClick: () -> Unit,
     viewModel: WeatherForecastViewModel
 ) {
@@ -50,7 +50,7 @@ fun CurrentTimeForecastLayout(
                         )
                         Text(
                             modifier = Modifier.offset((-16).dp),
-                            text = viewModel.toolbarSubtitleState.value,
+                            text = viewModel.toolbarSubtitleTextState.value,
                             color = viewModel.toolbarSubtitleColorState.value,
                             fontSize = (viewModel.toolbarSubtitleFontSizeState.value).sp,
                             maxLines = 1,

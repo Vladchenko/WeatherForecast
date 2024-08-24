@@ -11,6 +11,8 @@ interface WeatherForecastRepository {
 
     /**
      * Retrieve weather forecast model for [temperatureType] and [city]
+     *
+     * @return result with data model
      */
     suspend fun loadForecastForCity(
         temperatureType: TemperatureType,
@@ -19,6 +21,8 @@ interface WeatherForecastRepository {
 
     /**
      * Retrieve remote weather forecast model for [temperatureType] and [latitude], [longitude]
+     *
+     * @return result with data model
      */
     suspend fun loadRemoteForecastForLocation(
         temperatureType: TemperatureType,

@@ -17,18 +17,18 @@ import retrofit2.http.Query
 interface WeatherForecastApiService {
 
     /**
-     * Receive cities names that match the requested criteria, i.e. [city]
+     * Receive cities names that match the requested criteria, i.e. [city] string
      */
     @GET(GEO_DIRECT)
     @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun getCityNames(
+    suspend fun loadCitiesNames(
         @Query("q") city: String,
         @Query("limit") limit: Int = 5,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<List<WeatherForecastCityResponse>>
 
     /**
-     * Receive weather forecast data for one [city]
+     * Receive weather forecast data for [city]
      *
      * Please note that built-in API requests by city name, zip-codes and city id will be deprecated soon.
      * (from https://openweathermap.org/current#other)

@@ -7,13 +7,12 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
  */
 interface WeatherForecastLocalDataSource {
     /**
-     * Download data, from a local storage, having [city] as a request parameter
+     * Download weather forecast from a local storage, having [city] as a request parameter
      */
-    suspend fun loadWeatherForecastData(city: String): WeatherForecastDomainModel
+    suspend fun loadForecastData(city: String): WeatherForecastDomainModel
 
     /**
-     * TODO
-     * Save weather forecast data to local storage, having [city] as a request parameter
+     * Save weather forecast data to local storage as a whole [response]
      */
-    suspend fun saveWeatherForecastData(response: WeatherForecastDomainModel)
+    suspend fun saveForecastData(response: WeatherForecastDomainModel)
 }

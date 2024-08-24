@@ -7,12 +7,14 @@ import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import retrofit2.Response
 
 /**
- * CitiesNamesDataSource implementation
+ * [CitiesNamesRemoteDataSource] implementation.
+ *
+ * @param apiService Retrofit api to retrieve weather forecast data from network.
  */
 class CitiesNamesRemoteDataSourceImpl(private val apiService: WeatherForecastApiService) : CitiesNamesRemoteDataSource {
 
-    override suspend fun loadCityNames(token: String): Response<List<WeatherForecastCityResponse>> {
-        val model = apiService.getCityNames(token)
+    override suspend fun loadCitiesNames(token: String): Response<List<WeatherForecastCityResponse>> {
+        val model = apiService.loadCitiesNames(token)
         Log.d("CitiesNamesDataSourceImpl", model.body().toString())
         return model
     }

@@ -8,29 +8,28 @@ import com.example.weatherforecast.models.domain.CityLocationModel
 import kotlinx.coroutines.withContext
 
 /**
- * Implementation of ChosenCityRepository
+ * [ChosenCityRepository] implementation.
  *
- * @param chosenCityNameDataSource to provide chosen city saved earlier
- * @param coroutineDispatchers dispatchers for coroutines
+ * @property coroutineDispatchers dispatchers for coroutines
+ * @property chosenCityNameDataSource to provide chosen city name, saved earlier
  */
 class ChosenCityRepositoryImpl(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityNameDataSource: ChosenCityDataSource,
 ) : ChosenCityRepository {
 
-    override suspend fun loadChosenCity(): CityLocationModel = withContext(coroutineDispatchers.io) {
-        chosenCityNameDataSource.getCity()
-    }
+    override suspend fun loadChosenCity(): CityLocationModel =
+        withContext(coroutineDispatchers.io) {
+            chosenCityNameDataSource.loadCity()
+        }
 
-    override suspend fun saveChosenCity(city: String, location: Location) {
+    override suspend fun saveChosenCity(city: String, location: Location) =
         withContext(coroutineDispatchers.io) {
             chosenCityNameDataSource.saveCity(city, location)
         }
-    }
 
-    override suspend fun removeCity() {
+    override suspend fun removeCity() =
         withContext(coroutineDispatchers.io) {
             chosenCityNameDataSource.removeCity()
         }
-    }
 }

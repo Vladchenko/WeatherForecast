@@ -12,6 +12,8 @@ class ChosenCityInteractor(private val chosenCityRepository: ChosenCityRepositor
 
     /**
      * Download model of city chosen by user, consisting its name and [Location]
+     *
+     * @return data model for city
      */
     suspend fun loadChosenCityModel(): CityLocationModel {
         return chosenCityRepository.loadChosenCity()

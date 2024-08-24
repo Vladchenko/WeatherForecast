@@ -26,9 +26,9 @@ import javax.inject.Inject
 /**
  * View model (MVVM component) for cities names presentation.
  *
- * @param app custom [Application] implementation for Hilt.
- * @param coroutineDispatchers dispatchers for coroutines
- * @param citiesNamesInteractor provides domain layer data.
+ * @property app custom [Application] implementation for Hilt.
+ * @property coroutineDispatchers dispatchers for coroutines
+ * @property citiesNamesInteractor provides domain layer data.
  */
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(

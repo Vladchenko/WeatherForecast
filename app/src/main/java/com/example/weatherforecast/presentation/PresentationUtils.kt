@@ -53,6 +53,11 @@ object PresentationUtils {
         }
     }
 
+    /**
+     * Correct way to colose alert dialog
+     *
+     * @param view of alert dialog to close it.
+     */
     fun AlertDialog.closeWith(view: View) {
         view.doOnDetach { this.cancel() }
     }
