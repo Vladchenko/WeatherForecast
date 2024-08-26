@@ -208,15 +208,10 @@ class WeatherForecastViewModel @Inject constructor(
             if (result.isSuccess) {
                 Log.d(TAG, result.toString())
                 showProgressBarState.value = false
-                if (forecastModel.serverError.isNotBlank()) {
-                    processResponseError(forecastModel.serverError)
+                if (forecastModel.serverError.isBlank()) {
+                    showRemoteForecastAndSave(forecastModel)
                 } else {
-                    dataModelState.value = forecastModel
-                    showStatus(
-                        R.string.forecast_for_city,
-                        dataModelState.value?.city.orEmpty()
-                    )
-                    _onSaveForecastLiveData.postValue(forecastModel)
+                    showLocalForecastOrError(forecastModel)
                 }
             } else {
                 showError(forecastModel.serverError)
@@ -225,6 +220,27 @@ class WeatherForecastViewModel @Inject constructor(
             }
         } ?: run {
             processResponseError("Server responded with $this")
+        }
+    }
+
+    private fun showRemoteForecastAndSave(forecastModel: WeatherForecastDomainModel) {
+        dataModelState.value = forecastModel
+        showStatus(
+            R.string.forecast_for_city,
+            dataModelState.value?.city.orEmpty()
+        )
+        _onSaveForecastLiveData.postValue(forecastModel)
+    }
+
+    private fun showLocalForecastOrError(forecastModel: WeatherForecastDomainModel) {
+        if (forecastModel.city.isBlank()) {
+            processResponseError(forecastModel.serverError)
+        } else { // When server error but city is NOT blank - local forecast loaded
+            dataModelState.value = forecastModel
+            showError(
+                R.string.forecast_for_city_outdated,
+                dataModelState.value?.city.orEmpty()
+            )
         }
     }
 

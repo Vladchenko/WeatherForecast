@@ -38,8 +38,8 @@ class CurrentTimeForecastFragment : Fragment() {
     private val dialogHelper by lazy { AlertDialogHelper(requireContext()) }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
-        { isGranted ->
-            geoLocationViewModel.onPermissionResolution(isGranted)
+        {
+            isGranted -> geoLocationViewModel.onPermissionResolution(isGranted)
         }
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
     private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
@@ -85,12 +85,17 @@ class CurrentTimeForecastFragment : Fragment() {
     }
 
     private fun initLiveDataObservers() {
-        forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) {
-            dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
-                it,
-                onPositiveClick = { forecastViewModel.gotoCitySelection() },
-                onNegativeClick = {/*pass*/ }
-            ).show().closeWith(mainView!!)
+        forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) { city ->
+            mainView?.run {
+                val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
+                    city,
+                    onPositiveClick = { forecastViewModel.gotoCitySelection() },
+                    onNegativeClick = {/*pass*/ }
+                ).show()
+                alertDialog.setCancelable(false)
+                alertDialog.setCanceledOnTouchOutside(false)
+                alertDialog.closeWith(this)
+            }
         }
         forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) {
             geoLocationViewModel.defineLocationByCity(it)
@@ -133,31 +138,41 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     }
 
-    private fun locationDefinedAlertDialog(it: String) {
-        dialogHelper.getGeoLocationAlertDialogBuilder(
-            it,
-            onPositiveClick = {
-                forecastViewModel.showStatus(
-                    getString(R.string.forecast_downloading_for_city_text, it)
-                )
-                forecastViewModel.downloadWeatherForecastForCity(it)
-            },
-            onNegativeClick = {
-                forecastViewModel.gotoCitySelection()
-            }
-        ).show().closeWith(mainView!!)
+    private fun locationDefinedAlertDialog(message: String) {
+        mainView?.run {
+            val alertDialog = dialogHelper.getGeoLocationAlertDialogBuilder(
+                message,
+                onPositiveClick = {
+                    forecastViewModel.showStatus(
+                        getString(R.string.forecast_downloading_for_city_text, it)
+                    )
+                    forecastViewModel.downloadWeatherForecastForCity(it)
+                },
+                onNegativeClick = {
+                    forecastViewModel.gotoCitySelection()
+                }
+            ).show()
+            alertDialog.setCancelable(false)
+            alertDialog.setCanceledOnTouchOutside(false)
+            alertDialog.closeWith(this)
+        }
     }
 
     private fun showNoPermissionAlertDialog() {
-        dialogHelper.getLocationPermissionAlertDialogBuilder(
-            onPositiveClick = {
-                geoLocationViewModel.showStatus(getString(R.string.geo_location_permission_required))
-                geoLocationViewModel.requestGeoLocationPermission()
-            },
-            onNegativeClick = {
-                activity?.finish()
-            }
-        ).show().closeWith(mainView!!)
+        mainView?.run {
+            val alertDialog = dialogHelper.getLocationPermissionAlertDialogBuilder(
+                onPositiveClick = {
+                    geoLocationViewModel.showStatus(getString(R.string.geo_location_permission_required))
+                    geoLocationViewModel.requestGeoLocationPermission()
+                },
+                onNegativeClick = {
+                    activity?.finish()
+                }
+            ).show()
+            alertDialog.setCancelable(false)
+            alertDialog.setCanceledOnTouchOutside(false)
+            alertDialog.closeWith(this)
+        }
     }
 
     private fun requestLocationPermission() {

@@ -14,8 +14,8 @@ Running a saving for a forecast and a chosen city in separate coroutines instead
 From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...code to measure... }
 
 TODO:
+    - Replace LiveDatas with UIStates
     - Implement WorkManager for it could download weather forecast data periodically, say 30min.
-    - defineChosenCityLocation method should be moved out of ChosenCityLocalDataSourceImpl, since ChosenCityLocalDataSourceImpl has 2 responsibilities and that breaks S in SOLID
     - ! Create custom widget in Jetpack Compose, since it interviewers ask this technology
     - ! IMHO, local and remote forecasts is not a good approach - they should be joined.
     And have a sealed classes for a result - smth like Remote<Model>, Local<Model>
@@ -25,17 +25,9 @@ TODO:
     - Work out a case, when city not defined for first app running
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
 
-    - When app runs for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
-    - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.
     - When forecast fails to download, sometimes it calls cities screen for 2 times
     - As for network connection availability, is there a way to remove double check ?
-    - Sometimes geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
-        throws IOException: dhmg: DEADLINE_EXCEEDED: Deadline exceeded after 4.999926154s.
-            - Seems ok now
-    - WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@f309362[WeatherForecastActivity] that was originally added here
-              at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797), when device location permission is asked
     - App doesn't ask for permission when I remove it, after it was granted before
-    - Location definition alert dialog is shown twice
     - 2022-09-20 15:12:57.064 1722-1722/? E/WeatherForecastViewModel: Kazan
       2022-09-20 15:12:57.065 1722-1722/? E/WeatherForecastViewModel: Downloading weather forecast for a city failed, trying for geo location
       2022-09-20 15:12:57.066 1722-1722/? E/WeatherForecastViewModel: com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException: Kazan
@@ -53,7 +45,6 @@ TODO:
     - Should one process a database exceptions
     - Should settings be kept in a separate storage (shared prefs in data->domain->presentation)
     CurrentTimeForecastFragment
-        - geoLocator = WeatherForecastGeoLocator(viewModel)   //TODO Is this instantiating correct ?
         - What can be moved out of it and how
     ViewModel
         - Try turning AndroidViewModel into ViewModel
@@ -67,6 +58,14 @@ TODO:
                             android:gravity="center"
                             android:textAlignment="center"
 
+   Possiblу resolved (check if to appear later):
+        - When app runs for first time, selecting a city and taping back, loads a Kazan forecast, but should just show a dialog on geolocation
+        - When app is installed from scratch, it loads a Kazan city from DB, but DB is supposed to be empty.
+        - Sometimes geoCoder.getFromLocation(location.latitude, location.longitude, 1).first().locality
+                throws IOException: dhmg: DEADLINE_EXCEEDED: Deadline exceeded after 4.999926154s.
+        - WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@f309362[WeatherForecastActivity] that was originally added here
+                at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797), when device location permission is asked
+        - Location definition alert dialog is shown twice
 
 //            NetworkMonitor(app.applicationContext, this@WeatherForecastViewModel)
             // Since NetworkMonitor doesn't check if app started with no inet, following check is required

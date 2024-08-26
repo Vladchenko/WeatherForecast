@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.doOnDetach
+import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
 
@@ -45,16 +46,12 @@ object PresentationUtils {
         return if (resourceId > 0) {
             resourceId
         } else {
-            resources.getIdentifier(
-                "icon_clearsky",
-                DRAWABLE_RESOURCE_TYPE,
-                packageName
-            )
+            R.drawable.icon_clearsky
         }
     }
 
     /**
-     * Correct way to colose alert dialog
+     * Correct way to close alert dialog
      *
      * @param view of alert dialog to close it.
      */
