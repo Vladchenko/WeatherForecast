@@ -15,6 +15,7 @@ From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...cod
 
 TODO:
     - Replace LiveDatas with UIStates
+    - Move AbstractViewModel and other viewmodels's showError's references to views to Fragments
     - Implement WorkManager for it could download weather forecast data periodically, say 30min.
     - ! Create custom widget in Jetpack Compose, since it interviewers ask this technology
     - ! IMHO, local and remote forecasts is not a good approach - they should be joined.
@@ -24,6 +25,8 @@ TODO:
     - Add a ? picture for a case when a weather type image is not defined
     - Work out a case, when city not defined for first app running
     - When no inet, one needs to show all the saved cities, but not a filtered ones.
+    - Implement swipeToRefresh
+    - Move TemperatureType from DI to some settings providing mechanism. Probably a shared preferences with data-domain wrapping.
 
     - When forecast fails to download, sometimes it calls cities screen for 2 times
     - As for network connection availability, is there a way to remove double check ?
@@ -66,6 +69,10 @@ TODO:
         - WindowLeaked: Activity com.example.weatherforecast.presentation.WeatherForecastActivity has leaked window DecorView@f309362[WeatherForecastActivity] that was originally added here
                 at android.view.ViewRootImpl.<init>(ViewRootImpl.java:797), when device location permission is asked
         - Location definition alert dialog is shown twice
+
+
+   INFO:
+        - WorkManager is only injected in WeatherForecastActivity, but not used. The purpose here is just to launch it and it's launch performs downloading and saving of forecast to database.
 
 //            NetworkMonitor(app.applicationContext, this@WeatherForecastViewModel)
             // Since NetworkMonitor doesn't check if app started with no inet, following check is required

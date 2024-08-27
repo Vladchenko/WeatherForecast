@@ -17,7 +17,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
@@ -80,7 +79,6 @@ class CurrentTimeForecastFragment : Fragment() {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
         initLiveDataObservers()
-        forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
         if (arguments.chosenCity.isNotBlank()) {
             forecastViewModel.launchWeatherForecast(arguments.chosenCity)
         }

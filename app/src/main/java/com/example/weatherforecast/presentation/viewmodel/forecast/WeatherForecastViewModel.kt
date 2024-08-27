@@ -31,6 +31,7 @@ import javax.inject.Inject
  * ViewModel for weather forecast downloading.
  *
  * @property app custom [Application] implementation for Hilt
+ * @property temperatureType type of temperature
  * @property coroutineDispatchers for coroutines
  * @property chosenCityInteractor city chosen by user persistence interactor
  * @property forecastRemoteInteractor remote forecast data provider
@@ -38,6 +39,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(
     private val app: Application,
+    private val temperatureType: TemperatureType,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
@@ -76,7 +78,6 @@ class WeatherForecastViewModel @Inject constructor(
 
     private var chosenCity: String? = null
     private var weatherForecastDownloadJob: Job
-    private lateinit var temperatureType: TemperatureType
 
     init {
         showStatus(R.string.forecast_is_loading)
@@ -255,13 +256,6 @@ class WeatherForecastViewModel @Inject constructor(
 
     fun getLocalForecast(forecastModel: WeatherForecastDomainModel) {
         dataModelState.value = forecastModel
-    }
-
-    /**
-     * Set temperature type
-     */
-    fun setTemperatureType(temperatureType: TemperatureType) {
-        this.temperatureType = temperatureType
     }
 
     companion object {

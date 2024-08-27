@@ -3,6 +3,11 @@ package com.example.weatherforecast.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
@@ -14,8 +19,18 @@ import com.example.weatherforecast.data.database.WeatherForecastDataBase
 import com.example.weatherforecast.data.repository.ChosenCityRepositoryImpl
 import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
-import com.example.weatherforecast.data.repository.datasource.*
-import com.example.weatherforecast.data.repository.datasourceimpl.*
+import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSource
+import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
+import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
+import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
+import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
+import com.example.weatherforecast.data.repository.datasourceimpl.ChosenCityLocalDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastLocalDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastRemoteDataSourceImpl
+import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.data.workmanager.ForecastWorker
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.dispatchers.CoroutineDispatchersImpl
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
@@ -38,10 +53,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
@@ -171,12 +189,14 @@ class WeatherForecastModule {
     @Provides
     fun provideForecastViewModelFactory(
         app: Application,
+        temperatureType: TemperatureType,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
         weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             app,
+            temperatureType,
             chosenCityInteractor,
             coroutineDispatchers,
             weatherForecastRemoteInteractor
@@ -290,6 +310,12 @@ class WeatherForecastModule {
     @Singleton
     fun provideSharedPreference(@ApplicationContext context: Context): SharedPreferences? {
         return context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
+    }
+
+    @Singleton
+    @Provides
+    fun provideTemperatureType(): TemperatureType {
+        return TemperatureType.CELSIUS
     }
 
     companion object {
