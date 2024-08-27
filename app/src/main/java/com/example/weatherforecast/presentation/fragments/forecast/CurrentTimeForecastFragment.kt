@@ -81,7 +81,9 @@ class CurrentTimeForecastFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initLiveDataObservers()
         forecastViewModel.setTemperatureType(TemperatureType.CELSIUS)
-        forecastViewModel.launchWeatherForecast(arguments.chosenCity)   // TODO Make a looped downloading
+        if (arguments.chosenCity.isNotBlank()) {
+            forecastViewModel.launchWeatherForecast(arguments.chosenCity)
+        }
     }
 
     private fun initLiveDataObservers() {
@@ -143,9 +145,7 @@ class CurrentTimeForecastFragment : Fragment() {
             val alertDialog = dialogHelper.getGeoLocationAlertDialogBuilder(
                 message,
                 onPositiveClick = {
-                    forecastViewModel.showStatus(
-                        getString(R.string.forecast_downloading_for_city_text, it)
-                    )
+                    showStatusDependingOnCity(it)
                     forecastViewModel.downloadWeatherForecastForCity(it)
                 },
                 onNegativeClick = {
@@ -155,6 +155,18 @@ class CurrentTimeForecastFragment : Fragment() {
             alertDialog.setCancelable(false)
             alertDialog.setCanceledOnTouchOutside(false)
             alertDialog.closeWith(this)
+        }
+    }
+
+    private fun showStatusDependingOnCity(it: String) {
+        if (it.isBlank()) {
+            forecastViewModel.showStatus(
+                getString(R.string.forecast_is_loading, it)
+            )
+        } else {
+            forecastViewModel.showStatus(
+                getString(R.string.forecast_downloading_for_city_text, it)
+            )
         }
     }
 

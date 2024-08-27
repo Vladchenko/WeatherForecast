@@ -1,5 +1,6 @@
 package com.example.weatherforecast.data.repository
 
+import android.util.Log
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
@@ -39,9 +40,14 @@ class WeatherForecastRepositoryImpl(
                     weatherForecastRemoteDataSource.loadForecastDataForCity(city)
                 )
                 result = Result.success(response)
-            } catch (ex: NoInternetException) {
-                response = loadLocalForecast(city)
-                result = Result.success(response.copy(serverError = ex.message.toString()))
+            } catch (ex: Exception) {
+                Log.e(TAG, ex.message.toString())
+                try {
+                    response = loadLocalForecast(city)
+                    result = Result.success(response.copy(serverError = ex.message.toString()))
+                } catch (ex: Exception) {
+                    result = Result.failure(ex)
+                }
             }
             return@withContext result
         }
@@ -64,4 +70,8 @@ class WeatherForecastRepositoryImpl(
         withContext(coroutineDispatchers.io) {
             weatherForecastLocalDataSource.saveForecastData(model)
         }
+
+    companion object {
+        private const val TAG = "WeatherForecastRepositoryImpl"
+    }
 }

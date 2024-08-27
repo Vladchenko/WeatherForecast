@@ -81,8 +81,8 @@ class WeatherForecastViewModel @Inject constructor(
     init {
         showStatus(R.string.forecast_is_loading)
         weatherForecastDownloadJob =
-            viewModelScope.launch(coroutineDispatchers.io, CoroutineStart.LAZY) {
-                downloadWeatherForecast(chosenCity.orEmpty())
+            viewModelScope.launch(coroutineDispatchers.io) {//, CoroutineStart.LAZY) {
+                launchWeatherForecast(chosenCity.orEmpty())
             }
     }
 
@@ -108,6 +108,7 @@ class WeatherForecastViewModel @Inject constructor(
                         R.string.database_entry_for_city_not_found, throwable.message
                     )
                 )
+                showProgressBarState.value = false
             }
 
             else -> {
@@ -157,7 +158,7 @@ class WeatherForecastViewModel @Inject constructor(
      */
     private fun downloadWeatherForecast(city: String) {
         if (city.isBlank()) {
-            _onChosenCityBlankLiveData.call()
+            _onChosenCityBlankLiveData.postValue(null)
         } else {
             downloadWeatherForecastForCity(city)
         }

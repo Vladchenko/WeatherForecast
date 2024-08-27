@@ -56,7 +56,7 @@ class CitiesNamesViewModel @Inject constructor(
                 }
             }
             is NoSuchDatabaseEntryException -> {
-                showError("Forecast for city ${throwable.message} is not present in database")
+                showError("City with a name ${throwable.message} is not present in database")
             }
             is Exception -> showError(throwable.message.toString())
         }
