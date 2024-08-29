@@ -37,8 +37,8 @@ class CurrentTimeForecastFragment : Fragment() {
     private val dialogHelper by lazy { AlertDialogHelper(requireContext()) }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
-        {
-            isGranted -> geoLocationViewModel.onPermissionResolution(isGranted)
+        { isGranted ->
+            geoLocationViewModel.onPermissionResolution(isGranted)
         }
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
     private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
@@ -48,7 +48,6 @@ class CurrentTimeForecastFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        forecastViewModel.toolbarSubtitleTextState.value = getString(R.string.forecast_downloading_for_city_text)
         return ComposeView(requireContext()).apply {
             setContent {
                 CurrentTimeForecastLayout(
@@ -79,9 +78,8 @@ class CurrentTimeForecastFragment : Fragment() {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
         initLiveDataObservers()
-        if (arguments.chosenCity.isNotBlank()) {
-            forecastViewModel.launchWeatherForecast(arguments.chosenCity)
-        }
+        forecastViewModel.showInitialDownloadingStatusForCity(arguments.chosenCity)
+        forecastViewModel.launchWeatherForecast(arguments.chosenCity)
     }
 
     private fun initLiveDataObservers() {
@@ -110,8 +108,11 @@ class CurrentTimeForecastFragment : Fragment() {
         forecastViewModel.onLoadLocalForecastLiveData.observe(viewLifecycleOwner) { forecastModel ->
             persistenceViewModel.loadLocalWeatherForecast(forecastModel)
         }
+        forecastViewModel.onRemoteForecastFailLiveData.observe(viewLifecycleOwner) { chosenCity ->
+            persistenceViewModel.loadLocalWeatherForecast(chosenCity)
+        }
 
-        persistenceViewModel.onLocalForecastLoadSuccessLiveData.observe(viewLifecycleOwner) { forecastModel ->
+        persistenceViewModel.onLocalForecastSuccessLiveData.observe(viewLifecycleOwner) { forecastModel ->
             forecastViewModel.getLocalForecast(forecastModel)
         }
 
@@ -133,7 +134,9 @@ class CurrentTimeForecastFragment : Fragment() {
         geoLocationViewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
             locationDefinedAlertDialog(it)
         }
-        geoLocationViewModel.onShowNoPermissionForLocationTriangulatingAlertDialogLiveData.observe(viewLifecycleOwner) {
+        geoLocationViewModel.onShowNoPermissionForLocationTriangulatingAlertDialogLiveData.observe(
+            viewLifecycleOwner
+        ) {
             showNoPermissionAlertDialog()
         }
     }
@@ -159,7 +162,7 @@ class CurrentTimeForecastFragment : Fragment() {
     private fun showStatusDependingOnCity(it: String) {
         if (it.isBlank()) {
             forecastViewModel.showStatus(
-                getString(R.string.forecast_is_loading, it)
+                getString(R.string.forecast_downloading, it)
             )
         } else {
             forecastViewModel.showStatus(

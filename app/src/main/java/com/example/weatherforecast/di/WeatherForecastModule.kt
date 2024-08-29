@@ -181,21 +181,19 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastGeoLocator(): WeatherForecastGeoLocator {
-        return WeatherForecastGeoLocator()
+    fun provideWeatherForecastGeoLocator(@ApplicationContext context: Context): WeatherForecastGeoLocator {
+        return WeatherForecastGeoLocator(context)
     }
 
     @Singleton
     @Provides
     fun provideForecastViewModelFactory(
-        app: Application,
         temperatureType: TemperatureType,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
         weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
-            app,
             temperatureType,
             chosenCityInteractor,
             coroutineDispatchers,
@@ -206,13 +204,11 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun providePersistenceViewModelFactory(
-        app: Application,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
         weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
     ): PersistenceViewModelFactory {
         return PersistenceViewModelFactory(
-            app,
             chosenCityInteractor,
             coroutineDispatchers,
             weatherForecastLocalInteractor,
@@ -295,12 +291,10 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideCitiesNamesViewModelFactory(
-        app: Application,
         coroutineDispatchers: CoroutineDispatchers,
         citiesNamesInteractor: CitiesNamesInteractor
     ): CitiesNamesViewModelFactory {
         return CitiesNamesViewModelFactory(
-            app,
             coroutineDispatchers,
             citiesNamesInteractor
         )

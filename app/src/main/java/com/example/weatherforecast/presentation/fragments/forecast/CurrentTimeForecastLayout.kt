@@ -12,11 +12,13 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
+import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 
 /**
@@ -39,6 +42,14 @@ fun CurrentTimeForecastLayout(
     onBackClick: () -> Unit,
     viewModel: WeatherForecastViewModel
 ) {
+    val toolbarState = viewModel.toolbarSubtitleMessageState.collectAsState()
+    val toolbarSubtitle:String = toolbarState.value.stringId?.let {
+        LocalContext.current.getString(
+            it,
+            toolbarState.value.valueForStringId.orEmpty()
+        )
+    } ?: toolbarState.value.valueForStringId.orEmpty()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -50,9 +61,9 @@ fun CurrentTimeForecastLayout(
                         )
                         Text(
                             modifier = Modifier.offset((-16).dp),
-                            text = viewModel.toolbarSubtitleTextState.value,
-                            color = viewModel.toolbarSubtitleColorState.value,
-                            fontSize = (viewModel.toolbarSubtitleFontSizeState.value).sp,
+                            text = toolbarSubtitle,
+                            color = PresentationUtils.getToolbarSubtitleColor(toolbarState.value.messageType),
+                            fontSize = PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

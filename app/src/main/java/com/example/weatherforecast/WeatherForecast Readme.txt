@@ -14,6 +14,7 @@ Running a saving for a forecast and a chosen city in separate coroutines instead
 From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...code to measure... }
 
 TODO:
+    - Turn toolbar message yellow for local forecast
     - Replace LiveDatas with UIStates
     - Move AbstractViewModel and other viewmodels's showError's references to views to Fragments
     - Implement WorkManager for it could download weather forecast data periodically, say 30min.
@@ -28,6 +29,11 @@ TODO:
     - Implement swipeToRefresh
     - Move TemperatureType from DI to some settings providing mechanism. Probably a shared preferences with data-domain wrapping.
 
+    - Fix such case of first app run:
+        - Dialog of local city recognition appeared, one taps OK
+        - Remote forecast for city downloading fails
+        - Local forecast for city downloading also fails, since no initial city saved in DB
+        - Next, app crashes, saying "city has to be not null". So, one has to show some status that both - remote and local failed. And maybe go to a city selection screen.
     - When forecast fails to download, sometimes it calls cities screen for 2 times
     - As for network connection availability, is there a way to remove double check ?
     - App doesn't ask for permission when I remove it, after it was granted before
@@ -40,6 +46,7 @@ TODO:
     - Remove all superfluous Log.d
     - Add "fog", "light intensity shower rain", "heavy intensity rain", "thunderstorm with light rain" to weather images
     - Add unit tests
+    - Rename string.xml strings so that could match common pattern (related to city begin with "city_...")
 
     ?
     - "Ask about it"

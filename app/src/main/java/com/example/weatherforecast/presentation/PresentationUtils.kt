@@ -1,10 +1,12 @@
 package com.example.weatherforecast.presentation
 
+import androidx.compose.ui.graphics.Color
 import android.content.res.Resources
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.doOnDetach
 import com.example.weatherforecast.R
+import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
 
@@ -31,6 +33,16 @@ object PresentationUtils {
             APPBAR_SUBTITLE_SMALL_FONT_SIZE
         } else {
             APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
+        }
+
+    /**
+     * Defines a color for toolbar by its [type]
+     */
+    fun getToolbarSubtitleColor(type: MessageType) =
+        when(type) {
+            MessageType.INFO -> Color.White
+            MessageType.WARNING -> Color.Yellow
+            MessageType.ERROR -> Color.Red
         }
 
     /**

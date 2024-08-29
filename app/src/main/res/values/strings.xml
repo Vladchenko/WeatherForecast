@@ -9,8 +9,9 @@
     <string name="city_typing_hint">First several letters is enough</string>
     <string name="city_locating_cancelled">City locating cancelled</string>
     <string name="city_selection_from_dropdown">Type city and pick one from a dropdown list below</string>
+    <string name="city_mask_entries_error">City mask entries downloading error</string>
     <string name="begin_city_typing">Begin typing city name …</string>
-    <string name="current_location_defining_text">Current geo location defining…</string>
+    <string name="current_location_triangulating">Current geo location defining…</string>
     <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
     <string name="database_city_downloading">No network connection, database last city has been loaded</string>
     <string name="database_entries_not_found">Database records, matching %s, not found</string>
@@ -24,7 +25,7 @@
     <string name="error_text_example">Some error</string>
     <string name="forecast_for_city">Provided for city %1$s</string>
     <string name="forecast_for_city_outdated">Outdated forecast for city %1$s</string>
-    <string name="forecast_is_loading">Weatherforecast is downloading</string>
+    <string name="forecast_downloading">Weatherforecast is downloading</string>
     <string name="forecast_downloading_for_city_text">Weather forecast for %s downloading…</string>
     <string name="forecast_downloading_for_location_text">Weather forecast for %s\'s location downloading…</string>
     <string name="forecast_downloading_for_city_failed">Downloading weather forecast for a city failed, trying for geo location</string>

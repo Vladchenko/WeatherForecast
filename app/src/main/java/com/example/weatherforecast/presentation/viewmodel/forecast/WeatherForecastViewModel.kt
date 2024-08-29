@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation.viewmodel.forecast
 
-import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -16,21 +15,16 @@ import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
-import com.example.weatherforecast.presentation.PresentationUtils.REPEAT_INTERVAL
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
  * ViewModel for weather forecast downloading.
  *
- * @property app custom [Application] implementation for Hilt
  * @property temperatureType type of temperature
  * @property coroutineDispatchers for coroutines
  * @property chosenCityInteractor city chosen by user persistence interactor
@@ -38,12 +32,11 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(
-    private val app: Application,
     private val temperatureType: TemperatureType,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
-) : AbstractViewModel(app, coroutineDispatchers) {
+) : AbstractViewModel(coroutineDispatchers) {
 
     val dataModelState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
 
@@ -65,6 +58,9 @@ class WeatherForecastViewModel @Inject constructor(
 
     val onLoadLocalForecastLiveData: LiveData<WeatherForecastDomainModel>
         get() = _onLoadLocalForecastLiveData
+
+    val onRemoteForecastFailLiveData: LiveData<String>
+        get() = _onRemoteForecastFailLiveData
     //endregion livedata getters fields
 
     //region livedata fields
@@ -74,18 +70,10 @@ class WeatherForecastViewModel @Inject constructor(
     private val _onGotoCitySelectionLiveData = SingleLiveEvent<Unit>()
     private val _onSaveForecastLiveData = SingleLiveEvent<WeatherForecastDomainModel>()
     private val _onLoadLocalForecastLiveData = SingleLiveEvent<WeatherForecastDomainModel>()
+    private val _onRemoteForecastFailLiveData = SingleLiveEvent<String>()
     //endregion livedata fields
 
     private var chosenCity: String? = null
-    private var weatherForecastDownloadJob: Job
-
-    init {
-        showStatus(R.string.forecast_is_loading)
-        weatherForecastDownloadJob =
-            viewModelScope.launch(coroutineDispatchers.io) {//, CoroutineStart.LAZY) {
-                launchWeatherForecast(chosenCity.orEmpty())
-            }
-    }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
@@ -97,30 +85,24 @@ class WeatherForecastViewModel @Inject constructor(
 
             is NoInternetException -> {
                 showError(throwable.message.toString())
-                viewModelScope.launch(coroutineDispatchers.io) {
-                    delay(REPEAT_INTERVAL)
-                    weatherForecastDownloadJob.start()
-                }
+                _onRemoteForecastFailLiveData.postValue(chosenCity.orEmpty())
             }
 
             is NoSuchDatabaseEntryException -> {
                 showError(
-                    app.applicationContext.getString(
-                        R.string.database_entry_for_city_not_found, throwable.message
-                    )
+                    R.string.database_entry_for_city_not_found,
+                    throwable.message.orEmpty()
                 )
                 showProgressBarState.value = false
             }
 
             else -> {
-                Log.e(
-                    TAG,
-                    app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
-                )
+                Log.e(TAG, throwable.message.orEmpty())
                 Log.e(TAG, throwable.stackTraceToString())
                 showError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
                 _onCityRequestFailedLiveData.postValue(chosenCity.orEmpty())    //TODO .orEmpty()
+                showProgressBarState.value = false
             }
         }
         throwable.stackTrace.forEach {
@@ -132,7 +114,6 @@ class WeatherForecastViewModel @Inject constructor(
      * Go to city selection screen.
      */
     fun gotoCitySelection() {
-        weatherForecastDownloadJob.cancel()
         _onGotoCitySelectionLiveData.call()
     }
 
@@ -147,7 +128,7 @@ class WeatherForecastViewModel @Inject constructor(
                 Log.d(
                     TAG,
                     "No chosen city from picker fragment. Downloaded from database: city = ${cityModel.city}, " +
-                        "lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
+                            "lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
                 )
                 cityModel.city
             }
@@ -161,6 +142,7 @@ class WeatherForecastViewModel @Inject constructor(
         if (city.isBlank()) {
             _onChosenCityBlankLiveData.postValue(null)
         } else {
+            chosenCity = city
             downloadWeatherForecastForCity(city)
         }
     }
@@ -169,10 +151,6 @@ class WeatherForecastViewModel @Inject constructor(
      * Download weather forecast on a [city].
      */
     fun downloadWeatherForecastForCity(city: String) {
-        Log.d(
-            TAG,
-            app.applicationContext.getString(R.string.forecast_downloading_for_city_text, city)
-        )
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadForecastForCity(
@@ -184,10 +162,6 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     fun downloadWeatherForecastForLocation(cityModel: CityLocationModel) {
-        Log.d(
-            TAG,
-            app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
-        )
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             var result = forecastRemoteInteractor.loadForecastForLocation(
@@ -197,10 +171,6 @@ class WeatherForecastViewModel @Inject constructor(
             )
             // City in response is different than city in request
             result = Result.success(result.getOrNull()!!.copy(city = cityModel.city))
-            Log.d(
-                TAG,
-                app.applicationContext.getString(R.string.forecast_downloading_for_location_text)
-            )
             processServerResponse(result)
         }
     }
@@ -248,9 +218,6 @@ class WeatherForecastViewModel @Inject constructor(
 
     private fun processResponseError(error: String) {
         showError(error)
-        //     if (error.contains("Unable to resolve host")) {
-        //         throw NoInternetException(app.applicationContext.getString(R.string.database_forecast_downloading))
-        //     }
         _onLoadLocalForecastLiveData.call()
     }
 

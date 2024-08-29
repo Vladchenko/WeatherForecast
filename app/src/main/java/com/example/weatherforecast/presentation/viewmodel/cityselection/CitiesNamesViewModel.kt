@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation.viewmodel.cityselection
 
-import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -26,16 +25,14 @@ import javax.inject.Inject
 /**
  * View model (MVVM component) for cities names presentation.
  *
- * @property app custom [Application] implementation for Hilt.
  * @property coroutineDispatchers dispatchers for coroutines
  * @property citiesNamesInteractor provides domain layer data.
  */
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
-    private val app: Application,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val citiesNamesInteractor: CitiesNamesInteractor,
-) : AbstractViewModel(app, coroutineDispatchers) {
+) : AbstractViewModel(coroutineDispatchers) {
 
     private val _cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
     private val _citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
@@ -78,7 +75,8 @@ class CitiesNamesViewModel @Inject constructor(
             _citiesNamesState.value = response
             if (response.error.contains("Unable to resolve host")) {
                 Log.d("CitiesNamesViewModel", response.cities[0].toString())
-                throw NoInternetException(app.applicationContext.getString(R.string.database_city_downloading))
+                showError(R.string.city_mask_entries_error)
+                throw NoInternetException(response.error)
             }
         }
     }

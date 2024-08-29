@@ -9,28 +9,29 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 /**
  * Defines geo location of a device.
  */
-class WeatherForecastGeoLocator {
+class WeatherForecastGeoLocator(@ApplicationContext val context: Context) {
 
     /**
-     * Define current geo location, using [appContext] and sending callbacks through [locationListener].
+     * Define current geo location and send callbacks through [locationListener].
      */
-    fun defineCurrentLocation(appContext: Context, locationListener: GeoLocationListener) {
+    fun defineCurrentLocation(locationListener: GeoLocationListener) {
         try {
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(appContext)
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
                 override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
                 override fun isCancellationRequested() = false
             }).addOnSuccessListener { location: Location? ->
-                onDefineLocationSuccess(location, locationListener, appContext)
+                onDefineLocationSuccess(location, locationListener, context)
             }.addOnFailureListener { exception ->
                 onDefineLocationFailure(exception, locationListener)
             }.addOnCanceledListener {
                 Log.e(TAG, "Define location cancelled")
-                locationListener.onCurrentGeoLocationFail(appContext.getString(R.string.city_locating_cancelled))
+                locationListener.onCurrentGeoLocationFail(context.getString(R.string.city_locating_cancelled))
             }
         } catch (sec: SecurityException) {
             locationListener.onNoGeoLocationPermission()

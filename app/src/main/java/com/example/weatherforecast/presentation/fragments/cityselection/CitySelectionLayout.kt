@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityDomainModel
+import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -57,9 +59,19 @@ fun CitySelectionLayout(
     onCityClicked: (String) -> Unit,
     viewModel: CitiesNamesViewModel
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val cityItem by viewModel.cityMaskState.collectAsState()
+    val toolbarState = viewModel.toolbarSubtitleMessageState.collectAsState()
+    val toolbarSubtitle by remember {
+        mutableStateOf(toolbarState.value.stringId?.let {
+            context.getString(
+                it,
+                toolbarState.value.valueForStringId.orEmpty()
+            )
+        } ?: toolbarState.value.valueForStringId.orEmpty())
+    }
 
     Scaffold(
         topBar = {
@@ -72,9 +84,9 @@ fun CitySelectionLayout(
                         )
                         Text(
                             modifier = Modifier.offset((-16).dp),
-                            text = viewModel.toolbarSubtitleTextState.value,
-                            color = viewModel.toolbarSubtitleColorState.value,
-                            fontSize = (viewModel.toolbarSubtitleFontSizeState.value).sp,
+                            text = toolbarSubtitle,
+                            color = PresentationUtils.getToolbarSubtitleColor(toolbarState.value.messageType),
+                            fontSize = PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

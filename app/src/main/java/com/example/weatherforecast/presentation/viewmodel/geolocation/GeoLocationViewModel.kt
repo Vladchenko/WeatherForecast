@@ -40,7 +40,7 @@ class GeoLocationViewModel @Inject constructor(
     private val geoLocator: WeatherForecastGeoLocator,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
-) : AbstractViewModel(app, coroutineDispatchers) {
+) : AbstractViewModel(coroutineDispatchers) {
 
     private var permissionRequests = 0
 
@@ -80,18 +80,10 @@ class GeoLocationViewModel @Inject constructor(
             }
 
             is NoSuchDatabaseEntryException -> {
-                showError(
-                    app.applicationContext.getString(
-                        R.string.database_entry_for_city_not_found, throwable.message
-                    )
-                )
+                showError(R.string.database_entry_for_city_not_found, throwable.message.toString())
             }
 
             else -> {
-                Log.e(
-                    TAG,
-                    app.applicationContext.getString(R.string.forecast_downloading_for_city_failed)
-                )
                 Log.e(TAG, throwable.stackTraceToString())
                 showError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
@@ -111,7 +103,7 @@ class GeoLocationViewModel @Inject constructor(
         if (hasPermissionForGeoLocation(app.applicationContext)) {
             defineCurrentGeoLocation()
         } else {
-            showStatus(app.applicationContext.getString(R.string.geo_location_permission_required))
+            showStatus(R.string.geo_location_permission_required)
             permissionRequests++
             if (permissionRequests > 2) {
                 _onRequestPermissionDeniedLiveData.postValue(Unit)
@@ -123,8 +115,8 @@ class GeoLocationViewModel @Inject constructor(
     }
 
     fun defineCurrentGeoLocation() {
-        showStatus(app.applicationContext.getString(R.string.current_location_defining_text))
-        geoLocator.defineCurrentLocation(app.applicationContext, object : GeoLocationListener {
+        showStatus(R.string.current_location_triangulating)
+        geoLocator.defineCurrentLocation(object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
                 _onDefineCurrentGeoLocationSuccessLiveData.postValue(location)
                 showProgressBarState.value = false
@@ -149,7 +141,7 @@ class GeoLocationViewModel @Inject constructor(
         if (isGranted) {
             defineCurrentGeoLocation()
         } else {
-            showError(app.applicationContext.getString(R.string.geo_location_no_permission))
+            showError(R.string.geo_location_no_permission)
             _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData.call()
         }
     }
