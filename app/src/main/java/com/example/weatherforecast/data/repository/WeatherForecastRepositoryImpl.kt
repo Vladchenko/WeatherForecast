@@ -1,7 +1,5 @@
 package com.example.weatherforecast.data.repository
 
-import android.util.Log
-import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
@@ -26,30 +24,19 @@ class WeatherForecastRepositoryImpl(
     private val coroutineDispatchers: CoroutineDispatchers
 ) : WeatherForecastRepository {
 
-    override suspend fun loadForecastForCity(
+    override suspend fun loadRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
     ): Result<WeatherForecastDomainModel> =
         withContext(coroutineDispatchers.io) {
-            var response: WeatherForecastDomainModel
-            var result: Result<WeatherForecastDomainModel>
-            try {
+            val response: WeatherForecastDomainModel
+            val datasourceResponse = weatherForecastRemoteDataSource.loadForecastDataForCity(city)
                 response = modelsConverter.convert(
                     temperatureType,
                     city,
-                    weatherForecastRemoteDataSource.loadForecastDataForCity(city)
+                    datasourceResponse
                 )
-                result = Result.success(response)
-            } catch (ex: Exception) {
-                Log.e(TAG, ex.message.toString())
-                try {
-                    response = loadLocalForecast(city)
-                    result = Result.success(response.copy(serverError = ex.message.toString()))
-                } catch (ex: Exception) {
-                    result = Result.failure(ex)
-                }
-            }
-            return@withContext result
+            return@withContext Result.success(response)
         }
 
     override suspend fun loadRemoteForecastForLocation(
@@ -70,8 +57,4 @@ class WeatherForecastRepositoryImpl(
         withContext(coroutineDispatchers.io) {
             weatherForecastLocalDataSource.saveForecastData(model)
         }
-
-    companion object {
-        private const val TAG = "WeatherForecastRepositoryImpl"
-    }
 }

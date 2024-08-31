@@ -14,7 +14,7 @@ interface WeatherForecastRepository {
      *
      * @return result with data model
      */
-    suspend fun loadForecastForCity(
+    suspend fun loadRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
     ): Result<WeatherForecastDomainModel>

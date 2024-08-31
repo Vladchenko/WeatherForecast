@@ -65,35 +65,14 @@ class GeoLocationViewModel @Inject constructor(
     private val _onDefineCurrentGeoLocationSuccessLiveData = SingleLiveEvent<Location>()
     private val _onDefineCityByCurrentGeoLocationSuccessLiveData = SingleLiveEvent<String>()
     private val _onDefineGeoLocationByCitySuccessLiveData = SingleLiveEvent<CityLocationModel>()
-    private val _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData = SingleLiveEvent<Unit>()
+    private val _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData =
+        SingleLiveEvent<Unit>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
-        when (throwable) {
-            is NoInternetException -> {
-                showError(throwable.message.toString())
-                viewModelScope.launch(coroutineDispatchers.io) {
-                    delay(PresentationUtils.REPEAT_INTERVAL)
-                    // weatherForecastDownloadJob.start()
-                    //TODO Work through each case - for location for city
-                }
-            }
-
-            is NoSuchDatabaseEntryException -> {
-                showError(R.string.database_entry_for_city_not_found, throwable.message.toString())
-            }
-
-            else -> {
-                Log.e(TAG, throwable.stackTraceToString())
-                showError(throwable.message.toString())
-                //In fact, defines location and loads forecast for it
-                // _onCityRequestFailedLiveData.postValue(chosenCity)
-                // TODO What should go here ?
-            }
-        }
-        throwable.stackTrace.forEach {
-            Log.e(TAG, it.toString())
-        }
+        Log.e(TAG, throwable.stackTraceToString())
+        showError(throwable.message.toString())
+        showProgressBarState.value = false
     }
 
     /**
@@ -154,7 +133,10 @@ class GeoLocationViewModel @Inject constructor(
             showStatus("Defining geo location for city $city")
             try {
                 val location = geoLocationHelper.defineLocationByCity(city)
-                Log.d(TAG, "Geo location defined successfully for city = $city, location = $location")
+                Log.d(
+                    TAG,
+                    "Geo location defined successfully for city = $city, location = $location"
+                )
                 val cityModel = CityLocationModel(city, location)
                 saveChosenCity(cityModel)
                 Log.d(TAG, "City and its location saved successfully.")

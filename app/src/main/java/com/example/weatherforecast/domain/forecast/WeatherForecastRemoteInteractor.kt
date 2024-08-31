@@ -14,7 +14,7 @@ class WeatherForecastRemoteInteractor(private val weatherForecastRepository: Wea
         temperatureType: TemperatureType,
         city: String
     ): Result<WeatherForecastDomainModel> {
-        return weatherForecastRepository.loadForecastForCity(temperatureType, city)
+        return weatherForecastRepository.loadRemoteForecastForCity(temperatureType, city)
     }
 
     suspend fun loadForecastForLocation(

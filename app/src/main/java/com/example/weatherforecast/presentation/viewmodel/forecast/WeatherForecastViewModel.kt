@@ -90,10 +90,9 @@ class WeatherForecastViewModel @Inject constructor(
 
             is NoSuchDatabaseEntryException -> {
                 showError(
-                    R.string.database_entry_for_city_not_found,
+                    R.string.database_forecast_for_city_not_found,
                     throwable.message.orEmpty()
                 )
-                showProgressBarState.value = false
             }
 
             else -> {
@@ -102,9 +101,9 @@ class WeatherForecastViewModel @Inject constructor(
                 showError(throwable.message.toString())
                 //In fact, defines location and loads forecast for it
                 _onCityRequestFailedLiveData.postValue(chosenCity.orEmpty())    //TODO .orEmpty()
-                showProgressBarState.value = false
             }
         }
+        showProgressBarState.value = false
         throwable.stackTrace.forEach {
             Log.e(TAG, it.toString())
         }
