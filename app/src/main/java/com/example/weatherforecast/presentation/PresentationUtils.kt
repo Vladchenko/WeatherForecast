@@ -1,9 +1,9 @@
 package com.example.weatherforecast.presentation
 
-import androidx.compose.ui.graphics.Color
 import android.content.res.Resources
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.doOnDetach
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.presentation.MessageType

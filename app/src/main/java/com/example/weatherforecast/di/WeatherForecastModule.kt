@@ -306,6 +306,31 @@ class WeatherForecastModule {
         return context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
     }
 
+    @Provides
+    fun provideWorkManager(@ApplicationContext applicationContext: Context): WorkManager {
+        val workManager = WorkManager.getInstance(applicationContext)
+        val constraints = Constraints.Builder()
+            .setRequiresCharging(false)
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+        val workRequest =
+            PeriodicWorkRequestBuilder<ForecastWorker>(30, TimeUnit.MINUTES, 25, TimeUnit.MINUTES)
+                .setInitialDelay(5, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build()
+        workManager.enqueueUniquePeriodicWork("ForecastPeriodicWork",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest)
+        return workManager
+    }
+
+    @Singleton
+    @Provides
+    fun provideCoroutineScope(coroutineDispatchers: CoroutineDispatchers): CoroutineScope {
+        // Run this code when providing an instance of CoroutineScope
+        return CoroutineScope(SupervisorJob() + coroutineDispatchers.default)
+    }
+
     @Singleton
     @Provides
     fun provideTemperatureType(): TemperatureType {

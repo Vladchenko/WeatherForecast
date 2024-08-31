@@ -79,7 +79,8 @@ TODO:
 
 
    INFO:
-        - WorkManager is only injected in WeatherForecastActivity, but not used. The purpose here is just to launch it and it's launch performs downloading and saving of forecast to database.
+        - WorkManager to work correctly should have this app to run at least once and save a triangulated or typed city to database.
+        WorkManager is only injected in WeatherForecastActivity, but not used. The purpose here is just to launch it and its launch performs downloading and saving of forecast to database.
 
 //            NetworkMonitor(app.applicationContext, this@WeatherForecastViewModel)
             // Since NetworkMonitor doesn't check if app started with no inet, following check is required

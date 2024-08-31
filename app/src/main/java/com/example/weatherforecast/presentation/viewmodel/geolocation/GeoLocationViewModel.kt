@@ -6,8 +6,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.api.customexceptions.NoInternetException
-import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.geolocation.GeoLocationListener
@@ -15,12 +13,10 @@ import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.geolocation.hasPermissionForGeoLocation
 import com.example.weatherforecast.models.domain.CityLocationModel
-import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

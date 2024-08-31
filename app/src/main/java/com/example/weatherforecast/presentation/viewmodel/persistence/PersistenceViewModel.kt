@@ -11,10 +11,9 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteracto
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
-import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.geolocation.getLocationByLatLon
-import kotlinx.coroutines.CoroutineExceptionHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
