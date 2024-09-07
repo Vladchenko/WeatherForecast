@@ -56,6 +56,13 @@ open class AbstractViewModel(
     }
 
     /**
+     * Show warning message, providing [stringResId] and [value] as argument.
+     */
+    fun showWarning(@StringRes stringResId: Int, value: String) {
+        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(stringResId, value, MessageType.WARNING)
+    }
+
+    /**
      * Show [errorMessage].
      */
     fun showError(errorMessage: String) {

@@ -200,10 +200,15 @@ class SourceTypeConverter {
 
     @TypeConverter
     fun toWeather(stringList: String): List<Weather> {
-        val result = ArrayList<Weather>()
-        val split = stringList.replace("[", "").replace("]", "").replace(" ", "").split(",")
-        Weather(split[0].toLong(), split[1], split[2], split[3])
-        return result
+        val json = JSONObject(stringList)
+        return listOf(
+            Weather(
+                json.getString("id").toLong(),
+                json.getString("main"),
+                json.getString("description"),
+                json.getString("icon"),
+            )
+        )
     }
 
     @TypeConverter

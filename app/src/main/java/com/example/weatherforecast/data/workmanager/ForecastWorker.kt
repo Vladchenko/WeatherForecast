@@ -46,7 +46,7 @@ class ForecastWorker @AssistedInject constructor(
             try {
                 val city = chosenCityRepository.loadChosenCity().city
                 val forecastResponse =
-                    weatherForecastRepository.loadAndSaveRemoteForecastForCity(
+                    weatherForecastRepository.loadRemoteForecastForCity(
                         temperatureType,
                         city
                     )
@@ -54,12 +54,10 @@ class ForecastWorker @AssistedInject constructor(
                     Log.i(
                         TAG,
                         "ForecastWorker ran at " +
-                                "${
-                                    SimpleDateFormat(
-                                        "dd/MM/yyyy HH:mm:ss",
-                                        Locale.getDefault()
-                                    ).format(Date(this.dateTime.toLong() * 1000))
-                                }"
+                                SimpleDateFormat(
+                                    "dd/MM/yyyy HH:mm:ss",
+                                    Locale.getDefault()
+                                ).format(Date(this.dateTime.toLong() * 1000))
                     )
                 }
             } catch (e: Exception) {

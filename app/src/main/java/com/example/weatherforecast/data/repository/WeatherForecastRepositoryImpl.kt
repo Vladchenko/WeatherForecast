@@ -7,6 +7,7 @@ import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.models.data.WeatherForecastResponse
+import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,31 +30,77 @@ class WeatherForecastRepositoryImpl(
     private val temperatureType: TemperatureType
 ) : WeatherForecastRepository {
 
-    override suspend fun loadAndSaveRemoteForecastForCity(
+    override suspend fun loadRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
     ): Result<WeatherForecastDomainModel> =
         withContext(coroutineDispatchers.io) {
             val result: WeatherForecastDomainModel
             val response = weatherForecastRemoteDataSource.loadForecastDataForCity(city)
+            result = modelsConverter.convert(
+                temperatureType,
+                city,
+                response
+            )
+            saveForecast(response.body()!!)     //TODO Handle null body
+            return@withContext Result.success(result)
+        }
+
+    override suspend fun loadAndSaveRemoteForecastForCity(
+        temperatureType: TemperatureType,
+        city: String
+    ): LoadResult<WeatherForecastDomainModel> =
+        withContext(coroutineDispatchers.io) {
+            val result: WeatherForecastDomainModel
+            try {
+                val response = weatherForecastRemoteDataSource.loadForecastDataForCity(city)
                 result = modelsConverter.convert(
                     temperatureType,
                     city,
                     response
                 )
-            saveForecast(response.body()!!)     //TODO Handle null body
-            return@withContext Result.success(result)
+                saveForecast(response.body()!!)     //TODO Handle null body
+            } catch (ex: Exception) {
+                return@withContext LoadResult.Local(
+                    try {
+                        loadLocalForecast(city)
+                    } catch (ex: Exception) {
+                        return@withContext LoadResult.Fail(ex.message.orEmpty())
+                    },
+                    ex.message.orEmpty()
+                )
+            }
+            return@withContext LoadResult.Remote(result)
         }
 
-    override suspend fun loadRemoteForecastForLocation(
+    override suspend fun loadAndSaveRemoteForecastForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ) = withContext(coroutineDispatchers.io) {
-        val response = weatherForecastRemoteDataSource.loadForecastForLocation(latitude, longitude)
-        saveForecast(response.body()!!)     //TODO Handle null body
-        Result.success(modelsConverter.convert(temperatureType, response.body()!!.city, response))
-    }
+    ): LoadResult<WeatherForecastDomainModel> =
+        withContext(coroutineDispatchers.io) {
+            val result: WeatherForecastDomainModel
+            try {
+                val response = weatherForecastRemoteDataSource.loadForecastForLocation(latitude, longitude)
+                result = modelsConverter.convert(
+                    temperatureType,
+                    response.body()!!.city,
+                    response
+                )
+                saveForecast(response.body()!!)     //TODO Handle null body
+            } catch (ex: Exception) {
+//                return@withContext LoadResult.Local(
+//                    try {
+//                        loadLocalForecast(city) //TODO Should there be save for lat lon, or define city by lat lon and save it ?
+//                    } catch (ex: Exception) {
+                        return@withContext LoadResult.Fail(ex.message.orEmpty())
+//                    },
+//                    ex.message.orEmpty()
+//                )
+            }
+            return@withContext LoadResult.Remote(result)
+        }
+
 
     override suspend fun loadLocalForecast(city: String) =
         withContext(coroutineDispatchers.io) {

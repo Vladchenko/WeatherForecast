@@ -1,6 +1,7 @@
 package com.example.weatherforecast.domain.forecast
 
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 
 /**
@@ -13,21 +14,31 @@ interface WeatherForecastRepository {
      *
      * @return result with data model
      */
-    suspend fun loadAndSaveRemoteForecastForCity(
+    suspend fun loadRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
     ): Result<WeatherForecastDomainModel>
+
+    /**
+     * Retrieve weather forecast model for [temperatureType] and [city] and save it to database
+     *
+     * @return result with data model
+     */
+    suspend fun loadAndSaveRemoteForecastForCity(
+        temperatureType: TemperatureType,
+        city: String
+    ): LoadResult<WeatherForecastDomainModel>
 
     /**
      * Retrieve remote weather forecast model for [temperatureType] and [latitude], [longitude]
      *
      * @return result with data model
      */
-    suspend fun loadRemoteForecastForLocation(
+    suspend fun loadAndSaveRemoteForecastForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ): Result<WeatherForecastDomainModel>
+    ): LoadResult<WeatherForecastDomainModel>
 
     /**
      * Retrieve local(database) forecast for [city]

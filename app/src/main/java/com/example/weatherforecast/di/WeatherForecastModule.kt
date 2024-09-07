@@ -47,7 +47,6 @@ import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
-import com.example.weatherforecast.presentation.viewmodel.persistence.PersistenceViewModelFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -200,20 +199,6 @@ class WeatherForecastModule {
             chosenCityInteractor,
             coroutineDispatchers,
             weatherForecastRemoteInteractor
-        )
-    }
-
-    @Singleton
-    @Provides
-    fun providePersistenceViewModelFactory(
-        chosenCityInteractor: ChosenCityInteractor,
-        coroutineDispatchers: CoroutineDispatchers,
-        weatherForecastLocalInteractor: WeatherForecastLocalInteractor,
-    ): PersistenceViewModelFactory {
-        return PersistenceViewModelFactory(
-            chosenCityInteractor,
-            coroutineDispatchers,
-            weatherForecastLocalInteractor,
         )
     }
 

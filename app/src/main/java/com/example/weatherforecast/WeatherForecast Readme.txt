@@ -15,27 +15,22 @@ From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...cod
 
 TODO:
     - Save city names(tokens) to data base and load them when no inet
-    - Persistence viewmodel probably could be removed
-    - Turn toolbar message yellow for local forecast and cities responses
+        - When no inet, one needs to show all the saved cities, but not a filtered ones.
+    - Turn toolbar message yellow for cities responses
     - Replace LiveDatas with UIStates
-    - Move AbstractViewModel and other viewmodels's showError's references to views to Fragments
-    - Implement WorkManager for it could download weather forecast data periodically, say 30min.
     - ! Create custom widget in Jetpack Compose, since it interviewers ask this technology
-    - ! IMHO, local and remote forecasts is not a good approach - they should be joined.
-    And have a sealed classes for a result - smth like Remote<Model>, Local<Model>
     - ! Extract DI network module from current one
     - When loaded remotely and no forecast in DB, an error is shown during this time.
+        - Work out a case, when city not defined for first app running
     - Add a ? picture for a case when a weather type image is not defined
-    - Work out a case, when city not defined for first app running
-    - When no inet, one needs to show all the saved cities, but not a filtered ones.
     - Implement swipeToRefresh
     - Move TemperatureType from DI to some settings providing mechanism. Probably a shared preferences with data-domain wrapping.
 
     - Fix such case of first app run:
-        - Dialog of local city recognition appeared, one taps OK
-        - Remote forecast for city downloading fails
-        - Local forecast for city downloading also fails, since no initial city saved in DB
-        - Next, app crashes, saying "city has to be not null". So, one has to show some status that both - remote and local failed. And maybe go to a city selection screen.
+        1) Dialog of local city recognition appeared, one taps OK
+        2) Remote forecast for city downloading fails
+        3) Local forecast for city downloading also fails, since no initial city saved in DB
+        4) Next, app crashes, saying "city has to be not null". So, one has to show some status that both - remote and local failed. And maybe go to a city selection screen.
     - When forecast fails to download, sometimes it calls cities screen for 2 times
     - As for network connection availability, is there a way to remove double check ?
     - App doesn't ask for permission when I remove it, after it was granted before
