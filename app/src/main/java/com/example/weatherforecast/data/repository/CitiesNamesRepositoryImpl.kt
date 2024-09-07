@@ -6,11 +6,8 @@ import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDa
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
-import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.models.domain.CityDomainModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
+import retrofit2.Response
 
 /**
  * CitiesNamesRepository implementation to retrieve cities names.
@@ -32,15 +29,12 @@ class CitiesNamesRepositoryImpl(
             return@withContext try {
                 modelsConverter.convert(remoteDataSource.loadCitiesNames(token), "")
             } catch (ex: NoInternetException) {
-                CitiesNamesDomainModel(
-                    localDataSource.loadCitiesNames(token).toList(),
+                modelsConverter.convert(
+                    Response.success(localDataSource.loadCitiesNames(token)),
                     ex.message.orEmpty()
                 )
             }
         }
-
-    override fun loadLocalCitiesNames(token: String) =
-        localDataSource.loadCitiesNames(token)
 
     override suspend fun deleteAllCitiesNames() =
         withContext(coroutineDispatchers.io) {

@@ -6,17 +6,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.presentation.PresentationUtils.REPEAT_INTERVAL
 import com.example.weatherforecast.presentation.fragments.cityselection.CityItem
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -45,13 +42,6 @@ class CitiesNamesViewModel @Inject constructor(
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message.orEmpty())
         when (throwable) {
-            is NoInternetException -> {
-                showError(throwable.message.toString())
-                viewModelScope.launch(coroutineDispatchers.io) {
-                    delay(REPEAT_INTERVAL)
-                    getCitiesNamesForMask(cityMask)
-                }
-            }
             is NoSuchDatabaseEntryException -> {
                 showError("City with a name ${throwable.message} is not present in database")
             }
@@ -71,12 +61,11 @@ class CitiesNamesViewModel @Inject constructor(
     fun getCitiesNamesForMask(city: String) {
         Log.d("CitiesNamesViewModel", city)
         viewModelScope.launch(exceptionHandler) {
-            val response = citiesNamesInteractor.loadRemoteCitiesNames(city)
+            val response = citiesNamesInteractor.loadCitiesNames(city)
             _citiesNamesState.value = response
-            if (response.error.contains("Unable to resolve host")) {
-                Log.d("CitiesNamesViewModel", response.cities[0].toString())
-                showError(R.string.city_mask_entries_error)
-                throw NoInternetException(response.error)
+            if (response.error.isNotBlank()) {
+                Log.d("CitiesNamesViewModel", response.error)
+                showWarning(response.error)
             }
         }
     }
@@ -93,7 +82,7 @@ class CitiesNamesViewModel @Inject constructor(
     /**
      * Empty a mask that provides several cities names that match it.
      */
-    fun emptyCityMask() {
+    fun clearCityMask() {
         _cityMaskState.value = CityItem("")
     }
 

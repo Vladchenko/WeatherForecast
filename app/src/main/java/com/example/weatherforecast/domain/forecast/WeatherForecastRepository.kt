@@ -4,8 +4,7 @@ import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 
 /**
- * Weather forecast repository.
- * Provides domain-layer data.
+ * Weather forecast repository. Provides domain-layer data.
  */
 interface WeatherForecastRepository {
 
@@ -14,7 +13,7 @@ interface WeatherForecastRepository {
      *
      * @return result with data model
      */
-    suspend fun loadRemoteForecastForCity(
+    suspend fun loadAndSaveRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
     ): Result<WeatherForecastDomainModel>
@@ -34,9 +33,4 @@ interface WeatherForecastRepository {
      * Retrieve local(database) forecast for [city]
      */
     suspend fun loadLocalForecast(city: String): WeatherForecastDomainModel
-
-    /**
-     * Save weather forecast from [model]
-     */
-    suspend fun saveForecast(model: WeatherForecastDomainModel)
 }

@@ -53,9 +53,6 @@ class WeatherForecastViewModel @Inject constructor(
     val onGotoCitySelectionLiveData: LiveData<Unit>
         get() = _onGotoCitySelectionLiveData
 
-    val onSaveForecastLiveData: LiveData<WeatherForecastDomainModel>
-        get() = _onSaveForecastLiveData
-
     val onLoadLocalForecastLiveData: LiveData<WeatherForecastDomainModel>
         get() = _onLoadLocalForecastLiveData
 
@@ -68,7 +65,6 @@ class WeatherForecastViewModel @Inject constructor(
     private val _onChosenCityNotFoundLiveData = SingleLiveEvent<String>()
     private val _onCityRequestFailedLiveData = SingleLiveEvent<String>()
     private val _onGotoCitySelectionLiveData = SingleLiveEvent<Unit>()
-    private val _onSaveForecastLiveData = SingleLiveEvent<WeatherForecastDomainModel>()
     private val _onLoadLocalForecastLiveData = SingleLiveEvent<WeatherForecastDomainModel>()
     private val _onRemoteForecastFailLiveData = SingleLiveEvent<String>()
     //endregion livedata fields
@@ -93,6 +89,10 @@ class WeatherForecastViewModel @Inject constructor(
                     R.string.database_forecast_for_city_not_found,
                     throwable.message.orEmpty()
                 )
+            }
+
+            is NumberFormatException -> {
+                showError(throwable.message.orEmpty())
             }
 
             else -> {
@@ -180,7 +180,7 @@ class WeatherForecastViewModel @Inject constructor(
                 Log.d(TAG, result.toString())
                 showProgressBarState.value = false
                 if (forecastModel.serverError.isBlank()) {
-                    showRemoteForecastAndSave(forecastModel)
+                    showRemoteForecast(forecastModel)
                 } else {
                     showLocalForecastOrError(forecastModel)
                 }
@@ -194,13 +194,12 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
-    private fun showRemoteForecastAndSave(forecastModel: WeatherForecastDomainModel) {
+    private fun showRemoteForecast(forecastModel: WeatherForecastDomainModel) {
         dataModelState.value = forecastModel
         showStatus(
             R.string.forecast_for_city,
             dataModelState.value?.city.orEmpty()
         )
-        _onSaveForecastLiveData.postValue(forecastModel)
     }
 
     private fun showLocalForecastOrError(forecastModel: WeatherForecastDomainModel) {

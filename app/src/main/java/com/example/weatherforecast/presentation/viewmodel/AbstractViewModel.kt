@@ -49,6 +49,13 @@ open class AbstractViewModel(
     }
 
     /**
+     * Show [warningMessage].
+     */
+    fun showWarning(warningMessage: String) {
+        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(null, warningMessage, MessageType.WARNING)
+    }
+
+    /**
      * Show [errorMessage].
      */
     fun showError(errorMessage: String) {

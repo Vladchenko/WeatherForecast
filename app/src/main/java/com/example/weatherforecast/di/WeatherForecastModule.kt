@@ -114,7 +114,7 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideArticlesDataBase(app: Application): WeatherForecastDataBase {
+    fun provideWeatherForecastDataBase(app: Application): WeatherForecastDataBase {
         return WeatherForecastDataBase.getInstance(app.applicationContext)
     }
 
@@ -142,13 +142,15 @@ class WeatherForecastModule {
         weatherForecastRemoteDataSource: WeatherForecastRemoteDataSource,
         weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
         converter: ForecastDataToDomainModelsConverter,
-        coroutineDispatchers: CoroutineDispatchers
+        coroutineDispatchers: CoroutineDispatchers,
+        temperaturesType: TemperatureType
     ): WeatherForecastRepository {
         return WeatherForecastRepositoryImpl(
             weatherForecastRemoteDataSource,
             weatherForecastLocalDataSource,
             converter,
-            coroutineDispatchers
+            coroutineDispatchers,
+            temperaturesType
         )
     }
 

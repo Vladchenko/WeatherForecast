@@ -35,10 +35,10 @@ class ForecastDataToDomainModelsConverter {
         return WeatherForecastDomainModel(
             city,
             coordinate = Coordinate(
-                latitude = responseBody?.coord?.lat ?: 0.0,
-                longitude = responseBody?.coord?.lon ?: 0.0
+                latitude = responseBody?.coordinate?.latitude?: 0.0,
+                longitude = responseBody?.coordinate?.longitude ?: 0.0
             ),
-            date = responseBody?.dt.toString(),
+            dateTime = responseBody?.dateTime.toString(),
             temperature = convertTemperature(temperatureType, temperature),
             weatherType = weather?.description.orEmpty(),
             temperatureType = defineTemperatureSign(temperatureType),

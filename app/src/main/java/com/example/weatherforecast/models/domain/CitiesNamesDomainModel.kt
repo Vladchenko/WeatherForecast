@@ -1,9 +1,5 @@
 package com.example.weatherforecast.models.domain
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
-
 /**
  * Data model for cities names retrieval.
  *
@@ -25,10 +21,7 @@ data class CitiesNamesDomainModel(
  * @property state that city located in
  * @property serverError message if data retrieval failed
  */
-@Entity(tableName = "citiesNames")
 data class CityDomainModel(
-    @PrimaryKey
-    @SerializedName("city")
     val name: String,
     val lat: Double,
     val lon: Double,

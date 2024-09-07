@@ -14,7 +14,9 @@ Running a saving for a forecast and a chosen city in separate coroutines instead
 From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...code to measure... }
 
 TODO:
-    - Turn toolbar message yellow for local forecast
+    - Save city names(tokens) to data base and load them when no inet
+    - Persistence viewmodel probably could be removed
+    - Turn toolbar message yellow for local forecast and cities responses
     - Replace LiveDatas with UIStates
     - Move AbstractViewModel and other viewmodels's showError's references to views to Fragments
     - Implement WorkManager for it could download weather forecast data periodically, say 30min.

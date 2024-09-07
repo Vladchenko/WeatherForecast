@@ -11,7 +11,6 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteracto
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
-import com.example.weatherforecast.presentation.viewmodel.geolocation.getLocationByLatLon
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
@@ -82,38 +81,6 @@ class PersistenceViewModel @Inject constructor(
             )
         )
         showProgressBarState.value = false
-    }
-
-    /**
-     * Save weather forecast [domainModel] and previously chosen city to data base
-     */
-    fun saveForecastAndChosenCity(
-        domainModel: WeatherForecastDomainModel
-    ) = viewModelScope.launch(exceptionHandler) {
-        launch {
-            forecastLocalInteractor.saveForecast(domainModel)
-        }
-        launch {
-            saveChosenCity(
-                domainModel.city,
-                domainModel.coordinate.latitude,
-                domainModel.coordinate.longitude
-            )
-        }
-    }
-
-    private suspend fun saveChosenCity(
-        city: String,
-        latitude: Double,
-        longitude: Double,
-    ) {
-        chosenCityInteractor.saveChosenCity(
-            city,
-            getLocationByLatLon(
-                latitude,
-                longitude
-            )
-        )
     }
 
     companion object {

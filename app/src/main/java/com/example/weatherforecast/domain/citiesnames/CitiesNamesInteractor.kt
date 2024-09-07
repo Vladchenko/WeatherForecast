@@ -1,8 +1,6 @@
 package com.example.weatherforecast.domain.citiesnames
 
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.models.domain.CityDomainModel
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Cities names interactor.
@@ -14,15 +12,8 @@ class CitiesNamesInteractor(private val citiesNamesRepository: CitiesNamesReposi
     /**
      * Retrieve remote cities names matching [token].
      */
-    suspend fun loadRemoteCitiesNames(token: String): CitiesNamesDomainModel {
+    suspend fun loadCitiesNames(token: String): CitiesNamesDomainModel {
         return citiesNamesRepository.loadCitiesNames(token)
-    }
-
-    /**
-     * Retrieve local cities names matching [token].
-     */
-    fun loadLocalCitiesNames(token: String): Flow<CityDomainModel> {
-        return citiesNamesRepository.loadLocalCitiesNames(token)
     }
 
     /**

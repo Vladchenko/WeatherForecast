@@ -4,13 +4,13 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.weatherforecast.models.domain.CityDomainModel
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.data.WeatherForecastCityResponse
+import com.example.weatherforecast.models.data.WeatherForecastResponse
 
 /**
  * Database for weather forecast
  */
-@Database(entities = [WeatherForecastDomainModel::class, CityDomainModel::class], version = 2)
+@Database(entities = [WeatherForecastResponse::class, WeatherForecastCityResponse::class], version = 4)
 abstract class WeatherForecastDataBase : RoomDatabase() {
     abstract fun getCitiesNamesInstance(): CitiesNamesDAO
     abstract fun getWeatherForecastInstance(): WeatherForecastDAO
@@ -26,6 +26,7 @@ abstract class WeatherForecastDataBase : RoomDatabase() {
                     WeatherForecastDataBase::class.java,
                     "weather_forecast_database"
                 )
+                    // .fallbackToDestructiveMigration()
                     // .addMigrations(...) // Implement migrations if needed
                     .build()
                 INSTANCE = instance

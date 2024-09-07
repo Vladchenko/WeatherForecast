@@ -5,7 +5,7 @@ import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntry
 import com.example.weatherforecast.data.database.WeatherForecastDAO
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.WeatherForecastRemoteDataSource
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.data.WeatherForecastResponse
 
 /**
  * [WeatherForecastRemoteDataSource] implementation.
@@ -14,13 +14,13 @@ import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
  */
 class WeatherForecastLocalDataSourceImpl(private val dao: WeatherForecastDAO) : WeatherForecastLocalDataSource {
 
-    override suspend fun loadForecastData(city:String): WeatherForecastDomainModel {
-        val model = dao.getCityForecast(city) ?: throw NoSuchDatabaseEntryException(city)
-        Log.d("WeatherForecastLocalDataSourceImpl", "${model.city} city forecast loaded successfully")
-        return model
+    override suspend fun loadForecastData(city:String): WeatherForecastResponse {
+        val entry = dao.getCityForecast(city) ?: throw NoSuchDatabaseEntryException(city)
+        Log.d("WeatherForecastLocalDataSourceImpl", "${entry.city} city forecast loaded successfully")
+        return entry
     }
 
-    override suspend fun saveForecastData(response: WeatherForecastDomainModel) {
+    override suspend fun saveForecastData(response: WeatherForecastResponse) {
         dao.insertCityForecast(response)
         Log.d("WeatherForecastLocalDataSourceImpl", "${response.city} city forecast saved successfully")
     }

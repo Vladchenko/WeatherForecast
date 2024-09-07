@@ -46,12 +46,20 @@ class ForecastWorker @AssistedInject constructor(
             try {
                 val city = chosenCityRepository.loadChosenCity().city
                 val forecastResponse =
-                    weatherForecastRepository.loadRemoteForecastForCity(temperatureType, city)
+                    weatherForecastRepository.loadAndSaveRemoteForecastForCity(
+                        temperatureType,
+                        city
+                    )
                 forecastResponse.getOrNull()?.run {
-                    weatherForecastRepository.saveForecast(this)
-                    Log.i("ForecastWorker",
+                    Log.i(
+                        TAG,
                         "ForecastWorker ran at " +
-                                "${SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date(this.date.toLong() * 1000))}"
+                                "${
+                                    SimpleDateFormat(
+                                        "dd/MM/yyyy HH:mm:ss",
+                                        Locale.getDefault()
+                                    ).format(Date(this.dateTime.toLong() * 1000))
+                                }"
                     )
                 }
             } catch (e: Exception) {
@@ -60,5 +68,9 @@ class ForecastWorker @AssistedInject constructor(
             }
         }
         return Result.success()
+    }
+
+    companion object {
+        private const val TAG = "ForecastWorker"
     }
 }

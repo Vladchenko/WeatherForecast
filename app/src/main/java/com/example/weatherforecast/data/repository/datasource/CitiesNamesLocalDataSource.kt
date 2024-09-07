@@ -1,7 +1,6 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import com.example.weatherforecast.models.domain.CityDomainModel
-import kotlinx.coroutines.flow.Flow
+import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 
 /**
  * Data source for local cities names operations.
@@ -10,7 +9,7 @@ interface CitiesNamesLocalDataSource {
     /**
      * Retrieve cities names for [token].
      */
-    fun loadCitiesNames(token: String): Flow<CityDomainModel>
+    fun loadCitiesNames(token: String): List<WeatherForecastCityResponse>
 
     /**
      * Delete all cities names.

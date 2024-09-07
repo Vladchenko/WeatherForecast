@@ -20,9 +20,9 @@ class CitiesNamesDataToDomainConverter {
     ): CitiesNamesDomainModel {
         val cities = dataModel.body()?.map {
                 CityDomainModel(
-                    it.name,
-                    it.lat,
-                    it.lon,
+                    it.city,
+                    it.latitude,
+                    it.longitude,
                     it.country,
                     it.state,
                     dataModel.errorBody()?.string() ?: error

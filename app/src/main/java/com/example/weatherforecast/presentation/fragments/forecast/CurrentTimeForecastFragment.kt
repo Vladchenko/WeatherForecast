@@ -53,7 +53,7 @@ class CurrentTimeForecastFragment : Fragment() {
                 CurrentTimeForecastLayout(
                     toolbarTitle = getString(R.string.app_name),
                     currentDate = getCurrentDate(
-                        forecastViewModel.dataModelState.value?.date.orEmpty(),
+                        forecastViewModel.dataModelState.value?.dateTime.orEmpty(),
                         getString(R.string.bad_date_format)
                     ),
                     mainContentTextColor = Color.Black,
@@ -101,9 +101,6 @@ class CurrentTimeForecastFragment : Fragment() {
         forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelectionScreen() }
         forecastViewModel.onChosenCityBlankLiveData.observe(viewLifecycleOwner) {
             geoLocationViewModel.defineCurrentGeoLocation()
-        }
-        forecastViewModel.onSaveForecastLiveData.observe(viewLifecycleOwner) { forecastModel ->
-            persistenceViewModel.saveForecastAndChosenCity(forecastModel)
         }
         forecastViewModel.onLoadLocalForecastLiveData.observe(viewLifecycleOwner) { forecastModel ->
             persistenceViewModel.loadLocalWeatherForecast(forecastModel)

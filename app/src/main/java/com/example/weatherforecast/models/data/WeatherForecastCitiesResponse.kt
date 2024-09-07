@@ -1,25 +1,31 @@
 package com.example.weatherforecast.models.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.Serializable
 
 /**
- * Data model for cities weather forecasts retrieval.
+ * Data model for city's weather forecast.
  *
- * @property cities to provide weather forecasts for.
+ * @property city name to provide weather forecast for
+ * @property latitude 1st ordinate to locate city
+ * @property longitude 2nd ordinate to locate city
+ * @property country that city belongs to
+ * @property state that city belongs to
  */
 @Serializable
-data class WeatherForecastCitiesResponse(
-    val cities: List<WeatherForecastCityResponse>
-)
-
-/**
- * Data model for city's information.
- */
-@Serializable
-data class WeatherForecastCityResponse (
-    val name: String,
-    val lat: Double,
-    val lon: Double,
+@Entity(tableName = "citiesNames")
+data class WeatherForecastCityResponse(
+    @PrimaryKey
+    @SerializedName("city")
+    val city: String,
+    @SerializedName("lat")
+    val latitude: Double,
+    @SerializedName("lon")
+    val longitude: Double,
+    @SerializedName("country")
     val country: String,
+    @SerializedName("state")
     val state: String? = null
 )
