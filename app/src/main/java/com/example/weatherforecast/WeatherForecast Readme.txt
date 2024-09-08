@@ -14,12 +14,13 @@ Running a saving for a forecast and a chosen city in separate coroutines instead
 From 200-150ms to 3-1 msec. Measured using val time = measureTimeMillis { ...code to measure... }
 
 TODO:
-    - Save city names(tokens) to data base and load them when no inet
+    - City picking:
+        - Replace Result with sealed class just like in Forecast request
+        - Save city names(tokens) to data base and load them when no inet
         - When no inet, one needs to show all the saved cities, but not a filtered ones.
     - Turn toolbar message yellow for cities responses
     - Replace LiveDatas with UIStates
     - ! Create custom widget in Jetpack Compose, since it interviewers ask this technology
-    - ! Extract DI network module from current one
     - When loaded remotely and no forecast in DB, an error is shown during this time.
         - Work out a case, when city not defined for first app running
     - Add a ? picture for a case when a weather type image is not defined
