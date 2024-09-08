@@ -29,7 +29,7 @@ class CitiesNamesFragment : Fragment() {
                 CitySelectionLayout(
                     toolbarTitle = getString(R.string.app_name),
                     citySelectionTitle = getString(R.string.city_selection_from_dropdown),
-                    queryLabel = getString(R.string.begin_city_typing),
+                    queryLabel = getString(R.string.city_typing_begin),
                     { findNavController().popBackStack() },
                     { openForecastFragment(it) },   // This call should be done in viewmodel,
                     // but in this very case, somehow, CitiesNamesViewModel's livedata that calls

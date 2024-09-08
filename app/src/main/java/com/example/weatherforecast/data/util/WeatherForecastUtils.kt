@@ -1,7 +1,8 @@
 package com.example.weatherforecast.data.util
 
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * Utils helper methods.
@@ -22,7 +23,7 @@ object WeatherForecastUtils {
      * Format [time] (value in Long) to DATE_FORMAT presentation. Provide an [error] when formatting
      * is not possible.
      */
-    fun getCurrentDate(time: String, error: String): String {
+    fun getCurrentDateOrError(time: String, error: String): String {
         return try {
             SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(time.toLong() * 1000))
         } catch (ex: Exception) {

@@ -65,7 +65,7 @@ class CitiesNamesViewModel @Inject constructor(
             _citiesNamesState.value = response
             if (response.error.isNotBlank()) {
                 Log.d("CitiesNamesViewModel", response.error)
-                showWarning(response.error)
+                showError(response.error)
             }
         }
     }

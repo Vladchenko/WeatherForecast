@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 @Entity(tableName = "citiesNames")
 data class WeatherForecastCityResponse(
     @PrimaryKey
-    @SerializedName("city")
+    @SerializedName("name")
     val city: String,
     @SerializedName("lat")
     val latitude: Double,
