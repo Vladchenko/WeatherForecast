@@ -42,7 +42,7 @@ class WeatherForecastRepositoryImpl(
                 city,
                 response
             )
-            saveForecast(response.body()!!)     //TODO Handle null body
+            saveForecast(response.body()!!)     //NPE handled in WeatherForecastViewModel's exceptionHandler
             return@withContext Result.success(result)
         }
 
@@ -51,25 +51,13 @@ class WeatherForecastRepositoryImpl(
         city: String
     ): LoadResult<WeatherForecastDomainModel> =
         withContext(coroutineDispatchers.io) {
-            val result: WeatherForecastDomainModel
-            try {
-                val response = weatherForecastRemoteDataSource.loadForecastDataForCity(city)
-                result = modelsConverter.convert(
-                    temperatureType,
-                    city,
-                    response
-                )
-                saveForecast(response.body()!!)     //TODO Handle null body
-            } catch (ex: Exception) {
-                return@withContext LoadResult.Local(
-                    try {
-                        loadLocalForecast(city)
-                    } catch (ex: Exception) {
-                        return@withContext LoadResult.Fail(ex.message.orEmpty())
-                    },
-                    ex.message.orEmpty()
-                )
-            }
+            val response = weatherForecastRemoteDataSource.loadForecastDataForCity(city)
+            val result = modelsConverter.convert(
+                temperatureType,
+                city,
+                response
+            )
+            saveForecast(response.body()!!)     //NPE handled in WeatherForecastViewModel's exceptionHandler
             return@withContext LoadResult.Remote(result)
         }
 
@@ -80,38 +68,28 @@ class WeatherForecastRepositoryImpl(
     ): LoadResult<WeatherForecastDomainModel> =
         withContext(coroutineDispatchers.io) {
             val result: WeatherForecastDomainModel
-            try {
-                val response = weatherForecastRemoteDataSource.loadForecastForLocation(latitude, longitude)
-                result = modelsConverter.convert(
-                    temperatureType,
-                    response.body()!!.city,
-                    response
-                )
-                saveForecast(response.body()!!)     //TODO Handle null body
-            } catch (ex: Exception) {
-//                return@withContext LoadResult.Local(
-//                    try {
-//                        loadLocalForecast(city) //TODO Should there be save for lat lon, or define city by lat lon and save it ?
-//                    } catch (ex: Exception) {
-                        return@withContext LoadResult.Fail(ex.message.orEmpty())
-//                    },
-//                    ex.message.orEmpty()
-//                )
-            }
+            val response =
+                weatherForecastRemoteDataSource.loadForecastForLocation(latitude, longitude)
+            result = modelsConverter.convert(
+                temperatureType,
+                response.body()!!.city,
+                response
+            )
+            saveForecast(response.body()!!)     //NPE handled in WeatherForecastViewModel's exceptionHandler
             return@withContext LoadResult.Remote(result)
         }
 
-
-    override suspend fun loadLocalForecast(city: String) =
+    override suspend fun loadLocalForecast(city: String, remoteError: String) =
         withContext(coroutineDispatchers.io) {
             val response: WeatherForecastDomainModel
-            val datasourceResponse = Response.success(weatherForecastLocalDataSource.loadForecastData(city))
+            val datasourceResponse =
+                Response.success(weatherForecastLocalDataSource.loadForecastData(city))
             response = modelsConverter.convert(
                 temperatureType,
                 city,
                 datasourceResponse
             )
-            return@withContext response
+            return@withContext LoadResult.Local(response, remoteError)
         }
 
     private suspend fun saveForecast(response: WeatherForecastResponse) =

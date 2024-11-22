@@ -41,7 +41,10 @@ interface WeatherForecastRepository {
     ): LoadResult<WeatherForecastDomainModel>
 
     /**
-     * Retrieve local(database) forecast for [city]
+     * Retrieve local(database) forecast for [city] and provide [remoteError] describing why remote forecast failed
      */
-    suspend fun loadLocalForecast(city: String): WeatherForecastDomainModel
+    suspend fun loadLocalForecast(
+        city: String,
+        remoteError: String
+    ): LoadResult<WeatherForecastDomainModel>
 }

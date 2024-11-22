@@ -12,6 +12,7 @@ import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntry
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
+import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.LoadResult
@@ -20,8 +21,6 @@ import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,10 +37,14 @@ class WeatherForecastViewModel @Inject constructor(
     private val temperatureType: TemperatureType,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
+    private val forecastLocalInteractor: WeatherForecastLocalInteractor,
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
 ) : AbstractViewModel(coroutineDispatchers) {
 
     val dataModelState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
+
+//    private val _chosenCityStateFlow = MutableStateFlow(Unit)
+//    val chosenCityStateFlow:StateFlow<Unit> = _chosenCityStateFlow
 
     //region livedata getters fields
     val onChosenCityBlankLiveData: LiveData<Unit>
@@ -76,6 +79,10 @@ class WeatherForecastViewModel @Inject constructor(
 
             is NoInternetException -> {
                 showError(throwable.message.toString())
+                downloadLocalForecastForCity(
+                    chosenCity.orEmpty(),   // TODO Is it ok that orEmpty ?
+                    throwable.message.toString()
+                )
             }
 
             is NoSuchDatabaseEntryException -> {
@@ -131,17 +138,18 @@ class WeatherForecastViewModel @Inject constructor(
      */
     private fun downloadWeatherForecast(city: String) {
         if (city.isBlank()) {
-            _onChosenCityBlankLiveData.postValue(null)
+            _onChosenCityBlankLiveData.postValue(Unit)
+//            _chosenCityStateFlow.value = Unit
         } else {
             chosenCity = city
-            downloadWeatherForecastForCity(city)
+            downloadRemoteForecastForCity(city)
         }
     }
 
     /**
      * Download weather forecast on a [city].
      */
-    fun downloadWeatherForecastForCity(city: String) {
+    fun downloadRemoteForecastForCity(city: String) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadForecastForCity(
@@ -152,7 +160,20 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
-    fun downloadWeatherForecastForLocation(cityModel: CityLocationModel) {
+    /**
+     * Download weather forecast on a [city], providing an [remoteError] on why remote request failed.
+     */
+    private fun downloadLocalForecastForCity(city: String, remoteError: String) {
+        showProgressBarState.value = true
+        viewModelScope.launch(exceptionHandler) {
+            val result = forecastLocalInteractor.loadForecast(
+                city, remoteError
+            )
+            processServerResponse(result)
+        }
+    }
+
+    fun downloadRemoteForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadForecastForLocation(
@@ -164,20 +185,24 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
-    private fun processServerResponseForLocation(city: String,
-                                                 result: LoadResult<WeatherForecastDomainModel>) {
+    private fun processServerResponseForLocation(
+        city: String,
+        result: LoadResult<WeatherForecastDomainModel>
+    ) {
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
                 // City in response is different than city in request
                 showRemoteForecast(result.data.copy(city = city))
             }
+
             is LoadResult.Local -> {
                 // City in response is different than city in request
                 showLocalForecast(result.data.copy(city = city), result.remoteError)
             }
+
             is LoadResult.Fail -> {
-                showError(result.error)
+                showError(result.exception)
             }
         }
     }
@@ -188,30 +213,15 @@ class WeatherForecastViewModel @Inject constructor(
             is LoadResult.Remote -> {
                 showRemoteForecast(result.data)
             }
+
             is LoadResult.Local -> {
                 showLocalForecast(result.data, result.remoteError)
             }
+
             is LoadResult.Fail -> {
-                showError(result.error)
+                showError(result.exception)
             }
         }
-//        result.getOrNull()?.let { forecastModel -> // Result is not null
-//            if (result.isSuccess) {
-//                Log.d(TAG, result.toString())
-//                showProgressBarState.value = false
-//                if (forecastModel.serverError.isBlank()) {
-//                    showRemoteForecast(forecastModel)
-//                } else {
-//                    showLocalForecastOrError(forecastModel)
-//                }
-//            } else {
-//                showError(forecastModel.serverError)
-//                Log.e(TAG, forecastModel.serverError)
-//                _onCityRequestFailedLiveData.postValue(forecastModel.city)
-//            }
-//        } ?: run {
-//            showError("Server responded with $this")
-//        }
     }
 
     private fun showRemoteForecast(forecastModel: WeatherForecastDomainModel) {
@@ -223,19 +233,11 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun showLocalForecast(forecastModel: WeatherForecastDomainModel, error: String) {
-//        if (forecastModel.city.isBlank()) {
-//            showError(forecastModel.serverError)
-//        } else { // When server error but city is NOT blank - local forecast loaded
-            dataModelState.value = forecastModel
-            showWarning(
-                R.string.forecast_for_city_outdated,
-                dataModelState.value?.city.orEmpty()
-            )
-//        }
-    }
-
-    fun getLocalForecast(forecastModel: WeatherForecastDomainModel) {
         dataModelState.value = forecastModel
+        showWarning(
+            R.string.forecast_for_city_outdated,
+            dataModelState.value?.city.orEmpty()
+        )
     }
 
     companion object {

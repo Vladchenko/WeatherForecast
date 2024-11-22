@@ -86,13 +86,15 @@ class WeatherForecastModule {
         temperatureType: TemperatureType,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
-        weatherForecastRemoteInteractor: WeatherForecastRemoteInteractor
+        forecastLocalInteractor: WeatherForecastLocalInteractor,
+        forecastRemoteInteractor: WeatherForecastRemoteInteractor
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             temperatureType,
             chosenCityInteractor,
             coroutineDispatchers,
-            weatherForecastRemoteInteractor
+            forecastLocalInteractor,
+            forecastRemoteInteractor
         )
     }
 

@@ -17,7 +17,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDate
+import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDateOrError
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
@@ -50,7 +50,7 @@ class CurrentTimeForecastFragment : Fragment() {
             setContent {
                 CurrentTimeForecastLayout(
                     toolbarTitle = getString(R.string.app_name),
-                    currentDate = getCurrentDate(
+                    currentDate = getCurrentDateOrError(
                         forecastViewModel.dataModelState.value?.dateTime.orEmpty(),
                         getString(R.string.bad_date_format)
                     ),
@@ -101,11 +101,8 @@ class CurrentTimeForecastFragment : Fragment() {
             geoLocationViewModel.defineCurrentGeoLocation()
         }
 
-        geoLocationViewModel.onLoadForecastLiveData.observe(viewLifecycleOwner) { city ->
-            forecastViewModel.downloadWeatherForecastForCity(city)
-        }
         geoLocationViewModel.onDefineGeoLocationByCitySuccessLiveData.observe(viewLifecycleOwner) {
-            forecastViewModel.downloadWeatherForecastForLocation(it)
+            forecastViewModel.downloadRemoteForecastForLocation(it)
         }
         geoLocationViewModel.onDefineCurrentGeoLocationSuccessLiveData.observe(viewLifecycleOwner) {
             geoLocationViewModel.defineCityNameByLocation(it)
@@ -132,7 +129,7 @@ class CurrentTimeForecastFragment : Fragment() {
                 message,
                 onPositiveClick = {
                     showStatusDependingOnCity(it)
-                    forecastViewModel.downloadWeatherForecastForCity(it)
+                    forecastViewModel.downloadRemoteForecastForCity(it)
                 },
                 onNegativeClick = {
                     forecastViewModel.gotoCitySelection()

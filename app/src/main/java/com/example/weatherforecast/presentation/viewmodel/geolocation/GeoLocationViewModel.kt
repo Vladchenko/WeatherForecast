@@ -40,8 +40,8 @@ class GeoLocationViewModel @Inject constructor(
 
     private var permissionRequests = 0
 
-    val onLoadForecastLiveData: LiveData<String>
-        get() = _onLoadCityForecastLiveData
+//    val onLoadForecastLiveData: LiveData<String>
+//        get() = _onLoadCityForecastLiveData
     val onRequestPermissionLiveData: LiveData<Unit>
         get() = _onRequestPermissionLiveData
     val onRequestPermissionDeniedLiveData: LiveData<Unit>
@@ -56,7 +56,6 @@ class GeoLocationViewModel @Inject constructor(
         get() = _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData
 
     private val _onRequestPermissionLiveData = SingleLiveEvent<Unit>()
-    private val _onLoadCityForecastLiveData = SingleLiveEvent<String>()
     private val _onRequestPermissionDeniedLiveData = SingleLiveEvent<Unit>()
     private val _onDefineCurrentGeoLocationSuccessLiveData = SingleLiveEvent<Location>()
     private val _onDefineCityByCurrentGeoLocationSuccessLiveData = SingleLiveEvent<String>()

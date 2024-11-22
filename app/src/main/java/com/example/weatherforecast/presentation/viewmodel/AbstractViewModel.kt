@@ -21,9 +21,10 @@ open class AbstractViewModel(
 ) : ViewModel() {
 
     internal val showProgressBarState: MutableState<Boolean> = mutableStateOf(true)
-    private val _toolbarSubtitleMessageState: MutableStateFlow<ToolbarSubtitleMessage> = MutableStateFlow(
-        ToolbarSubtitleMessage(null, null, MessageType.INFO)
-    )
+    private val _toolbarSubtitleMessageState: MutableStateFlow<ToolbarSubtitleMessage> =
+        MutableStateFlow(
+            ToolbarSubtitleMessage(null, null, MessageType.INFO)
+        )
     val toolbarSubtitleMessageState: StateFlow<ToolbarSubtitleMessage>
         get() = _toolbarSubtitleMessageState
 
@@ -31,56 +32,72 @@ open class AbstractViewModel(
      * Show [statusMessage].
      */
     fun showStatus(statusMessage: String) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(null, statusMessage, MessageType.INFO)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(null, statusMessage, MessageType.INFO)
     }
 
     /**
      * Show status message, providing [stringResId].
      */
     fun showStatus(@StringRes stringResId: Int) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(stringResId, null, MessageType.INFO)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(stringResId, null, MessageType.INFO)
     }
 
     /**
      * Show status message, providing [stringResId] and [value] as argument.
      */
     fun showStatus(@StringRes stringResId: Int, value: String) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(stringResId, value, MessageType.INFO)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(stringResId, value, MessageType.INFO)
     }
 
     /**
      * Show [warningMessage].
      */
     fun showWarning(warningMessage: String) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(null, warningMessage, MessageType.WARNING)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(null, warningMessage, MessageType.WARNING)
     }
 
     /**
      * Show warning message, providing [stringResId] and [value] as argument.
      */
     fun showWarning(@StringRes stringResId: Int, value: String) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(stringResId, value, MessageType.WARNING)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(stringResId, value, MessageType.WARNING)
     }
 
     /**
      * Show [errorMessage].
      */
     fun showError(errorMessage: String) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(null, errorMessage, MessageType.ERROR)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(null, errorMessage, MessageType.ERROR)
+    }
+
+    /**
+     * Show [exception].
+     */
+    fun showError(exception: Exception) {
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(null, exception.message, MessageType.ERROR)
     }
 
     /**
      * Show error message, providing [stringResId].
      */
     fun showError(@StringRes stringResId: Int) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(stringResId, null, MessageType.ERROR)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(stringResId, null, MessageType.ERROR)
     }
 
     /**
      * Show error message, providing [stringResId] and [value] as argument.
      */
     fun showError(@StringRes stringResId: Int, value: String) {
-        _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(stringResId, value, MessageType.ERROR)
+        _toolbarSubtitleMessageState.value =
+            ToolbarSubtitleMessage(stringResId, value, MessageType.ERROR)
     }
 
     /**
