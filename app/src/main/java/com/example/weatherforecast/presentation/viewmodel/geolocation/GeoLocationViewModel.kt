@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
+import com.example.weatherforecast.data.api.customexceptions.GeoLocationException
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.geolocation.GeoLocationListener
@@ -17,6 +18,7 @@ import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,9 +41,12 @@ class GeoLocationViewModel @Inject constructor(
 ) : AbstractViewModel(coroutineDispatchers) {
 
     private var permissionRequests = 0
+    private var geoLocatingAttempts = 0
 
-//    val onLoadForecastLiveData: LiveData<String>
+    //    val onLoadForecastLiveData: LiveData<String>
 //        get() = _onLoadCityForecastLiveData
+    val onGotoCitySelectionLiveData: LiveData<Unit>
+        get() = _onGotoCitySelectionLiveData
     val onRequestPermissionLiveData: LiveData<Unit>
         get() = _onRequestPermissionLiveData
     val onRequestPermissionDeniedLiveData: LiveData<Unit>
@@ -55,6 +60,7 @@ class GeoLocationViewModel @Inject constructor(
     val onShowNoPermissionForLocationTriangulatingAlertDialogLiveData: LiveData<Unit>
         get() = _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData
 
+    private val _onGotoCitySelectionLiveData = SingleLiveEvent<Unit>()
     private val _onRequestPermissionLiveData = SingleLiveEvent<Unit>()
     private val _onRequestPermissionDeniedLiveData = SingleLiveEvent<Unit>()
     private val _onDefineCurrentGeoLocationSuccessLiveData = SingleLiveEvent<Location>()
@@ -64,10 +70,29 @@ class GeoLocationViewModel @Inject constructor(
         SingleLiveEvent<Unit>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        showProgressBarState.value = false
         Log.e(TAG, throwable.message.orEmpty())
         Log.e(TAG, throwable.stackTraceToString())
-        showError(throwable.message.toString())
-        showProgressBarState.value = false
+
+        if (throwable is GeoLocationException) {
+            showError(throwable.message.toString())
+            retryGeoLocationOrGotoCitySelectionScreen()
+        } else {
+            showError(throwable.message.toString())
+        }
+    }
+
+    private fun retryGeoLocationOrGotoCitySelectionScreen() {
+        geoLocatingAttempts++
+        if (geoLocatingAttempts == GEO_LOCATING_ATTEMPTS) {
+            // TODO Bad UX approach - one should inform the user about the error, not send him right away to city chooser screen. As of now, there is no any user informing mechanism.
+            _onGotoCitySelectionLiveData.postValue(Unit)
+        } else {
+            viewModelScope.launch {
+                delay(DELAY_BETWEEN_ATTEMPTS)
+                defineCurrentGeoLocation()
+            }
+        }
     }
 
     /**
@@ -159,7 +184,7 @@ class GeoLocationViewModel @Inject constructor(
      * Defines a city name that matches given [location]
      */
     fun defineCityNameByLocation(location: Location) {
-        viewModelScope.launch(coroutineDispatchers.io) {
+        viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
             showStatus("Defining city from geo location")
             val city = geoLocationHelper.defineCityNameByLocation(location)
             Log.d(
@@ -173,5 +198,7 @@ class GeoLocationViewModel @Inject constructor(
 
     companion object {
         private const val TAG = "GeoLocationViewModel"
+        private const val GEO_LOCATING_ATTEMPTS = 3
+        private const val DELAY_BETWEEN_ATTEMPTS = 1000L
     }
 }

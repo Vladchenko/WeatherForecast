@@ -121,6 +121,9 @@ class CurrentTimeForecastFragment : Fragment() {
         ) {
             showNoPermissionAlertDialog()
         }
+        geoLocationViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) {
+            gotoCitySelectionScreen()
+        }
     }
 
     private fun locationDefinedAlertDialog(message: String) {

@@ -27,3 +27,12 @@ class NoSuchDatabaseEntryException(entryName: String) : Exception(entryName)
  * @param cause of the exception.
  */
 class UnexpectedException(cause: Exception) : Exception(cause)
+
+/**
+ * Exception indicating geo location is not available.
+ *
+ * @constructor to provide dependencies
+ *
+ * @param cause of the exception.
+ */
+class GeoLocationException(cause: Exception) : Exception(cause)
