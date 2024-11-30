@@ -30,22 +30,6 @@ class WeatherForecastRepositoryImpl(
     private val temperatureType: TemperatureType
 ) : WeatherForecastRepository {
 
-    override suspend fun loadRemoteForecastForCity(
-        temperatureType: TemperatureType,
-        city: String
-    ): Result<WeatherForecastDomainModel> =
-        withContext(coroutineDispatchers.io) {
-            val result: WeatherForecastDomainModel
-            val response = weatherForecastRemoteDataSource.loadForecastDataForCity(city)
-            result = modelsConverter.convert(
-                temperatureType,
-                city,
-                response
-            )
-            saveForecast(response.body()!!)     //NPE handled in WeatherForecastViewModel's exceptionHandler
-            return@withContext Result.success(result)
-        }
-
     override suspend fun loadAndSaveRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String

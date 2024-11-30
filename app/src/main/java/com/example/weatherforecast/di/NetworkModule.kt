@@ -49,6 +49,7 @@ class NetworkModule {
         return retrofit.create(WeatherForecastApiService::class.java)
     }
 
+    @Singleton
     @Provides
     fun provideWorkManager(@ApplicationContext applicationContext: Context): WorkManager {
         val workManager = WorkManager.getInstance(applicationContext)
@@ -62,7 +63,7 @@ class NetworkModule {
                 .setConstraints(constraints)
                 .build()
         workManager.enqueueUniquePeriodicWork("ForecastPeriodicWork",
-            ExistingPeriodicWorkPolicy.REPLACE,
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest)
         return workManager
     }

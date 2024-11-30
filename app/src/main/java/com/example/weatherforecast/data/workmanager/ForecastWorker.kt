@@ -9,6 +9,7 @@ import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConv
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
+import com.example.weatherforecast.models.domain.LoadResult
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
@@ -46,22 +47,20 @@ class ForecastWorker @AssistedInject constructor(
             try {
                 val city = chosenCityRepository.loadChosenCity().city
                 val forecastResponse =
-                    weatherForecastRepository.loadRemoteForecastForCity(
+                    weatherForecastRepository.loadAndSaveRemoteForecastForCity(
                         temperatureType,
                         city
                     )
-                forecastResponse.getOrNull()?.run {
-                    Log.i(
-                        TAG,
-                        "ForecastWorker ran at " +
-                                SimpleDateFormat(
-                                    "dd/MM/yyyy HH:mm:ss",
-                                    Locale.getDefault()
-                                ).format(Date(this.dateTime.toLong() * 1000))
-                    )
-                }
+                Log.i(
+                    TAG,
+                    LOG_MESSAGE +
+                            SimpleDateFormat(
+                                TIMESTAMP_PATTERN,
+                                Locale.getDefault()
+                            ).format(Date((forecastResponse as LoadResult.Remote).data.dateTime.toLong() * 1000))
+                )
             } catch (e: Exception) {
-                Log.e("ForecastWorker", e.toString())
+                Log.e(TAG, e.toString())
                 Result.failure()
             }
         }
@@ -70,5 +69,7 @@ class ForecastWorker @AssistedInject constructor(
 
     companion object {
         private const val TAG = "ForecastWorker"
+        private const val LOG_MESSAGE = "ForecastWorker ran at "
+        private const val TIMESTAMP_PATTERN = "dd/MM/yyyy HH:mm:ss"
     }
 }
