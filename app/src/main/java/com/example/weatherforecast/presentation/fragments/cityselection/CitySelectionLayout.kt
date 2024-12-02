@@ -87,14 +87,12 @@ fun CitySelectionLayout(
     val keyboardController = LocalSoftwareKeyboardController.current
     val cityItem by viewModel.cityMaskState.collectAsState()
     val toolbarState = viewModel.toolbarSubtitleMessageState.collectAsState()
-    val toolbarSubtitle by remember {
-        mutableStateOf(toolbarState.value.stringId?.let {
-            context.getString(
-                it,
-                toolbarState.value.valueForStringId.orEmpty()
-            )
-        } ?: toolbarState.value.valueForStringId.orEmpty())
-    }
+    val toolbarSubtitle = toolbarState.value.stringId?.let {
+        context.getString(
+            it,
+            toolbarState.value.valueForStringId.orEmpty()
+        )
+    } ?: toolbarState.value.valueForStringId.orEmpty()
 
     Scaffold(
         topBar = {
@@ -229,7 +227,6 @@ private fun QuerySearch(
             trailingIcon = {
                 if (showClearButton) {
                     IconButton(onClick = {
-
                         onClearClick()
                     }) {
                         Icon(imageVector = Icons.Filled.Close, contentDescription = "Clear")

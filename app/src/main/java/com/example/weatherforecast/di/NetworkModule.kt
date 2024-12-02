@@ -7,6 +7,8 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.weatherforecast.BuildConfig
+import com.example.weatherforecast.connectivity.ConnectivityObserver
+import com.example.weatherforecast.connectivity.ConnectivityObserverImpl
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
 import com.example.weatherforecast.data.workmanager.ForecastWorker
@@ -66,5 +68,11 @@ class NetworkModule {
             ExistingPeriodicWorkPolicy.UPDATE,
             workRequest)
         return workManager
+    }
+
+    @Singleton
+    @Provides
+    fun provideConnectivityObserver(@ApplicationContext context: Context): ConnectivityObserver {
+        return ConnectivityObserverImpl(context)
     }
 }

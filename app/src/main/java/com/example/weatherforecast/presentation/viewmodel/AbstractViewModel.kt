@@ -4,36 +4,79 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
+import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.models.presentation.ToolbarSubtitleMessage
+import com.example.weatherforecast.presentation.PresentationUtils
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * View model (MVVM component) with code common to inherent viewModels.
  *
+ * @param connectivityObserver internet connectivity observer
  * @property coroutineDispatchers dispatchers for coroutines
  */
 open class AbstractViewModel(
+    connectivityObserver: ConnectivityObserver,
     private val coroutineDispatchers: CoroutineDispatchers
 ) : ViewModel() {
 
     internal val showProgressBarState: MutableState<Boolean> = mutableStateOf(true)
+
     private val _toolbarSubtitleMessageState: MutableStateFlow<ToolbarSubtitleMessage> =
         MutableStateFlow(
-            ToolbarSubtitleMessage(null, null, MessageType.INFO)
+            ToolbarSubtitleMessage(
+                null,
+                null,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.INFO),
+                MessageType.INFO
+            )
         )
     val toolbarSubtitleMessageState: StateFlow<ToolbarSubtitleMessage>
         get() = _toolbarSubtitleMessageState
+
+    val internetConnectedState: StateFlow<Boolean> = connectivityObserver
+        .isConnected
+        .stateIn(     // Convert the Flow to a StateFlow (cold flow to a hot flow)
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            true
+        )
+
+    init {
+        collectConnectivityEvents()
+    }
+
+    private fun collectConnectivityEvents() {
+        viewModelScope.launch(coroutineDispatchers.io) {
+            internetConnectedState.collect { isConnected ->
+                if (isConnected) {
+                    showStatus(R.string.connected)
+                } else {
+                    showError(R.string.disconnected)
+                }
+            }
+        }
+    }
 
     /**
      * Show [statusMessage].
      */
     fun showStatus(statusMessage: String) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(null, statusMessage, MessageType.INFO)
+            ToolbarSubtitleMessage(
+                null,
+                statusMessage,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.INFO),
+                MessageType.INFO
+            )
     }
 
     /**
@@ -41,7 +84,12 @@ open class AbstractViewModel(
      */
     fun showStatus(@StringRes stringResId: Int) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(stringResId, null, MessageType.INFO)
+            ToolbarSubtitleMessage(
+                stringResId,
+                null,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.INFO),
+                MessageType.INFO
+            )
     }
 
     /**
@@ -49,7 +97,10 @@ open class AbstractViewModel(
      */
     fun showStatus(@StringRes stringResId: Int, value: String) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(stringResId, value, MessageType.INFO)
+            ToolbarSubtitleMessage(
+                stringResId, value,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.INFO), MessageType.INFO
+            )
     }
 
     /**
@@ -57,7 +108,12 @@ open class AbstractViewModel(
      */
     fun showWarning(warningMessage: String) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(null, warningMessage, MessageType.WARNING)
+            ToolbarSubtitleMessage(
+                null,
+                warningMessage,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.WARNING),
+                MessageType.WARNING
+            )
     }
 
     /**
@@ -65,7 +121,12 @@ open class AbstractViewModel(
      */
     fun showWarning(@StringRes stringResId: Int, value: String) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(stringResId, value, MessageType.WARNING)
+            ToolbarSubtitleMessage(
+                stringResId,
+                value,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.WARNING),
+                MessageType.WARNING
+            )
     }
 
     /**
@@ -73,7 +134,12 @@ open class AbstractViewModel(
      */
     fun showError(errorMessage: String) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(null, errorMessage, MessageType.ERROR)
+            ToolbarSubtitleMessage(
+                null,
+                errorMessage,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.ERROR),
+                MessageType.ERROR
+            )
     }
 
     /**
@@ -81,7 +147,12 @@ open class AbstractViewModel(
      */
     fun showError(exception: Exception) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(null, exception.message, MessageType.ERROR)
+            ToolbarSubtitleMessage(
+                null,
+                exception.message,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.ERROR),
+                MessageType.ERROR
+            )
     }
 
     /**
@@ -89,7 +160,12 @@ open class AbstractViewModel(
      */
     fun showError(@StringRes stringResId: Int) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(stringResId, null, MessageType.ERROR)
+            ToolbarSubtitleMessage(
+                stringResId,
+                null,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.ERROR),
+                MessageType.ERROR
+            )
     }
 
     /**
@@ -97,7 +173,12 @@ open class AbstractViewModel(
      */
     fun showError(@StringRes stringResId: Int, value: String) {
         _toolbarSubtitleMessageState.value =
-            ToolbarSubtitleMessage(stringResId, value, MessageType.ERROR)
+            ToolbarSubtitleMessage(
+                stringResId,
+                value,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.ERROR),
+                MessageType.ERROR
+            )
     }
 
     /**
@@ -108,12 +189,14 @@ open class AbstractViewModel(
             _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(
                 R.string.forecast_downloading,
                 null,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.INFO),
                 MessageType.INFO
             )
         } else {
             _toolbarSubtitleMessageState.value = ToolbarSubtitleMessage(
                 R.string.forecast_downloading_for_city_text,
                 chosenCity,
+                PresentationUtils.getToolbarSubtitleColor(MessageType.INFO),
                 MessageType.INFO
             )
         }

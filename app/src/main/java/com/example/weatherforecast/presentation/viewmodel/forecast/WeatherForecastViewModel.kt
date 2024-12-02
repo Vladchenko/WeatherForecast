@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
+import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
@@ -27,24 +28,24 @@ import javax.inject.Inject
 /**
  * ViewModel for weather forecast downloading.
  *
+ * @param connectivityObserver internet connectivity observer
  * @property temperatureType type of temperature
  * @property coroutineDispatchers for coroutines
  * @property chosenCityInteractor city chosen by user persistence interactor
- * @property forecastRemoteInteractor remote forecast data provider
+ * @property forecastLocalInteractor local forecast interactor
+ * @property forecastRemoteInteractor remote forecast interactor
  */
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(
+    connectivityObserver: ConnectivityObserver,
     private val temperatureType: TemperatureType,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastLocalInteractor: WeatherForecastLocalInteractor,
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
-) : AbstractViewModel(coroutineDispatchers) {
+) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     val dataModelState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
-
-//    private val _chosenCityStateFlow = MutableStateFlow(Unit)
-//    val chosenCityStateFlow:StateFlow<Unit> = _chosenCityStateFlow
 
     //region livedata getters fields
     val onChosenCityBlankLiveData: LiveData<Unit>
@@ -139,7 +140,6 @@ class WeatherForecastViewModel @Inject constructor(
     private fun downloadWeatherForecast(city: String) {
         if (city.isBlank()) {
             _onChosenCityBlankLiveData.postValue(Unit)
-//            _chosenCityStateFlow.value = Unit
         } else {
             chosenCity = city
             downloadRemoteForecastForCity(city)

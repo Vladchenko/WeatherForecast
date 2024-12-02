@@ -1,6 +1,7 @@
 package com.example.weatherforecast.di
 
 import android.app.Application
+import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
 import com.example.weatherforecast.data.database.WeatherForecastDAO
@@ -84,6 +85,7 @@ class WeatherForecastModule {
     @Provides
     fun provideForecastViewModelFactory(
         temperatureType: TemperatureType,
+        connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
         forecastLocalInteractor: WeatherForecastLocalInteractor,
@@ -91,6 +93,7 @@ class WeatherForecastModule {
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
             temperatureType,
+            connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers,
             forecastLocalInteractor,
@@ -104,6 +107,7 @@ class WeatherForecastModule {
         app: Application,
         geoLocationHelper: Geolocator,
         geoLocator: WeatherForecastGeoLocator,
+        connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
     ): GeoLocationViewModelFactory {
@@ -111,6 +115,7 @@ class WeatherForecastModule {
             app,
             geoLocationHelper,
             geoLocator,
+            connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers
         )

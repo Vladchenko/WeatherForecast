@@ -2,6 +2,7 @@ package com.example.weatherforecast.di
 
 import android.app.Application
 import android.content.Context
+import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.converter.CitiesNamesDataToDomainConverter
 import com.example.weatherforecast.data.database.CitiesNamesDAO
@@ -96,10 +97,12 @@ class CitiesNamesModule {
     @Singleton
     @Provides
     fun provideCitiesNamesViewModelFactory(
+        connectivityObserver: ConnectivityObserver,
         coroutineDispatchers: CoroutineDispatchers,
         citiesNamesInteractor: CitiesNamesInteractor
     ): CitiesNamesViewModelFactory {
         return CitiesNamesViewModelFactory(
+            connectivityObserver,
             coroutineDispatchers,
             citiesNamesInteractor
         )

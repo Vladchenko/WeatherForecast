@@ -33,5 +33,4 @@ class CommonModule {
         // Run this code when providing an instance of CoroutineScope
         return CoroutineScope(SupervisorJob() + coroutineDispatchers.default)
     }
-
 }

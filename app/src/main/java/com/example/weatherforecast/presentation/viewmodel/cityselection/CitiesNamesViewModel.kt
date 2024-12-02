@@ -6,6 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
+import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
@@ -22,14 +23,16 @@ import javax.inject.Inject
 /**
  * View model (MVVM component) for cities names presentation.
  *
+ * @param connectivityObserver internet connectivity observer
  * @property coroutineDispatchers dispatchers for coroutines
  * @property citiesNamesInteractor provides domain layer data.
  */
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
+    connectivityObserver: ConnectivityObserver,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val citiesNamesInteractor: CitiesNamesInteractor,
-) : AbstractViewModel(coroutineDispatchers) {
+) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     private val _cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
     private val _citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
@@ -38,6 +41,10 @@ class CitiesNamesViewModel @Inject constructor(
         get() = _cityMaskState
     val citiesNamesState: State<CitiesNamesDomainModel?>
         get() = _citiesNamesState
+
+    init {
+        showStatus(R.string.city_selection_title)
+    }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e("CitiesNamesViewModel", throwable.message.orEmpty())
@@ -50,10 +57,6 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     private lateinit var cityMask: String
-
-    init {
-        showStatus(R.string.city_selection_title)
-    }
 
     /**
      * Download a cities names beginning with string mask [city]
