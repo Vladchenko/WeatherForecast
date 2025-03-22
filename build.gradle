@@ -8,6 +8,7 @@ plugins {
     alias libs.plugins.kotlin.android apply false
     alias libs.plugins.navigation.args apply false
     alias libs.plugins.kotlin.kapt apply false
+    alias libs.plugins.kotlin.ksp apply false
 }
 
 task clean(type: Delete) {

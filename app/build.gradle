@@ -4,6 +4,7 @@ plugins {
     alias libs.plugins.kotlin.android
     alias libs.plugins.kotlin.serialization
     alias libs.plugins.kotlin.kapt
+    alias libs.plugins.kotlin.ksp
     alias libs.plugins.navigation.args
 }
 
@@ -60,22 +61,23 @@ kapt {
 
 
 dependencies {
+
     implementation libs.androidx.activity.ktx
     implementation libs.androidx.appcompat
-    implementation libs.androidx.core.ktx
-    implementation libs.androidx.constraintlayout
-    implementation libs.androidx.compose.ui
     implementation libs.androidx.compose.material
     implementation libs.androidx.compose.material.icons.extended
+    implementation libs.androidx.compose.ui
     implementation libs.androidx.compose.ui.tooling.preview
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.core.ktx
     implementation libs.androidx.fragment.ktx
     implementation libs.androidx.hilt.common
     implementation libs.androidx.hilt.work
     implementation libs.androidx.legacy.support.v4
-    implementation libs.androidx.lifecycle.viewmodel.ktx
     implementation libs.androidx.lifecycle.livedata.ktx
-    implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.lifecycle.process
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.viewmodel.ktx
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui.ktx
     implementation libs.androidx.room.ktx
@@ -88,20 +90,20 @@ dependencies {
     implementation libs.kotlinx.coroutines.core
     implementation libs.kotlinx.serialization.json
     implementation libs.material
-    implementation libs.okhttp.logging.interceptor
     implementation libs.okhttp
-    implementation libs.play.services.location   // To define a geo location
+    implementation libs.okhttp.logging.interceptor
+    implementation libs.play.services.location
     implementation libs.retrofit
     implementation libs.retrofit.converter.gson
 
-    kapt libs.androidx.hilt.compiler
-    kapt libs.hilt.compiler
-    kapt libs.room
+    ksp libs.androidx.hilt.compiler
+    ksp libs.hilt.compiler
+    ksp libs.room
 
     testImplementation libs.junit
 
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.androidx.espresso.core
     androidTestImplementation libs.androidx.compose.ui.test.junit4
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.junit
     debugImplementation libs.androidx.compose.ui.tooling
 }

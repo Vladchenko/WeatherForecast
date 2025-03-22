@@ -55,7 +55,6 @@ TODO:
     CurrentTimeForecastFragment
         - What can be moved out of it and how
     ViewModel
-        - Try turning AndroidViewModel into ViewModel
         - What can be moved out of it and how
         - Should AlertDialogs refer to interface, but not to viewModel itself
             ! No need, since there is only one implementation of viewModel exists
@@ -77,8 +76,11 @@ TODO:
 
 
    INFO:
+        - Forecast downloading launch has been moved from CurrentTimeForecastFragment.onViewCreated to CurrentTimeForecastLayout LaunchedEffect
         - WorkManager to work correctly should have this app to run at least once and save a triangulated or typed city to database.
         WorkManager is only injected in WeatherForecastActivity, but not used. The purpose here is just to launch it and its launch performs downloading and saving of forecast to database.
+        - Internet connectivity availability:
+              No use for creating ConnectivityViewModel as shown in https://www.youtube.com/watch?v=wvDPG2iQ-OE, since notification has to be done earlier - in AbstractViewModel
 
 //            NetworkMonitor(app.applicationContext, this@WeatherForecastViewModel)
             // Since NetworkMonitor doesn't check if app started with no inet, following check is required
@@ -86,105 +88,24 @@ TODO:
 //                requestGeoLocationPermissionOrDownloadWeatherForecast()
 //            }
 
-    override fun onNetworkConnectionAvailable() {
-        Log.d("NetworkConnectionViewModel", "onNetworkConnectionAvailable")
-        _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.network_available_text))
-        requestGeoLocationPermissionOrDownloadWeatherForecast()
-    }
+When http request fails:
+    2024-11-24 00:27:19.902  5627-7339  okhttp.OkHttpClient                   com.example.weatherforecast     I
+    --> GET https://api.openweathermap.org/data/2.5/weather?q=Mountain%20View&appid=a8f0e797059b7959399040200fd43231
+    --> END GET
+    <-- HTTP FAILED: java.net.SocketTimeoutException: Read timed out
 
-    override fun onNetworkConnectionLost() {
-        Log.d("NetworkConnectionViewModel", "onNetworkConnectionLost")
-        _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-        val city = chosenCity.ifBlank {
-            savedCity
-        }
-        downloadWeatherForecastForCityOrGeoLocation(city)
-    }
-
-    /**
-     * Download a local weather forecast for a [city].
-     */
-    private fun downloadLocalForecast(city: String) {
-        viewModelScope.launch(exceptionHandler) {
-            val result = weatherForecastLocalInteractor.loadForecast(city)
-            _onLocalForecastDownloadedLiveData.postValue(result)
-            _onShowWeatherForecastLiveData.postValue(result)
-            Log.d("WeatherForecastViewModel", "Local forecast downloaded $result")
-            _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.database_forecast_downloading))
-        }
-    }
-
-    private fun downloadForecastWhenNetworkAvailable(chosenCity: String) {
-        if (chosenCity.isNotBlank()) {
-            Log.d("WeatherForecastViewModel", "Chosen city is $chosenCity")
-            downloadWeatherForecastForCityOrGeoLocation(chosenCity)
-        } else {
-            Log.d("WeatherForecastViewModel", "Chosen city is empty")
-            // Try loading a city model from DB
-            viewModelScope.launch(exceptionHandler) {
-                val cityModel = chosenCityInteractor.loadChosenCityModel()
-                Log.d(
-                    "WeatherForecastViewModel",
-                    app.applicationContext.getString(
-                        R.string.database_city_loaded,
-                        cityModel.city,
-                        cityModel.location.latitude,
-                        cityModel.location.longitude
-                    )
-                )
-                // When there is no loaded city model from database,
-                if (cityModel.city.isBlank()) {
-                    // Define local city and try downloading a forecast for it
-                    _onUpdateStatusLiveData.postValue(app.applicationContext.getString(R.string.current_location_defining_text))
-                    _onShowProgressBarLiveData.postValue(true)
-                    // Following row defines a city and displays an alert
-                    defineCurrentGeoLocation()
-                } else {
-                    downloadWeatherForecastForCityOrGeoLocation(cityModel.city)
-                }
-            }
-        }
-    }
-
-    private fun downloadForecastWhenNetworkNotAvailable(chosenCity: String) {
-        if (chosenCity.isBlank()) {
-            // Try loading a city model from DB
-            viewModelScope.launch(exceptionHandler) {
-                val cityModel = chosenCityInteractor.loadChosenCityModel()
-                Log.d(
-                    "WeatherForecastViewModel",
-                    app.applicationContext.getString(
-                        R.string.database_entry_loaded,
-                        cityModel.city,
-                        cityModel.location.latitude,
-                        cityModel.location.longitude
-                    )
-                )
-                // If it is null, show error
-                if (cityModel.city.isBlank()) {
-                    _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-                } else {
-                    // Else download a forecast from database
-                    downloadLocalForecast(cityModel.city)
-                }
-            }
-        } else {
-            downloadLocalForecast(chosenCity)
-        }
-    }
-
-    fun onNetworkNotAvailable(hasPermissionForGeoLocation: Boolean, city: String) {
-        if (!isNetworkAvailable(app.applicationContext)) {
-            if (!hasPermissionForGeoLocation) {
-                _onShowErrorLiveData.postValue(app.applicationContext.getString(R.string.network_not_available_error_text))
-            } else {
-                downloadWeatherForecastForCityOrGeoLocation(city)
-            }
-        }
-    }
-
-    private fun defineCityByGeoLocation(location: Location) = lifecycleScope.launchWhenCreated {
-        val locality = geolocationHelper.loadCityByLocation(location)
-        Log.d("CurrentTimeForecastFragment", "City for $location is defined as $locality")
-        forecastViewModel.onDefineCityByGeoLocationSuccess(locality, location)
-    }
+When http request succeeds:
+    --> GET https://api.openweathermap.org/data/2.5/weather?q=Mountain%20View&appid=a8f0e797059b7959399040200fd43231
+    --> END GET
+    <-- 200 OK https://api.openweathermap.org/data/2.5/weather?q=Mountain%20View&appid=a8f0e797059b7959399040200fd43231 (757ms)
+        Server: openresty
+        Date: Wed, 27 Nov 2024 19:06:33 GMT
+        Content-Type: application/json; charset=utf-8
+        Content-Length: 515
+        Connection: keep-alive
+        X-Cache-Key: /data/2.5/weather?q=mountain%20view
+        Access-Control-Allow-Origin: *
+        Access-Control-Allow-Credentials: true
+        Access-Control-Allow-Methods: GET, POST
+        {"coord":{"lon":-122.0838,"lat":37.3861},"weather":[{"id":800,"main":"Clear","description":"clear sky","icon":"01d"}],"base":"stations","main":{"temp":286.91,"feels_like":285.7,"temp_min":285.34,"temp_max":288.61,"pressure":1021,"humidity":52,"sea_level":1021,"grnd_level":1000},"visibility":10000,"wind":{"speed":5.14,"deg":350},"clouds":{"all":0},"dt":1732734204,"sys":{"type":2,"id":2089760,"country":"US","sunrise":1732719654,"sunset":1732755112},"timezone":-28800,"id":5375480,"name":"Mountain View","cod":200}
+    <-- END HTTP (515-byte body)

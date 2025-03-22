@@ -77,7 +77,6 @@ class CurrentTimeForecastFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initLiveDataObservers()
         forecastViewModel.showInitialDownloadingStatusForCity(arguments.chosenCity)
-        forecastViewModel.launchWeatherForecast(arguments.chosenCity)
     }
 
     private fun initLiveDataObservers() {
