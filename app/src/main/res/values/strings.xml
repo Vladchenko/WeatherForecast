@@ -42,4 +42,7 @@
     <string name="network_forecast_downloading_text">Weather forecast downloading…</string>
     <string name="weather_image_content_description">Weather type</string>
     <string name="weather_type_example">weather type</string>
+    <string name="connected">Internet connection available</string>
+    <string name="disconnected">Internet connection not available</string>
+    <string name="defining_city_from_geo_location">Defining city from geo location</string>
 </resources>

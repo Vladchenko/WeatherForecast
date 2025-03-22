@@ -74,7 +74,6 @@ import kotlinx.coroutines.launch
  * @param onCityClicked         city name click callback
  * @param viewModel             viewModel for city selection ops
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @NonSkippableComposable
 fun CitySelectionLayout(
@@ -88,7 +87,7 @@ fun CitySelectionLayout(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val cityItem by viewModel.cityMaskState.collectAsState()
+    val cityState by viewModel.cityMaskState.collectAsState()
     val toolbarState = viewModel.toolbarSubtitleMessageState.collectAsState()
     val toolbarSubtitle = toolbarState.value.stringId?.let {
         context.getString(
@@ -118,7 +117,7 @@ fun CitySelectionLayout(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Filled.ArrowBack, "backIcon")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon")
                     }
                 },
                 backgroundColor = MaterialTheme.colors.primary,
@@ -142,16 +141,18 @@ fun CitySelectionLayout(
                         fontSize = 16.sp
                     )
                     AddressEdit(
-                        cityName = cityItem,
+                        cityName = cityState,
                         queryLabel = queryLabel,
                         modifier = Modifier,
                         cityMaskPredictions = viewModel.citiesNamesState.value?.cities.orEmpty()
                             .toPersistentList(),
                         cityMaskAction = cityMaskAction(
                             keyboardController,
-                            scope,
-                            viewModel,
-                            onCityClicked
+                            { scope },
+                            onCityClicked,
+                            viewModel::clearCityMask,
+                            viewModel::emptyCitiesNames,
+                            viewModel::getCitiesNamesForMask
                         )
                     )
                 }
@@ -160,19 +161,20 @@ fun CitySelectionLayout(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun cityMaskAction(
     keyboardController: SoftwareKeyboardController?,
-    scope: CoroutineScope,
-    viewModel: CitiesNamesViewModel,
+    scope: () -> CoroutineScope,
     onCityClicked: (String) -> Unit,
+    onCityMaskEmptied: () -> Unit,
+    onCitiesNamesEmptied: () -> Unit,
+    getCitiesNamesForMask: (String) -> Unit
 ): (CityMaskAction) -> Unit =
     { action: CityMaskAction ->
         when (action) {
             is CityMaskAction.OnCitySelected -> {
                 keyboardController?.hide()
-                scope.launch {
+                scope.invoke().launch {
                     onCityClicked(
                         getFullCityName(
                             action.selectedCity.name,
@@ -184,8 +186,8 @@ private fun cityMaskAction(
             }
 
             is CityMaskAction.OnCityMaskChange -> {
-                scope.launch {
-                    viewModel.getCitiesNamesForMask(action.cityMask)
+                scope.invoke().launch {
+                    getCitiesNamesForMask(action.cityMask)
                 }
             }
 
@@ -194,12 +196,12 @@ private fun cityMaskAction(
             }
 
             is CityMaskAction.OnCityMaskAutoCompleteClear -> {
-                viewModel.clearCityMask()
-                viewModel.emptyCitiesNames()
+                onCityMaskEmptied.invoke()
+                onCitiesNamesEmptied.invoke()
             }
 
             is CityMaskAction.OnCitiesOptionsClear -> {
-                viewModel.emptyCitiesNames()
+                onCitiesNamesEmptied.invoke()
             }
         }
     }

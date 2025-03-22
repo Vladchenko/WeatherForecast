@@ -60,28 +60,38 @@ fun CurrentTimeForecastLayout(
     onBackClick: () -> Unit,
     viewModel: WeatherForecastViewModel
 ) {
-    val toolbarState = viewModel.toolbarSubtitleMessageState.collectAsState()
-    val toolbarSubtitle:String = toolbarState.value.stringId?.let {
-        LocalContext.current.getString(
+    val modifier = Modifier
+    val toolbarSubtitleState = viewModel.toolbarSubtitleMessageState.collectAsState()
+    val toolbarSubtitle = toolbarSubtitleState.value.stringId?.let {
+        stringResource(
             it,
-            toolbarState.value.valueForStringId.orEmpty()
+            toolbarSubtitleState.value.valueForStringId.orEmpty()
         )
-    } ?: toolbarState.value.valueForStringId.orEmpty()
-
+    } ?: toolbarSubtitleState.value.valueForStringId.orEmpty()
+    val fontSize = remember {
+        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.internetConnectedState.collect { isConnected ->
+            if (isConnected) {
+                viewModel.launchWeatherForecast(viewModel.dataModelState.value?.city.orEmpty())
+            }
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Column {
                         Text(
-                            modifier = Modifier.offset((-16).dp),
+                            modifier = modifier.offset((-16).dp),
                             text = toolbarTitle
                         )
                         Text(
-                            modifier = Modifier.offset((-16).dp),
+                            modifier = modifier.offset((-16).dp),
                             text = toolbarSubtitle,
-                            color = PresentationUtils.getToolbarSubtitleColor(toolbarState.value.messageType),
-                            fontSize = PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp,
+                            color = toolbarSubtitleState.value.color,
+                            fontSize = fontSize.value,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -89,7 +99,7 @@ fun CurrentTimeForecastLayout(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Filled.ArrowBack, "backIcon")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon")
                     }
                 },
                 backgroundColor = MaterialTheme.colors.primary,
@@ -97,84 +107,112 @@ fun CurrentTimeForecastLayout(
             )
         },
         content = { innerPadding ->
-            Image(
-                painter = painterResource(id = R.drawable.background),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-            )
+            BackgroundImage(modifier, innerPadding)
             AnimatedVisibility(
                 visible = viewModel.showProgressBarState.value,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                ShowProgressBar()
+                ShowProgressBar(modifier)
             }
             if (!viewModel.showProgressBarState.value) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        modifier = Modifier.padding(top = 56.dp),
-                        text = currentDate,
-                        fontSize = 14.sp,
-                        color = mainContentTextColor
-                    )
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 32.dp, top = 24.dp, end = 32.dp)
-                            .clickable {
-                                onCityClick()
-                            },
-                        text = viewModel.dataModelState.value?.city.orEmpty(),
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        color = mainContentTextColor,
-                        fontSize = 36.sp,
-                    )
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 24.dp)
-                            .align(Alignment.CenterHorizontally)
-                    ) {
-                        Text(
-                            text = viewModel.dataModelState.value?.temperature.orEmpty(),
-                            fontSize = 60.sp,
-                            color = mainContentTextColor,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = viewModel.dataModelState.value?.temperatureType.orEmpty(),
-                            color = mainContentTextColor,
-                            fontSize = 30.sp,
-                        )
-                        Image(
-                            modifier = Modifier.padding(start = 8.dp),
-                            painter = painterResource(id = weatherImageId),
-                            contentDescription = viewModel.dataModelState.value?.weatherType
-                        )
-                    }
-                    Text(
-                        modifier = Modifier
-                            .padding(top = 16.dp),
-                        text = viewModel.dataModelState.value?.weatherType.orEmpty(),
-                        color = mainContentTextColor
-                    )
-                }
+                MainContent(
+                    modifier,
+                    innerPadding,
+                    currentDate,
+                    mainContentTextColor,
+                    onCityClick,
+                    viewModel.dataModelState.value,
+                    weatherImageId
+                )
             }
         }
     )
 }
 
 @Composable
-fun ShowProgressBar() {
+private fun BackgroundImage(
+    modifier: Modifier,
+    innerPadding: PaddingValues
+) {
+    Image(
+        painter = painterResource(id = R.drawable.background),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        modifier = modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+    )
+}
+
+@Composable
+private fun MainContent(
+    modifier: Modifier,
+    innerPadding: PaddingValues,
+    currentDate: String,
+    mainContentTextColor: Color,
+    onCityClick: () -> Unit,
+    dataModel: WeatherForecastDomainModel?,
+    weatherImageId: Int
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = modifier.padding(top = 56.dp),
+            text = currentDate,
+            fontSize = 14.sp,
+            color = mainContentTextColor
+        )
+        Text(
+            modifier = modifier
+                .padding(start = 32.dp, top = 24.dp, end = 32.dp)
+                .clickable {
+                    onCityClick()
+                },
+            text = dataModel?.city.orEmpty(),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            color = mainContentTextColor,
+            fontSize = 36.sp,
+        )
+        Row(
+            modifier = modifier
+                .padding(top = 24.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Text(
+                text = dataModel?.temperature.orEmpty(),
+                fontSize = 60.sp,
+                color = mainContentTextColor,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = dataModel?.temperatureType.orEmpty(),
+                color = mainContentTextColor,
+                fontSize = 30.sp,
+            )
+            Image(
+                modifier = modifier.padding(start = 8.dp),
+                painter = painterResource(id = weatherImageId),
+                contentDescription = dataModel?.weatherType
+            )
+        }
+        Text(
+            modifier = modifier.padding(top = 16.dp),
+            text = dataModel?.weatherType.orEmpty(),
+            color = mainContentTextColor
+        )
+    }
+}
+
+@Composable
+fun ShowProgressBar(modifier: Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .alpha(0.6f)
             .background(color = Color.White),
