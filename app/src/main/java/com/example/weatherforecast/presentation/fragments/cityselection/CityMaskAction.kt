@@ -1,5 +1,6 @@
 package com.example.weatherforecast.presentation.fragments.cityselection
 
+import androidx.compose.runtime.Immutable
 import com.example.weatherforecast.models.domain.CityDomainModel
 
 /**
@@ -18,4 +19,5 @@ sealed class CityMaskAction {
  *
  * @param cityMask string mask for a cities to choose from.
  */
+@Immutable
 data class CityItem(var cityMask: String)

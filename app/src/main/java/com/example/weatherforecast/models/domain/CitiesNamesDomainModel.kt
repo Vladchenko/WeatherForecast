@@ -1,13 +1,17 @@
 package com.example.weatherforecast.models.domain
 
+import kotlinx.collections.immutable.ImmutableList
+import javax.annotation.concurrent.Immutable
+
 /**
  * Data model for cities names retrieval.
  *
  * @property cities data models list
  * @property error message if cities list failed to be fetched
  */
+@Immutable
 data class CitiesNamesDomainModel(
-    val cities: List<CityDomainModel>,
+    val cities: ImmutableList<CityDomainModel>,
     val error: String
 )
 

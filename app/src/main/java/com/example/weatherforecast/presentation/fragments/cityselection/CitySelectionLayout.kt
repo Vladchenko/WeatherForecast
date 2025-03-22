@@ -28,16 +28,16 @@ import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonSkippableComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -59,6 +59,8 @@ import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -74,6 +76,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
+@NonSkippableComposable
 fun CitySelectionLayout(
     toolbarTitle: String,
     citySelectionTitle: String,
@@ -142,7 +145,8 @@ fun CitySelectionLayout(
                         cityName = cityItem,
                         queryLabel = queryLabel,
                         modifier = Modifier,
-                        cityMaskPredictions = viewModel.citiesNamesState.value?.cities.orEmpty(),
+                        cityMaskPredictions = viewModel.citiesNamesState.value?.cities.orEmpty()
+                            .toPersistentList(),
                         cityMaskAction = cityMaskAction(
                             keyboardController,
                             scope,
@@ -282,7 +286,7 @@ private fun <T> AutoCompleteUI(
     useOutlined: Boolean = false,
     colors: TextFieldColors? = null,
     onQueryChanged: (String) -> Unit = {},
-    predictions: List<T>,
+    predictions: ImmutableList<T>,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
     onItemClick: (T) -> Unit = {},
@@ -336,7 +340,7 @@ private fun AddressEdit(
     cityName: CityItem,
     queryLabel: String,
     modifier: Modifier,
-    cityMaskPredictions: List<CityDomainModel>,
+    cityMaskPredictions: ImmutableList<CityDomainModel>,
     cityMaskAction: (CityMaskAction) -> Unit
 ) {
     Column(

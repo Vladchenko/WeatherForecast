@@ -1,5 +1,7 @@
 package com.example.weatherforecast.models.domain
 
+import androidx.compose.runtime.Immutable
+
 /**
  * Weather forecast response model
  *
@@ -31,6 +33,7 @@ data class WeatherForecastDomainModel(
  * @property latitude 1st ordinate to locate city
  * @property longitude 2nd ordinate to locate city
  */
+@Immutable
 data class Coordinate(
     val latitude: Double,
     val longitude: Double,
