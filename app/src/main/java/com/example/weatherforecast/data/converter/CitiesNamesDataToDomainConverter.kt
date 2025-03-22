@@ -3,6 +3,7 @@ package com.example.weatherforecast.data.converter
 import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.models.domain.CityDomainModel
+import kotlinx.collections.immutable.toPersistentList
 import retrofit2.Response
 
 /**
@@ -27,7 +28,7 @@ class CitiesNamesDataToDomainConverter {
                     it.state,
                     dataModel.errorBody()?.string() ?: error
                 )
-        }.orEmpty()
+        }.orEmpty().toPersistentList()
         return CitiesNamesDomainModel(cities, error)
     }
 }
