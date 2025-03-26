@@ -88,7 +88,10 @@ fun CurrentTimeForecastLayout(
                             text = toolbarTitle
                         )
                         Text(
-                            modifier = modifier.offset((-16).dp),
+                            modifier = modifier
+                                .offset((-16).dp)
+                                .background(MaterialTheme.colors.primary.copy(alpha = 0.8f))
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
                             text = toolbarSubtitle,
                             color = toolbarSubtitleState.value.color,
                             fontSize = fontSize.value,

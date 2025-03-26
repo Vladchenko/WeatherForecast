@@ -15,6 +15,13 @@ data class ApiException(val statusCode: String) : Exception()
 class NoInternetException(message: String) : Exception(message)
 
 /**
+ * Exception indicating network timeout occurred.
+ *
+ * @param message error message
+ */
+class NetworkTimeoutException(message: String) : Exception(message)
+
+/**
  * Exception indicating there is no such entry
  *
  * @param entryName name of the database entry that is absent.

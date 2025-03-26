@@ -8,6 +8,14 @@ plugins {
     alias libs.plugins.navigation.args
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
 android {
     compileSdk 34
 
@@ -20,8 +28,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "API_KEY", API_KEY)
-        buildConfigField("String", "API_BASE_URL", API_BASE_URL)
+        buildConfigField("String", "API_KEY", "\"${localProperties.getProperty('WEATHER_API_KEY')}\"")
+        buildConfigField("String", "API_BASE_URL", "\"${localProperties.getProperty('WEATHER_API_BASE_URL')}\"")
     }
     buildFeatures {
         dataBinding true
@@ -32,8 +40,13 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false
         }
     }
     compileOptions {

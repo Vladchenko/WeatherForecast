@@ -2,6 +2,7 @@ package com.example.weatherforecast.data.api.customexceptions
 
 import retrofit2.*
 import java.io.IOException
+import java.net.SocketTimeoutException
 
 /**
  * Provides custom error handling for network requests.
@@ -49,6 +50,7 @@ class CallWithErrorHandling(
         return when (remoteException) {
             is NoSuchDatabaseEntryException -> NoSuchDatabaseEntryException(remoteException.message.orEmpty())
             is IOException -> NoInternetException(remoteException.message.orEmpty())
+            is SocketTimeoutException -> NetworkTimeoutException("Request timed out. Please try again.")
             is HttpException -> httpExceptionsMapper?.map(remoteException) ?: ApiException(remoteException.code().toString())
             else -> UnexpectedException(remoteException as java.lang.Exception)
         }

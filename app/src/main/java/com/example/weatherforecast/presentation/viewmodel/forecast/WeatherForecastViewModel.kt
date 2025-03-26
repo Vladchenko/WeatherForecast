@@ -10,6 +10,7 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import com.example.weatherforecast.data.api.customexceptions.NetworkTimeoutException
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
@@ -82,6 +83,15 @@ class WeatherForecastViewModel @Inject constructor(
                 showError(throwable.message.toString())
                 downloadLocalForecastForCity(
                     chosenCity.orEmpty(),   // TODO Is it ok that orEmpty ?
+                    throwable.message.toString()
+                )
+            }
+
+            is NetworkTimeoutException -> {
+                showError(throwable.message.toString())
+                // Try to get local data as fallback
+                downloadLocalForecastForCity(
+                    chosenCity.orEmpty(),
                     throwable.message.toString()
                 )
             }
