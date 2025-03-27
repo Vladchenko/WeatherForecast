@@ -1,0 +1,12 @@
+{
+    "kotlin.languageServer.enabled": true,
+    "kotlin.trace.server": "messages",
+    "kotlin.debugAdapter.enabled": true,
+    "kotlin.compiler.jvm.target": "1.8",
+    "kotlin.formatter.enable": true,
+    "kotlin.linting.enabled": true,
+    "files.associations": {
+        "*.kt": "kotlin"
+    },
+    "java.configuration.updateBuildConfiguration": "automatic"
+} 

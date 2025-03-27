@@ -45,4 +45,5 @@
     <string name="connected">Internet connection available</string>
     <string name="disconnected">Internet connection not available</string>
     <string name="defining_city_from_geo_location">Defining city from geo location</string>
+    <string name="hourly_forecast">Hourly Forecast</string>
 </resources>

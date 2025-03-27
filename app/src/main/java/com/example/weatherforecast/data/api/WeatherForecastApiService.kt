@@ -2,9 +2,11 @@ package com.example.weatherforecast.data.api
 
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.ApiConstants.GEO_DIRECT
+import com.example.weatherforecast.data.api.ApiConstants.HOURLY_FORECAST
 import com.example.weatherforecast.data.api.ApiConstants.WEATHER_DATA
 import com.example.weatherforecast.data.api.customexceptions.ExceptionsMapper
 import com.example.weatherforecast.data.api.customexceptions.WeatherForecastExceptionMapper
+import com.example.weatherforecast.models.data.HourlyForecastResponse
 import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 import retrofit2.Response
@@ -51,4 +53,25 @@ interface WeatherForecastApiService {
         @Query("lon")  longitude: Double,
         @Query("appid")  apiKey: String = BuildConfig.API_KEY
     ): Response<WeatherForecastResponse>
+
+    /**
+     * Receive hourly weather forecast data for [city]
+     */
+    @GET(HOURLY_FORECAST)
+    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
+    suspend fun loadHourlyForecastForCity(
+        @Query("q") city: String,
+        @Query("appid") apiKey: String = BuildConfig.API_KEY
+    ): Response<HourlyForecastResponse>
+
+    /**
+     * Receive hourly weather forecast data for current location [latitude] and [longitude]
+     */
+    @GET(HOURLY_FORECAST)
+    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
+    suspend fun loadHourlyForecastForLocation(
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double,
+        @Query("appid") apiKey: String = BuildConfig.API_KEY
+    ): Response<HourlyForecastResponse>
 }

@@ -17,6 +17,7 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
+    namespace 'com.example.weatherforecast'
     compileSdk 34
 
     defaultConfig {
@@ -27,6 +28,9 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
 
         buildConfigField("String", "API_KEY", "\"${localProperties.getProperty('WEATHER_API_KEY')}\"")
         buildConfigField("String", "API_BASE_URL", "\"${localProperties.getProperty('WEATHER_API_BASE_URL')}\"")
@@ -79,6 +83,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.androidx.compose.material
     implementation libs.androidx.compose.material.icons.extended
+    implementation libs.androidx.compose.material3
     implementation libs.androidx.compose.ui
     implementation libs.androidx.compose.ui.tooling.preview
     implementation libs.androidx.constraintlayout
