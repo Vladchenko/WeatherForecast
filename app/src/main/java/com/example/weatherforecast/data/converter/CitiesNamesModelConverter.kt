@@ -7,9 +7,9 @@ import kotlinx.collections.immutable.toPersistentList
 import retrofit2.Response
 
 /**
- * Convert data-layer model to domain-layer for cities names request.
+ * Converts data layer model to domain one for cities names request.
  */
-class CitiesNamesDataToDomainConverter {
+class CitiesNamesModelConverter {
 
     /**
      * Convert [dataModel] and [error] to domain-layer model

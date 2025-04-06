@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast
+package com.example.weatherforecast.presentation.fragments.forecast.current
 
 import android.Manifest
 import android.content.Intent
@@ -20,6 +20,8 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDateOrError
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
+import com.example.weatherforecast.presentation.fragments.forecast.AlertDialogHelper
+import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +43,7 @@ class CurrentTimeForecastFragment : Fragment() {
         }
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
     private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
+    private val hourlyForecastViewModel by activityViewModels<HourlyForecastViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,14 +54,14 @@ class CurrentTimeForecastFragment : Fragment() {
                 CurrentTimeForecastLayout(
                     toolbarTitle = getString(R.string.app_name),
                     currentDate = getCurrentDateOrError(
-                        forecastViewModel.dataModelState.value?.dateTime.orEmpty(),
+                        forecastViewModel.forecastState.value?.dateTime.orEmpty(),
                         getString(R.string.bad_date_format)
                     ),
                     mainContentTextColor = Color.Black,
                     weatherImageId = getWeatherTypeIcon(
                         resources,
                         requireActivity().packageName,
-                        forecastViewModel.dataModelState.value?.weatherType.orEmpty()
+                        forecastViewModel.forecastState.value?.weatherType.orEmpty()
                     ),
                     onCityClick = {
                         gotoCitySelectionScreen()
@@ -66,7 +69,8 @@ class CurrentTimeForecastFragment : Fragment() {
                     onBackClick = {
                         activity?.finish()
                     },
-                    viewModel = forecastViewModel
+                    viewModel = forecastViewModel,
+                    hourlyViewModel = hourlyForecastViewModel
                 )
             }
         }

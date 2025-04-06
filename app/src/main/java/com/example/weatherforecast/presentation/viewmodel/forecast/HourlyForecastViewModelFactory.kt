@@ -6,8 +6,8 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
-import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
-import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
+import com.example.weatherforecast.domain.forecast.HourlyForecastLocalInteractor
+import com.example.weatherforecast.domain.forecast.HourlyForecastRemoteInteractor
 
 /**
  * WeatherForecastViewModel factory
@@ -24,8 +24,8 @@ class HourlyForecastViewModelFactory(
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val forecastLocalInteractor: WeatherForecastLocalInteractor,
-    private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
+    private val forecastLocalInteractor: HourlyForecastLocalInteractor,
+    private val forecastRemoteInteractor: HourlyForecastRemoteInteractor
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return HourlyForecastViewModel(
@@ -33,6 +33,7 @@ class HourlyForecastViewModelFactory(
             temperatureType,
             coroutineDispatchers,
             chosenCityInteractor,
+            forecastLocalInteractor,
             forecastRemoteInteractor
         ) as T
     }

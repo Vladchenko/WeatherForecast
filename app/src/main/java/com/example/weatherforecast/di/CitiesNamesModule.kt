@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.WeatherForecastApiService
-import com.example.weatherforecast.data.converter.CitiesNamesDataToDomainConverter
+import com.example.weatherforecast.data.converter.CitiesNamesModelConverter
 import com.example.weatherforecast.data.database.CitiesNamesDAO
 import com.example.weatherforecast.data.repository.ChosenCityRepositoryImpl
 import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
@@ -68,15 +68,15 @@ class CitiesNamesModule {
 
     @Singleton
     @Provides
-    fun provideCitiesNamesConverter(): CitiesNamesDataToDomainConverter {
-        return CitiesNamesDataToDomainConverter()
+    fun provideCitiesNamesConverter(): CitiesNamesModelConverter {
+        return CitiesNamesModelConverter()
     }
 
     @Singleton
     @Provides
     fun provideCitiesNamesRepository(
         coroutineDispatchers: CoroutineDispatchers,
-        converter: CitiesNamesDataToDomainConverter,
+        converter: CitiesNamesModelConverter,
         citiesNamesLocalDataSource: CitiesNamesLocalDataSource,
         citiesNamesRemoteDataSource: CitiesNamesRemoteDataSource
     ): CitiesNamesRepository {

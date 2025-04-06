@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast
+package com.example.weatherforecast.presentation.fragments.forecast.current
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
@@ -7,12 +7,33 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.NonSkippableComposable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -28,7 +49,8 @@ import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils
-import com.example.weatherforecast.presentation.ui.components.HourlyForecastLayout
+import com.example.weatherforecast.presentation.fragments.forecast.hourly.HourlyForecastLayout
+import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 
 /**
@@ -43,7 +65,8 @@ fun CurrentTimeForecastLayout(
     @DrawableRes weatherImageId: Int,
     onCityClick: () -> Unit,
     onBackClick: () -> Unit,
-    viewModel: WeatherForecastViewModel
+    viewModel: WeatherForecastViewModel,
+    hourlyViewModel: HourlyForecastViewModel
 ) {
     val modifier = Modifier
     val toolbarSubtitleState = viewModel.toolbarSubtitleMessageState.collectAsState()
@@ -57,15 +80,15 @@ fun CurrentTimeForecastLayout(
         derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp }
     }
     var showHourlyForecast by remember { mutableStateOf(false) }
-    
+
     LaunchedEffect(Unit) {
         viewModel.internetConnectedState.collect { isConnected ->
             if (isConnected) {
-                viewModel.launchWeatherForecast(viewModel.dataModelState.value?.city.orEmpty())
+                viewModel.launchWeatherForecast(viewModel.forecastState.value?.city.orEmpty())
             }
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -96,6 +119,9 @@ fun CurrentTimeForecastLayout(
                 actions = {
                     IconButton(onClick = { showHourlyForecast = !showHourlyForecast }) {
                         Icon(Icons.Default.Timeline, "hourlyForecast")
+                        hourlyViewModel.loadHourlyForecastForCity(
+                            viewModel.forecastState.value?.city.orEmpty()
+                        )
                     }
                 },
                 backgroundColor = MaterialTheme.colors.primary,
@@ -121,12 +147,12 @@ fun CurrentTimeForecastLayout(
                         currentDate,
                         mainContentTextColor,
                         onCityClick,
-                        viewModel.dataModelState.value,
+                        viewModel.forecastState.value,
                         weatherImageId
                     )
                     if (showHourlyForecast) {
                         HourlyForecastLayout(
-                            hourlyForecast = viewModel.hourlyForecastState.value,
+                            hourlyForecast = hourlyViewModel.hourlyForecastState.value,
                             modifier = modifier
                         )
                     }

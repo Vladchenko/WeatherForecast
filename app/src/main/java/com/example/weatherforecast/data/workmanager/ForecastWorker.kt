@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.example.weatherforecast.data.converter.ForecastDataToDomainModelsConverter
+import com.example.weatherforecast.data.converter.CurrentForecastModelConverter
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
@@ -38,7 +38,7 @@ class ForecastWorker @AssistedInject constructor(
     private val coroutineScope: CoroutineScope,
     private val temperatureType: TemperatureType,
     private val chosenCityRepository: ChosenCityRepository,
-    private val converter: ForecastDataToDomainModelsConverter,
+    private val converter: CurrentForecastModelConverter,
     private val weatherForecastRepository: WeatherForecastRepository,
 ) : Worker(context, params) {
 

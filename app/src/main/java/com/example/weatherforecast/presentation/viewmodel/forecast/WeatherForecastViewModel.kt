@@ -8,16 +8,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
+import com.example.weatherforecast.data.api.customexceptions.NetworkTimeoutException
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
-import com.example.weatherforecast.data.api.customexceptions.NetworkTimeoutException
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
-import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
@@ -47,8 +46,7 @@ class WeatherForecastViewModel @Inject constructor(
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
-    val dataModelState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
-    val hourlyForecastState: MutableState<HourlyForecastDomainModel?> = mutableStateOf(null)
+    val forecastState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
 
     //region livedata getters fields
     val onChosenCityBlankLiveData: LiveData<Unit>
@@ -157,7 +155,6 @@ class WeatherForecastViewModel @Inject constructor(
         } else {
             chosenCity = city
             downloadRemoteForecastForCity(city)
-            downloadHourlyForecastForCity(city)
         }
     }
 
@@ -176,19 +173,6 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     /**
-     * Download hourly weather forecast on a [city].
-     */
-    fun downloadHourlyForecastForCity(city: String) {
-        viewModelScope.launch(exceptionHandler) {
-            val result = forecastRemoteInteractor.loadHourlyForecastForCity(
-                temperatureType,
-                city
-            )
-            processHourlyForecastResponse(result)
-        }
-    }
-
-    /**
      * Download weather forecast on a [city], providing an [remoteError] on why remote request failed.
      */
     private fun downloadLocalForecastForCity(city: String, remoteError: String) {
@@ -201,6 +185,9 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Download hourly weather forecast on a [cityModel].
+     */
     fun downloadRemoteForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
@@ -210,18 +197,6 @@ class WeatherForecastViewModel @Inject constructor(
                 cityModel.location.longitude
             )
             processServerResponseForLocation(cityModel.city, result)
-            downloadHourlyForecastForLocation(cityModel)
-        }
-    }
-
-    private fun downloadHourlyForecastForLocation(cityModel: CityLocationModel) {
-        viewModelScope.launch(exceptionHandler) {
-            val result = forecastRemoteInteractor.loadHourlyForecastForLocation(
-                temperatureType,
-                cityModel.location.latitude,
-                cityModel.location.longitude
-            )
-            processHourlyForecastResponse(result)
         }
     }
 
@@ -264,33 +239,19 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
-    private fun processHourlyForecastResponse(result: LoadResult<HourlyForecastDomainModel>) {
-        when (result) {
-            is LoadResult.Remote -> {
-                hourlyForecastState.value = result.data
-            }
-            is LoadResult.Local -> {
-                // Not used for hourly forecast
-            }
-            is LoadResult.Fail -> {
-                showError(result.exception)
-            }
-        }
-    }
-
     private fun showRemoteForecast(forecastModel: WeatherForecastDomainModel) {
-        dataModelState.value = forecastModel
+        forecastState.value = forecastModel
         showStatus(
             R.string.forecast_for_city,
-            dataModelState.value?.city.orEmpty()
+            forecastState.value?.city.orEmpty()
         )
     }
 
     private fun showLocalForecast(forecastModel: WeatherForecastDomainModel) {
-        dataModelState.value = forecastModel
+        forecastState.value = forecastModel
         showWarning(
             R.string.forecast_for_city_outdated,
-            dataModelState.value?.city.orEmpty()
+            forecastState.value?.city.orEmpty()
         )
     }
 

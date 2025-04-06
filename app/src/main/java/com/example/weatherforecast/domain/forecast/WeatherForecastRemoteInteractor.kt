@@ -1,7 +1,6 @@
 package com.example.weatherforecast.domain.forecast
 
 import com.example.weatherforecast.data.util.TemperatureType
-import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 
@@ -29,20 +28,5 @@ class WeatherForecastRemoteInteractor(private val weatherForecastRepository: Wea
             latitude,
             longitude
         )
-    }
-
-    suspend fun loadHourlyForecastForCity(
-        temperatureType: TemperatureType,
-        city: String
-    ): LoadResult<HourlyForecastDomainModel> {
-        return weatherForecastRepository.loadHourlyForecastForCity(temperatureType, city)
-    }
-
-    suspend fun loadHourlyForecastForLocation(
-        temperatureType: TemperatureType,
-        latitude: Double,
-        longitude: Double
-    ): LoadResult<HourlyForecastDomainModel> {
-        return weatherForecastRepository.loadHourlyForecastForLocation(temperatureType, latitude, longitude)
     }
 }

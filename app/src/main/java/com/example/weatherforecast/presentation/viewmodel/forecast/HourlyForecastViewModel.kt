@@ -7,12 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
-import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NetworkTimeoutException
+import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
-import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
+import com.example.weatherforecast.domain.forecast.HourlyForecastLocalInteractor
+import com.example.weatherforecast.domain.forecast.HourlyForecastRemoteInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
@@ -26,9 +27,10 @@ import javax.inject.Inject
 class HourlyForecastViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
     private val temperatureType: TemperatureType,
-    private val coroutineDispatchers: CoroutineDispatchers,
+    coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
-    private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
+    private val forecastLocalInteractor: HourlyForecastLocalInteractor,
+    private val forecastRemoteInteractor: HourlyForecastRemoteInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     val hourlyForecastState: MutableState<HourlyForecastDomainModel?> = mutableStateOf(null)
@@ -57,6 +59,9 @@ class HourlyForecastViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Download hourly weather forecast on a [city].
+     */
     fun loadHourlyForecastForCity(city: String) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
@@ -68,6 +73,9 @@ class HourlyForecastViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Download hourly weather forecast on a [cityModel].
+     */
     fun loadHourlyForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {

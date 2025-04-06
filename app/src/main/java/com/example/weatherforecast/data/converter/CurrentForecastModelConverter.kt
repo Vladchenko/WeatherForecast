@@ -10,9 +10,9 @@ import retrofit2.Response
 import kotlin.math.roundToInt
 
 /**
- * Convert data-layer model to domain-layer for weather forecast.
+ * Converts data layer model to domain one for current time weather forecast
  */
-class ForecastDataToDomainModelsConverter {
+class CurrentForecastModelConverter {
 
     /**
      * Convert [Response<WeatherForecastResponse>] to [WeatherForecastDomainModel].
@@ -35,7 +35,7 @@ class ForecastDataToDomainModelsConverter {
         return WeatherForecastDomainModel(
             city,
             coordinate = Coordinate(
-                latitude = responseBody?.coordinate?.latitude?: 0.0,
+                latitude = responseBody?.coordinate?.latitude ?: 0.0,
                 longitude = responseBody?.coordinate?.longitude ?: 0.0
             ),
             dateTime = responseBody?.dateTime.toString(),
@@ -46,11 +46,11 @@ class ForecastDataToDomainModelsConverter {
         )
     }
 
-    private fun convertTemperature(temperatureType: TemperatureType, temperature: Double) =
+    private fun convertTemperature(temperatureType: TemperatureType, kelvin: Double) =
         when (temperatureType) {
-            TemperatureType.CELSIUS -> "${convertKelvinToCelsiusDegrees(temperature).roundToInt()}"
-            TemperatureType.FAHRENHEIT -> "${convertKelvinToFahrenheitDegrees(temperature).roundToInt()}"
-            TemperatureType.KELVIN -> "${temperature.roundToInt()}"
+            TemperatureType.CELSIUS -> "${convertKelvinToCelsiusDegrees(kelvin).roundToInt()}"
+            TemperatureType.FAHRENHEIT -> "${convertKelvinToFahrenheitDegrees(kelvin).roundToInt()}"
+            TemperatureType.KELVIN -> "${kelvin.roundToInt()}"
         }
 
     private fun defineTemperatureSign(temperatureType: TemperatureType) =

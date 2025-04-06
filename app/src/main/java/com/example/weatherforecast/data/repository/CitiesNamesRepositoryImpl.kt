@@ -1,7 +1,7 @@
 package com.example.weatherforecast.data.repository
 
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
-import com.example.weatherforecast.data.converter.CitiesNamesDataToDomainConverter
+import com.example.weatherforecast.data.converter.CitiesNamesModelConverter
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
@@ -21,7 +21,7 @@ class CitiesNamesRepositoryImpl(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val localDataSource: CitiesNamesLocalDataSource,
     private val remoteDataSource: CitiesNamesRemoteDataSource,
-    private val modelsConverter: CitiesNamesDataToDomainConverter,
+    private val modelsConverter: CitiesNamesModelConverter,
 ) : CitiesNamesRepository {
 
     override suspend fun loadCitiesNames(token: String) =

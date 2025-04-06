@@ -1,12 +1,18 @@
 package com.example.weatherforecast.data.converter
 
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinToCelsiusDegrees
+import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinToFahrenheitDegrees
 import com.example.weatherforecast.models.data.HourlyForecastResponse
 import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.HourlyForecastItemDomainModel
+import kotlinx.collections.immutable.toPersistentList
 import retrofit2.Response
 
-class HourlyForecastDataToDomainModelsConverter {
+/**
+ * Converts data layer model to domain one for hourly weather forecast
+ */
+class HourlyForecastModelsConverter {
     fun convert(
         temperatureType: TemperatureType,
         city: String,
@@ -26,14 +32,14 @@ class HourlyForecastDataToDomainModelsConverter {
                     weatherIcon = item.weather.firstOrNull()?.icon ?: "",
                     dateText = item.dateText
                 )
-            }
+            }.toPersistentList()
         )
     }
 
     private fun convertTemperature(kelvin: Double, temperatureType: TemperatureType): Double {
         return when (temperatureType) {
-            TemperatureType.CELSIUS -> kelvin - 273.15
-            TemperatureType.FAHRENHEIT -> (kelvin - 273.15) * 9 / 5 + 32
+            TemperatureType.CELSIUS -> convertKelvinToCelsiusDegrees(kelvin)
+            TemperatureType.FAHRENHEIT -> convertKelvinToFahrenheitDegrees(kelvin)
             TemperatureType.KELVIN -> kelvin
         }
     }
