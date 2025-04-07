@@ -27,14 +27,18 @@ class WeatherForecastViewModelFactory(
     private val forecastLocalInteractor: WeatherForecastLocalInteractor,
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
 ) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return WeatherForecastViewModel(
-            connectivityObserver,
-            temperatureType,
-            coroutineDispatchers,
-            chosenCityInteractor,
-            forecastLocalInteractor,
-            forecastRemoteInteractor
-        ) as T
+        if (modelClass.isAssignableFrom(WeatherForecastViewModel::class.java)) {
+            return WeatherForecastViewModel(
+                connectivityObserver,
+                temperatureType,
+                coroutineDispatchers,
+                chosenCityInteractor,
+                forecastLocalInteractor,
+                forecastRemoteInteractor
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }
 }

@@ -6,6 +6,7 @@ import android.location.Location
 import com.example.weatherforecast.data.api.customexceptions.GeoLocationException
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.presentation.fragments.forecast.toLocation
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Locale
 
@@ -23,33 +24,30 @@ class GeolocatorImpl(
     /**
      * Get city(area) name by [location]
      */
+    @Suppress("DEPRECATION")
     override suspend fun defineCityNameByLocation(location: Location): String =
-        with(coroutineDispatchers.io) {
+        withContext(coroutineDispatchers.io) {
             val geoCoder = Geocoder(context, Locale.getDefault())
-            val locality: String
             try {
-                locality = geoCoder.getFromLocation(location.latitude, location.longitude, 1)
-                    ?.first()?.locality.orEmpty()
+                val addresses = geoCoder.getFromLocation(location.latitude, location.longitude, 1)
+                addresses?.firstOrNull()?.locality.orEmpty()
             } catch (ex: IOException) {
                 throw GeoLocationException(ex)
             }
-            return locality
         }
 
     /**
      * Define [android.location.Location] for [city]
      */
+    @Suppress("DEPRECATION")
     override suspend fun defineLocationByCity(city: String): Location =
-        with(coroutineDispatchers.io) {
+        withContext(coroutineDispatchers.io) {
             val geoCoder = Geocoder(context, Locale.getDefault())
-            val location: Location
             try {
-                location =
-                    geoCoder.getFromLocationName(city, 1)?.first()?.toLocation()
-                        ?: Location("")
+                val addresses = geoCoder.getFromLocationName(city, 1)
+                addresses?.firstOrNull()?.toLocation() ?: Location("")
             } catch (ex: IOException) {
                 throw GeoLocationException(ex)
             }
-            return location
         }
 }
