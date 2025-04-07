@@ -6,33 +6,32 @@ package com.example.weatherforecast.models.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.example.weatherforecast.data.database.WeatherForecastTypeConverters
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.json.JSONObject
 
 /**
  * Weather forecast server response model.
+ * This class represents the complete weather forecast data for a city.
  *
- * @property coordinate of longitude and latitude
- * @property weather some compound model of weather information
- * @property base satellite or stations provide weather data
- * @property main weather forecast information
- * @property visibility range of visibility
- * @property wind wind information
- * @property clouds clouds information
- * @property dateTime timestamp
- * @property system information
- * @property timezone time zone
- * @property id some id
- * @property city name of city
- * @property code of region
+ * @property coordinate Geographical coordinates of the city
+ * @property weather List of weather conditions
+ * @property base Source of the weather data (e.g., "stations")
+ * @property main Main weather parameters (temperature, pressure, etc.)
+ * @property visibility Visibility range in meters
+ * @property wind Wind information
+ * @property clouds Cloud coverage information
+ * @property dateTime Timestamp of the forecast
+ * @property system System information including country and sunrise/sunset times
+ * @property timezone Timezone offset in seconds
+ * @property id City ID
+ * @property city City name
+ * @property code Response code
  */
 @Serializable
 @Entity(tableName = "citiesForecasts")
-@TypeConverters(SourceTypeConverter::class)
+@TypeConverters(WeatherForecastTypeConverters::class)
 data class WeatherForecastResponse(
     @SerializedName("coord")
     val coordinate: Coordinate,
@@ -67,18 +66,29 @@ data class WeatherForecastResponse(
     }
 }
 
+/**
+ * Geographical coordinates.
+ *
+ * @property latitude Latitude coordinate
+ * @property longitude Longitude coordinate
+ */
 @Serializable
 data class Coordinate(
     @SerializedName("lat")
     val latitude: Double,
     @SerializedName("lon")
-    val longitude: Double,
+    val longitude: Double
 ) {
     override fun toString(): String {
         return "Coordinate(latitude=$latitude, longitude=$longitude)"
     }
 }
 
+/**
+ * Cloud coverage information.
+ *
+ * @property all Cloud coverage percentage
+ */
 @Serializable
 data class Clouds(
     @SerializedName("all")
@@ -89,26 +99,28 @@ data class Clouds(
     }
 }
 
+/**
+ * Main weather parameters.
+ *
+ * @property temp Current temperature
+ * @property feelsLike "Feels like" temperature
+ * @property tempMin Minimum temperature
+ * @property tempMax Maximum temperature
+ * @property pressure Atmospheric pressure
+ * @property humidity Humidity percentage
+ */
 @Serializable
 data class Main(
     @SerializedName("temp")
     val temp: Double,
-
-    @SerialName("feels_like")
     @SerializedName("feels_like")
     val feelsLike: Double,
-
-    @SerialName("temp_min")
     @SerializedName("temp_min")
     val tempMin: Double,
-
-    @SerialName("temp_max")
     @SerializedName("temp_max")
     val tempMax: Double,
-
     @SerializedName("pressure")
     val pressure: Long,
-
     @SerializedName("humidity")
     val humidity: Long
 ) {
@@ -117,6 +129,15 @@ data class Main(
     }
 }
 
+/**
+ * System information.
+ *
+ * @property type System type
+ * @property id System ID
+ * @property country Country code
+ * @property sunrise Sunrise time
+ * @property sunset Sunset time
+ */
 @Serializable
 data class System(
     @SerializedName("type")
@@ -135,6 +156,14 @@ data class System(
     }
 }
 
+/**
+ * Weather condition information.
+ *
+ * @property id Weather condition ID
+ * @property main Main weather condition
+ * @property description Detailed weather description
+ * @property icon Weather icon code
+ */
 @Serializable
 data class Weather(
     @SerializedName("id")
@@ -151,6 +180,13 @@ data class Weather(
     }
 }
 
+/**
+ * Wind information.
+ *
+ * @property speed Wind speed
+ * @property degrees Wind direction in degrees
+ * @property gust Wind gust speed
+ */
 @Serializable
 data class Wind(
     @SerializedName("speed")
@@ -162,134 +198,5 @@ data class Wind(
 ) {
     override fun toString(): String {
         return "Wind(speed=$speed, deg=$degrees, gust=$gust)"
-    }
-}
-
-/**
- * Type converters for ROOM database.
- */
-class SourceTypeConverter {
-    @TypeConverter
-    fun fromCoordinate(source: Coordinate): String {
-        return JSONObject().apply {
-            put("lat", source.latitude)
-            put("long", source.longitude)
-        }.toString()
-    }
-
-    @TypeConverter
-    fun toCoordinate(source: String): Coordinate {
-        val json = JSONObject(source)
-        return Coordinate(
-            json.getString("lat").toDouble(),
-            json.getString("long").toDouble()
-        )
-    }
-
-    @TypeConverter
-    fun fromWeather(source: List<Weather>): String {
-        return JSONObject().apply {
-            source.map { source ->
-                put("id", source.id)
-                put("main", source.main)
-                put("description", source.description)
-                put("icon", source.icon)
-            }
-        }.toString()
-    }
-
-    @TypeConverter
-    fun toWeather(stringList: String): List<Weather> {
-        val json = JSONObject(stringList)
-        return listOf(
-            Weather(
-                json.getString("id").toLong(),
-                json.getString("main"),
-                json.getString("description"),
-                json.getString("icon"),
-            )
-        )
-    }
-
-    @TypeConverter
-    fun fromMain(source: Main): String {
-        return JSONObject().apply {
-            put("temp", source.temp)
-            put("feels_like", source.feelsLike)
-            put("temp_min", source.tempMin)
-            put("temp_max", source.tempMax)
-            put("pressure", source.pressure)
-            put("humidity", source.humidity)
-        }.toString()
-    }
-
-    @TypeConverter
-    fun toMain(source: String): Main {
-        val json = JSONObject(source)
-        return Main(
-            json.getString("temp").toDouble(),
-            json.getString("feels_like").toDouble(),
-            json.getString("temp_min").toDouble(),
-            json.getString("temp_max").toDouble(),
-            json.getString("pressure").toLong(),
-            json.getString("humidity").toLong(),
-        )
-    }
-
-    @TypeConverter
-    fun fromWind(source: Wind): String {
-        return JSONObject().apply {
-            put("speed", source.speed)
-            put("deg", source.degrees)
-            put("gust", source.gust)
-        }.toString()
-    }
-
-    @TypeConverter
-    fun toWind(source: String): Wind {
-        val json = JSONObject(source)
-        return Wind(
-            json.getString("speed").toDouble(),
-            json.getString("deg").toLong(),
-            json.getString("gust").toDouble()
-        )
-    }
-
-    @TypeConverter
-    fun fromClouds(source: Clouds): String {
-        return JSONObject().apply {
-            put("all", source.all)
-        }.toString()
-    }
-
-    @TypeConverter
-    fun toClouds(source: String): Clouds {
-        val json = JSONObject(source)
-        return Clouds(
-            json.getString("all").toLong()
-        )
-    }
-
-    @TypeConverter
-    fun fromSys(source: System): String {
-        return JSONObject().apply {
-            put("type", source.type)
-            put("id", source.id)
-            put("country", source.country)
-            put("sunrise", source.sunrise)
-            put("sunset", source.sunset)
-        }.toString()
-    }
-
-    @TypeConverter
-    fun toSys(source: String): System {
-        val json = JSONObject(source)
-        return System(
-            json.getString("type").toLong(),
-            json.getString("id").toLong(),
-            json.getString("country"),
-            json.getString("sunrise").toLong(),
-            json.getString("sunset").toLong()
-        )
     }
 }

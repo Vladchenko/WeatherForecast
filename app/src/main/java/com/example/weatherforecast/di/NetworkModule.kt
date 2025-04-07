@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.connectivity.ConnectivityObserverImpl
+import com.example.weatherforecast.data.api.CityApiService
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
 import com.example.weatherforecast.data.workmanager.ForecastWorker
@@ -24,6 +25,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+/**
+ * Dagger Hilt module for providing network-related dependencies.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class NetworkModule {
@@ -53,6 +57,12 @@ class NetworkModule {
 
     @Singleton
     @Provides
+    fun provideCityApiService(retrofit: Retrofit): CityApiService {
+        return retrofit.create(CityApiService::class.java)
+    }
+
+    @Singleton
+    @Provides
     fun provideWorkManager(@ApplicationContext applicationContext: Context): WorkManager {
         val workManager = WorkManager.getInstance(applicationContext)
         val constraints = Constraints.Builder()
@@ -64,9 +74,11 @@ class NetworkModule {
                 .setInitialDelay(5, TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build()
-        workManager.enqueueUniquePeriodicWork("ForecastPeriodicWork",
+        workManager.enqueueUniquePeriodicWork(
+            "ForecastPeriodicWork",
             ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest)
+            workRequest
+        )
         return workManager
     }
 

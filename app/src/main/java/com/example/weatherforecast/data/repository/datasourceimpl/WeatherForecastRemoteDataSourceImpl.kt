@@ -8,9 +8,9 @@ import com.example.weatherforecast.models.data.WeatherForecastResponse
 import retrofit2.Response
 
 /**
- * [WeatherForecastRemoteDataSource] implementation.
+ * Implementation of [WeatherForecastRemoteDataSource] that fetches weather forecast data from the remote API.
  *
- * @property apiService Retrofit service to download weather forecast data
+ * @property apiService Service for weather forecast API operations
  * @property loggingService Service to log API responses
  * @property responseProcessor Processor to process API responses
  */
@@ -21,14 +21,17 @@ class WeatherForecastRemoteDataSourceImpl(
 ) : WeatherForecastRemoteDataSource {
 
     override suspend fun loadForecastDataForCity(city: String): Response<WeatherForecastResponse> {
-        val response = apiService.loadWeatherForecastForCity(city)
-        loggingService.logApiResponse("WeatherForecastRemoteDataSourceImpl", "response for city = $city", response.body())
+        val response = apiService.getWeatherForecast(city)
+        loggingService.logApiResponse(TAG, "Weather forecast response for city = $city", response.body())
         return responseProcessor.processResponse(response)
     }
 
     override suspend fun loadForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse> {
-        val response = apiService.loadWeatherForecastForLocation(latitude, longitude)
-        loggingService.logApiResponse("WeatherForecastRemoteDataSourceImpl", "response for latitude = $latitude, and longitude = $longitude", response.body())
-        return responseProcessor.processResponse(response)
+        // Note: Location-based API is no longer supported in the current version
+        throw UnsupportedOperationException("Location-based weather forecast is no longer supported")
+    }
+
+    companion object {
+        private const val TAG = "WeatherForecastRemoteDataSourceImpl"
     }
 }

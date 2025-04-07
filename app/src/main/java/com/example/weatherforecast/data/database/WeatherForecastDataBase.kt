@@ -8,26 +8,26 @@ import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 
 /**
- * Database for weather forecast
+ * Room database for storing weather forecast data.
+ * This database contains tables for weather forecasts and city names.
  */
 @Database(entities = [WeatherForecastResponse::class, WeatherForecastCityResponse::class], version = 4)
-abstract class WeatherForecastDataBase : RoomDatabase() {
+abstract class WeatherForecastDatabase : RoomDatabase() {
     abstract fun getCitiesNamesInstance(): CitiesNamesDAO
     abstract fun getWeatherForecastInstance(): WeatherForecastDAO
 
     companion object {
         @Volatile
-        private var INSTANCE: WeatherForecastDataBase? = null
+        private var INSTANCE: WeatherForecastDatabase? = null
 
-        fun getInstance(context: Context): WeatherForecastDataBase {
+        fun getInstance(context: Context): WeatherForecastDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    WeatherForecastDataBase::class.java,
+                    WeatherForecastDatabase::class.java,
                     "weather_forecast_database"
                 )
-                    // .fallbackToDestructiveMigration()
-                    // .addMigrations(...) // Implement migrations if needed
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

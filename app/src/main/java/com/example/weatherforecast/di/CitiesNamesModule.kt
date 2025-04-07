@@ -3,7 +3,7 @@ package com.example.weatherforecast.di
 import android.app.Application
 import android.content.Context
 import com.example.weatherforecast.connectivity.ConnectivityObserver
-import com.example.weatherforecast.data.api.WeatherForecastApiService
+import com.example.weatherforecast.data.api.CityApiService
 import com.example.weatherforecast.data.converter.CitiesNamesModelConverter
 import com.example.weatherforecast.data.database.CitiesNamesDAO
 import com.example.weatherforecast.data.repository.ChosenCityRepositoryImpl
@@ -27,6 +27,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Dagger Hilt module for providing cities-related dependencies.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 class CitiesNamesModule {
@@ -45,7 +48,7 @@ class CitiesNamesModule {
         chosenCityDataSource: ChosenCityDataSource,
         coroutineDispatchers: CoroutineDispatchers
     ): ChosenCityRepository {
-        return ChosenCityRepositoryImpl(coroutineDispatchers, chosenCityDataSource,)
+        return ChosenCityRepositoryImpl(coroutineDispatchers, chosenCityDataSource)
     }
 
     @Singleton
@@ -62,8 +65,8 @@ class CitiesNamesModule {
 
     @Singleton
     @Provides
-    fun provideCitiesNamesRemoteDataSource(weatherForecastApiService: WeatherForecastApiService): CitiesNamesRemoteDataSource {
-        return CitiesNamesRemoteDataSourceImpl(weatherForecastApiService)
+    fun provideCitiesNamesRemoteDataSource(cityApiService: CityApiService): CitiesNamesRemoteDataSource {
+        return CitiesNamesRemoteDataSourceImpl(cityApiService)
     }
 
     @Singleton
@@ -107,5 +110,4 @@ class CitiesNamesModule {
             citiesNamesInteractor
         )
     }
-
 }

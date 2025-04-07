@@ -14,64 +14,63 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 /**
- * Retrofit api service
+ * Base interface for weather forecast API services.
  */
 interface WeatherForecastApiService {
+    /**
+     * Get current weather forecast for a city by name.
+     *
+     * @param cityName Name of the city
+     * @param apiKey API key for authentication
+     * @return Response containing weather forecast data
+     */
+    @ExceptionsMapper(WeatherForecastExceptionMapper::class)
+    @GET(WEATHER_DATA)
+    suspend fun getWeatherForecast(
+        @Query("q") cityName: String,
+        @Query("appid") apiKey: String = BuildConfig.API_KEY
+    ): Response<WeatherForecastResponse>
 
     /**
-     * Receive cities names that match the requested criteria, i.e. [city] string
+     * Get hourly forecast for a city by name.
+     *
+     * @param cityName Name of the city
+     * @param apiKey API key for authentication
+     * @return Response containing hourly forecast data
      */
+    @ExceptionsMapper(WeatherForecastExceptionMapper::class)
+    @GET(HOURLY_FORECAST)
+    suspend fun getHourlyForecast(
+        @Query("q") cityName: String,
+        @Query("appid") apiKey: String = BuildConfig.API_KEY
+    ): Response<HourlyForecastResponse>
+
+    @GET("data/2.5/forecast")
+    suspend fun getHourlyForecastByLocation(
+        @Query("lat") latitude: Double,
+        @Query("lon") longitude: Double,
+        @Query("appid") apiKey: String = BuildConfig.API_KEY,
+        @Query("units") units: String = "metric"
+    ): Response<HourlyForecastResponse>
+}
+
+/**
+ * Interface for city-related API operations.
+ */
+interface CityApiService {
+    /**
+     * Search for cities by name.
+     *
+     * @param cityName Name or partial name of the city to search for
+     * @param limit Maximum number of results to return
+     * @param apiKey API key for authentication
+     * @return Response containing list of matching cities
+     */
+    @ExceptionsMapper(WeatherForecastExceptionMapper::class)
     @GET(GEO_DIRECT)
-    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun loadCitiesNames(
-        @Query("q") city: String,
+    suspend fun searchCities(
+        @Query("q") cityName: String,
         @Query("limit") limit: Int = 5,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<List<WeatherForecastCityResponse>>
-
-    /**
-     * Receive weather forecast data for [city]
-     *
-     * Please note that built-in API requests by city name, zip-codes and city id will be deprecated soon.
-     * (from https://openweathermap.org/current#other)
-     */
-    @GET(WEATHER_DATA)
-    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun loadWeatherForecastForCity(
-        @Query("q") city: String,
-        @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<WeatherForecastResponse>
-
-    /**
-     * Receive weather forecast data for current location [latitude] and [longitude],
-     * having an [apiKey] provided.
-     */
-    @GET(WEATHER_DATA)
-    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun loadWeatherForecastForLocation(
-        @Query("lat")  latitude: Double,
-        @Query("lon")  longitude: Double,
-        @Query("appid")  apiKey: String = BuildConfig.API_KEY
-    ): Response<WeatherForecastResponse>
-
-    /**
-     * Receive hourly weather forecast data for [city]
-     */
-    @GET(HOURLY_FORECAST)
-    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun loadHourlyForecastForCity(
-        @Query("q") city: String,
-        @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<HourlyForecastResponse>
-
-    /**
-     * Receive hourly weather forecast data for current location [latitude] and [longitude]
-     */
-    @GET(HOURLY_FORECAST)
-    @ExceptionsMapper(value = WeatherForecastExceptionMapper::class)
-    suspend fun loadHourlyForecastForLocation(
-        @Query("lat") latitude: Double,
-        @Query("lon") longitude: Double,
-        @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<HourlyForecastResponse>
 }
