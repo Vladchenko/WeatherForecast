@@ -4,21 +4,27 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.HourlyForecastItemDomainModel
@@ -36,18 +42,16 @@ fun HourlyForecastLayout(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+        modifier = modifier.fillMaxWidth()
     ) {
         Text(
             text = stringResource(R.string.hourly_forecast),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge
         )
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 8.dp)
+            contentPadding = PaddingValues(8.dp)
         ) {
             items(hourlyForecast.hourlyForecasts) { forecast ->
                 HourlyForecastItem(forecast)
@@ -58,30 +62,41 @@ fun HourlyForecastLayout(
 
 @Composable
 private fun HourlyForecastItem(forecast: HourlyForecastItemDomainModel) {
-    Card(
+    Surface(
         modifier = Modifier
-            .width(120.dp)
-            .padding(4.dp)
+            .width(130.dp)
+            .height(110.dp)
+            .padding(8.dp)
+            .offset((-16).dp),
+        color = Color.White.copy(alpha = 0.8f),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .alpha(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = formatTime(forecast.timestamp),
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${forecast.temperature}°",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = forecast.weatherDescription,
                 style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp
             )
         }
     }
@@ -90,4 +105,4 @@ private fun HourlyForecastItem(forecast: HourlyForecastItemDomainModel) {
 private fun formatTime(timestamp: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp * 1000))
-} 
+}

@@ -40,7 +40,7 @@ object PresentationUtils {
      */
     fun getToolbarSubtitleColor(type: MessageType) =
         when(type) {
-            MessageType.INFO -> Color.White
+            MessageType.INFO -> Color.Black
             MessageType.WARNING -> Color.Yellow
             MessageType.ERROR -> Color.Red
         }

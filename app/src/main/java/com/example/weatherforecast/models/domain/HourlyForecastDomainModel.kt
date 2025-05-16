@@ -9,8 +9,8 @@ data class HourlyForecastDomainModel(
 
 data class HourlyForecastItemDomainModel(
     val timestamp: Long,
-    val temperature: Double,
-    val feelsLike: Double,
+    val temperature: String,
+    val feelsLike: String,
     val humidity: Int,
     val windSpeed: Double,
     val weatherDescription: String,

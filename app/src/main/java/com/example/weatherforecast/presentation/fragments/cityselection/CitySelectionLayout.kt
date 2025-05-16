@@ -10,26 +10,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldColors
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonSkippableComposable
 import androidx.compose.runtime.collectAsState
@@ -74,6 +75,7 @@ import kotlinx.coroutines.launch
  * @param onCityClicked         city name click callback
  * @param viewModel             viewModel for city selection ops
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @NonSkippableComposable
 fun CitySelectionLayout(
@@ -99,14 +101,17 @@ fun CitySelectionLayout(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimary,
+                ),
                 title = {
                     Column {
                         Text(
-                            modifier = Modifier.offset((-16).dp),
+                            modifier = Modifier
+                                .padding(top = 4.dp),
                             text = toolbarTitle
                         )
                         Text(
-                            modifier = Modifier.offset((-16).dp),
                             text = toolbarSubtitle,
                             color = PresentationUtils.getToolbarSubtitleColor(toolbarState.value.messageType),
                             fontSize = PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp,
@@ -120,8 +125,6 @@ fun CitySelectionLayout(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon")
                     }
                 },
-                backgroundColor = MaterialTheme.colors.primary,
-                elevation = 10.dp
             )
         },
         content = { innerPadding ->
@@ -133,8 +136,9 @@ fun CitySelectionLayout(
                     .fillMaxSize()
                     .padding(innerPadding),
             )
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+            Box(modifier = Modifier.fillMaxSize()
+                .padding(innerPadding)) {
+                Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = citySelectionTitle,
                         modifier = Modifier.padding(top = 16.dp),
@@ -228,7 +232,7 @@ private fun QuerySearch(
             value = query,
             onValueChange = onQueryChanged,
             label = { Text(text = label) },
-            textStyle = MaterialTheme.typography.subtitle1,
+            textStyle = MaterialTheme.typography.bodySmall,
             singleLine = true,
             trailingIcon = {
                 if (showClearButton) {
@@ -247,7 +251,7 @@ private fun QuerySearch(
                 imeAction = ImeAction.Done,
                 keyboardType = KeyboardType.Text
             ),
-            colors = colors ?: TextFieldDefaults.outlinedTextFieldColors()
+            colors = colors ?: TextFieldDefaults.colors()
         )
     } else {
         TextField(
@@ -259,7 +263,7 @@ private fun QuerySearch(
             value = query,
             onValueChange = onQueryChanged,
             label = { Text(text = label) },
-            textStyle = MaterialTheme.typography.subtitle1,
+            textStyle = MaterialTheme.typography.bodySmall,
             singleLine = true,
             trailingIcon = {
                 if (showClearButton) {
@@ -275,7 +279,7 @@ private fun QuerySearch(
                 imeAction = ImeAction.Done,
                 keyboardType = KeyboardType.Text
             ),
-            colors = colors ?: TextFieldDefaults.textFieldColors()
+            colors = colors ?: TextFieldDefaults.colors()
         )
     }
 }
@@ -382,7 +386,7 @@ private fun AddressEdit(
             Text(
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colors.primary)
+                    .background(MaterialTheme.colorScheme.onPrimary)
                     .padding(8.dp),
                 color = Color.Black,
                 text = with(it) {

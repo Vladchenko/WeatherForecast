@@ -7,24 +7,26 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonSkippableComposable
@@ -56,6 +58,7 @@ import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForeca
 /**
  * Layout for a main screen fragment
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @NonSkippableComposable
 fun CurrentTimeForecastLayout(
@@ -68,7 +71,6 @@ fun CurrentTimeForecastLayout(
     viewModel: WeatherForecastViewModel,
     hourlyViewModel: HourlyForecastViewModel
 ) {
-    val modifier = Modifier
     val toolbarSubtitleState = viewModel.toolbarSubtitleMessageState.collectAsState()
     val toolbarSubtitle = toolbarSubtitleState.value.stringId?.let {
         stringResource(
@@ -92,17 +94,18 @@ fun CurrentTimeForecastLayout(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimary,
+                ),
                 title = {
                     Column {
                         Text(
-                            modifier = modifier.offset((-16).dp),
+                            modifier = Modifier
+                                .padding(top = 4.dp),
                             text = toolbarTitle
                         )
                         Text(
-                            modifier = modifier
-                                .offset((-16).dp)
-                                .background(MaterialTheme.colors.primary.copy(alpha = 0.8f))
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            modifier = Modifier,
                             text = toolbarSubtitle,
                             color = toolbarSubtitleState.value.color,
                             fontSize = fontSize.value,
@@ -124,25 +127,25 @@ fun CurrentTimeForecastLayout(
                         )
                     }
                 },
-                backgroundColor = MaterialTheme.colors.primary,
-                elevation = 10.dp
             )
         },
         content = { innerPadding ->
-            BackgroundImage(modifier, innerPadding)
+            BackgroundImage(innerPadding)
             AnimatedVisibility(
                 visible = viewModel.showProgressBarState.value,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                ShowProgressBar(modifier)
+                ShowProgressBar()
             }
             if (!viewModel.showProgressBarState.value) {
                 Column(
-                    modifier = modifier.fillMaxSize()
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceBetween,
                 ) {
                     MainContent(
-                        modifier,
                         innerPadding,
                         currentDate,
                         mainContentTextColor,
@@ -153,7 +156,7 @@ fun CurrentTimeForecastLayout(
                     if (showHourlyForecast) {
                         HourlyForecastLayout(
                             hourlyForecast = hourlyViewModel.hourlyForecastState.value,
-                            modifier = modifier
+                            modifier = Modifier
                         )
                     }
                 }
@@ -164,14 +167,13 @@ fun CurrentTimeForecastLayout(
 
 @Composable
 private fun BackgroundImage(
-    modifier: Modifier,
     innerPadding: PaddingValues
 ) {
     Image(
         painter = painterResource(id = R.drawable.background),
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding),
     )
@@ -179,7 +181,6 @@ private fun BackgroundImage(
 
 @Composable
 private fun MainContent(
-    modifier: Modifier,
     innerPadding: PaddingValues,
     currentDate: String,
     mainContentTextColor: Color,
@@ -188,19 +189,19 @@ private fun MainContent(
     weatherImageId: Int
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(innerPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            modifier = modifier.padding(top = 56.dp),
+            modifier = Modifier.padding(top = 50.dp),
             text = currentDate,
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             color = mainContentTextColor
         )
         Text(
-            modifier = modifier
+            modifier = Modifier
                 .padding(start = 32.dp, top = 24.dp, end = 32.dp)
                 .clickable {
                     onCityClick()
@@ -212,7 +213,7 @@ private fun MainContent(
             fontSize = 36.sp,
         )
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .padding(top = 24.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
@@ -228,23 +229,24 @@ private fun MainContent(
                 fontSize = 30.sp,
             )
             Image(
-                modifier = modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = 8.dp),
                 painter = painterResource(id = weatherImageId),
                 contentDescription = dataModel?.weatherType
             )
         }
         Text(
-            modifier = modifier.padding(top = 16.dp),
+            modifier = Modifier.padding(top = 16.dp),
             text = dataModel?.weatherType.orEmpty(),
-            color = mainContentTextColor
+            color = mainContentTextColor,
+            fontSize = 18.sp
         )
     }
 }
 
 @Composable
-fun ShowProgressBar(modifier: Modifier) {
+fun ShowProgressBar() {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .alpha(0.6f)
             .background(color = Color.White),

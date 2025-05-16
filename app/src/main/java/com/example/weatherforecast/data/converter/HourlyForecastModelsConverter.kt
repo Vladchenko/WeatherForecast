@@ -8,6 +8,7 @@ import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.HourlyForecastItemDomainModel
 import kotlinx.collections.immutable.toPersistentList
 import retrofit2.Response
+import kotlin.math.roundToInt
 
 /**
  * Converts data layer model to domain one for hourly weather forecast
@@ -36,11 +37,11 @@ class HourlyForecastModelsConverter {
         )
     }
 
-    private fun convertTemperature(kelvin: Double, temperatureType: TemperatureType): Double {
+    private fun convertTemperature(kelvin: Double, temperatureType: TemperatureType): String {
         return when (temperatureType) {
-            TemperatureType.CELSIUS -> convertKelvinToCelsiusDegrees(kelvin)
-            TemperatureType.FAHRENHEIT -> convertKelvinToFahrenheitDegrees(kelvin)
-            TemperatureType.KELVIN -> kelvin
+            TemperatureType.CELSIUS -> "${convertKelvinToCelsiusDegrees(kelvin).roundToInt()}"
+            TemperatureType.FAHRENHEIT -> "${convertKelvinToFahrenheitDegrees(kelvin).roundToInt()}"
+            TemperatureType.KELVIN -> "${kelvin.roundToInt()}"
         }
     }
 } 

@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast.current
+package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.Manifest
 import android.content.Intent
@@ -20,7 +20,7 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDateOrError
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
-import com.example.weatherforecast.presentation.fragments.forecast.AlertDialogHelper
+import com.example.weatherforecast.presentation.fragments.forecast.current.CurrentTimeForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
@@ -28,13 +28,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlin.system.exitProcess
 
 /**
- * Fragment representing a weather forecast for current time.
+ * Fragment representing a weather forecast.
  */
 @AndroidEntryPoint
-class CurrentTimeForecastFragment : Fragment() {
+class ForecastFragment : Fragment() {
 
     private var mainView: View? = null
-    private val arguments: CurrentTimeForecastFragmentArgs by navArgs()
+    private val arguments: ForecastFragmentArgs by navArgs()
     private val dialogHelper by lazy { AlertDialogHelper(requireContext()) }
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
