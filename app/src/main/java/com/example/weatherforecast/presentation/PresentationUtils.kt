@@ -3,12 +3,14 @@ package com.example.weatherforecast.presentation
 import android.content.res.Resources
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import androidx.compose.ui.graphics.Color
 import androidx.core.view.doOnDetach
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
+import com.example.weatherforecast.presentation.PresentationConstants.ERROR_STATUS_COLOR
+import com.example.weatherforecast.presentation.PresentationConstants.SUCCESS_STATUS_COLOR
+import com.example.weatherforecast.presentation.PresentationConstants.WARNING_STATUS_COLOR
 
 /**
  * Presentation layer utility methods.
@@ -40,9 +42,9 @@ object PresentationUtils {
      */
     fun getToolbarSubtitleColor(type: MessageType) =
         when(type) {
-            MessageType.INFO -> Color.Black
-            MessageType.WARNING -> Color.Yellow
-            MessageType.ERROR -> Color.Red
+            MessageType.INFO -> SUCCESS_STATUS_COLOR
+            MessageType.WARNING -> WARNING_STATUS_COLOR
+            MessageType.ERROR -> ERROR_STATUS_COLOR
         }
 
     /**
@@ -71,7 +73,6 @@ object PresentationUtils {
         view.doOnDetach { this.cancel() }
     }
 
-    const val REPEAT_INTERVAL = 5000L
     private const val ICON_PREFIX = "icon_"
     private const val DRAWABLE_RESOURCE_TYPE = "drawable"
     const val SHARED_PREFERENCES_KEY = "Shared preferences key"

@@ -14,7 +14,9 @@ object PresentationConstants {
     /**
      * Appbar subtitle's font size for long subtitle length. Size rather small to fit screen.
      */
-    const val APPBAR_SUBTITLE_SMALL_FONT_SIZE = 10
-    val APPBAR_SUBTITLE_ERROR_FONT_COLOR = Color.Red
-    val APPBAR_SUBTITLE_STATUS_FONT_COLOR = Color.White
+    const val APPBAR_SUBTITLE_SMALL_FONT_SIZE = 12
+
+    val ERROR_STATUS_COLOR = Color.Red
+    val WARNING_STATUS_COLOR = Color.Yellow
+    val SUCCESS_STATUS_COLOR = Color.Black
 }

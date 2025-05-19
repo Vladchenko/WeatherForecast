@@ -23,6 +23,7 @@ import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,6 +47,7 @@ class WeatherForecastViewModel @Inject constructor(
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
+    val chosenCityState = MutableStateFlow("")
     val forecastState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
 
     //region livedata getters fields
@@ -173,7 +175,7 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     /**
-     * Download weather forecast on a [city], providing an [remoteError] on why remote request failed.
+     * Download weather forecast on a [city], providing a [remoteError] on why remote request failed.
      */
     private fun downloadLocalForecastForCity(city: String, remoteError: String) {
         showProgressBarState.value = true

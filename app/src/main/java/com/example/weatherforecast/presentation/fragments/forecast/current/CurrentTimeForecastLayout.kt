@@ -91,6 +91,10 @@ fun CurrentTimeForecastLayout(
         }
     }
 
+    LaunchedEffect(viewModel.chosenCityState) {
+        viewModel.downloadRemoteForecastForCity(viewModel.chosenCityState.value)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -156,7 +160,6 @@ fun CurrentTimeForecastLayout(
                     if (showHourlyForecast) {
                         HourlyForecastLayout(
                             hourlyForecast = hourlyViewModel.hourlyForecastState.value,
-                            modifier = Modifier
                         )
                     }
                 }

@@ -81,6 +81,11 @@ class ForecastFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initLiveDataObservers()
         forecastViewModel.showInitialDownloadingStatusForCity(arguments.chosenCity)
+        if (arguments.chosenCity.isNotBlank()) {
+            forecastViewModel.chosenCityState.value = arguments.chosenCity
+        } else {
+            forecastViewModel.launchWeatherForecast("")
+        }
     }
 
     private fun initLiveDataObservers() {
@@ -89,7 +94,7 @@ class ForecastFragment : Fragment() {
                 val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
                     city,
                     onPositiveClick = { forecastViewModel.gotoCitySelection() },
-                    onNegativeClick = {/*pass*/ }
+                    onNegativeClick = { /*pass*/ }
                 ).show()
                 alertDialog.setCancelable(false)
                 alertDialog.setCanceledOnTouchOutside(false)
@@ -135,7 +140,7 @@ class ForecastFragment : Fragment() {
                 message,
                 onPositiveClick = {
                     showStatusDependingOnCity(it)
-                    forecastViewModel.downloadRemoteForecastForCity(it)
+                    forecastViewModel.chosenCityState.value = it
                 },
                 onNegativeClick = {
                     forecastViewModel.gotoCitySelection()

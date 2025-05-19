@@ -136,8 +136,11 @@ fun CitySelectionLayout(
                     .fillMaxSize()
                     .padding(innerPadding),
             )
-            Box(modifier = Modifier.fillMaxSize()
-                .padding(innerPadding)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
                         text = citySelectionTitle,
@@ -359,8 +362,10 @@ private fun AddressEdit(
             queryLabel = queryLabel,
             useOutlined = true,
             onQueryChanged = { updatedCityMask ->
-                cityName.cityMask = updatedCityMask
-                cityMaskAction(CityMaskAction.OnCityMaskChange(cityName.cityMask))
+                if (updatedCityMask.isNotBlank()) {
+                    cityName.cityMask = updatedCityMask
+                    cityMaskAction(CityMaskAction.OnCityMaskChange(cityName.cityMask))
+                }
             },
             predictions = cityMaskPredictions,
             onClearClick = {

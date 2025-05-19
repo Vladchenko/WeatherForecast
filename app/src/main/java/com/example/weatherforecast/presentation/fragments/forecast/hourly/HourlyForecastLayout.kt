@@ -1,5 +1,6 @@
 package com.example.weatherforecast.presentation.fragments.forecast.hourly
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,18 +37,23 @@ import java.util.Locale
 @Composable
 fun HourlyForecastLayout(
     hourlyForecast: HourlyForecastDomainModel?,
-    modifier: Modifier = Modifier
 ) {
     if (hourlyForecast == null) {
         return
     }
 
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(0.8f)
     ) {
         Text(
             text = stringResource(R.string.hourly_forecast),
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
         )
@@ -68,7 +75,7 @@ private fun HourlyForecastItem(forecast: HourlyForecastItemDomainModel) {
             .height(110.dp)
             .padding(8.dp)
             .offset((-16).dp),
-        color = Color.White.copy(alpha = 0.8f),
+        color = Color.White,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
