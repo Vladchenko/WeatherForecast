@@ -24,6 +24,8 @@ import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,7 +49,8 @@ class WeatherForecastViewModel @Inject constructor(
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
-    val chosenCityState = MutableStateFlow("")
+    private val _chosenCityState = MutableStateFlow("")
+    val chosenCityStateFlow: StateFlow<String> = _chosenCityState.asStateFlow()
     val forecastState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
 
     //region livedata getters fields
@@ -146,6 +149,11 @@ class WeatherForecastViewModel @Inject constructor(
             }
             downloadWeatherForecast(city)
         }
+    }
+
+    /** Update a state of a chosen city with [city]. */
+    fun updateChosenCityState(city: String) {
+        _chosenCityState.value = city
     }
 
     /**

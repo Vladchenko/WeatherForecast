@@ -91,8 +91,8 @@ fun CurrentTimeForecastLayout(
         }
     }
 
-    LaunchedEffect(viewModel.chosenCityState) {
-        viewModel.downloadRemoteForecastForCity(viewModel.chosenCityState.value)
+    LaunchedEffect(viewModel.chosenCityStateFlow) {
+        viewModel.downloadRemoteForecastForCity(viewModel.chosenCityStateFlow.value)
     }
 
     Scaffold(

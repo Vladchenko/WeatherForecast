@@ -82,7 +82,7 @@ class ForecastFragment : Fragment() {
         initLiveDataObservers()
         forecastViewModel.showInitialDownloadingStatusForCity(arguments.chosenCity)
         if (arguments.chosenCity.isNotBlank()) {
-            forecastViewModel.chosenCityState.value = arguments.chosenCity
+            forecastViewModel.updateChosenCityState(arguments.chosenCity)
         } else {
             forecastViewModel.launchWeatherForecast("")
         }
@@ -140,7 +140,7 @@ class ForecastFragment : Fragment() {
                 message,
                 onPositiveClick = {
                     showStatusDependingOnCity(it)
-                    forecastViewModel.chosenCityState.value = it
+                    forecastViewModel.updateChosenCityState(it)
                 },
                 onNegativeClick = {
                     forecastViewModel.gotoCitySelection()
