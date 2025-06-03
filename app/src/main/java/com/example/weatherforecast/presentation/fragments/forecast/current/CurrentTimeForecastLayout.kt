@@ -126,7 +126,7 @@ fun CurrentTimeForecastLayout(
                 actions = {
                     IconButton(onClick = { showHourlyForecast = !showHourlyForecast }) {
                         Icon(Icons.Default.Timeline, "hourlyForecast")
-                        hourlyViewModel.loadHourlyForecastForCity(
+                        hourlyViewModel.getHourlyForecastForCity(
                             viewModel.forecastState.value?.city.orEmpty()
                         )
                     }

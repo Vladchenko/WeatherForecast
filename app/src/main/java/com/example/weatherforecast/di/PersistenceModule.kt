@@ -2,8 +2,8 @@ package com.example.weatherforecast.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.room.Room
 import com.example.weatherforecast.data.database.CitiesNamesDAO
+import com.example.weatherforecast.data.database.HourlyForecastDAO
 import com.example.weatherforecast.data.database.WeatherForecastDAO
 import com.example.weatherforecast.data.database.WeatherForecastDatabase
 import dagger.Module
@@ -25,17 +25,25 @@ object PersistenceModule {
     fun provideWeatherForecastDatabase(
         @ApplicationContext context: Context
     ): WeatherForecastDatabase {
-        return Room.databaseBuilder(
-            context,
-            WeatherForecastDatabase::class.java,
-            "weather_forecast_database"
-        ).build()
+        return WeatherForecastDatabase.getInstance(context)
+        // following code was present earlier,
+//        Room.databaseBuilder(
+//            context,
+//            WeatherForecastDatabase::class.java,
+//            "weather_forecast_database"
+//        ).build()
     }
 
     @Provides
     @Singleton
     fun provideWeatherForecastDAO(database: WeatherForecastDatabase): WeatherForecastDAO {
         return database.getWeatherForecastInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHourlyForecastDAO(database: WeatherForecastDatabase): HourlyForecastDAO {
+        return database.getHourlyForecastInstance()
     }
 
     @Provides

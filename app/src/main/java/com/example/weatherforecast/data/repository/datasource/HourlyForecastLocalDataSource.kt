@@ -9,7 +9,7 @@ interface HourlyForecastLocalDataSource {
     /**
      * Download weather forecast from a local storage, having [city] as a request parameter
      */
-    suspend fun loadHourlyForecastData(city: String): HourlyForecastResponse
+    suspend fun getHourlyForecastData(city: String): HourlyForecastResponse
 
     /**
      * Save weather forecast data to local storage as a whole [response]

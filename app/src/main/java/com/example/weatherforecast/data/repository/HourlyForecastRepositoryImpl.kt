@@ -67,7 +67,7 @@ class HourlyForecastRepositoryImpl(
         withContext(coroutineDispatchers.io) {
             val response: HourlyForecastDomainModel
             val datasourceResponse =
-                Response.success(hourlyForecastLocalDataSource.loadHourlyForecastData(city))
+                Response.success(hourlyForecastLocalDataSource.getHourlyForecastData(city))
             response = modelsConverter.convert(
                 temperatureType,
                 city,

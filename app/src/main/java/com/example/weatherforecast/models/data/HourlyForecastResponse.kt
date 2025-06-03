@@ -1,12 +1,19 @@
 package com.example.weatherforecast.models.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.example.weatherforecast.data.database.HourlyForecastTypeConverters
 import com.google.gson.annotations.SerializedName
 
+@Entity(tableName = "hourlyForecasts")
+@TypeConverters(HourlyForecastTypeConverters::class)
 data class HourlyForecastResponse(
-    @SerializedName("list")
-    val hourlyForecasts: List<HourlyForecastItem>,
+    @PrimaryKey
     @SerializedName("city")
-    val city: City
+    val city: City,
+    @SerializedName("list")
+    val hourlyForecasts: List<HourlyForecastItem>
 )
 
 data class HourlyForecastItem(

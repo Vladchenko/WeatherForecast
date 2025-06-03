@@ -132,6 +132,10 @@ class ForecastFragment : Fragment() {
         geoLocationViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) {
             gotoCitySelectionScreen()
         }
+
+        hourlyForecastViewModel.onRemoteCityRequestFailedLiveData.observe(viewLifecycleOwner) {
+            hourlyForecastViewModel.getLocalCity()
+        }
     }
 
     private fun locationDefinedAlertDialog(message: String) {

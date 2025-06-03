@@ -5,6 +5,7 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.converter.CurrentForecastModelConverter
 import com.example.weatherforecast.data.converter.HourlyForecastModelsConverter
+import com.example.weatherforecast.data.database.HourlyForecastDAO
 import com.example.weatherforecast.data.database.WeatherForecastDAO
 import com.example.weatherforecast.data.repository.HourlyForecastRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
@@ -77,7 +78,7 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideHourlyForecastLocalDataSource(forecastDAO: WeatherForecastDAO): HourlyForecastLocalDataSource {
+    fun provideHourlyForecastLocalDataSource(forecastDAO: HourlyForecastDAO): HourlyForecastLocalDataSource {
         return HourlyForecastLocalDataSourceImpl(forecastDAO)
     }
 
