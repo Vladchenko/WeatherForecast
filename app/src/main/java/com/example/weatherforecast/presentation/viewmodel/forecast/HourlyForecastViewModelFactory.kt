@@ -30,8 +30,8 @@ class HourlyForecastViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return HourlyForecastViewModel(
             connectivityObserver,
-            temperatureType,
             coroutineDispatchers,
+            temperatureType,
             chosenCityInteractor,
             forecastLocalInteractor,
             forecastRemoteInteractor

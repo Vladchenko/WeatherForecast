@@ -47,7 +47,7 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e("CitiesNamesViewModel", throwable.message.orEmpty())
+        Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is NoSuchDatabaseEntryException -> {
                 showError("City with a name ${throwable.message} is not present in database")
@@ -56,18 +56,16 @@ class CitiesNamesViewModel @Inject constructor(
         }
     }
 
-    private lateinit var cityMask: String
-
     /**
      * Download a cities names beginning with string mask [city]
      */
     fun getCitiesNamesForMask(city: String) {
-        Log.d("CitiesNamesViewModel", city)
+        Log.d(TAG, city)
         viewModelScope.launch(exceptionHandler) {
             val response = citiesNamesInteractor.loadCitiesNames(city)
             _citiesNamesState.value = response
             if (response.error.isNotBlank()) {
-                Log.d("CitiesNamesViewModel", response.error)
+                Log.d(TAG, response.error)
                 showError(response.error)
             }
         }
@@ -83,16 +81,20 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     /**
-     * Empty a mask that provides several cities names that match it.
+     * Clear a mask that provides several cities names that match it.
      */
     fun clearCityMask() {
         _cityMaskState.value = CityItem("")
     }
 
     /**
-     * Empty a list of cities that are matching a mask.
+     * Clear a list of cities that are matching a mask.
      */
-    fun emptyCitiesNames() {
+    fun clearCitiesNames() {
         _citiesNamesState.value = null
+    }
+
+    companion object {
+        private const val TAG = "CitiesNamesViewModel"
     }
 }

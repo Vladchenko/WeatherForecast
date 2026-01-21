@@ -158,7 +158,7 @@ fun CitySelectionLayout(
                             { scope },
                             onCityClicked,
                             viewModel::clearCityMask,
-                            viewModel::emptyCitiesNames,
+                            viewModel::clearCitiesNames,
                             viewModel::getCitiesNamesForMask
                         )
                     )

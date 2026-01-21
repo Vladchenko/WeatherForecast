@@ -9,7 +9,6 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 
@@ -78,8 +77,6 @@ class WeatherForecastRepositoryImpl(
 
     private suspend fun saveForecast(response: WeatherForecastResponse) =
         withContext(coroutineDispatchers.io) {
-            launch {
-                weatherForecastLocalDataSource.saveForecastData(response)
-            }
+            weatherForecastLocalDataSource.saveForecastData(response)
         }
 }
