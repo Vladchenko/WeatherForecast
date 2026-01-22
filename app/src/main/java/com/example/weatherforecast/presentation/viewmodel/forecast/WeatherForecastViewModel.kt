@@ -3,7 +3,6 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
@@ -20,11 +19,14 @@ import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
-import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,39 +51,33 @@ class WeatherForecastViewModel @Inject constructor(
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
-    private val _chosenCityState = MutableStateFlow("")
-    val chosenCityStateFlow: StateFlow<String> = _chosenCityState.asStateFlow()
+    //region flows
     val forecastState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
+    private val _chosenCityStateFlow = MutableStateFlow("")
+    val chosenCityFlow: StateFlow<String> = _chosenCityStateFlow.asStateFlow()
 
-    //region livedata getters fields
-    val onChosenCityBlankLiveData: LiveData<Unit>
-        get() = _onChosenCityBlankLiveData
+    private val _chosenCityBlankFlow = MutableSharedFlow<Unit>()
+    val chosenCityBlankFlow: SharedFlow<Unit> = _chosenCityBlankFlow.asSharedFlow()
 
-    val onChosenCityNotFoundLiveData: LiveData<String>
-        get() = _onChosenCityNotFoundLiveData
+    private val _chosenCityNotFoundFlow = MutableSharedFlow<String>()
+    val chosenCityNotFoundFlow: SharedFlow<String> = _chosenCityNotFoundFlow.asSharedFlow()
 
-    val onCityRequestFailedLiveData: LiveData<String>
-        get() = _onCityRequestFailedLiveData
+    private val _cityRequestFailedFlow = MutableSharedFlow<String>()
+    val cityRequestFailedFlow: SharedFlow<String> = _cityRequestFailedFlow.asSharedFlow()
 
-    val onGotoCitySelectionLiveData: LiveData<Unit>
-        get() = _onGotoCitySelectionLiveData
-    //endregion livedata getters fields
-
-    //region livedata fields
-    private val _onChosenCityBlankLiveData = SingleLiveEvent<Unit>()
-    private val _onChosenCityNotFoundLiveData = SingleLiveEvent<String>()
-    private val _onCityRequestFailedLiveData = SingleLiveEvent<String>()
-    private val _onGotoCitySelectionLiveData = SingleLiveEvent<Unit>()
-    //endregion livedata fields
+    private val _gotoCitySelectionFlow = MutableSharedFlow<Unit>()
+    val gotoCitySelectionFlow: SharedFlow<Unit> = _gotoCitySelectionFlow.asSharedFlow()
+    //endregion flows
 
     private var chosenCity: String? = null
+    private var currentJob: Job? = null
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is CityNotFoundException -> {
                 showError(throwable.message)
-                _onCityRequestFailedLiveData.postValue(throwable.city)
+                _cityRequestFailedFlow.tryEmit(throwable.city)
             }
 
             is NoInternetException -> {
@@ -128,18 +124,20 @@ class WeatherForecastViewModel @Inject constructor(
      * Go to city selection screen.
      */
     fun gotoCitySelection() {
-        _onGotoCitySelectionLiveData.call()
+        _gotoCitySelectionFlow.tryEmit(Unit)
     }
 
     /**
      * Launch weather forecast downloading, having a [chosenCity] provided from a city picker fragment.
      */
     fun launchWeatherForecast(chosenCity: String) {
-        this.chosenCity = chosenCity
+        if (chosenCity.isNotBlank()) {
+            showInitialDownloadingStatusForCity(chosenCity)
+        }
         viewModelScope.launch(exceptionHandler) {
             // If chosenCity is blank, then return cityModel.city
             val city = chosenCity.ifBlank {
-                val cityModel = chosenCityInteractor.loadChosenCityModel()
+                val cityModel = chosenCityInteractor.loadChosenCity()
                 Log.d(
                     TAG,
                     "No chosen city from picker fragment. Downloaded from database: city = ${cityModel.city}, " +
@@ -153,7 +151,7 @@ class WeatherForecastViewModel @Inject constructor(
 
     /** Update a state of a chosen city with [city]. */
     fun updateChosenCityState(city: String) {
-        _chosenCityState.value = city
+        _chosenCityStateFlow.value = city
     }
 
     /**
@@ -161,7 +159,7 @@ class WeatherForecastViewModel @Inject constructor(
      */
     private fun downloadWeatherForecast(city: String) {
         if (city.isBlank()) {
-            _onChosenCityBlankLiveData.postValue(Unit)
+            _chosenCityBlankFlow.tryEmit(Unit)
         } else {
             chosenCity = city
             downloadRemoteForecastForCity(city)
@@ -173,7 +171,8 @@ class WeatherForecastViewModel @Inject constructor(
      */
     fun downloadRemoteForecastForCity(city: String) {
         showProgressBarState.value = true
-        viewModelScope.launch(exceptionHandler) {
+        if (currentJob?.isActive == true) return    // Return if there is a job already running
+        currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadForecastForCity(
                 temperatureType,
                 city
@@ -200,7 +199,8 @@ class WeatherForecastViewModel @Inject constructor(
      */
     fun downloadRemoteForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
-        viewModelScope.launch(exceptionHandler) {
+        currentJob?.cancel() // Отменяем предыдущий запрос
+        currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadForecastForLocation(
                 temperatureType,
                 cityModel.location.latitude,

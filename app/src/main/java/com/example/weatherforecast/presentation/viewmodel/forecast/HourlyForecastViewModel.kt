@@ -111,7 +111,7 @@ class HourlyForecastViewModel @Inject constructor(
      */
     fun getLocalCity() {
         viewModelScope.launch(exceptionHandler) {
-            val cityModel = chosenCityInteractor.loadChosenCityModel()
+            val cityModel = chosenCityInteractor.loadChosenCity()
             if (cityModel.city.isBlank()) {
                 showError("Local city not found")
             } else {

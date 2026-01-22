@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
@@ -25,6 +26,7 @@ import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecas
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 /**
@@ -80,33 +82,36 @@ class ForecastFragment : Fragment() {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
         initLiveDataObservers()
-        forecastViewModel.showInitialDownloadingStatusForCity(arguments.chosenCity)
-        if (arguments.chosenCity.isNotBlank()) {
-            forecastViewModel.updateChosenCityState(arguments.chosenCity)
-        } else {
-            forecastViewModel.launchWeatherForecast("")
-        }
+        forecastViewModel.launchWeatherForecast(arguments.chosenCity)
     }
 
     private fun initLiveDataObservers() {
-        forecastViewModel.onChosenCityNotFoundLiveData.observe(viewLifecycleOwner) { city ->
-            mainView?.run {
-                val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
-                    city,
-                    onPositiveClick = { forecastViewModel.gotoCitySelection() },
-                    onNegativeClick = { /*pass*/ }
-                ).show()
-                alertDialog.setCancelable(false)
-                alertDialog.setCanceledOnTouchOutside(false)
-                alertDialog.closeWith(this)
+        lifecycleScope.launch {
+            forecastViewModel.cityRequestFailedFlow.collect {
+                geoLocationViewModel.defineLocationByCity(it)
             }
         }
-        forecastViewModel.onCityRequestFailedLiveData.observe(viewLifecycleOwner) {
-            geoLocationViewModel.defineLocationByCity(it)
+        lifecycleScope.launch {
+            forecastViewModel.gotoCitySelectionFlow.collect { gotoCitySelectionScreen() }
         }
-        forecastViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) { gotoCitySelectionScreen() }
-        forecastViewModel.onChosenCityBlankLiveData.observe(viewLifecycleOwner) {
-            geoLocationViewModel.defineCurrentGeoLocation()
+        lifecycleScope.launch {
+            forecastViewModel.chosenCityNotFoundFlow.collect { city ->
+                mainView?.run {
+                    val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
+                        city,
+                        onPositiveClick = { forecastViewModel.gotoCitySelection() },
+                        onNegativeClick = { /*pass*/ }
+                    ).show()
+                    alertDialog.setCancelable(false)
+                    alertDialog.setCanceledOnTouchOutside(false)
+                    alertDialog.closeWith(this)
+                }
+            }
+        }
+        lifecycleScope.launch {
+            forecastViewModel.chosenCityBlankFlow.collect {
+                geoLocationViewModel.defineCurrentGeoLocation()
+            }
         }
 
         geoLocationViewModel.onDefineGeoLocationByCitySuccessLiveData.observe(viewLifecycleOwner) {

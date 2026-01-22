@@ -54,6 +54,7 @@ import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.fragments.forecast.hourly.HourlyForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
+import kotlinx.coroutines.flow.drop
 
 /**
  * Layout for a main screen fragment
@@ -84,15 +85,14 @@ fun CurrentTimeForecastLayout(
     var showHourlyForecast by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.internetConnectedState.collect { isConnected ->
+        viewModel.internetConnectedState
+            .drop(1)
+            .collect { isConnected ->
             if (isConnected) {
-                viewModel.launchWeatherForecast(viewModel.forecastState.value?.city.orEmpty())
+                // TODO Is there a way for this to fire when inet is gone and then back.
+                viewModel.launchWeatherForecast(viewModel.chosenCityFlow.value)
             }
         }
-    }
-
-    LaunchedEffect(viewModel.chosenCityStateFlow) {
-        viewModel.downloadRemoteForecastForCity(viewModel.chosenCityStateFlow.value)
     }
 
     Scaffold(
@@ -124,11 +124,16 @@ fun CurrentTimeForecastLayout(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showHourlyForecast = !showHourlyForecast }) {
+                    IconButton(
+                        onClick =
+                            {
+                                showHourlyForecast = !showHourlyForecast
+                                hourlyViewModel.getHourlyForecastForCity(
+                                    viewModel.forecastState.value?.city.orEmpty()
+                                )
+                            }
+                    ) {
                         Icon(Icons.Default.Timeline, "hourlyForecast")
-                        hourlyViewModel.getHourlyForecastForCity(
-                            viewModel.forecastState.value?.city.orEmpty()
-                        )
                     }
                 },
             )
