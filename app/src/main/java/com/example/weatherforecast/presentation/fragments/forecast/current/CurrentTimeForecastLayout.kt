@@ -86,10 +86,9 @@ fun CurrentTimeForecastLayout(
 
     LaunchedEffect(Unit) {
         viewModel.internetConnectedState
-            .drop(1)
+            .drop(1)    // First entry is dropped, since redundant
             .collect { isConnected ->
             if (isConnected) {
-                // TODO Is there a way for this to fire when inet is gone and then back.
                 viewModel.launchWeatherForecast(viewModel.chosenCityFlow.value)
             }
         }

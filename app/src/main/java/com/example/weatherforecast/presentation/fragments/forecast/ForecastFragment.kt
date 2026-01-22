@@ -2,7 +2,6 @@ package com.example.weatherforecast.presentation.fragments.forecast
 
 import android.Manifest
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.view.LayoutInflater
@@ -12,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -150,6 +150,7 @@ class ForecastFragment : Fragment() {
                 onPositiveClick = {
                     showStatusDependingOnCity(it)
                     forecastViewModel.updateChosenCityState(it)
+                    forecastViewModel.launchWeatherForecast(it)
                 },
                 onNegativeClick = {
                     forecastViewModel.gotoCitySelection()
@@ -197,7 +198,7 @@ class ForecastFragment : Fragment() {
     private fun showToastAndOpenAppSettings() {
         val intent = Intent(
             ACTION_APPLICATION_DETAILS_SETTINGS,
-            Uri.parse("package:" + activity?.packageName)
+            ("package:" + activity?.packageName).toUri()
         )
         startActivity(intent)
         showToast(getString(R.string.geo_location_permission_denied))

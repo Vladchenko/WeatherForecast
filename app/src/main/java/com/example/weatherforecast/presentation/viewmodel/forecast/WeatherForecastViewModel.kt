@@ -56,7 +56,10 @@ class WeatherForecastViewModel @Inject constructor(
     private val _chosenCityStateFlow = MutableStateFlow("")
     val chosenCityFlow: StateFlow<String> = _chosenCityStateFlow.asStateFlow()
 
-    private val _chosenCityBlankFlow = MutableSharedFlow<Unit>()
+    private val _chosenCityBlankFlow = MutableSharedFlow<Unit>(
+        replay = 0,
+        extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
+    )
     val chosenCityBlankFlow: SharedFlow<Unit> = _chosenCityBlankFlow.asSharedFlow()
 
     private val _chosenCityNotFoundFlow = MutableSharedFlow<String>()
