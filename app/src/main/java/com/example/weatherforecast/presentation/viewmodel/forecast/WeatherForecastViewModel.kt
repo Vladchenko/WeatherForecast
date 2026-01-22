@@ -1,5 +1,7 @@
 package com.example.weatherforecast.presentation.viewmodel.forecast
 
+import android.location.Location
+import android.location.LocationManager
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -239,7 +241,14 @@ class WeatherForecastViewModel @Inject constructor(
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
-                showRemoteForecast(result.data)
+                viewModelScope.launch {
+                    showRemoteForecast(result.data)
+                    val location = getLocation(result)
+                    chosenCityInteractor.saveChosenCity(
+                        city = result.data.city,
+                        location = location
+                    )
+                }
             }
 
             is LoadResult.Local -> {
@@ -250,6 +259,13 @@ class WeatherForecastViewModel @Inject constructor(
                 showError(result.exception)
             }
         }
+    }
+
+    private fun getLocation(result: LoadResult.Remote<WeatherForecastDomainModel>): Location {
+        val location = Location(LocationManager.NETWORK_PROVIDER)
+        location.latitude = result.data.coordinate.latitude
+        location.longitude = result.data.coordinate.longitude
+        return location
     }
 
     private fun showRemoteForecast(forecastModel: WeatherForecastDomainModel) {
