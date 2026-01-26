@@ -26,6 +26,7 @@ import com.example.weatherforecast.presentation.PresentationUtils.getWeatherType
 import com.example.weatherforecast.presentation.fragments.forecast.current.CurrentTimeForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
+import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -128,23 +129,18 @@ class ForecastFragment : Fragment() {
                     }
                 }
                 launch {
-                    geoLocationViewModel.requestPermissionFlow.collect {
-                        requestLocationPermission()
-                    }
-                }
-                launch {
-                    geoLocationViewModel.permissionDeniedFlow.collect {
-                        showToastAndOpenAppSettings()
+                    geoLocationViewModel.geoGeoLocationPermissionFlow.collect {
+                        when (it) {
+                            GeoLocationPermission.Requested -> requestLocationPermission()
+                            GeoLocationPermission.Denied -> showNoPermissionAlertDialog()
+                            GeoLocationPermission.Granted -> geoLocationViewModel.defineCurrentGeoLocation()
+                            GeoLocationPermission.PermanentlyDenied -> showToastAndOpenAppSettings()
+                        }
                     }
                 }
                 launch {
                     geoLocationViewModel.geoLocationDefineCitySuccessFlow.collect {
                         locationDefinedAlertDialog(it)
-                    }
-                }
-                launch {
-                    geoLocationViewModel.noPermissionForGeoLocationFlow.collect {
-                        showNoPermissionAlertDialog()
                     }
                 }
                 launch {
@@ -219,6 +215,7 @@ class ForecastFragment : Fragment() {
             ("package:" + activity?.packageName).toUri()
         )
         startActivity(intent)
+        // TODO replace with alert dialog
         showToast(getString(R.string.geo_location_permission_denied))
         showToast(getString(R.string.geo_location_permission_denied))
         showToast(getString(R.string.geo_location_permission_denied))

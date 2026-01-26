@@ -47,25 +47,18 @@ class GeoLocationViewModel @Inject constructor(
 
     val selectCityFlow: SharedFlow<Unit>
         get() = _selectCityFlow
-    val requestPermissionFlow: SharedFlow<Unit> // TODO sealed class Permission.Granted, Permission.Denied
-        get() = _requestPermissionFlow
-    val permissionDeniedFlow: SharedFlow<Unit>
-        get() = _permissionDeniedFlow
+    val geoGeoLocationPermissionFlow: SharedFlow<GeoLocationPermission>
+        get() = _geoGeoLocationPermissionFlow
     val geoLocationDefineCitySuccessFlow: SharedFlow<String>
         get() = _geoLocationDefineCitySuccessFlow
     val geoLocationSuccessFlow: SharedFlow<Location>
         get() = _geoLocationSuccessFlow
     val geoLocationByCitySuccessFlow: SharedFlow<CityLocationModel>
         get() = _geoLocationByCitySuccessFlow
-    val noPermissionForGeoLocationFlow: SharedFlow<Unit>
-        get() = _noPermissionForGeoLocationFlow
 
     private val _selectCityFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    private val _requestPermissionFlow = MutableSharedFlow<Unit>(
+    private val _geoGeoLocationPermissionFlow = MutableSharedFlow<GeoLocationPermission>(
         extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
-    )
-    private val _permissionDeniedFlow = MutableSharedFlow<Unit>(
-        extraBufferCapacity = 1
     )
     private val _geoLocationSuccessFlow = MutableSharedFlow<Location>(
         extraBufferCapacity = 1
@@ -76,8 +69,6 @@ class GeoLocationViewModel @Inject constructor(
     private val _geoLocationByCitySuccessFlow = MutableSharedFlow<CityLocationModel>(
         extraBufferCapacity = 1
     )
-    private val _noPermissionForGeoLocationFlow =
-        MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         showProgressBarState.value = false
@@ -115,9 +106,9 @@ class GeoLocationViewModel @Inject constructor(
             showStatus(R.string.geo_location_permission_required)
             permissionRequests++
             if (permissionRequests > 2) {
-                _permissionDeniedFlow.tryEmit(Unit)
+                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Denied)
             } else {
-                _requestPermissionFlow.tryEmit(Unit)
+                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Requested)
                 Log.i(TAG, "Geo location permission requested")
             }
         }
@@ -151,7 +142,7 @@ class GeoLocationViewModel @Inject constructor(
             defineCurrentGeoLocation()
         } else {
             showError(R.string.geo_location_no_permission)
-            _noPermissionForGeoLocationFlow.tryEmit(Unit)
+            _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.PermanentlyDenied)
         }
     }
 
