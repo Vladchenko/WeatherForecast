@@ -90,7 +90,7 @@ fun CitySelectionLayout(
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val cityState by viewModel.cityMaskState.collectAsState()
-    val toolbarState = viewModel.toolbarSubtitleMessageState.collectAsState()
+    val toolbarState = viewModel.toolbarSubtitleMessageFlow.collectAsState()
     val toolbarSubtitle = toolbarState.value.stringId?.let {
         context.getString(
             it,

@@ -34,7 +34,7 @@ class WeatherForecastRepositoryImpl(
         city: String
     ): LoadResult<WeatherForecastDomainModel> =
         withContext(coroutineDispatchers.io) {
-            val response = weatherForecastRemoteDataSource.loadForecastDataForCity(city)
+            val response = weatherForecastRemoteDataSource.loadForecastForCity(city)
             val result = modelsConverter.convert(
                 temperatureType,
                 city,

@@ -14,7 +14,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
@@ -81,65 +83,81 @@ class ForecastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
-        initLiveDataObservers()
+        initFlowObservers()
         forecastViewModel.launchWeatherForecast(arguments.chosenCity)
     }
 
-    private fun initLiveDataObservers() {
-        lifecycleScope.launch {
-            forecastViewModel.cityRequestFailedFlow.collect {
-                geoLocationViewModel.defineLocationByCity(it)
-            }
-        }
-        lifecycleScope.launch {
-            forecastViewModel.gotoCitySelectionFlow.collect { gotoCitySelectionScreen() }
-        }
-        lifecycleScope.launch {
-            forecastViewModel.chosenCityNotFoundFlow.collect { city ->
-                mainView?.run {
-                    val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
-                        city,
-                        onPositiveClick = { forecastViewModel.gotoCitySelection() },
-                        onNegativeClick = { /*pass*/ }
-                    ).show()
-                    alertDialog.setCancelable(false)
-                    alertDialog.setCanceledOnTouchOutside(false)
-                    alertDialog.closeWith(this)
+    private fun initFlowObservers() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    forecastViewModel.cityRequestFailedFlow.collect {
+                        geoLocationViewModel.defineLocationByCity(it)
+                    }
+                }
+                launch {
+                    forecastViewModel.gotoCitySelectionFlow.collect { gotoCitySelectionScreen() }
+                }
+                launch {
+                    forecastViewModel.chosenCityNotFoundFlow.collect { city ->
+                        mainView?.run {
+                            val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
+                                city,
+                                onPositiveClick = { forecastViewModel.gotoCitySelection() },
+                                onNegativeClick = { /*pass*/ }
+                            ).show()
+                            alertDialog.setCancelable(false)
+                            alertDialog.setCanceledOnTouchOutside(false)
+                            alertDialog.closeWith(this)
+                        }
+                    }
+                }
+                launch {
+                    forecastViewModel.chosenCityBlankFlow.collect {
+                        geoLocationViewModel.defineCurrentGeoLocation()
+                    }
+                }
+                launch {
+                    geoLocationViewModel.geoLocationByCitySuccessFlow.collect {
+                        forecastViewModel.downloadRemoteForecastForLocation(it)
+                    }
+                }
+                launch {
+                    geoLocationViewModel.geoLocationSuccessFlow.collect {
+                        geoLocationViewModel.defineCityNameByLocation(it)
+                    }
+                }
+                launch {
+                    geoLocationViewModel.requestPermissionFlow.collect {
+                        requestLocationPermission()
+                    }
+                }
+                launch {
+                    geoLocationViewModel.permissionDeniedFlow.collect {
+                        showToastAndOpenAppSettings()
+                    }
+                }
+                launch {
+                    geoLocationViewModel.geoLocationDefineCitySuccessFlow.collect {
+                        locationDefinedAlertDialog(it)
+                    }
+                }
+                launch {
+                    geoLocationViewModel.noPermissionForGeoLocationFlow.collect {
+                        showNoPermissionAlertDialog()
+                    }
+                }
+                launch {
+                    geoLocationViewModel.selectCityFlow.collect {
+                        gotoCitySelectionScreen()
+                    }
+                }
+                launch {
+                    hourlyForecastViewModel.remoteRequestFailedFlow.collect {
+                        hourlyForecastViewModel.getLocalCity()
+                    }
                 }
             }
-        }
-        lifecycleScope.launch {
-            forecastViewModel.chosenCityBlankFlow.collect {
-                geoLocationViewModel.defineCurrentGeoLocation()
-            }
-        }
-
-        geoLocationViewModel.onDefineGeoLocationByCitySuccessLiveData.observe(viewLifecycleOwner) {
-            forecastViewModel.downloadRemoteForecastForLocation(it)
-        }
-        geoLocationViewModel.onDefineCurrentGeoLocationSuccessLiveData.observe(viewLifecycleOwner) {
-            geoLocationViewModel.defineCityNameByLocation(it)
-        }
-        geoLocationViewModel.onRequestPermissionLiveData.observe(viewLifecycleOwner) {
-            requestLocationPermission()
-        }
-        geoLocationViewModel.onRequestPermissionDeniedLiveData.observe(viewLifecycleOwner) {
-            showToastAndOpenAppSettings()
-        }
-        geoLocationViewModel.onShowGeoLocationAlertDialogLiveData.observe(viewLifecycleOwner) {
-            locationDefinedAlertDialog(it)
-        }
-        geoLocationViewModel.onShowNoPermissionForLocationTriangulatingAlertDialogLiveData.observe(
-            viewLifecycleOwner
-        ) {
-            showNoPermissionAlertDialog()
-        }
-        geoLocationViewModel.onGotoCitySelectionLiveData.observe(viewLifecycleOwner) {
-            gotoCitySelectionScreen()
-        }
-
-        hourlyForecastViewModel.onRemoteCityRequestFailedLiveData.observe(viewLifecycleOwner) {
-            hourlyForecastViewModel.getLocalCity()
         }
     }
 

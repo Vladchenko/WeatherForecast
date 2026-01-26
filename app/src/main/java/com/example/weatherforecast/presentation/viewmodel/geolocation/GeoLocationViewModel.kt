@@ -3,7 +3,6 @@ package com.example.weatherforecast.presentation.viewmodel.geolocation
 import android.app.Application
 import android.location.Location
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
@@ -16,10 +15,11 @@ import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.geolocation.hasPermissionForGeoLocation
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
-import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,29 +45,39 @@ class GeoLocationViewModel @Inject constructor(
     private var permissionRequests = 0
     private var geoLocatingAttempts = 0
 
-    val onGotoCitySelectionLiveData: LiveData<Unit>
-        get() = _onGotoCitySelectionLiveData
-    val onRequestPermissionLiveData: LiveData<Unit>
-        get() = _onRequestPermissionLiveData
-    val onRequestPermissionDeniedLiveData: LiveData<Unit>
-        get() = _onRequestPermissionDeniedLiveData
-    val onShowGeoLocationAlertDialogLiveData: LiveData<String>
-        get() = _onDefineCityByCurrentGeoLocationSuccessLiveData
-    val onDefineCurrentGeoLocationSuccessLiveData: LiveData<Location>
-        get() = _onDefineCurrentGeoLocationSuccessLiveData
-    val onDefineGeoLocationByCitySuccessLiveData: LiveData<CityLocationModel>
-        get() = _onDefineGeoLocationByCitySuccessLiveData
-    val onShowNoPermissionForLocationTriangulatingAlertDialogLiveData: LiveData<Unit>
-        get() = _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData
+    val selectCityFlow: SharedFlow<Unit>
+        get() = _selectCityFlow
+    val requestPermissionFlow: SharedFlow<Unit> // TODO sealed class Permission.Granted, Permission.Denied
+        get() = _requestPermissionFlow
+    val permissionDeniedFlow: SharedFlow<Unit>
+        get() = _permissionDeniedFlow
+    val geoLocationDefineCitySuccessFlow: SharedFlow<String>
+        get() = _geoLocationDefineCitySuccessFlow
+    val geoLocationSuccessFlow: SharedFlow<Location>
+        get() = _geoLocationSuccessFlow
+    val geoLocationByCitySuccessFlow: SharedFlow<CityLocationModel>
+        get() = _geoLocationByCitySuccessFlow
+    val noPermissionForGeoLocationFlow: SharedFlow<Unit>
+        get() = _noPermissionForGeoLocationFlow
 
-    private val _onGotoCitySelectionLiveData = SingleLiveEvent<Unit>()
-    private val _onRequestPermissionLiveData = SingleLiveEvent<Unit>()
-    private val _onRequestPermissionDeniedLiveData = SingleLiveEvent<Unit>()
-    private val _onDefineCurrentGeoLocationSuccessLiveData = SingleLiveEvent<Location>()
-    private val _onDefineCityByCurrentGeoLocationSuccessLiveData = SingleLiveEvent<String>()
-    private val _onDefineGeoLocationByCitySuccessLiveData = SingleLiveEvent<CityLocationModel>()
-    private val _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData =
-        SingleLiveEvent<Unit>()
+    private val _selectCityFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val _requestPermissionFlow = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
+    )
+    private val _permissionDeniedFlow = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 1
+    )
+    private val _geoLocationSuccessFlow = MutableSharedFlow<Location>(
+        extraBufferCapacity = 1
+    )
+    private val _geoLocationDefineCitySuccessFlow = MutableSharedFlow<String>(
+        extraBufferCapacity = 1
+    )
+    private val _geoLocationByCitySuccessFlow = MutableSharedFlow<CityLocationModel>(
+        extraBufferCapacity = 1
+    )
+    private val _noPermissionForGeoLocationFlow =
+        MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         showProgressBarState.value = false
@@ -86,7 +96,7 @@ class GeoLocationViewModel @Inject constructor(
         geoLocatingAttempts++
         if (geoLocatingAttempts == GEO_LOCATING_ATTEMPTS) {
             // TODO Bad UX approach - one should inform the user about the error, not send him right away to city chooser screen. As of now, there is no any user informing mechanism.
-            _onGotoCitySelectionLiveData.postValue(Unit)
+            _selectCityFlow.tryEmit(Unit)
         } else {
             viewModelScope.launch {
                 delay(DELAY_BETWEEN_ATTEMPTS)
@@ -105,9 +115,9 @@ class GeoLocationViewModel @Inject constructor(
             showStatus(R.string.geo_location_permission_required)
             permissionRequests++
             if (permissionRequests > 2) {
-                _onRequestPermissionDeniedLiveData.postValue(Unit)
+                _permissionDeniedFlow.tryEmit(Unit)
             } else {
-                _onRequestPermissionLiveData.postValue(Unit)
+                _requestPermissionFlow.tryEmit(Unit)
                 Log.i(TAG, "Geo location permission requested")
             }
         }
@@ -117,7 +127,7 @@ class GeoLocationViewModel @Inject constructor(
         showStatus(R.string.current_location_triangulating)
         geoLocator.defineCurrentLocation(object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
-                _onDefineCurrentGeoLocationSuccessLiveData.postValue(location)
+                _geoLocationSuccessFlow.tryEmit(location)
                 showProgressBarState.value = false
             }
 
@@ -141,7 +151,7 @@ class GeoLocationViewModel @Inject constructor(
             defineCurrentGeoLocation()
         } else {
             showError(R.string.geo_location_no_permission)
-            _onShowNoPermissionForLocationTriangulatingAlertDialogLiveData.call()
+            _noPermissionForGeoLocationFlow.tryEmit(Unit)
         }
     }
 
@@ -160,7 +170,7 @@ class GeoLocationViewModel @Inject constructor(
                 val cityModel = CityLocationModel(city, location)
                 saveChosenCity(cityModel)
                 Log.i(TAG, "City and its location saved successfully.")
-                _onDefineGeoLocationByCitySuccessLiveData.postValue(cityModel)
+                _geoLocationByCitySuccessFlow.tryEmit(cityModel)
             } catch (ex: Exception) {
                 showError(ex.message.toString())
             }
@@ -192,7 +202,7 @@ class GeoLocationViewModel @Inject constructor(
                 "City defined successfully by location = $location, city = $city"
             )
             saveChosenCity(CityLocationModel(city, location))
-            _onDefineCityByCurrentGeoLocationSuccessLiveData.postValue(city)
+            _geoLocationDefineCitySuccessFlow.tryEmit(city)
         }
     }
 

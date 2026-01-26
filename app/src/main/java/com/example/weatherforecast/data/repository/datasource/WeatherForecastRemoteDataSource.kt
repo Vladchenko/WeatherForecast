@@ -11,7 +11,7 @@ interface WeatherForecastRemoteDataSource {
     /**
      * Receive weather forecast for [city].
      */
-    suspend fun loadForecastDataForCity(city: String): Response<WeatherForecastResponse>
+    suspend fun loadForecastForCity(city: String): Response<WeatherForecastResponse>
 
     /**
      * Receive weather forecast for a location defined by [latitude] and [longitude].

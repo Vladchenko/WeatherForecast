@@ -72,7 +72,7 @@ fun CurrentTimeForecastLayout(
     viewModel: WeatherForecastViewModel,
     hourlyViewModel: HourlyForecastViewModel
 ) {
-    val toolbarSubtitleState = viewModel.toolbarSubtitleMessageState.collectAsState()
+    val toolbarSubtitleState = viewModel.toolbarSubtitleMessageFlow.collectAsState()
     val toolbarSubtitle = toolbarSubtitleState.value.stringId?.let {
         stringResource(
             it,

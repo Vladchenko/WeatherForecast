@@ -28,8 +28,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -55,23 +53,24 @@ class WeatherForecastViewModel @Inject constructor(
 
     //region flows
     val forecastState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
-    private val _chosenCityStateFlow = MutableStateFlow("")
-    val chosenCityFlow: StateFlow<String> = _chosenCityStateFlow.asStateFlow()
+    val chosenCityFlow: StateFlow<String>
+        get() = _chosenCityStateFlow
+    val cityRequestFailedFlow: SharedFlow<String>
+        get() = _cityRequestFailedFlow
+    val chosenCityBlankFlow: SharedFlow<Unit>
+        get() = _chosenCityBlankFlow
+    val chosenCityNotFoundFlow: SharedFlow<String>
+        get() = _chosenCityNotFoundFlow
+    val gotoCitySelectionFlow: SharedFlow<Unit>
+        get() = _gotoCitySelectionFlow
 
     private val _chosenCityBlankFlow = MutableSharedFlow<Unit>(
-        replay = 0,
         extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
     )
-    val chosenCityBlankFlow: SharedFlow<Unit> = _chosenCityBlankFlow.asSharedFlow()
-
-    private val _chosenCityNotFoundFlow = MutableSharedFlow<String>()
-    val chosenCityNotFoundFlow: SharedFlow<String> = _chosenCityNotFoundFlow.asSharedFlow()
-
-    private val _cityRequestFailedFlow = MutableSharedFlow<String>()
-    val cityRequestFailedFlow: SharedFlow<String> = _cityRequestFailedFlow.asSharedFlow()
-
-    private val _gotoCitySelectionFlow = MutableSharedFlow<Unit>()
-    val gotoCitySelectionFlow: SharedFlow<Unit> = _gotoCitySelectionFlow.asSharedFlow()
+    private val _chosenCityStateFlow = MutableStateFlow("")
+    private val _chosenCityNotFoundFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    private val _cityRequestFailedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    private val _gotoCitySelectionFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     //endregion flows
 
     private var chosenCity: String? = null

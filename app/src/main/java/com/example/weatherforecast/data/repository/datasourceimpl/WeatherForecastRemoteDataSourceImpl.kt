@@ -20,7 +20,7 @@ class WeatherForecastRemoteDataSourceImpl(
     private val responseProcessor: ResponseProcessor
 ) : WeatherForecastRemoteDataSource {
 
-    override suspend fun loadForecastDataForCity(city: String): Response<WeatherForecastResponse> {
+    override suspend fun loadForecastForCity(city: String): Response<WeatherForecastResponse> {
         val response = apiService.getWeatherForecast(city)
         loggingService.logApiResponse(TAG, "Weather forecast response for city = $city", response.body())
         return responseProcessor.processResponse(response)

@@ -3,7 +3,6 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
@@ -20,9 +19,10 @@ import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
-import com.example.weatherforecast.presentation.viewmodel.SingleLiveEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,16 +48,16 @@ class HourlyForecastViewModel @Inject constructor(
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     val hourlyForecastState: MutableState<HourlyForecastDomainModel?> = mutableStateOf(null)
-    val onRemoteCityRequestFailedLiveData: LiveData<String>
-        get() = _onRemoteCityRequestFailedLiveData
-    private val _onRemoteCityRequestFailedLiveData = SingleLiveEvent<String>()
+    val remoteRequestFailedFlow: SharedFlow<String>
+        get() = _remoteRequestFailedFlow
+    private val _remoteRequestFailedFlow = MutableSharedFlow<String>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is CityNotFoundException -> {
                 showError(throwable.message)
-                _onRemoteCityRequestFailedLiveData.postValue(throwable.city)
+                _remoteRequestFailedFlow.tryEmit(throwable.city)
             }
             is NoInternetException, is NetworkTimeoutException -> {
                 showError(throwable.message.toString())
