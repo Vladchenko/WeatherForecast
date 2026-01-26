@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast.hourly
+package com.example.weatherforecast.presentation.view.fragments.forecast.hourly
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.cityselection
+package com.example.weatherforecast.presentation.view.fragments.cityselection
 
 import android.os.Bundle
 import android.view.LayoutInflater

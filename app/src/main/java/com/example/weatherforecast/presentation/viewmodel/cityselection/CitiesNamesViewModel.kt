@@ -11,7 +11,7 @@ import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntry
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.presentation.fragments.cityselection.CityItem
+import com.example.weatherforecast.presentation.view.fragments.cityselection.CityItem
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler

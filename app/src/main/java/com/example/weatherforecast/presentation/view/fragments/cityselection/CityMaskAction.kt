@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.cityselection
+package com.example.weatherforecast.presentation.view.fragments.cityselection
 
 import androidx.compose.runtime.Immutable
 import com.example.weatherforecast.models.domain.CityDomainModel

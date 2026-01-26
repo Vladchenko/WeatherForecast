@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast
+package com.example.weatherforecast.presentation.view.fragments.forecast
 
 import android.location.Address
 import android.location.Location

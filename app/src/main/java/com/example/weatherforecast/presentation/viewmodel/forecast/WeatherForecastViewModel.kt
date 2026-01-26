@@ -19,7 +19,7 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteracto
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.LoadResult
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecast
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -52,7 +52,7 @@ class WeatherForecastViewModel @Inject constructor(
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     //region flows
-    val forecastState: MutableState<WeatherForecastDomainModel?> = mutableStateOf(null)
+    val forecastState: MutableState<WeatherForecast?> = mutableStateOf(null)
     val chosenCityFlow: StateFlow<String>
         get() = _chosenCityStateFlow
     val cityRequestFailedFlow: SharedFlow<String>
@@ -216,7 +216,7 @@ class WeatherForecastViewModel @Inject constructor(
 
     private fun processServerResponseForLocation(
         city: String,
-        result: LoadResult<WeatherForecastDomainModel>
+        result: LoadResult<WeatherForecast>
     ) {
         showProgressBarState.value = false
         when (result) {
@@ -236,7 +236,7 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
-    private fun processServerResponse(result: LoadResult<WeatherForecastDomainModel>) {
+    private fun processServerResponse(result: LoadResult<WeatherForecast>) {
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
@@ -260,14 +260,14 @@ class WeatherForecastViewModel @Inject constructor(
         }
     }
 
-    private fun getLocation(result: LoadResult.Remote<WeatherForecastDomainModel>): Location {
+    private fun getLocation(result: LoadResult.Remote<WeatherForecast>): Location {
         val location = Location(LocationManager.NETWORK_PROVIDER)
         location.latitude = result.data.coordinate.latitude
         location.longitude = result.data.coordinate.longitude
         return location
     }
 
-    private fun showRemoteForecast(forecastModel: WeatherForecastDomainModel) {
+    private fun showRemoteForecast(forecastModel: WeatherForecast) {
         forecastState.value = forecastModel
         showStatus(
             R.string.forecast_for_city,
@@ -275,7 +275,7 @@ class WeatherForecastViewModel @Inject constructor(
         )
     }
 
-    private fun showLocalForecast(forecastModel: WeatherForecastDomainModel) {
+    private fun showLocalForecast(forecastModel: WeatherForecast) {
         forecastState.value = forecastModel
         showWarning(
             R.string.forecast_for_city_outdated,

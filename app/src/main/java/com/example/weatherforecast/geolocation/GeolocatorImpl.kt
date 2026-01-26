@@ -5,7 +5,7 @@ import android.location.Geocoder
 import android.location.Location
 import com.example.weatherforecast.data.api.customexceptions.GeoLocationException
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
-import com.example.weatherforecast.presentation.fragments.forecast.toLocation
+import com.example.weatherforecast.presentation.view.fragments.forecast.toLocation
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Locale

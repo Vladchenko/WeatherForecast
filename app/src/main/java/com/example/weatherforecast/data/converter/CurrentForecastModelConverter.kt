@@ -5,7 +5,7 @@ import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinT
 import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinToFahrenheitDegrees
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 import com.example.weatherforecast.models.domain.Coordinate
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecast
 import retrofit2.Response
 import kotlin.math.roundToInt
 
@@ -15,7 +15,7 @@ import kotlin.math.roundToInt
 class CurrentForecastModelConverter {
 
     /**
-     * Convert [Response<WeatherForecastResponse>] to [WeatherForecastDomainModel].
+     * Convert [Response<WeatherForecastResponse>] to [WeatherForecast].
      *
      * @param temperatureType Celsius / Kelvin / Fahrenheit
      * @param city name
@@ -26,13 +26,13 @@ class CurrentForecastModelConverter {
         temperatureType: TemperatureType,
         city: String,
         response: Response<WeatherForecastResponse>
-    ): WeatherForecastDomainModel {
+    ): WeatherForecast {
         val responseBody = response.body()
         val main = responseBody?.main
         val weather = responseBody?.weather?.get(0)
         val temperature = main?.temp ?: 0.0
 
-        return WeatherForecastDomainModel(
+        return WeatherForecast(
             city,
             coordinate = Coordinate(
                 latitude = responseBody?.coordinate?.latitude ?: 0.0,

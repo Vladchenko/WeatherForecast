@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast.current
+package com.example.weatherforecast.presentation.view.fragments.forecast.current
 
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
@@ -49,9 +49,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecast
 import com.example.weatherforecast.presentation.PresentationUtils
-import com.example.weatherforecast.presentation.fragments.forecast.hourly.HourlyForecastLayout
+import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import kotlinx.coroutines.flow.drop
@@ -192,7 +192,7 @@ private fun MainContent(
     currentDate: String,
     mainContentTextColor: Color,
     onCityClick: () -> Unit,
-    dataModel: WeatherForecastDomainModel?,
+    dataModel: WeatherForecast?,
     weatherImageId: Int
 ) {
     Column(

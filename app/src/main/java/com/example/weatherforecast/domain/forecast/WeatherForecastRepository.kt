@@ -2,7 +2,7 @@ package com.example.weatherforecast.domain.forecast
 
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.models.domain.LoadResult
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecast
 
 /**
  * Weather forecast repository. Provides domain-layer data.
@@ -17,7 +17,7 @@ interface WeatherForecastRepository {
     suspend fun loadAndSaveRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
-    ): LoadResult<WeatherForecastDomainModel>
+    ): LoadResult<WeatherForecast>
 
     /**
      * Retrieve remote weather forecast model for [temperatureType] and [latitude], [longitude]
@@ -28,7 +28,7 @@ interface WeatherForecastRepository {
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ): LoadResult<WeatherForecastDomainModel>
+    ): LoadResult<WeatherForecast>
 
     /**
      * Retrieve local(database) forecast for [city] and provide [remoteError] describing why remote forecast failed
@@ -36,5 +36,5 @@ interface WeatherForecastRepository {
     suspend fun loadLocalForecast(
         city: String,
         remoteError: String
-    ): LoadResult<WeatherForecastDomainModel>
+    ): LoadResult<WeatherForecast>
 }

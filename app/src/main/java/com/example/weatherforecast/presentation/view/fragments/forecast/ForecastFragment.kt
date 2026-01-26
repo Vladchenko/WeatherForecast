@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.forecast
+package com.example.weatherforecast.presentation.view.fragments.forecast
 
 import android.Manifest
 import android.content.Intent
@@ -23,7 +23,7 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDateOrError
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
-import com.example.weatherforecast.presentation.fragments.forecast.current.CurrentTimeForecastLayout
+import com.example.weatherforecast.presentation.view.fragments.forecast.current.CurrentTimeForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission

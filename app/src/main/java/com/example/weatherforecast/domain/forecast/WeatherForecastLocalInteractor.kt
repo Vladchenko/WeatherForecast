@@ -1,7 +1,7 @@
 package com.example.weatherforecast.domain.forecast
 
 import com.example.weatherforecast.models.domain.LoadResult
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecast
 
 /**
  * Weather forecast interactor.
@@ -17,7 +17,7 @@ class WeatherForecastLocalInteractor(private val weatherForecastRepository: Weat
      * @param remoteError describing what why remote forecast failed
      * @return forecast result
      */
-    suspend fun loadForecast(city: String, remoteError: String): LoadResult<WeatherForecastDomainModel> {
+    suspend fun loadForecast(city: String, remoteError: String): LoadResult<WeatherForecast> {
         return weatherForecastRepository.loadLocalForecast(city, remoteError)
     }
 }

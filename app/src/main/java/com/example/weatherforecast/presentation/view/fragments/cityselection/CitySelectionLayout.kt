@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.fragments.cityselection
+package com.example.weatherforecast.presentation.view.fragments.cityselection
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

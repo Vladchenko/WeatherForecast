@@ -8,7 +8,7 @@ import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 import com.example.weatherforecast.models.domain.LoadResult
-import com.example.weatherforecast.models.domain.WeatherForecastDomainModel
+import com.example.weatherforecast.models.domain.WeatherForecast
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 
@@ -32,7 +32,7 @@ class WeatherForecastRepositoryImpl(
     override suspend fun loadAndSaveRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
-    ): LoadResult<WeatherForecastDomainModel> =
+    ): LoadResult<WeatherForecast> =
         withContext(coroutineDispatchers.io) {
             val response = weatherForecastRemoteDataSource.loadForecastForCity(city)
             val result = modelsConverter.convert(
@@ -48,9 +48,9 @@ class WeatherForecastRepositoryImpl(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ): LoadResult<WeatherForecastDomainModel> =
+    ): LoadResult<WeatherForecast> =
         withContext(coroutineDispatchers.io) {
-            val result: WeatherForecastDomainModel
+            val result: WeatherForecast
             val response =
                 weatherForecastRemoteDataSource.loadForecastForLocation(latitude, longitude)
             result = modelsConverter.convert(
@@ -64,7 +64,7 @@ class WeatherForecastRepositoryImpl(
 
     override suspend fun loadLocalForecast(city: String, remoteError: String) =
         withContext(coroutineDispatchers.io) {
-            val response: WeatherForecastDomainModel
+            val response: WeatherForecast
             val datasourceResponse =
                 Response.success(weatherForecastLocalDataSource.loadForecastData(city))
             response = modelsConverter.convert(

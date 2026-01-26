@@ -13,7 +13,7 @@ import androidx.compose.runtime.Immutable
  * @property temperatureType like Celsius, Fahrenheit
  * @property serverError if there is an error from remote server
  */
-data class WeatherForecastDomainModel(
+data class WeatherForecast(
     val city: String,
     val coordinate: Coordinate,
     val dateTime: String,
