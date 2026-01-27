@@ -20,9 +20,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDateOrError
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
-import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.view.fragments.forecast.current.CurrentTimeForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
@@ -55,28 +53,10 @@ class ForecastFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return ComposeView(requireContext()).apply {
+            // Пока нет данных — можно показать заглушку или пустой экран
             setContent {
-                CurrentTimeForecastLayout(
-                    toolbarTitle = getString(R.string.app_name),
-                    currentDate = getCurrentDateOrError(
-                        forecastViewModel.forecastState.value?.dateTime.orEmpty(),
-                        getString(R.string.bad_date_format)
-                    ),
-                    mainContentTextColor = Color.Black,
-                    weatherImageId = getWeatherTypeIcon(
-                        resources,
-                        requireActivity().packageName,
-                        forecastViewModel.forecastState.value?.weatherType.orEmpty()
-                    ),
-                    onCityClick = {
-                        gotoCitySelectionScreen()
-                    },
-                    onBackClick = {
-                        activity?.finish()
-                    },
-                    viewModel = forecastViewModel,
-                    hourlyViewModel = hourlyForecastViewModel
-                )
+                // Будет обновляться динамически в onViewCreated
+                // TODO Отобразить заглушку
             }
         }
     }
@@ -86,6 +66,23 @@ class ForecastFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initFlowObservers()
         forecastViewModel.launchWeatherForecast(arguments.chosenCity)
+
+        (view as ComposeView).setContent {
+            CurrentTimeForecastLayout(
+                toolbarTitle = getString(R.string.app_name),
+                currentDate = "",   // TODO Remove it
+                mainContentTextColor = Color.Black,
+                weatherImageId = 0, // TODO Remove it
+                onCityClick = {
+                    gotoCitySelectionScreen()
+                },
+                onBackClick = {
+                    activity?.finish()
+                },
+                viewModel = forecastViewModel,
+                hourlyViewModel = hourlyForecastViewModel
+            )
+        }
     }
 
     private fun initFlowObservers() {

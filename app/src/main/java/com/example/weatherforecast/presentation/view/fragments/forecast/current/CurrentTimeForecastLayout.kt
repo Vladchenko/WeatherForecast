@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,9 +50,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
-import com.example.weatherforecast.models.domain.WeatherForecast
+import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDateOrError
 import com.example.weatherforecast.presentation.PresentationUtils
+import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyForecastLayout
+import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
 import kotlinx.coroutines.flow.drop
@@ -72,6 +75,7 @@ fun CurrentTimeForecastLayout(
     viewModel: WeatherForecastViewModel,
     hourlyViewModel: HourlyForecastViewModel
 ) {
+    val uiState = viewModel.forecastState.collectAsState()
     val toolbarSubtitleState = viewModel.toolbarSubtitleMessageFlow.collectAsState()
     val toolbarSubtitle = toolbarSubtitleState.value.stringId?.let {
         stringResource(
@@ -128,7 +132,7 @@ fun CurrentTimeForecastLayout(
                             {
                                 showHourlyForecast = !showHourlyForecast
                                 hourlyViewModel.getHourlyForecastForCity(
-                                    viewModel.forecastState.value?.city.orEmpty()
+                                    (uiState.value as ForecastUiState.Success).forecast.city
                                 )
                             }
                     ) {
@@ -158,7 +162,7 @@ fun CurrentTimeForecastLayout(
                         currentDate,
                         mainContentTextColor,
                         onCityClick,
-                        viewModel.forecastState.value,
+                        (uiState.value as ForecastUiState.Success),
                         weatherImageId
                     )
                     if (showHourlyForecast) {
@@ -192,7 +196,7 @@ private fun MainContent(
     currentDate: String,
     mainContentTextColor: Color,
     onCityClick: () -> Unit,
-    dataModel: WeatherForecast?,
+    uiState: ForecastUiState.Success,
     weatherImageId: Int
 ) {
     Column(
@@ -203,7 +207,10 @@ private fun MainContent(
     ) {
         Text(
             modifier = Modifier.padding(top = 50.dp),
-            text = currentDate,
+            text = getCurrentDateOrError(
+                uiState.forecast.dateTime,
+                LocalContext.current.getString(R.string.bad_date_format)
+            ),
             fontSize = 18.sp,
             color = mainContentTextColor
         )
@@ -213,7 +220,7 @@ private fun MainContent(
                 .clickable {
                     onCityClick()
                 },
-            text = dataModel?.city.orEmpty(),
+            text = uiState.forecast.city,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
             color = mainContentTextColor,
@@ -225,25 +232,29 @@ private fun MainContent(
                 .align(Alignment.CenterHorizontally)
         ) {
             Text(
-                text = dataModel?.temperature.orEmpty(),
+                text = uiState.forecast.temperature,
                 fontSize = 60.sp,
                 color = mainContentTextColor,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = dataModel?.temperatureType.orEmpty(),
+                text = uiState.forecast.temperatureType,
                 color = mainContentTextColor,
                 fontSize = 30.sp,
             )
             Image(
                 modifier = Modifier.padding(start = 8.dp),
-                painter = painterResource(id = weatherImageId),
-                contentDescription = dataModel?.weatherType
+                painter = painterResource(id = getWeatherTypeIcon(
+                    LocalContext.current.resources,
+                    LocalContext.current.packageName,
+                    uiState.forecast.weatherType
+                )),
+                contentDescription = uiState.forecast.weatherType
             )
         }
         Text(
             modifier = Modifier.padding(top = 16.dp),
-            text = dataModel?.weatherType.orEmpty(),
+            text = uiState.forecast.weatherType,
             color = mainContentTextColor,
             fontSize = 18.sp
         )

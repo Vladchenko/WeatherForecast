@@ -3,8 +3,6 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 import android.location.Location
 import android.location.LocationManager
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
@@ -52,7 +50,8 @@ class WeatherForecastViewModel @Inject constructor(
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     //region flows
-    val forecastState: MutableState<WeatherForecast?> = mutableStateOf(null)
+    val forecastState: StateFlow<ForecastUiState>
+        get() = _forecastState
     val chosenCityFlow: StateFlow<String>
         get() = _chosenCityStateFlow
     val cityRequestFailedFlow: SharedFlow<String>
@@ -67,6 +66,7 @@ class WeatherForecastViewModel @Inject constructor(
     private val _chosenCityBlankFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
     )
+    private val _forecastState = MutableStateFlow<ForecastUiState>(ForecastUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow("")
     private val _chosenCityNotFoundFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val _cityRequestFailedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -199,7 +199,7 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     /**
-     * Download hourly weather forecast on a [cityModel].
+     * Download remote weather forecast on a [cityModel] for location.
      */
     fun downloadRemoteForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
@@ -268,18 +268,18 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun showRemoteForecast(forecastModel: WeatherForecast) {
-        forecastState.value = forecastModel
+        _forecastState.value = ForecastUiState.Success(forecastModel, DataSource.REMOTE)
         showStatus(
             R.string.forecast_for_city,
-            forecastState.value?.city.orEmpty()
+            forecastModel.city
         )
     }
 
     private fun showLocalForecast(forecastModel: WeatherForecast) {
-        forecastState.value = forecastModel
+        _forecastState.value = ForecastUiState.Success(forecastModel, DataSource.LOCAL)
         showWarning(
             R.string.forecast_for_city_outdated,
-            forecastState.value?.city.orEmpty()
+            forecastModel.city
         )
     }
 
