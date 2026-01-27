@@ -70,9 +70,7 @@ class ForecastFragment : Fragment() {
         (view as ComposeView).setContent {
             CurrentTimeForecastLayout(
                 toolbarTitle = getString(R.string.app_name),
-                currentDate = "",   // TODO Remove it
                 mainContentTextColor = Color.Black,
-                weatherImageId = 0, // TODO Remove it
                 onCityClick = {
                     gotoCitySelectionScreen()
                 },

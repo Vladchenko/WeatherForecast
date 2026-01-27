@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation.view.fragments.forecast.current
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,9 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
-import com.example.weatherforecast.data.util.WeatherForecastUtils.getCurrentDateOrError
 import com.example.weatherforecast.presentation.PresentationUtils
-import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
@@ -67,9 +63,7 @@ import kotlinx.coroutines.flow.drop
 @NonSkippableComposable
 fun CurrentTimeForecastLayout(
     toolbarTitle: String,
-    currentDate: String,
     mainContentTextColor: Color,
-    @DrawableRes weatherImageId: Int,
     onCityClick: () -> Unit,
     onBackClick: () -> Unit,
     viewModel: WeatherForecastViewModel,
@@ -159,11 +153,9 @@ fun CurrentTimeForecastLayout(
                 ) {
                     MainContent(
                         innerPadding,
-                        currentDate,
                         mainContentTextColor,
                         onCityClick,
-                        (uiState.value as ForecastUiState.Success),
-                        weatherImageId
+                        (uiState.value as ForecastUiState.Success)
                     )
                     if (showHourlyForecast) {
                         HourlyForecastLayout(
@@ -193,11 +185,9 @@ private fun BackgroundImage(
 @Composable
 private fun MainContent(
     innerPadding: PaddingValues,
-    currentDate: String,
     mainContentTextColor: Color,
     onCityClick: () -> Unit,
     uiState: ForecastUiState.Success,
-    weatherImageId: Int
 ) {
     Column(
         modifier = Modifier
@@ -207,10 +197,7 @@ private fun MainContent(
     ) {
         Text(
             modifier = Modifier.padding(top = 50.dp),
-            text = getCurrentDateOrError(
-                uiState.forecast.dateTime,
-                LocalContext.current.getString(R.string.bad_date_format)
-            ),
+            text = uiState.forecast.dateTime,
             fontSize = 18.sp,
             color = mainContentTextColor
         )
@@ -244,11 +231,7 @@ private fun MainContent(
             )
             Image(
                 modifier = Modifier.padding(start = 8.dp),
-                painter = painterResource(id = getWeatherTypeIcon(
-                    LocalContext.current.resources,
-                    LocalContext.current.packageName,
-                    uiState.forecast.weatherType
-                )),
+                painter = painterResource(id = uiState.forecast.weatherImageId),
                 contentDescription = uiState.forecast.weatherType
             )
         }

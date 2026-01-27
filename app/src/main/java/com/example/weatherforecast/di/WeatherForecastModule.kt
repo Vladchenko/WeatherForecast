@@ -30,6 +30,8 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteract
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
+import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverter
+import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverterImpl
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
@@ -96,8 +98,14 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastConverter(): CurrentForecastModelConverter {
+    fun provideWeatherForecastDomainConverter(): CurrentForecastModelConverter {
         return CurrentForecastModelConverter()
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherForecastUiConverter(): ForecastDomainToUiConverter {
+        return ForecastDomainToUiConverterImpl()
     }
 
     @Singleton
@@ -169,20 +177,24 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideForecastViewModelFactory(
+        app: Application,
         temperatureType: TemperatureType,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
         forecastLocalInteractor: WeatherForecastLocalInteractor,
-        forecastRemoteInteractor: WeatherForecastRemoteInteractor
+        forecastRemoteInteractor: WeatherForecastRemoteInteractor,
+        uiConverter: ForecastDomainToUiConverter
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
+            app,
             temperatureType,
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers,
             forecastLocalInteractor,
-            forecastRemoteInteractor
+            forecastRemoteInteractor,
+            uiConverter
         )
     }
 

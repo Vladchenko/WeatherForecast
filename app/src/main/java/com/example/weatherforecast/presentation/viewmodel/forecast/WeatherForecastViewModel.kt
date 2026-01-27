@@ -1,5 +1,6 @@
 package com.example.weatherforecast.presentation.viewmodel.forecast
 
+import android.app.Application
 import android.location.Location
 import android.location.LocationManager
 import android.util.Log
@@ -18,6 +19,8 @@ import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteract
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecast
+import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
+import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverter
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -32,6 +35,7 @@ import javax.inject.Inject
 /**
  * ViewModel for weather forecast downloading.
  *
+ * @param app application
  * @param connectivityObserver internet connectivity observer
  * @property temperatureType type of temperature
  * @property coroutineDispatchers for coroutines
@@ -41,12 +45,14 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(
+    private val app: Application,
     connectivityObserver: ConnectivityObserver,
     private val temperatureType: TemperatureType,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastLocalInteractor: WeatherForecastLocalInteractor,
-    private val forecastRemoteInteractor: WeatherForecastRemoteInteractor
+    private val forecastRemoteInteractor: WeatherForecastRemoteInteractor,
+    private val forecastDomainToUiConverter: ForecastDomainToUiConverter,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     //region flows
@@ -268,7 +274,10 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun showRemoteForecast(forecastModel: WeatherForecast) {
-        _forecastState.value = ForecastUiState.Success(forecastModel, DataSource.REMOTE)
+        _forecastState.value = ForecastUiState.Success(
+            getUiModel(forecastModel),
+            DataSource.REMOTE
+        )
         showStatus(
             R.string.forecast_for_city,
             forecastModel.city
@@ -276,12 +285,28 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     private fun showLocalForecast(forecastModel: WeatherForecast) {
-        _forecastState.value = ForecastUiState.Success(forecastModel, DataSource.LOCAL)
+        _forecastState.value = ForecastUiState.Success(
+            getUiModel(forecastModel),
+            DataSource.LOCAL
+        )
         showWarning(
             R.string.forecast_for_city_outdated,
             forecastModel.city
         )
     }
+
+    private fun getUiModel(forecastModel: WeatherForecast) =
+        forecastDomainToUiConverter.convert(
+            model = forecastModel,
+            defaultErrorMessage = app.getString(R.string.bad_date_format),
+            getWeatherIconId = { weatherType ->
+                getWeatherTypeIcon(
+                    app.resources,
+                    app.packageName,
+                    weatherType
+                )
+            }
+        )
 
     companion object {
         private const val TAG = "WeatherForecastViewModel"

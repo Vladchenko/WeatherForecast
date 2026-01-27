@@ -1,4 +1,5 @@
-package com.example.weatherforecast.models.domain
+package com.example.weatherforecast.models.presentation
+
 
 import androidx.compose.runtime.Immutable
 
@@ -8,22 +9,24 @@ import androidx.compose.runtime.Immutable
  * @property city a name of city to provide a weather forecast on
  * @property coordinate of longitude and latitude
  * @property dateTime on which a forecast is provided
+ * @property weatherImageId weather icon id
  * @property temperature for the city
  * @property weatherType like rain, snow, etc
  * @property temperatureType like Celsius, Fahrenheit
  * @property serverError if there is an error from remote server
  */
-data class WeatherForecast(
+data class WeatherForecastUi(
     val city: String,
     val coordinate: Coordinate,
     val dateTime: String,
+    val weatherImageId: Int,
     val temperature: String,
     val weatherType: String,
     val temperatureType: String,
     val serverError: String
 ) {
     override fun toString(): String {
-        return "WeatherForecast(city='$city', coordinate=$coordinate, date='$dateTime', temperature='$temperature', weatherType='$weatherType', temperatureType='$temperatureType', serverError='$serverError')"
+        return "WeatherForecastUi(city='$city', coordinate=$coordinate, date='$dateTime', temperature='$temperature', weatherType='$weatherType', temperatureType='$temperatureType', serverError='$serverError')"
     }
 }
 
