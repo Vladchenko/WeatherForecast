@@ -1,6 +1,7 @@
 package com.example.weatherforecast.di
 
 import android.app.Application
+import android.content.Context
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.converter.CurrentForecastModelConverter
@@ -20,6 +21,8 @@ import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecas
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.data.util.permission.AndroidPermissionChecker
+import com.example.weatherforecast.data.util.permission.PermissionChecker
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyForecastLocalInteractor
@@ -37,9 +40,11 @@ import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
+import com.example.weatherforecast.utils.ResourceManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -49,6 +54,18 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class WeatherForecastModule {
+
+    @Singleton
+    @Provides
+    fun providePermissionChecker(@ApplicationContext context: Context): PermissionChecker {
+        return AndroidPermissionChecker(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideResourceManager(@ApplicationContext context: Context): ResourceManager {
+        return ResourceManager(context)
+    }
 
     @Singleton
     @Provides
@@ -223,7 +240,7 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideGeoLocationViewModelFactory(
-        app: Application,
+        permissionChecker: PermissionChecker,
         geoLocationHelper: Geolocator,
         geoLocator: WeatherForecastGeoLocator,
         connectivityObserver: ConnectivityObserver,
@@ -231,7 +248,7 @@ class WeatherForecastModule {
         coroutineDispatchers: CoroutineDispatchers,
     ): GeoLocationViewModelFactory {
         return GeoLocationViewModelFactory(
-            app,
+            permissionChecker,
             geoLocationHelper,
             geoLocator,
             connectivityObserver,
@@ -249,11 +266,11 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideAppBarViewModelFactory(
-        app: Application,
+        resourceManager: ResourceManager,
         appBarStateConverter: AppBarStateConverter
     ): AppBarViewModelFactory {
         return AppBarViewModelFactory(
-            app,
+            resourceManager,
             appBarStateConverter
         )
     }

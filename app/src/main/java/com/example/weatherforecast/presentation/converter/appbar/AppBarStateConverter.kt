@@ -6,6 +6,7 @@ import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.forecast.DataSource
 import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
+import com.example.weatherforecast.utils.ResourceManager
 import javax.inject.Inject
 
 /**
@@ -14,33 +15,33 @@ import javax.inject.Inject
 class AppBarStateConverter @Inject constructor() {
 
     /**
-     * Convert [forecastState] to [AppBarState], having [application] context to get resource strings.
+     * Convert [forecastState] to [AppBarState], having [resourceManager] to get resource strings.
      */
     fun convert(
         forecastState: ForecastUiState,
-        application: android.app.Application
+        resourceManager: ResourceManager
     ): AppBarState {
         return when (forecastState) {
             is ForecastUiState.Loading -> {
                 AppBarState(
-                    title = application.getString(R.string.app_name),
-                    subtitle = application.getString(R.string.forecast_for_city_loading),
+                    title = resourceManager.getString(R.string.app_name),
+                    subtitle = resourceManager.getString(R.string.forecast_for_city_loading),
                     subtitleColor = PresentationUtils.getToolbarSubtitleColor(MessageType.INFO),
                 )
             }
 
             is ForecastUiState.Error -> {
                 AppBarState(
-                    title = application.getString(R.string.app_name),
-                    subtitle = application.getString(R.string.forecast_for_city_error),
+                    title = resourceManager.getString(R.string.app_name),
+                    subtitle = resourceManager.getString(R.string.forecast_for_city_error),
                     subtitleColor = PresentationUtils.getToolbarSubtitleColor(MessageType.ERROR),
                 )
             }
 
             is ForecastUiState.Success -> {
                 AppBarState(
-                    title = application.getString(R.string.app_name),
-                    subtitle = application.getString(
+                    title = resourceManager.getString(R.string.app_name),
+                    subtitle = resourceManager.getString(
                         R.string.forecast_for_city_success,
                         forecastState.forecast.city
                     ),

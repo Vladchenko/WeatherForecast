@@ -1,17 +1,16 @@
 package com.example.weatherforecast.presentation.viewmodel.geolocation
 
-import android.app.Application
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.GeoLocationException
+import com.example.weatherforecast.data.util.permission.PermissionChecker
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
-import com.example.weatherforecast.geolocation.hasPermissionForGeoLocation
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +24,7 @@ import javax.inject.Inject
 /**
  * View model for geo location or city name of a device.
  *
- * @property app custom [Application] implementation for Hilt
+ * @property permissionChecker to check if needed permission is provided
  * @property geoLocationHelper provides geo location service
  * @property geoLocator provides geo location service
  * @property chosenCityInteractor saves/loads chosen city
@@ -33,7 +32,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(
-    private val app: Application,
+    private val permissionChecker: PermissionChecker,
     private val geoLocationHelper: Geolocator,
     connectivityObserver: ConnectivityObserver,
     private val geoLocator: WeatherForecastGeoLocator,
@@ -99,7 +98,7 @@ class GeoLocationViewModel @Inject constructor(
      * Request geo location permission, when it is not granted.
      */
     fun requestGeoLocationPermission() {
-        if (hasPermissionForGeoLocation(app.applicationContext)) {
+        if (permissionChecker.hasLocationPermission()) {
             defineCurrentGeoLocation()
         } else {
             permissionRequests++
