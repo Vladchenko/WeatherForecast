@@ -61,6 +61,7 @@ class HourlyForecastViewModel @Inject constructor(
             }
             is NoInternetException, is NetworkTimeoutException -> {
                 showError(throwable.message.toString())
+                _remoteRequestFailedFlow.tryEmit(throwable.message.toString())
             }
             is NoSuchDatabaseEntryException -> {
                 showError(throwable.message.toString())
@@ -113,7 +114,7 @@ class HourlyForecastViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             val cityModel = chosenCityInteractor.loadChosenCity()
             if (cityModel.city.isBlank()) {
-                showError("Local city not found")
+                showError(R.string.default_city_absent)
             } else {
                 forecastLocalInteractor.loadForecast(cityModel.city, "")
             }
@@ -125,8 +126,8 @@ class HourlyForecastViewModel @Inject constructor(
         when (result) {
             is LoadResult.Remote -> {
                 hourlyForecastState.value = result.data
-                showStatus(
-                    R.string.forecast_for_city,
+                showMessage(
+                    R.string.forecast_for_city_success,
                     result.data.city
                 )
             }
@@ -134,7 +135,7 @@ class HourlyForecastViewModel @Inject constructor(
                 // Not used for hourly forecast
             }
             is LoadResult.Fail -> {
-                showError(result.exception)
+                showError(result.exception.toString())
             }
         }
     }

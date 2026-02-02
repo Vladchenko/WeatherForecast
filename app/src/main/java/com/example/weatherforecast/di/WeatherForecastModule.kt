@@ -32,6 +32,8 @@ import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverter
 import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverterImpl
+import com.example.weatherforecast.presentation.converter.appbar.AppBarStateConverter
+import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
@@ -235,6 +237,24 @@ class WeatherForecastModule {
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideAppBarStateConverter(): AppBarStateConverter {
+        return AppBarStateConverter()
+    }
+
+    @Singleton
+    @Provides
+    fun provideAppBarViewModelFactory(
+        app: Application,
+        appBarStateConverter: AppBarStateConverter
+    ): AppBarViewModelFactory {
+        return AppBarViewModelFactory(
+            app,
+            appBarStateConverter
         )
     }
 }

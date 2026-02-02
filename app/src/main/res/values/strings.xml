@@ -11,19 +11,33 @@
     <string name="city_selection_from_dropdown">Type city and pick one from a dropdown list below</string>
     <string name="city_mask_entries_error">City mask entries downloading error</string>
     <string name="city_typing_begin">Begin typing city name …</string>
+
     <string name="current_location_triangulating">Current geo location defining …</string>
+    <string name="current_location_success">Current geo location success</string>
+    <string name="current_location_denied">Current geo location permission denied</string>
+    <string name="current_location_denied_permanently">Current geo location permission denied</string>
+    <string name="geo_location_by_city_define">Geo location for city %1$s defining</string>
+    <string name="geo_location_by_city_success">Geo location by city succeeded</string>
+    <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
+    <string name="geo_location_permission_denied">Permission denied. You may grant it by clicking permissions in following window and remove it from denied ones. You will be asked to grant permission again next time.</string>
+    <string name="geo_location_permission_required">Local geo location triangulation permission required</string>
+
     <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
     <string name="database_city_downloading">No network connection, database last city has been loaded</string>
     <string name="database_entries_not_found">Database records, matching %s, not found</string>
     <string name="database_forecast_loaded">Downloaded from database: city = %1$s, lat = %2$d, lon = %3$d</string>
     <string name="database_city_loaded">Chosen city loaded from database = %1$s, lat = %2$d, lon = %3$d</string>
     <string name="database_forecast_for_city_not_found">Forecast for %s not found in database</string>
-    <string name="default_city_absent">City was not defined earlier, cannot load from DB, turn connection on</string>
+    <string name="default_city_absent">City was not defined earlier, cannot load from DB</string>
     <string name="degrees_values">Value of degrees for an air in Celsius of Fahrenheit</string>
     <string name="default_degrees_values">25</string>
     <string name="default_degrees_type">C</string>
     <string name="error_occurred">Some error occurred</string>
-    <string name="forecast_for_city">Provided for city %1$s</string>
+
+    <string name="forecast_for_city_loading">Downloading for city %1$s</string>
+    <string name="forecast_for_city_success">Provided for city %1$s</string>
+    <string name="forecast_for_city_error">Forecast for %1$s error</string>
+
     <string name="forecast_for_city_outdated">Outdated forecast for city %1$s</string>
     <string name="forecast_downloading">Forecast is downloading</string>
     <string name="forecast_downloading_for_city_text">Forecast for %s downloading…</string>
@@ -32,10 +46,6 @@
     <string name="forecast_downloading_for_location_failed">Downloading forecast for a location also failed</string>
     <string name="forecast_downloading_for_city_succeeded">Downloading remote weather forecast for a city succeeded</string>
     <string name="forecast_downloading_for_location_succeeded">Downloading remote weather forecast for a location succeeded</string>
-    <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
-    <string name="geo_location_no_permission">Permission not granted, app cannot proceed</string>
-    <string name="geo_location_permission_denied">Permission denied. You may grant it by clicking permissions in following window and remove it from denied ones. You will be asked to grant permission again next time.</string>
-    <string name="geo_location_permission_required">Local geo location triangulation permission required</string>
     <string name="network_available_text">Network available</string>
     <string name="network_lost_error_text">Network connection lost, check connection</string>
     <string name="network_not_available_error_text">Network is not available, check connection</string>

@@ -29,7 +29,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonSkippableComposable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,15 +40,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyForecastLayout
+import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
@@ -62,23 +62,17 @@ import kotlinx.coroutines.flow.drop
 @Composable
 @NonSkippableComposable
 fun CurrentTimeForecastLayout(
-    toolbarTitle: String,
     mainContentTextColor: Color,
     onCityClick: () -> Unit,
     onBackClick: () -> Unit,
+    appBarViewModel: AppBarViewModel,
     viewModel: WeatherForecastViewModel,
-    hourlyViewModel: HourlyForecastViewModel
+    hourlyViewModel: HourlyForecastViewModel,
 ) {
-    val uiState = viewModel.forecastState.collectAsState()
-    val toolbarSubtitleState = viewModel.toolbarSubtitleMessageFlow.collectAsState()
-    val toolbarSubtitle = toolbarSubtitleState.value.stringId?.let {
-        stringResource(
-            it,
-            toolbarSubtitleState.value.valueForStringId.orEmpty()
-        )
-    } ?: toolbarSubtitleState.value.valueForStringId.orEmpty()
+    val forecastUiState = viewModel.forecastState.collectAsStateWithLifecycle()
+    val appBarUiState = appBarViewModel.appBarState.collectAsStateWithLifecycle()
     val fontSize = remember {
-        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp }
+        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitle).sp }
     }
     var showHourlyForecast by remember { mutableStateOf(false) }
 
@@ -103,12 +97,12 @@ fun CurrentTimeForecastLayout(
                         Text(
                             modifier = Modifier
                                 .padding(top = 4.dp),
-                            text = toolbarTitle
+                            text = appBarUiState.value.title
                         )
                         Text(
                             modifier = Modifier,
-                            text = toolbarSubtitle,
-                            color = toolbarSubtitleState.value.color,
+                            text = appBarUiState.value.subtitle,
+                            color = appBarUiState.value.subtitleColor,
                             fontSize = fontSize.value,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -126,7 +120,7 @@ fun CurrentTimeForecastLayout(
                             {
                                 showHourlyForecast = !showHourlyForecast
                                 hourlyViewModel.getHourlyForecastForCity(
-                                    (uiState.value as ForecastUiState.Success).forecast.city
+                                    (forecastUiState.value as ForecastUiState.Success).forecast.city
                                 )
                             }
                     ) {
@@ -155,7 +149,7 @@ fun CurrentTimeForecastLayout(
                         innerPadding,
                         mainContentTextColor,
                         onCityClick,
-                        (uiState.value as ForecastUiState.Success)
+                        (forecastUiState.value as ForecastUiState.Success)
                     )
                     if (showHourlyForecast) {
                         HourlyForecastLayout(

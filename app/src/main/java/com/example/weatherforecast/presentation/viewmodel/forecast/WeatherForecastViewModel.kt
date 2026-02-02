@@ -77,6 +77,7 @@ class WeatherForecastViewModel @Inject constructor(
     private val _chosenCityNotFoundFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val _cityRequestFailedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val _gotoCitySelectionFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
     //endregion flows
 
     private var chosenCity: String? = null
@@ -86,7 +87,6 @@ class WeatherForecastViewModel @Inject constructor(
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is CityNotFoundException -> {
-                showError(throwable.message)
                 _cityRequestFailedFlow.tryEmit(throwable.city)
             }
 
@@ -110,7 +110,7 @@ class WeatherForecastViewModel @Inject constructor(
             is NoSuchDatabaseEntryException -> {
                 showError(
                     R.string.database_forecast_for_city_not_found,
-                    throwable.message.orEmpty()
+                    chosenCity.orEmpty()
                 )
             }
 
@@ -141,9 +141,6 @@ class WeatherForecastViewModel @Inject constructor(
      * Launch weather forecast downloading, having a [chosenCity] provided from a city picker fragment.
      */
     fun launchWeatherForecast(chosenCity: String) {
-        if (chosenCity.isNotBlank()) {
-            showInitialDownloadingStatusForCity(chosenCity)
-        }
         viewModelScope.launch(exceptionHandler) {
             // If chosenCity is blank, then return cityModel.city
             val city = chosenCity.ifBlank {
@@ -237,7 +234,7 @@ class WeatherForecastViewModel @Inject constructor(
             }
 
             is LoadResult.Fail -> {
-                showError(result.exception)
+                showError(result.exception.message.toString())
             }
         }
     }
@@ -261,7 +258,7 @@ class WeatherForecastViewModel @Inject constructor(
             }
 
             is LoadResult.Fail -> {
-                showError(result.exception)
+                showError(result.exception.message.toString())
             }
         }
     }
@@ -278,20 +275,12 @@ class WeatherForecastViewModel @Inject constructor(
             getUiModel(forecastModel),
             DataSource.REMOTE
         )
-        showStatus(
-            R.string.forecast_for_city,
-            forecastModel.city
-        )
     }
 
     private fun showLocalForecast(forecastModel: WeatherForecast) {
         _forecastState.value = ForecastUiState.Success(
             getUiModel(forecastModel),
             DataSource.LOCAL
-        )
-        showWarning(
-            R.string.forecast_for_city_outdated,
-            forecastModel.city
         )
     }
 

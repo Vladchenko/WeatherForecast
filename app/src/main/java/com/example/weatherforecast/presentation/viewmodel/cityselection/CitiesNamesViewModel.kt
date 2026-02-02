@@ -43,14 +43,15 @@ class CitiesNamesViewModel @Inject constructor(
         get() = _citiesNamesState
 
     init {
-        showStatus(R.string.city_selection_title)
+        showMessage(R.string.city_selection_title)
     }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is NoSuchDatabaseEntryException -> {
-                showError("City with a name ${throwable.message} is not present in database")
+                showError(R.string.default_city_absent)
+                Log.d(TAG, throwable.message.toString())
             }
             is Exception -> showError(throwable.message.toString())
         }

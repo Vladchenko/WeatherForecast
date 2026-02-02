@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
+import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
 
+    private val appBarViewModel by activityViewModels<AppBarViewModel>()
     private val citiesNamesViewModel by activityViewModels<CitiesNamesViewModel>()
 
     override fun onCreateView(
@@ -35,6 +37,7 @@ class CitiesNamesFragment : Fragment() {
                     // but in this very case, somehow, CitiesNamesViewModel's livedata that calls
                     // forecastscreen, fires right away when a CitiesNames screen is opened (
                     // i.e. CurrentForecast -> CitiesNames -> CurrentForecast call is performed)
+                    appBarViewModel = appBarViewModel,
                     viewModel = citiesNamesViewModel
                 )
             }

@@ -33,7 +33,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonSkippableComposable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,7 +43,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -55,10 +53,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
+import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -84,19 +84,13 @@ fun CitySelectionLayout(
     queryLabel: String,
     onBackClick: () -> Unit,
     onCityClicked: (String) -> Unit,
+    appBarViewModel: AppBarViewModel,
     viewModel: CitiesNamesViewModel
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val cityState by viewModel.cityMaskState.collectAsState()
-    val toolbarState = viewModel.toolbarSubtitleMessageFlow.collectAsState()
-    val toolbarSubtitle = toolbarState.value.stringId?.let {
-        context.getString(
-            it,
-            toolbarState.value.valueForStringId.orEmpty()
-        )
-    } ?: toolbarState.value.valueForStringId.orEmpty()
+    val cityState by viewModel.cityMaskState.collectAsStateWithLifecycle()
+    val appbarState by appBarViewModel.appBarState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -109,12 +103,12 @@ fun CitySelectionLayout(
                         Text(
                             modifier = Modifier
                                 .padding(top = 4.dp),
-                            text = toolbarTitle
+                            text = appbarState.title
                         )
                         Text(
-                            text = toolbarSubtitle,
-                            color = PresentationUtils.getToolbarSubtitleColor(toolbarState.value.messageType),
-                            fontSize = PresentationUtils.getToolbarSubtitleFontSize(toolbarSubtitle).sp,
+                            text = appbarState.subtitle,
+                            color = appbarState.subtitleColor,
+                            fontSize = PresentationUtils.getToolbarSubtitleFontSize(appbarState.subtitle).sp,   //TODO Move to model
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
