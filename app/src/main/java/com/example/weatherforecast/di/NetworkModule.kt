@@ -1,10 +1,8 @@
 package com.example.weatherforecast.di
 
 import android.content.Context
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.connectivity.ConnectivityObserver
@@ -12,7 +10,6 @@ import com.example.weatherforecast.connectivity.ConnectivityObserverImpl
 import com.example.weatherforecast.data.api.CityApiService
 import com.example.weatherforecast.data.api.WeatherForecastApiService
 import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
-import com.example.weatherforecast.data.workmanager.ForecastWorker
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,7 +19,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
@@ -61,24 +57,17 @@ class NetworkModule {
         return retrofit.create(CityApiService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideWorkManagerConfiguration(workerFactory: HiltWorkerFactory): Configuration =
+        Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
+
     @Singleton
     @Provides
     fun provideWorkManager(@ApplicationContext applicationContext: Context): WorkManager {
         val workManager = WorkManager.getInstance(applicationContext)
-        val constraints = Constraints.Builder()
-            .setRequiresCharging(false)
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
-        val workRequest =
-            PeriodicWorkRequestBuilder<ForecastWorker>(30, TimeUnit.MINUTES, 25, TimeUnit.MINUTES)
-                .setInitialDelay(5, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .build()
-        workManager.enqueueUniquePeriodicWork(
-            "ForecastPeriodicWork",
-            ExistingPeriodicWorkPolicy.UPDATE,
-            workRequest
-        )
         return workManager
     }
 

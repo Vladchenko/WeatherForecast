@@ -1,8 +1,7 @@
 package com.example.weatherforecast.presentation
 
 import android.app.Application
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
+import com.example.weatherforecast.data.workmanager.WorkerStarter
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -10,13 +9,12 @@ import javax.inject.Inject
  * Application class for Hilt implementation
  */
 @HiltAndroidApp
-class WeatherForecastApp : Application(), Configuration.Provider {
+class WeatherForecastApp : Application() {
 
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var workerStarter: WorkerStarter
 
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
+    override fun onCreate() {
+        super.onCreate()
+        workerStarter.start()
+    }
 }
