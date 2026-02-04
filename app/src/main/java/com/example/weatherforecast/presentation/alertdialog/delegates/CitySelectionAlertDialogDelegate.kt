@@ -1,4 +1,4 @@
-package com.example.weatherforecast.presentation.alertdialog
+package com.example.weatherforecast.presentation.alertdialog.delegates
 
 import android.content.Context
 import android.content.DialogInterface
@@ -16,7 +16,7 @@ class CitySelectionAlertDialogDelegate(private val city: String,
                                        private val onNegativeClick: () -> Unit) {
 
     /**
-     * Get [AlertDialog.Builder] using [android.content.Context]
+     * Get [AlertDialog.Builder] using [Context]
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)

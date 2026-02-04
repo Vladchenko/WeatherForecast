@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WeatherForecast">
         <activity
-            android:name=".presentation.view.WeatherForecastActivity"
+            android:name=".presentation.view.activities.WeatherForecastActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

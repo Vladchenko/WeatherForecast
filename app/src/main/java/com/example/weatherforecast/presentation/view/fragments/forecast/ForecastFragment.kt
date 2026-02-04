@@ -9,38 +9,44 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
-import com.example.weatherforecast.models.presentation.Message
-import com.example.weatherforecast.presentation.PresentationUtils.closeWith
+import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
+import com.example.weatherforecast.presentation.alertdialog.ForecastDialogControllerFactory
+import com.example.weatherforecast.presentation.coordinator.ForecastCoordinator
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.view.fragments.forecast.current.CurrentTimeForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecastViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModel
-import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
+import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.system.exitProcess
 
 /**
  * Fragment representing a weather forecast.
+ * Orchestration delegated to Hilt-provided factories and their products.
  */
 @AndroidEntryPoint
 class ForecastFragment : Fragment() {
 
+    @Inject lateinit var statusRendererFactory: StatusRenderer.Factory
+    @Inject lateinit var forecastCoordinatorFactory: ForecastCoordinator.Factory
+    @Inject lateinit var resourceManager: ResourceManager
+
     private var mainView: View? = null
     private val arguments: ForecastFragmentArgs by navArgs()
-    private val dialogHelper by lazy { AlertDialogHelper(requireContext()) }
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission())
         { isGranted ->
@@ -50,6 +56,9 @@ class ForecastFragment : Fragment() {
     private val appBarViewModel by activityViewModels<AppBarViewModel>()
     private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
     private val hourlyForecastViewModel by activityViewModels<HourlyForecastViewModel>()
+
+    private lateinit var statusRenderer: StatusRenderer
+    private lateinit var coordinator: ForecastCoordinator
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,10 +76,27 @@ class ForecastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
-        initFlowObservers()
-        initAppBarObserver()
+        val alertDialogHelper = AlertDialogHelper(requireActivity())
+        val dialogController = ForecastDialogControllerFactory(alertDialogHelper)
+            .create(requireActivity() as AppCompatActivity)
+
+        statusRenderer = statusRendererFactory.create(appBarViewModel)
+        coordinator = forecastCoordinatorFactory.create(
+            forecastViewModel = forecastViewModel,
+            appBarViewModel = appBarViewModel,
+            geoLocationViewModel = geoLocationViewModel,
+            hourlyForecastViewModel = hourlyForecastViewModel,
+            statusRenderer = statusRenderer,
+            dialogController = dialogController,
+            resourceManager = resourceManager,
+            onGotoCitySelection = { gotoCitySelectionScreen() },
+            onRequestLocationPermission = { requestLocationPermission() },
+            onPermanentlyDenied = { showToastAndOpenAppSettings() },
+            onNegativeNoPermission = { activity?.finish() }
+        )
+        coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
         val chosenCity = arguments.chosenCity
-        showInitialDownloadMessage(chosenCity)
+        statusRenderer.showDownloadingStatusFor(chosenCity)
         forecastViewModel.launchWeatherForecast(chosenCity)
 
         (view as ComposeView).setContent {
@@ -86,219 +112,6 @@ class ForecastFragment : Fragment() {
                 viewModel = forecastViewModel,
                 hourlyViewModel = hourlyForecastViewModel
             )
-        }
-    }
-
-    private fun showInitialDownloadMessage(chosenCity: String) {
-        if (chosenCity.isBlank()) {
-            appBarViewModel.updateSubtitle(
-                getString(
-                    R.string.forecast_downloading_for_city_text,
-                    chosenCity
-                )
-            )
-        } else {
-            appBarViewModel.updateSubtitle(getString(R.string.forecast_downloading))
-        }
-    }
-
-    private fun initFlowObservers() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    forecastViewModel.messageFlow.collect {
-                        when (it) {
-                            is Message.Success -> {
-                                when (it.content) {
-                                    is Message.Content.Text -> {
-                                        appBarViewModel.updateSubtitle(it.content.message)
-                                    }
-                                    is Message.Content.Resource -> {
-                                        appBarViewModel.updateSubtitle(
-                                            getString(it.content.resId)
-                                        )
-                                    }
-                                }
-                            }
-                            is Message.Error -> {
-                                when (it.content) {
-                                    is Message.Content.Text -> {
-                                        appBarViewModel.updateSubtitleWithError(
-                                            it.content.message
-                                        )
-                                    }
-                                    is Message.Content.Resource -> {
-                                        appBarViewModel.updateSubtitleWithError(
-                                            getString(it.content.resId)
-                                        )
-                                    }
-                                }
-                            }
-                            is Message.Warning -> {
-                                when (it.content) {
-                                    is Message.Content.Text -> {
-                                        appBarViewModel.updateSubtitleWithWarning(
-                                            it.content.message
-                                        )
-                                    }
-                                    is Message.Content.Resource -> {
-                                        appBarViewModel.updateSubtitleWithWarning(
-                                            getString(it.content.resId)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                launch {
-                    forecastViewModel.cityRequestFailedFlow.collect {
-                        appBarViewModel.updateSubtitle(
-                            getString(R.string.geo_location_by_city_define, it)
-                        )
-                        geoLocationViewModel.defineLocationByCity(it)
-                    }
-                }
-                launch {
-                    forecastViewModel.gotoCitySelectionFlow.collect { gotoCitySelectionScreen() }
-                }
-                launch {
-                    forecastViewModel.chosenCityNotFoundFlow.collect { city ->
-                        mainView?.run {
-                            val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
-                                city,
-                                onPositiveClick = { forecastViewModel.gotoCitySelection() },
-                                onNegativeClick = { /*pass*/ }
-                            ).show()
-                            alertDialog.setCancelable(false)
-                            alertDialog.setCanceledOnTouchOutside(false)
-                            alertDialog.closeWith(this)
-                        }
-                    }
-                }
-                launch {
-                    forecastViewModel.chosenCityBlankFlow.collect {
-                        appBarViewModel.updateSubtitle(getString(R.string.current_location_triangulating))
-                        geoLocationViewModel.defineCurrentGeoLocation()
-                    }
-                }
-                launch {
-                    geoLocationViewModel.geoLocationByCitySuccessFlow.collect {
-                        appBarViewModel.updateSubtitle(getString(R.string.current_location_success))
-                        forecastViewModel.downloadRemoteForecastForLocation(it)
-                    }
-                }
-                launch {
-                    geoLocationViewModel.geoLocationSuccessFlow.collect {
-                        appBarViewModel.updateSubtitle(getString(R.string.defining_city_from_geo_location))
-                        geoLocationViewModel.defineCityNameByLocation(it)
-                    }
-                }
-                launch {
-                    geoLocationViewModel.geoGeoLocationPermissionFlow.collect {
-                        when (it) {
-                            GeoLocationPermission.Requested -> {
-                                appBarViewModel.updateSubtitle(
-                                    getString(R.string.geo_location_permission_required)
-                                )
-                                requestLocationPermission()
-                            }
-                            GeoLocationPermission.Denied -> {
-                                appBarViewModel.updateSubtitle(
-                                    getString(R.string.current_location_denied)
-                                )
-                                showNoPermissionAlertDialog()
-                            }
-                            GeoLocationPermission.Granted -> {
-                                appBarViewModel.updateSubtitle(
-                                    getString(R.string.current_location_triangulating)
-                                )
-                                geoLocationViewModel.defineCurrentGeoLocation()
-                            }
-                            GeoLocationPermission.PermanentlyDenied -> {
-                                appBarViewModel.updateSubtitle(
-                                getString(R.string.current_location_denied_permanently)
-                                )
-                                showToastAndOpenAppSettings()
-                            }
-                        }
-                    }
-                }
-                launch {
-                    geoLocationViewModel.geoLocationDefineCitySuccessFlow.collect {
-                        locationDefinedAlertDialog(it)
-                    }
-                }
-                launch {
-                    geoLocationViewModel.selectCityFlow.collect {
-                        gotoCitySelectionScreen()
-                    }
-                }
-                launch {
-                    hourlyForecastViewModel.remoteRequestFailedFlow.collect {
-                        hourlyForecastViewModel.getLocalCity()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun initAppBarObserver() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    forecastViewModel.forecastState.collect { state ->
-                        appBarViewModel.updateAppBarState(state)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun locationDefinedAlertDialog(message: String) {
-        mainView?.run {
-            val alertDialog = dialogHelper.getGeoLocationAlertDialogBuilder(
-                message,
-                onPositiveClick = {
-                    showStatusDependingOnCity(it)
-                    forecastViewModel.updateChosenCityState(it)
-                    forecastViewModel.launchWeatherForecast(it)
-                },
-                onNegativeClick = {
-                    appBarViewModel.updateSubtitle(getString(R.string.city_selection_title))
-                    forecastViewModel.gotoCitySelection()
-                }
-            ).show()
-            alertDialog.setCancelable(false)
-            alertDialog.setCanceledOnTouchOutside(false)
-            alertDialog.closeWith(this)
-        }
-    }
-
-    private fun showStatusDependingOnCity(it: String) {
-        if (it.isBlank()) {
-            appBarViewModel.updateSubtitle(getString(R.string.forecast_downloading))
-        } else {
-            appBarViewModel.updateSubtitle(
-                getString(R.string.forecast_downloading_for_city_text, it)
-            )
-        }
-    }
-
-    private fun showNoPermissionAlertDialog() {
-        appBarViewModel.updateSubtitle(getString(R.string.geo_location_permission_required))
-        mainView?.run {
-            val alertDialog = dialogHelper.getLocationPermissionAlertDialogBuilder(
-                onPositiveClick = {
-                    geoLocationViewModel.requestGeoLocationPermission()
-                },
-                onNegativeClick = {
-                    activity?.finish()
-                }
-            ).show()
-            alertDialog.setCancelable(false)
-            alertDialog.setCanceledOnTouchOutside(false)
-            alertDialog.closeWith(this)
         }
     }
 

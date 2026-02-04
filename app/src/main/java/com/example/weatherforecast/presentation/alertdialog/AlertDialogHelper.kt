@@ -1,11 +1,11 @@
-package com.example.weatherforecast.presentation.view.fragments.forecast
+package com.example.weatherforecast.presentation.alertdialog
 
 import android.content.Context
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
-import com.example.weatherforecast.presentation.alertdialog.CitySelectionAlertDialogDelegate
-import com.example.weatherforecast.presentation.alertdialog.GeoLocationAlertDialogDelegate
-import com.example.weatherforecast.presentation.alertdialog.LocationPermissionAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.delegates.CitySelectionAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.delegates.GeoLocationAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.delegates.LocationPermissionAlertDialogDelegate
 
 /**
  * Permission to define location alert dialog.

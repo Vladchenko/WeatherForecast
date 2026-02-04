@@ -1,7 +1,7 @@
-package com.example.weatherforecast.presentation.view
+package com.example.weatherforecast.presentation.view.activities
 
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.work.WorkManager
 import com.example.weatherforecast.R
 import dagger.hilt.android.AndroidEntryPoint
@@ -11,7 +11,7 @@ import javax.inject.Inject
  * Weather forecast main activity
  */
 @AndroidEntryPoint
-class WeatherForecastActivity : FragmentActivity() {
+class WeatherForecastActivity : AppCompatActivity() {
 
     @Inject
     lateinit var workManager: WorkManager
