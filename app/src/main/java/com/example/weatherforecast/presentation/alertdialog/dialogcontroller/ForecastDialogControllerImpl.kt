@@ -1,27 +1,11 @@
-package com.example.weatherforecast.presentation.alertdialog
+package com.example.weatherforecast.presentation.alertdialog.dialogcontroller
 
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
+import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
 
 /**
- * Encapsulates forecast dialogs
- */
-interface ForecastDialogController {
-
-    fun showChosenCityNotFound(city: String, onPositive: (String) -> Unit)
-
-    fun showLocationDefined(
-        message: String,
-        onPositive: (String) -> Unit,
-        onNegative: () -> Unit
-    )
-
-    fun showNoPermission(onPositive: () -> Unit, onNegative: () -> Unit)
-}
-
-/**
- * Implementation using [AlertDialogHelper] and optional [View] for lifecycle binding.
+ * Implementation using [com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper] and optional [View] for lifecycle binding.
  */
 class ForecastDialogControllerImpl(
     private val dialogHelper: AlertDialogHelper,
@@ -69,15 +53,19 @@ class ForecastDialogControllerImpl(
             alertDialog?.closeWith(view)
         }
     }
-}
 
-/**
- * Factory provided via [com.example.weatherforecast.di.ForecastPresentationModule];
- * call [create] with view provider from Fragment.
- */
-class ForecastDialogControllerFactory(
-    private val dialogHelper: AlertDialogHelper
-) {
-    fun create(activity: AppCompatActivity): ForecastDialogController =
-        ForecastDialogControllerImpl(dialogHelper)  { activity.window.decorView.rootView }
+    override fun showPermissionPermanentlyDenied(message: String,
+                                                 onPositive: () -> Unit,
+                                                 onNegative: () -> Unit) {
+        viewProvider()?.let { view ->
+            val alertDialog = dialogHelper.getNoLocationPermissionPermanentlyAlertDialogBuilder(
+                message = message,
+                onPositiveClick = { onPositive() },
+                onNegativeClick = { onNegative() }
+            ).show()
+            alertDialog?.setCancelable(false)
+            alertDialog?.setCanceledOnTouchOutside(false)
+            alertDialog?.closeWith(view)
+        }
+    }
 }

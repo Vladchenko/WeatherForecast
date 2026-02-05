@@ -20,7 +20,7 @@
     <string name="geo_location_by_city_success">Geo location by city succeeded</string>
     <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
     <string name="geo_location_permission_denied">Permission denied. You may grant it by clicking permissions in following window and remove it from denied ones. You will be asked to grant permission again next time.</string>
-    <string name="geo_location_permission_required">Local geo location triangulation permission required</string>
+    <string name="geo_location_permission_required">Local geo location permission required</string>
 
     <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
     <string name="database_city_downloading">No network connection, database last city has been loaded</string>
@@ -56,4 +56,5 @@
     <string name="disconnected">Internet connection not available</string>
     <string name="defining_city_from_geo_location">Defining city from geo location</string>
     <string name="hourly_forecast">Hourly Forecast</string>
+    <string name="open_settings">Открыть настройки</string>
 </resources>

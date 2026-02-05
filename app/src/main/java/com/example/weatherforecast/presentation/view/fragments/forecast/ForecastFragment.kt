@@ -1,18 +1,14 @@
 package com.example.weatherforecast.presentation.view.fragments.forecast
 
 import android.Manifest
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -20,7 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
-import com.example.weatherforecast.presentation.alertdialog.ForecastDialogControllerFactory
+import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.ForecastDialogControllerFactory
 import com.example.weatherforecast.presentation.coordinator.ForecastCoordinator
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.view.fragments.forecast.current.CurrentTimeForecastLayout
@@ -31,7 +27,6 @@ import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocatio
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlin.system.exitProcess
 
 /**
  * Fragment representing a weather forecast.
@@ -40,9 +35,12 @@ import kotlin.system.exitProcess
 @AndroidEntryPoint
 class ForecastFragment : Fragment() {
 
-    @Inject lateinit var statusRendererFactory: StatusRenderer.Factory
-    @Inject lateinit var forecastCoordinatorFactory: ForecastCoordinator.Factory
-    @Inject lateinit var resourceManager: ResourceManager
+    @Inject
+    lateinit var statusRendererFactory: StatusRenderer.Factory
+    @Inject
+    lateinit var forecastCoordinatorFactory: ForecastCoordinator.Factory
+    @Inject
+    lateinit var resourceManager: ResourceManager
 
     private var mainView: View? = null
     private val arguments: ForecastFragmentArgs by navArgs()
@@ -91,7 +89,7 @@ class ForecastFragment : Fragment() {
             resourceManager = resourceManager,
             onGotoCitySelection = { gotoCitySelectionScreen() },
             onRequestLocationPermission = { requestLocationPermission() },
-            onPermanentlyDenied = { showToastAndOpenAppSettings() },
+            onPermanentlyDenied = { requireActivity().finish() },
             onNegativeNoPermission = { activity?.finish() }
         )
         coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
@@ -117,27 +115,6 @@ class ForecastFragment : Fragment() {
 
     private fun requestLocationPermission() {
         requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-    private fun showToastAndOpenAppSettings() {
-        val intent = Intent(
-            ACTION_APPLICATION_DETAILS_SETTINGS,
-            ("package:" + activity?.packageName).toUri()
-        )
-        startActivity(intent)
-        // TODO replace with alert dialog
-        showToast(getString(R.string.geo_location_permission_denied))
-        showToast(getString(R.string.geo_location_permission_denied))
-        showToast(getString(R.string.geo_location_permission_denied))
-        exitProcess(0)
-    }
-
-    private fun showToast(toastMessage: String) {
-        Toast.makeText(
-            requireContext(),
-            toastMessage,
-            Toast.LENGTH_LONG
-        ).show()
     }
 
     private fun gotoCitySelectionScreen() {

@@ -6,7 +6,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.presentation.Message
-import com.example.weatherforecast.presentation.alertdialog.ForecastDialogController
+import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.ForecastDialogController
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
@@ -117,7 +117,11 @@ class ForecastCoordinator(
                 }
                 GeoLocationPermission.PermanentlyDenied -> {
                     statusRenderer.showError(resourceManager.getString(R.string.current_location_denied_permanently))
-                    onPermanentlyDenied()
+                    dialogController.showPermissionPermanentlyDenied(
+                        resourceManager.getString(R.string.current_location_denied_permanently),
+                        onPositive = {},
+                        onNegative = onPermanentlyDenied
+                    )
                 }
             }
         }
