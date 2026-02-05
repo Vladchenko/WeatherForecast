@@ -1,8 +1,8 @@
 package com.example.weatherforecast.data.converter
 
+import com.example.weatherforecast.data.util.TemperatureConversionUtils.convertKelvinToCelsiusDegrees
+import com.example.weatherforecast.data.util.TemperatureConversionUtils.convertKelvinToFahrenheitDegrees
 import com.example.weatherforecast.data.util.TemperatureType
-import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinToCelsiusDegrees
-import com.example.weatherforecast.data.util.WeatherForecastUtils.convertKelvinToFahrenheitDegrees
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 import com.example.weatherforecast.models.domain.Coordinate
 import com.example.weatherforecast.models.domain.WeatherForecast
