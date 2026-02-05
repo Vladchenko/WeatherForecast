@@ -21,8 +21,8 @@ import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecas
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.data.util.TemperatureType
-import com.example.weatherforecast.data.util.permission.AndroidPermissionChecker
 import com.example.weatherforecast.data.util.permission.PermissionChecker
+import com.example.weatherforecast.data.util.permission.PermissionCheckerImpl
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyForecastLocalInteractor
@@ -41,6 +41,7 @@ import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyForecas
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForecastViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
 import com.example.weatherforecast.utils.ResourceManager
+import com.example.weatherforecast.utils.ResourceManagerImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,7 +50,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Dependency injection (Dagger) module.
+ * Dependency injection (Hilt) module.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -58,13 +59,13 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun providePermissionChecker(@ApplicationContext context: Context): PermissionChecker {
-        return AndroidPermissionChecker(context)
+        return PermissionCheckerImpl(context)
     }
 
     @Singleton
     @Provides
     fun provideResourceManager(@ApplicationContext context: Context): ResourceManager {
-        return ResourceManager(context)
+        return ResourceManagerImpl(context)
     }
 
     @Singleton
