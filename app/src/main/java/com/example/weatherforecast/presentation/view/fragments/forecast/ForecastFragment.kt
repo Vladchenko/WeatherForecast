@@ -37,8 +37,10 @@ class ForecastFragment : Fragment() {
 
     @Inject
     lateinit var statusRendererFactory: StatusRenderer.Factory
+
     @Inject
     lateinit var forecastCoordinatorFactory: ForecastCoordinator.Factory
+
     @Inject
     lateinit var resourceManager: ResourceManager
 
@@ -75,7 +77,10 @@ class ForecastFragment : Fragment() {
         mainView = view
         super.onViewCreated(view, savedInstanceState)
         val alertDialogHelper = AlertDialogHelper(requireActivity())
-        val dialogController = ForecastDialogControllerFactory(alertDialogHelper)
+        val dialogController = ForecastDialogControllerFactory(
+            resourceManager,
+            alertDialogHelper
+        )
             .create(requireActivity() as AppCompatActivity)
 
         statusRenderer = statusRendererFactory.create(appBarViewModel)

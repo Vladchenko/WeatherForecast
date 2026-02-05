@@ -12,16 +12,6 @@
     <string name="city_mask_entries_error">City mask entries downloading error</string>
     <string name="city_typing_begin">Begin typing city name …</string>
 
-    <string name="current_location_triangulating">Current geo location defining …</string>
-    <string name="current_location_success">Current geo location success</string>
-    <string name="current_location_denied">Current geo location permission denied</string>
-    <string name="current_location_denied_permanently">Current geo location permission denied</string>
-    <string name="geo_location_by_city_define">Geo location for city %1$s defining</string>
-    <string name="geo_location_by_city_success">Geo location by city succeeded</string>
-    <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
-    <string name="geo_location_permission_denied">Permission denied. You may grant it by clicking permissions in following window and remove it from denied ones. You will be asked to grant permission again next time.</string>
-    <string name="geo_location_permission_required">Local geo location permission required</string>
-
     <string name="database_forecast_downloading">No network connection, database last location forecast has been loaded</string>
     <string name="database_city_downloading">No network connection, database last city has been loaded</string>
     <string name="database_entries_not_found">Database records, matching %s, not found</string>
@@ -41,11 +31,12 @@
     <string name="forecast_for_city_outdated">Outdated forecast for city %1$s</string>
     <string name="forecast_downloading">Forecast is downloading</string>
     <string name="forecast_downloading_for_city_text">Forecast for %s downloading…</string>
-    <string name="forecast_downloading_for_location_text">Forecast for %s\'s location downloading…</string>
-    <string name="forecast_downloading_for_city_failed">Downloading forecast for a city failed, trying for geo location</string>
-    <string name="forecast_downloading_for_location_failed">Downloading forecast for a location also failed</string>
+
+    <string name="no_selected_city_forecast">No forecast for a city</string>
+    <string name="no_selected_city_forecast_description">Forecast for city $city is not available, please choose another city</string>
+
+
     <string name="forecast_downloading_for_city_succeeded">Downloading remote weather forecast for a city succeeded</string>
-    <string name="forecast_downloading_for_location_succeeded">Downloading remote weather forecast for a location succeeded</string>
     <string name="network_available_text">Network available</string>
     <string name="network_lost_error_text">Network connection lost, check connection</string>
     <string name="network_not_available_error_text">Network is not available, check connection</string>
@@ -54,7 +45,24 @@
     <string name="weather_type_example">weather type</string>
     <string name="connected">Internet connection available</string>
     <string name="disconnected">Internet connection not available</string>
-    <string name="defining_city_from_geo_location">Defining city from geo location</string>
     <string name="hourly_forecast">Hourly Forecast</string>
-    <string name="open_settings">Открыть настройки</string>
+    <string name="open_settings">Open settings</string>
+
+    <string name="forecast_downloading_for_city_failed">Downloading forecast for a city failed, trying for geo location</string>
+
+    <string name="geo_location_title">Area geo location</string>
+    <string name="geo_location_message">Google Maps defined your location as $city. Do you agree ?</string>
+    <string name="forecast_downloading_for_location_text">Forecast for %s\'s location downloading…</string>
+    <string name="forecast_downloading_for_location_failed">Downloading forecast for a location also failed</string>
+    <string name="forecast_downloading_for_location_succeeded">Downloading remote weather forecast for a location succeeded</string>
+    <string name="defining_city_from_geo_location">Defining city from geo location</string>
+    <string name="current_location_triangulating">Current geo location defining …</string>
+    <string name="current_location_success">Current geo location success</string>
+    <string name="current_location_denied">Current geo location permission denied</string>
+    <string name="current_location_denied_permanently">Current geo location permission permanently denied. You may grant it by clicking permissions in following window and remove it from denied ones. You will be asked to grant permission again next time.</string>
+    <string name="geo_location_by_city_define">Geo location for city %1$s defining</string>
+    <string name="geo_location_by_city_success">Geo location by city succeeded</string>
+    <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
+    <string name="geo_location_permission_required">Local geo location permission required</string>
+    <string name="geo_location_permission_offer">This app requires geo location permission to find out your location. Please agree to grant permission or quit.</string>
 </resources>

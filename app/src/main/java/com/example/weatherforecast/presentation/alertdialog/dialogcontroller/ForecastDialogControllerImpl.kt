@@ -3,11 +3,18 @@ package com.example.weatherforecast.presentation.alertdialog.dialogcontroller
 import android.view.View
 import com.example.weatherforecast.presentation.PresentationUtils.closeWith
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
+import com.example.weatherforecast.utils.ResourceManager
 
 /**
- * Implementation using [com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper] and optional [View] for lifecycle binding.
+ * Implementation of [ForecastDialogController]
+ *
+ * @constructor
+ * @property resourceManager to provide localized strings for dialogs.
+ * @property dialogHelper to build dialogs.
+ * @property viewProvider to get the view to close the dialog with.
  */
 class ForecastDialogControllerImpl(
+    private val resourceManager: ResourceManager,
     private val dialogHelper: AlertDialogHelper,
     private val viewProvider: () -> View?
 ) : ForecastDialogController {
@@ -16,6 +23,7 @@ class ForecastDialogControllerImpl(
         viewProvider()?.let { view ->
             val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
                 city,
+                resourceManager,
                 onPositiveClick = onPositive,
                 onNegativeClick = {}
             ).show()
@@ -33,6 +41,7 @@ class ForecastDialogControllerImpl(
         viewProvider()?.let { view ->
             val alertDialog = dialogHelper.getGeoLocationAlertDialogBuilder(
                 message,
+                resourceManager,
                 onPositiveClick = onPositive,
                 onNegativeClick = onNegative
             ).show()
@@ -45,7 +54,8 @@ class ForecastDialogControllerImpl(
     override fun showNoPermission(onPositive: () -> Unit, onNegative: () -> Unit) {
         viewProvider()?.let { view ->
             val alertDialog = dialogHelper.getLocationPermissionAlertDialogBuilder(
-                onPositiveClick = { onPositive() },
+                resourceManager,
+                onPositiveClick = onPositive,
                 onNegativeClick = onNegative
             ).show()
             alertDialog?.setCancelable(false)
@@ -54,12 +64,11 @@ class ForecastDialogControllerImpl(
         }
     }
 
-    override fun showPermissionPermanentlyDenied(message: String,
-                                                 onPositive: () -> Unit,
+    override fun showPermissionPermanentlyDenied(onPositive: () -> Unit,
                                                  onNegative: () -> Unit) {
         viewProvider()?.let { view ->
             val alertDialog = dialogHelper.getNoLocationPermissionPermanentlyAlertDialogBuilder(
-                message = message,
+                resourceManager,
                 onPositiveClick = { onPositive() },
                 onNegativeClick = { onNegative() }
             ).show()

@@ -1,7 +1,7 @@
 package com.example.weatherforecast.presentation.alertdialog.dialogcontroller
 
 /**
- * Encapsulates forecast dialogs
+ * Manages forecast dialogs showing
  */
 interface ForecastDialogController {
 
@@ -37,11 +37,9 @@ interface ForecastDialogController {
     /**
      * Shows dialog when permission to provide geo location for the current device is permanently denied
      *
-     * @param message to show
      * @param onPositive callback when user clicks positive button
      * @param onNegative callback when user clicks negative button
      */
-    fun showPermissionPermanentlyDenied(message: String,
-                                        onPositive: () -> Unit,
+    fun showPermissionPermanentlyDenied(onPositive: () -> Unit,
                                         onNegative: () -> Unit)
 }

@@ -3,25 +3,29 @@ package com.example.weatherforecast.presentation.alertdialog.delegates
 import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
+import com.example.weatherforecast.R
+import com.example.weatherforecast.utils.ResourceManager
 
 /**
- * Shows alert dialog and processes its buttons clicks
+ * Shows alert dialog for a server city lookup failure and processes its buttons clicks
  *
  * @property city to have a weather forecast for
+ * @property resourceManager to get strings from resources
  * @property onPositiveClick ok button click callback
  * @property onNegativeClick cancel button click callback
  */
-class CitySelectionAlertDialogDelegate(private val city: String,
-                                       private val onPositiveClick: (String) -> Unit,
-                                       private val onNegativeClick: () -> Unit) {
+class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
+                                              private val resourceManager: ResourceManager,
+                                              private val onPositiveClick: (String) -> Unit,
+                                              private val onNegativeClick: () -> Unit) {
 
     /**
      * Get [AlertDialog.Builder] using [Context]
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("City forecast failed")
-        builder.setMessage("Forecast for city $city is not available, please choose another city")
+        builder.setTitle(resourceManager.getString(R.string.no_selected_city_forecast))
+        builder.setMessage(resourceManager.getString(R.string.no_selected_city_forecast_description))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

@@ -3,16 +3,18 @@ package com.example.weatherforecast.presentation.alertdialog.delegates
 import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
+import com.example.weatherforecast.R
+import com.example.weatherforecast.utils.ResourceManager
 
 /**
  * Shows alert dialog when geo location permission is not granted
  *
- * @param message message to show in a dialog
+ * @property resourceManager to get strings from resources
  * @property onPositiveClick positive click callback
  * @property onNegativeClick negative click callback
  */
 class NoLocationPermissionPermanentlyAlertDialogDelegate(
-    private val message: String,
+    private val resourceManager: ResourceManager,
     private val onPositiveClick: (String) -> Unit,
     private val onNegativeClick: () -> Unit
 ) {
@@ -22,8 +24,8 @@ class NoLocationPermissionPermanentlyAlertDialogDelegate(
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Geo location permission not granted")
-        builder.setMessage(message)
+        builder.setTitle(resourceManager.getString(R.string.current_location_denied))
+        builder.setMessage(resourceManager.getString(R.string.current_location_denied_permanently))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

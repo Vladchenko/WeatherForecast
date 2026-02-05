@@ -118,7 +118,6 @@ class ForecastCoordinator(
                 GeoLocationPermission.PermanentlyDenied -> {
                     statusRenderer.showError(resourceManager.getString(R.string.current_location_denied_permanently))
                     dialogController.showPermissionPermanentlyDenied(
-                        resourceManager.getString(R.string.current_location_denied_permanently),
                         onPositive = {},
                         onNegative = onPermanentlyDenied
                     )
