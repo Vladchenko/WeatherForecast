@@ -14,7 +14,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 /**
  * Defines geo location of a device.
  */
-class WeatherForecastGeoLocator(@ApplicationContext val context: Context) {
+class WeatherForecastGeoLocator(
+    @param:ApplicationContext private val context: Context
+) {
 
     /**
      * Define current geo location and send callbacks through [locationListener].
@@ -22,18 +24,22 @@ class WeatherForecastGeoLocator(@ApplicationContext val context: Context) {
     fun defineCurrentLocation(locationListener: GeoLocationListener) {
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, object : CancellationToken() {
-                override fun onCanceledRequested(p0: OnTokenCanceledListener) = CancellationTokenSource().token
-                override fun isCancellationRequested() = false
-            }).addOnSuccessListener { location: Location? ->
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                object : CancellationToken() {
+                    override fun onCanceledRequested(p0: OnTokenCanceledListener) =
+                        CancellationTokenSource().token
+                    override fun isCancellationRequested() = false
+                }).addOnSuccessListener { location: Location? ->
                 onDefineLocationSuccess(location, locationListener, context)
             }.addOnFailureListener { exception ->
                 onDefineLocationFailure(exception, locationListener)
             }.addOnCanceledListener {
                 Log.e(TAG, "Define location cancelled")
-                locationListener.onCurrentGeoLocationFail(context.getString(R.string.city_locating_cancelled))
+                locationListener.onCurrentGeoLocationFail(context.getString(R.string.current_location_cancelled))
             }
         } catch (sec: SecurityException) {
+            Log.e(TAG, sec.message.toString())
             locationListener.onNoGeoLocationPermission()
         }
     }

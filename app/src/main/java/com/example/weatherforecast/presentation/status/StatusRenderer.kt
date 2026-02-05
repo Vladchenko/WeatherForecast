@@ -94,7 +94,7 @@ class StatusRenderer(
             statusDisplay.showStatus(
                 StatusDisplay.Status(
                     text = resourceManager.getString(
-                        R.string.forecast_downloading_for_city_text,
+                        R.string.forecast_for_city_loading,
                         city
                     ),
                     type = MessageType.INFO
