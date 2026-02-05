@@ -16,7 +16,7 @@ import com.example.weatherforecast.utils.ResourceManager
  */
 class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
                                               private val resourceManager: ResourceManager,
-                                              private val onPositiveClick: (String) -> Unit,
+                                              private val onPositiveClick: () -> Unit,
                                               private val onNegativeClick: () -> Unit) {
 
     /**
@@ -24,7 +24,7 @@ class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(resourceManager.getString(R.string.no_selected_city_forecast))
+        builder.setTitle(resourceManager.getString(R.string.no_selected_city_forecast, city))
         builder.setMessage(resourceManager.getString(R.string.no_selected_city_forecast_description))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
@@ -35,7 +35,7 @@ class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
     }
 
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
-        onPositiveClick(city)
+        onPositiveClick()
         dialogInterface.dismiss()
     }
 

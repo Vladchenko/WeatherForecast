@@ -32,7 +32,7 @@
     <string name="forecast_downloading">Forecast is downloading</string>
     <string name="forecast_downloading_for_city_text">Forecast for %s downloading…</string>
 
-    <string name="no_selected_city_forecast">No forecast for a city</string>
+    <string name="no_selected_city_forecast">Server has ho forecast for %1$s</string>
     <string name="no_selected_city_forecast_description">Forecast for city $city is not available, please choose another city</string>
 
 

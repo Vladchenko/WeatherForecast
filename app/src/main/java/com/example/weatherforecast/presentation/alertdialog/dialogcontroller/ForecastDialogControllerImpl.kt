@@ -19,7 +19,7 @@ class ForecastDialogControllerImpl(
     private val viewProvider: () -> View?
 ) : ForecastDialogController {
 
-    override fun showChosenCityNotFound(city: String, onPositive: (String) -> Unit) {
+    override fun showChosenCityNotFound(city: String, onPositive: () -> Unit) {
         viewProvider()?.let { view ->
             val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
                 city,

@@ -11,7 +11,7 @@ interface ForecastDialogController {
      * @param city that user picked up
      * @param onPositive callback when user clicks positive button
      */
-    fun showChosenCityNotFound(city: String, onPositive: (String) -> Unit)
+    fun showChosenCityNotFound(city: String, onPositive: () -> Unit)
 
     /**
      * Shows dialog when location is defined

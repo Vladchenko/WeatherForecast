@@ -81,7 +81,7 @@ class AlertDialogHelper(private val context: Context) {
     fun getAlertDialogBuilderToChooseAnotherCity(
         city: String,
         resourceManager:ResourceManager,
-        onPositiveClick: (String) -> Unit,
+        onPositiveClick: () -> Unit,
         onNegativeClick: () -> Unit
     ): AlertDialog.Builder {
         return SelectedCityNotFoundAlertDialogDelegate(
