@@ -3,6 +3,7 @@ package com.example.weatherforecast.models.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
 /**
@@ -16,6 +17,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Entity(tableName = "citiesNames")
+@InternalSerializationApi
 data class WeatherForecastCityResponse(
     @PrimaryKey
     @SerializedName("name")

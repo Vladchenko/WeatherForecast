@@ -11,6 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 /**
@@ -22,6 +23,7 @@ object PersistenceModule {
 
     @Provides
     @Singleton
+    @InternalSerializationApi
     fun provideWeatherForecastDatabase(
         @ApplicationContext context: Context
     ): WeatherForecastDatabase {
@@ -36,18 +38,21 @@ object PersistenceModule {
 
     @Provides
     @Singleton
+    @InternalSerializationApi
     fun provideWeatherForecastDAO(database: WeatherForecastDatabase): WeatherForecastDAO {
         return database.getWeatherForecastInstance()
     }
 
     @Provides
     @Singleton
+    @InternalSerializationApi
     fun provideHourlyForecastDAO(database: WeatherForecastDatabase): HourlyForecastDAO {
         return database.getHourlyForecastInstance()
     }
 
     @Provides
     @Singleton
+    @InternalSerializationApi
     fun provideCitiesNamesDAO(database: WeatherForecastDatabase): CitiesNamesDAO {
         return database.getCitiesNamesInstance()
     }

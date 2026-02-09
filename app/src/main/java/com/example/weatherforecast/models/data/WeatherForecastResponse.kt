@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.example.weatherforecast.data.database.WeatherForecastTypeConverters
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
 /**
@@ -31,6 +32,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Entity(tableName = "citiesForecasts")
+@InternalSerializationApi
 @TypeConverters(WeatherForecastTypeConverters::class)
 data class WeatherForecastResponse(
     @SerializedName("coord")
@@ -73,6 +75,7 @@ data class WeatherForecastResponse(
  * @property longitude Longitude coordinate
  */
 @Serializable
+@InternalSerializationApi
 data class Coordinate(
     @SerializedName("lat")
     val latitude: Double,
@@ -90,6 +93,7 @@ data class Coordinate(
  * @property all Cloud coverage percentage
  */
 @Serializable
+@InternalSerializationApi
 data class Clouds(
     @SerializedName("all")
     val all: Long
@@ -110,6 +114,7 @@ data class Clouds(
  * @property humidity Humidity percentage
  */
 @Serializable
+@InternalSerializationApi
 data class Main(
     @SerializedName("temp")
     val temp: Double,
@@ -139,6 +144,7 @@ data class Main(
  * @property sunset Sunset time
  */
 @Serializable
+@InternalSerializationApi
 data class System(
     @SerializedName("type")
     val type: Long,
@@ -165,6 +171,7 @@ data class System(
  * @property icon Weather icon code
  */
 @Serializable
+@InternalSerializationApi
 data class Weather(
     @SerializedName("id")
     val id: Long,
@@ -188,6 +195,7 @@ data class Weather(
  * @property gust Wind gust speed
  */
 @Serializable
+@InternalSerializationApi
 data class Wind(
     @SerializedName("speed")
     val speed: Double,

@@ -9,6 +9,7 @@ import com.example.weatherforecast.data.api.customexceptions.WeatherForecastExce
 import com.example.weatherforecast.models.data.HourlyForecastResponse
 import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.models.data.WeatherForecastResponse
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -24,6 +25,7 @@ interface WeatherForecastApiService {
      * @param apiKey API key for authentication
      * @return Response containing weather forecast data
      */
+    @InternalSerializationApi
     @ExceptionsMapper(WeatherForecastExceptionMapper::class)
     @GET(WEATHER_DATA)
     suspend fun getWeatherForecast(
@@ -38,6 +40,7 @@ interface WeatherForecastApiService {
      * @param apiKey API key for authentication
      * @return Response containing hourly forecast data
      */
+    @InternalSerializationApi
     @ExceptionsMapper(WeatherForecastExceptionMapper::class)
     @GET(HOURLY_FORECAST)
     suspend fun getHourlyForecast(
@@ -45,6 +48,7 @@ interface WeatherForecastApiService {
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<HourlyForecastResponse>
 
+    @InternalSerializationApi
     @GET("data/2.5/forecast")
     suspend fun getHourlyForecastByLocation(
         @Query("lat") latitude: Double,
@@ -66,6 +70,7 @@ interface CityApiService {
      * @param apiKey API key for authentication
      * @return Response containing list of matching cities
      */
+    @InternalSerializationApi
     @ExceptionsMapper(WeatherForecastExceptionMapper::class)
     @GET(GEO_DIRECT)
     suspend fun searchCities(

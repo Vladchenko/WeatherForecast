@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.weatherforecast.models.data.HourlyForecastResponse
 import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.models.data.WeatherForecastResponse
+import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Room database for storing weather forecast data.
@@ -16,6 +17,7 @@ import com.example.weatherforecast.models.data.WeatherForecastResponse
     entities = [WeatherForecastResponse::class, WeatherForecastCityResponse::class, HourlyForecastResponse::class],
     version = 5
 )
+@InternalSerializationApi
 abstract class WeatherForecastDatabase : RoomDatabase() {
     abstract fun getCitiesNamesInstance(): CitiesNamesDAO
     abstract fun getWeatherForecastInstance(): WeatherForecastDAO
