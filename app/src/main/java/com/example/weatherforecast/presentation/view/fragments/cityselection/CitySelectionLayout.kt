@@ -68,12 +68,21 @@ import kotlinx.coroutines.launch
 /**
  * Layout for a city selection screen.
  *
- * @param toolbarTitle          text for a toolbar title
- * @param citySelectionTitle    title text for city selection
- * @param queryLabel            mask typing text field hint text
- * @param onBackClick           back button click callback
- * @param onCityClicked         city name click callback
- * @param viewModel             viewModel for city selection ops
+ * Displays:
+ * - A top app bar with title and subtitle from [AppBarViewModel]
+ * - An auto-complete text field for entering a city name
+ * - A list of predicted city names based on user input
+ * - Background image for visual appeal
+ *
+ * The screen supports keyboard hiding, clearing input, and handling city selection.
+ *
+ * @param toolbarTitle Text to display in the toolbar (not currently used — title comes from [appBarViewModel])
+ * @param citySelectionTitle Title shown above the search field
+ * @param queryLabel Hint text for the city search input field
+ * @param onBackClick Callback triggered when the back button is clicked
+ * @param onCityClicked Callback invoked with the full city name when a city is selected
+ * @param appBarViewModel ViewModel providing UI state for the app bar (title, subtitle, colors)
+ * @param viewModel ViewModel managing city name search and suggestions
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,6 +171,20 @@ fun CitySelectionLayout(
     )
 }
 
+/**
+ * Returns an event handler for city mask (search query) actions.
+ *
+ * Handles various user interactions like typing, selecting a suggestion, clearing input, or pressing "Done".
+ *
+ * @param keyboardController Controller to hide the soft keyboard when needed
+ * @param scope Provides a [CoroutineScope] for launching coroutines
+ * @param onCityClicked Called when a city is selected; receives the full city name
+ * @param onCityMaskEmptied Callback to clear the current city mask input
+ * @param onCitiesNamesEmptied Callback to clear the list of suggested cities
+ * @param getCitiesNamesForMask Loads city suggestions based on the current input mask
+ *
+ * @return A function that takes a [CityMaskAction] and performs the corresponding operation
+ */
 @Composable
 private fun cityMaskAction(
     keyboardController: SoftwareKeyboardController?,
@@ -207,6 +230,20 @@ private fun cityMaskAction(
         }
     }
 
+/**
+ * A reusable text field with a clear button and "Done" action support.
+ *
+ * Can be rendered as outlined or filled style.
+ *
+ * @param modifier Modifier to apply to the text field
+ * @param query Current input text
+ * @param label Label/hint displayed inside the text field
+ * @param useOutlined If true, uses [OutlinedTextField]; otherwise, uses [TextField]
+ * @param colors Custom colors for the text field (optional)
+ * @param onDoneActionClick Called when the "Done" action is triggered on the keyboard
+ * @param onClearClick Called when the clear ("X") icon is clicked
+ * @param onQueryChanged Called whenever the text input changes
+ */
 @Composable
 private fun QuerySearch(
     modifier: Modifier = Modifier,
@@ -281,6 +318,24 @@ private fun QuerySearch(
     }
 }
 
+/**
+ * Generic auto-complete UI component with drop-down suggestions.
+ *
+ * Displays a text field and a scrollable list of predictions below it.
+ *
+ * @param T Type of prediction items (e.g., [CityDomainModel])
+ * @param modifier Modifier for the container
+ * @param query Current user input
+ * @param queryLabel Hint text for the input field
+ * @param useOutlined Whether to use outlined or filled text field style
+ * @param colors Optional custom colors for the text field
+ * @param onQueryChanged Called when input changes
+ * @param predictions List of available suggestions
+ * @param onDoneActionClick Triggered when "Done" is pressed
+ * @param onClearClick Triggered when the clear button is clicked
+ * @param onItemClick Called when a suggestion is clicked
+ * @param itemContent Composable lambda defining how each suggestion is rendered
+ */
 @Composable
 private fun <T> AutoCompleteUI(
     modifier: Modifier,
@@ -338,6 +393,17 @@ private fun <T> AutoCompleteUI(
     }
 }
 
+/**
+ * Input field for city name with auto-completion and prediction display.
+ *
+ * Wraps [AutoCompleteUI] with specific logic for city name search.
+ *
+ * @param cityName Current city input state (wrapper with mutable [CityItem.cityMask])
+ * @param queryLabel Hint text for the search field
+ * @param modifier Modifier for layout customization
+ * @param cityMaskPredictions List of matching cities to display as suggestions
+ * @param cityMaskAction Handler for user actions (typing, selection, etc.)
+ */
 @Composable
 private fun AddressEdit(
     cityName: CityItem,

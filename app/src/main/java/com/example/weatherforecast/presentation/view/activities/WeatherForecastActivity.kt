@@ -8,7 +8,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 /**
- * Weather forecast main activity
+ * Main activity of the Weather Forecast application.
+ *
+ * Serves as the entry point for the app UI and hosts navigation components.
+ * Uses Hilt for dependency injection, including [WorkManager] for background tasks.
+ *
+ * The layout is defined in [R.layout.weather_forecast_activity] and typically contains
+ * a NavHostFragment to manage screen navigation.
  */
 @AndroidEntryPoint
 class WeatherForecastActivity : AppCompatActivity() {

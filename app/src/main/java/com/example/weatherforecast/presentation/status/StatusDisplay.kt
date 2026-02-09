@@ -9,9 +9,14 @@ import com.example.weatherforecast.models.presentation.MessageType
 interface StatusDisplay {
 
     /**
-     * Shows a status message
+     * Displays a status message in the app bar's subtitle.
      *
-     * @param status message to show
+     * The appearance (text and color) depends on the message type:
+     * - [MessageType.INFO]: Normal informational message
+     * - [MessageType.WARNING]: Warning with appropriate color
+     * - [MessageType.ERROR]: Error indication with error color
+     *
+     * @param status The status object containing message text and type
      */
     fun showStatus(status: Status)
 

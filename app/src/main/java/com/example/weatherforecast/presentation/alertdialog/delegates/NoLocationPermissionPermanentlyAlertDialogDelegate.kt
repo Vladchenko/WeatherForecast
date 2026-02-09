@@ -7,11 +7,14 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.utils.ResourceManager
 
 /**
- * Shows alert dialog when geo location permission is not granted
+ * Shows an alert dialog when location permission has been permanently denied.
  *
- * @property resourceManager to get strings from resources
- * @property onPositiveClick positive click callback
- * @property onNegativeClick negative click callback
+ * Informs the user that location access is disabled and must be manually enabled
+ * in system settings. Offers options to open settings or cancel and use manual input.
+ *
+ * @property resourceManager Helper to retrieve localized strings from resources
+ * @property onPositiveClick Callback triggered when "OK" is tapped (typically opens app settings)
+ * @property onNegativeClick Callback triggered when "Cancel" is tapped
  */
 class NoLocationPermissionPermanentlyAlertDialogDelegate(
     private val resourceManager: ResourceManager,
@@ -20,7 +23,13 @@ class NoLocationPermissionPermanentlyAlertDialogDelegate(
 ) {
 
     /**
-     * Get [AlertDialog.Builder] using [Context]
+     * Creates and returns a configured [AlertDialog.Builder] for this dialog.
+     *
+     * Sets title, message, and both positive ("OK") and negative ("Cancel") buttons
+     * with appropriate click listeners.
+     *
+     * @param context Android context required to build the dialog
+     * @return Fully configured [AlertDialog.Builder] instance
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)

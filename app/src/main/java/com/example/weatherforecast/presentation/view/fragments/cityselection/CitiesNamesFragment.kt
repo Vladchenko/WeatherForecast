@@ -14,7 +14,12 @@ import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNa
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Represents a feature of choosing a city to have a weather forecast for it further on.
+ * Fragment for selecting a city from a list of suggestions based on user input.
+ *
+ * Displays a search interface with auto-complete functionality, allowing users to type
+ * and select a city name. Upon selection, navigates to the weather forecast screen.
+ *
+ * Uses [CitySelectionLayout] as its Compose UI root and shares ViewModels with the host activity.
  */
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
@@ -45,7 +50,11 @@ class CitiesNamesFragment : Fragment() {
     }
 
     /**
-     * Open forecast fragment to show data on a [chosenCity] in it.
+     * Navigates to the current weather forecast screen for the specified city.
+     *
+     * Called when a city is selected from the suggestions list.
+     *
+     * @param chosenCity Name of the city to display weather for
      */
     private fun openForecastFragment(chosenCity: String) {
         val action =

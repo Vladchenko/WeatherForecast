@@ -8,7 +8,8 @@ import com.example.weatherforecast.utils.ResourceManager
 
 /**
  * Alert dialog that asks user if the geo located city is a proper one to provide a weather forecast on.
- * If a user agrees to the located city, its forecast is downloaded, otherwise, user is suggested to choose another city.
+ * If a user agrees to the located city, its forecast is downloaded, otherwise, user is suggested
+ * to choose another city.
  *
  * @property city to point what city geo location has defined.
  * @property resourceManager to get strings from resources

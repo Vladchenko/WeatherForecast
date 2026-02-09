@@ -21,11 +21,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * View model (MVVM component) for cities names presentation.
+ * ViewModel for managing the city name search and selection UI state.
  *
- * @param connectivityObserver internet connectivity observer
- * @property coroutineDispatchers dispatchers for coroutines
- * @property citiesNamesInteractor provides domain layer data.
+ * This ViewModel handles:
+ * - Observing user input (city name mask)
+ * - Fetching matching city names from the domain layer
+ * - Managing UI state for city suggestions
+ * - Error handling during data retrieval
+ * - Clearing cached data on demand
+ *
+ * It uses [CitiesNamesInteractor] to retrieve data and respects internet connectivity
+ * via [ConnectivityObserver]. All coroutines are launched in [viewModelScope]
+ * with proper exception handling.
+ *
+ * @property connectivityObserver Observes network connectivity state
+ * @property coroutineDispatchers Provides dispatchers for coroutine execution
+ * @property citiesNamesInteractor Business logic handler for city name operations
  */
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
@@ -37,8 +48,19 @@ class CitiesNamesViewModel @Inject constructor(
     private val _cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
     private val _citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
 
+    /**
+     * StateFlow representing the current city name mask entered by the user.
+     *
+     * Used to track user input for auto-completion. Updates trigger city name lookups.
+     */
     val cityMaskState: StateFlow<CityItem>
         get() = _cityMaskState
+
+    /**
+     * Current list of city names matching the input mask.
+     *
+     * Nullable — `null` indicates no search has been performed yet or results were cleared.
+     */
     val citiesNamesState: State<CitiesNamesDomainModel?>
         get() = _citiesNamesState
 
@@ -47,49 +69,64 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, throwable.message.orEmpty())
+        Log.e(TAG, throwable.message.orEmpty(), throwable)
         when (throwable) {
             is NoSuchDatabaseEntryException -> {
                 showError(R.string.default_city_absent)
-                Log.d(TAG, throwable.message.toString())
+                Log.d(TAG, "Default city not found in database", throwable)
             }
-            is Exception -> showError(throwable.message.toString())
+            is Exception -> {
+                showError(throwable.message.toString())
+                Log.e(TAG, "Unexpected error in city name loading", throwable)
+            }
         }
     }
 
     /**
-     * Download a cities names beginning with string mask [city]
+     * Requests a list of cities whose names start with the given [city] prefix.
+     *
+     * Launches a coroutine to load data via [CitiesNamesInteractor].
+     * Updates [citiesNamesState] with the result or shows an error if applicable.
+     *
+     * @param city Prefix string to filter city names (e.g., "Kaz")
      */
     fun getCitiesNamesForMask(city: String) {
-        Log.d(TAG, city)
-        viewModelScope.launch(exceptionHandler) {
+        Log.d(TAG, "Fetching cities for mask: $city")
+        viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
             val response = citiesNamesInteractor.loadCitiesNames(city)
             _citiesNamesState.value = response
             if (response.error.isNotBlank()) {
-                Log.d(TAG, response.error)
+                Log.d(TAG, "Error from interactor: ${response.error}")
                 showError(response.error)
             }
         }
     }
 
     /**
-     * Delete all cities names. Method is used on demand.
+     * Deletes all stored city name entries from the local database.
+     *
+     * Useful for clearing cache or resetting data. Executes in a background coroutine.
      */
     fun deleteAllCitiesNames() {
-        viewModelScope.launch(exceptionHandler) {
+        Log.d(TAG, "Deleting all city names from database")
+        viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
             citiesNamesInteractor.deleteAllCitiesNames()
         }
     }
 
     /**
-     * Clear a mask that provides several cities names that match it.
+     * Clears the current city name mask input.
+     *
+     * Resets the search query, typically used when the user wants to start over.
      */
     fun clearCityMask() {
         _cityMaskState.value = CityItem("")
     }
 
     /**
-     * Clear a list of cities that are matching a mask.
+     * Clears the list of suggested city names.
+     *
+     * Does not affect the input mask. Used to reset suggestion UI independently.
      */
     fun clearCitiesNames() {
         _citiesNamesState.value = null

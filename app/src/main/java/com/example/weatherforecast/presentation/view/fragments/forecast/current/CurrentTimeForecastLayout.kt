@@ -56,7 +56,22 @@ import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherForeca
 import kotlinx.coroutines.flow.drop
 
 /**
- * Layout for a main screen fragment
+ * Composable layout for the main weather forecast screen.
+ *
+ * Displays:
+ * - A top app bar with title, subtitle, back button, and hourly forecast toggle
+ * - Current weather data (city, temperature, weather condition, time)
+ * - Optional hourly forecast panel (shown when toggled)
+ * - Full-screen progress indicator during data loading
+ *
+ * The background is set using a static image that fills the screen.
+ *
+ * @param mainContentTextColor Color used for all main content text elements
+ * @param onCityClick Callback invoked when the city name is clicked
+ * @param onBackClick Callback invoked when the back button is pressed
+ * @param appBarViewModel ViewModel managing the app bar state (title, subtitle, colors)
+ * @param viewModel Main ViewModel providing current weather forecast state
+ * @param hourlyViewModel ViewModel providing hourly forecast data
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,6 +177,13 @@ fun CurrentTimeForecastLayout(
     )
 }
 
+/**
+ * Displays the full-screen background image.
+ *
+ * The image covers the entire screen and respects scaffold padding.
+ *
+ * @param innerPadding Padding provided by [Scaffold] to account for system bars
+ */
 @Composable
 private fun BackgroundImage(
     innerPadding: PaddingValues
@@ -176,6 +198,16 @@ private fun BackgroundImage(
     )
 }
 
+/**
+ * Displays the main weather information: city, time, temperature, and weather condition.
+ *
+ * The city name is clickable and triggers [onCityClick].
+ *
+ * @param innerPadding Padding from the scaffold to prevent system UI overlap
+ * @param mainContentTextColor Color applied to all text elements
+ * @param onCityClick Callback triggered when the user taps the city name
+ * @param uiState Success state containing the current weather data
+ */
 @Composable
 private fun MainContent(
     innerPadding: PaddingValues,
@@ -238,6 +270,12 @@ private fun MainContent(
     }
 }
 
+/**
+ * Displays a full-screen semi-transparent overlay with a loading spinner.
+ *
+ * Shown when [viewModel.showProgressBarState] is true.
+ * Uses a white background with 60% opacity to dim the underlying content.
+ */
 @Composable
 fun ShowProgressBar() {
     Box(

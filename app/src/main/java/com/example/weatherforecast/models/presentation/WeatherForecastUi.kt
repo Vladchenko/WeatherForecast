@@ -4,16 +4,20 @@ package com.example.weatherforecast.models.presentation
 import androidx.compose.runtime.Immutable
 
 /**
- * Weather forecast response model
+ * Data class representing the weather forecast UI state.
  *
- * @property city a name of city to provide a weather forecast on
- * @property coordinate of longitude and latitude
- * @property dateTime on which a forecast is provided
- * @property weatherImageId weather icon id
- * @property temperature for the city
- * @property weatherType like rain, snow, etc
- * @property temperatureType like Celsius, Fahrenheit
- * @property serverError if there is an error from remote server
+ * Holds all necessary information to display current weather conditions in the UI,
+ * including city name, coordinates, date/time, temperature, weather condition,
+ * associated icon resource ID, and any server error message.
+ *
+ * @property city Name of the city for which the forecast is displayed
+ * @property coordinate Geographic coordinates (latitude and longitude) of the city
+ * @property dateTime Formatted date and time of the forecast
+ * @property weatherImageId Resource ID of the weather condition icon (e.g., sunny, rainy)
+ * @property temperature Current temperature as a formatted string
+ * @property weatherType Description of the weather condition (e.g., "clear sky", "light rain")
+ * @property temperatureType Unit of temperature measurement (e.g., "°C", "°F")
+ * @property serverError Error message from the API; empty if no error occurred
  */
 data class WeatherForecastUi(
     val city: String,
@@ -31,10 +35,13 @@ data class WeatherForecastUi(
 }
 
 /**
- * Coordinate of a location to provide a weather forecast for
+ * Immutable data class representing geographic coordinates.
  *
- * @property latitude 1st ordinate to locate city
- * @property longitude 2nd ordinate to locate city
+ * Used to store latitude and longitude values for a location.
+ * Marked with [@Immutable] for use in Jetpack Compose state.
+ *
+ * @property latitude Latitude in degrees (range: -90 to +90)
+ * @property longitude Longitude in degrees (range: -180 to +180)
  */
 @Immutable
 data class Coordinate(

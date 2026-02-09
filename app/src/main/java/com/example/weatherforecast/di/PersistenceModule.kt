@@ -15,7 +15,29 @@ import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 /**
- * Dagger Hilt module for providing persistence-related dependencies.
+ * Dagger Hilt module that provides persistence-related dependencies for the application.
+ *
+ * This object module is installed in the [SingletonComponent], ensuring that all provided instances
+ * are created once and shared across the entire app lifecycle.
+ *
+ * It supplies:
+ * - A singleton [WeatherForecastDatabase] instance using Room, which serves as the main database
+ *   for storing weather forecasts, hourly data, and city names
+ * - Data Access Objects (DAOs) for each entity:
+ *   - [WeatherForecastDAO] – for current weather data
+ *   - [HourlyForecastDAO] – for hourly forecast entries
+ * - [CitiesNamesDAO] – for cached city name suggestions
+ * - A [SharedPreferences] instance for lightweight persistent storage,
+ *   used to save user preferences such as the selected city
+ *
+ * The database is initialized via [WeatherForecastDatabase.getInstance], which ensures a single instance
+ * across the app and supports proper dependency injection.
+ *
+ * @see WeatherForecastDatabase
+ * @see WeatherForecastDAO
+ * @see HourlyForecastDAO
+ * @see CitiesNamesDAO
+ * @see SharedPreferences
  */
 @Module
 @InstallIn(SingletonComponent::class)

@@ -7,12 +7,15 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.utils.ResourceManager
 
 /**
- * Shows alert dialog for a server city lookup failure and processes its buttons clicks
+ * Shows an alert dialog when the selected city is not found during a server lookup.
  *
- * @property city to have a weather forecast for
- * @property resourceManager to get strings from resources
- * @property onPositiveClick ok button click callback
- * @property onNegativeClick cancel button click callback
+ * The dialog informs the user that no forecast data is available for the given city
+ * and allows them to confirm or cancel the action.
+ *
+ * @property city Name of the city for which forecast was not found
+ * @property resourceManager Helper to retrieve localized strings from resources
+ * @property onPositiveClick Callback triggered when the "OK" button is pressed
+ * @property onNegativeClick Callback triggered when the "Cancel" button is pressed (not currently set in builder)
  */
 class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
                                               private val resourceManager: ResourceManager,
@@ -20,7 +23,13 @@ class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
                                               private val onNegativeClick: () -> Unit) {
 
     /**
-     * Get [AlertDialog.Builder] using [Context]
+     * Creates and configures an [AlertDialog.Builder] for displaying the city not found dialog.
+     *
+     * Sets title, message, and positive button with dismissal behavior.
+     * Negative button must be added separately if needed.
+     *
+     * @param context Android context required to build the dialog
+     * @return Configured [AlertDialog.Builder] instance
      */
     fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
@@ -34,11 +43,23 @@ class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
         return builder
     }
 
+    /**
+     * Handles click on the positive (OK) button: executes the [onPositiveClick] callback
+     * and dismisses the dialog.
+     *
+     * @param dialogInterface Reference to the dialog being dismissed
+     */
     private fun positiveButtonClick(dialogInterface: DialogInterface) {
         onPositiveClick()
         dialogInterface.dismiss()
     }
 
+    /**
+     * Handles click on the negative (Cancel) button: executes the [onNegativeClick] callback
+     * and dismisses the dialog.
+     *
+     * @param dialogInterface Reference to the dialog being dismissed
+     */
     private fun negativeButtonClick(dialogInterface: DialogInterface) {
         onNegativeClick()
         dialogInterface.dismiss()

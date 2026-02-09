@@ -22,7 +22,29 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 /**
- * Dagger Hilt module for providing network-related dependencies.
+ * Dagger Hilt module that provides network and connectivity-related dependencies for the application.
+ *
+ * This module is installed in the [SingletonComponent], ensuring that all provided instances
+ * are scoped to the application lifecycle.
+ *
+ * It supplies:
+ * - A configured [Retrofit] instance with:
+ *   - [OkHttpClient] featuring HTTP logging (in debug builds)
+ *   - [GsonConverterFactory] for JSON parsing
+ *   - [ErrorsCallAdapterFactory] to handle API errors as sealed results
+ *   - Base URL from [BuildConfig.API_BASE_URL]
+ * - API service interfaces: [WeatherForecastApiService] and [CityApiService]
+ * - [WorkManager] and its [Configuration] for background task scheduling
+ * - [ConnectivityObserver] implementation to monitor network state changes
+ *
+ * These dependencies enable type-safe HTTP communication, proper error handling,
+ * background work coordination, and reactive connectivity awareness throughout the app.
+ *
+ * @see Retrofit
+ * @see WeatherForecastApiService
+ * @see CityApiService
+ * @see WorkManager
+ * @see ConnectivityObserver
  */
 @Module
 @InstallIn(SingletonComponent::class)

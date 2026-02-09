@@ -29,13 +29,13 @@ import javax.inject.Inject
 /**
  * Viewmodel for hourly weather forecast.
  *
+ * @constructor
  * @param connectivityObserver observes internet connectivity state.
  * @param coroutineDispatchers dispatchers coroutines.
  * @property temperatureType current temperature type.
  * @property chosenCityInteractor interactor to get chosen city.
  * @property forecastLocalInteractor interactor to get saved hourly forecast.
  * @property forecastRemoteInteractor interactor to get remote hourly forecast.
- * @constructor
  */
 @HiltViewModel
 class HourlyForecastViewModel @Inject constructor(

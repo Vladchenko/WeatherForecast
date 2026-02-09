@@ -6,7 +6,9 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 /**
- * Application class for Hilt implementation
+ * Application class responsible for initializing the app and starting background workers.
+ * Uses Dagger Hilt for dependency injection. The [WorkerStarter] is injected and triggered
+ * during app startup to ensure periodic weather data updates via WorkManager.
  */
 @HiltAndroidApp
 class WeatherForecastApp : Application() {

@@ -34,6 +34,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Composable function that displays the hourly forecast section.
+ *
+ * Shows a horizontal scrollable list of hourly weather data including time, temperature,
+ * and weather condition. If the provided [hourlyForecast] is null, nothing is rendered.
+ *
+ * @param hourlyForecast Data model containing a list of hourly forecasts
+ */
 @Composable
 fun HourlyForecastLayout(
     hourlyForecast: HourlyForecastDomainModel?,
@@ -67,6 +75,18 @@ fun HourlyForecastLayout(
     }
 }
 
+/**
+ * Private composable that renders a single hourly forecast item as a card.
+ *
+ * Displays:
+ * - Time (formatted from timestamp)
+ * - Temperature in degrees Celsius
+ * - Weather description (e.g., "clear sky", "light rain")
+ *
+ * Styled with rounded corners, fixed size, and centered content.
+ *
+ * @param forecast Domain model containing data for one hour
+ */
 @Composable
 private fun HourlyForecastItem(forecast: HourlyForecastItemDomainModel) {
     Surface(
@@ -109,6 +129,14 @@ private fun HourlyForecastItem(forecast: HourlyForecastItemDomainModel) {
     }
 }
 
+/**
+ * Formats a Unix timestamp into a 24-hour time string (e.g., "14:30").
+ *
+ * The timestamp is expected to be in seconds, so it's multiplied by 1000 to convert to milliseconds.
+ *
+ * @param timestamp Unix timestamp in seconds
+ * @return Formatted time string in "HH:mm" format using the device's default locale
+ */
 private fun formatTime(timestamp: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp * 1000))

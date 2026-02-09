@@ -4,7 +4,7 @@ import android.location.Location
 import android.location.LocationManager
 
 /**
- * Getting [Location] from [latitude] and [longitude]
+ * Detecting [Location] by [latitude] and [longitude]
  */
 fun getLocationByLatLon(latitude: Double, longitude: Double): Location {
     val location = Location(LocationManager.NETWORK_PROVIDER)

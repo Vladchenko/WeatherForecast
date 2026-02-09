@@ -28,7 +28,23 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Dagger Hilt module for providing cities-related dependencies.
+ * Dagger Hilt module that provides dependency injection bindings for city-related components.
+ *
+ * This module is installed in the [SingletonComponent], ensuring that all provided dependencies
+ * have a singleton lifecycle across the application.
+ *
+ * It includes providers for:
+ * - Data sources (local and remote) for city names and chosen city
+ * - Repositories encapsulating data access logic
+ * - Interactors (use cases) containing business logic
+ * - ViewModel factory for [CitiesNamesViewModel]
+ *
+ * Dependencies are constructed with proper layering: data sources → repositories → interactors → ViewModels.
+ *
+ * @see ChosenCityDataSource
+ * @see CitiesNamesRepository
+ * @see CitiesNamesInteractor
+ * @see CitiesNamesViewModelFactory
  */
 @Module
 @InstallIn(SingletonComponent::class)

@@ -49,7 +49,32 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Dependency injection (Hilt) module.
+ * Dagger Hilt module that provides core business logic and presentation-layer dependencies
+ * for the weather forecast feature.
+ *
+ * This module is installed in the [SingletonComponent], ensuring that all provided instances
+ * are scoped to the application lifecycle and shared across components.
+ *
+ * It supplies:
+ * - Data converters: [CurrentForecastModelConverter], [HourlyForecastModelsConverter],
+ *   and [ForecastDomainToUiConverter] for transforming API responses to domain and UI models
+ * - Local and remote data sources for current and hourly forecasts, using DAOs and API services
+ * - Repositories ([WeatherForecastRepositoryImpl], [HourlyForecastRepositoryImpl]) that encapsulate
+ *   data access logic with proper threading via [CoroutineDispatchers]
+ * - Interactors (use cases) for local and remote forecast operations
+ * - ViewModel factories for:
+ *   - [WeatherForecastViewModelFactory] – main forecast screen
+ *   - [HourlyForecastViewModelFactory] – hourly forecast panel
+ *   - [GeoLocationViewModelFactory] – location permission and retrieval logic
+ *   - [AppBarViewModelFactory] – app bar title/subtitle management
+ * - Supporting utilities: [PermissionChecker], [ResourceManager], [LoggingService], [ResponseProcessor]
+ *
+ * Enables clean separation of concerns, testability, and dependency injection throughout the app.
+ *
+ * @see WeatherForecastRepository
+ * @see WeatherForecastViewModelFactory
+ * @see GeoLocationViewModelFactory
+ * @see AppBarStateConverter
  */
 @Module
 @InstallIn(SingletonComponent::class)

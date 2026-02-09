@@ -24,8 +24,10 @@ import javax.inject.Inject
 /**
  * View model for geo location or city name of a device.
  *
+ * @constructor
  * @property permissionChecker to check if needed permission is provided
  * @property geoLocationHelper provides geo location service
+ * @param connectivityObserver provides connectivity state
  * @property geoLocator provides geo location service
  * @property chosenCityInteractor saves/loads chosen city
  * @property coroutineDispatchers dispatchers for coroutines

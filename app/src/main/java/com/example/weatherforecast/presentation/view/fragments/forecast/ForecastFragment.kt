@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
@@ -30,7 +29,6 @@ import javax.inject.Inject
 
 /**
  * Fragment representing a weather forecast.
- * Orchestration delegated to Hilt-provided factories and their products.
  */
 @AndroidEntryPoint
 class ForecastFragment : Fragment() {

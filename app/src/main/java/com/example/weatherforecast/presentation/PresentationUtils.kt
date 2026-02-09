@@ -45,8 +45,8 @@ object PresentationUtils {
         }
 
     /**
-     * Weather type icon retrieving from [resources], having a path to this icon, i.e. [packageName] and weather
-     * description, i.e. [weatherType] specified.
+     * Weather type icon retrieving from [resources], having a path to this icon, i.e. [packageName]
+     * and weather description, i.e. [weatherType] specified.
      */
     fun getWeatherTypeIcon(resources: Resources, packageName: String, weatherType: String): Int {
         val resourceId = resources.getIdentifier(

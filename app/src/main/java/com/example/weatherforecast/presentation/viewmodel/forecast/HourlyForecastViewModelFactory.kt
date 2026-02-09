@@ -19,6 +19,7 @@ import com.example.weatherforecast.domain.forecast.HourlyForecastRemoteInteracto
  * @property forecastLocalInteractor downloads weather forecast from database
  * @property forecastRemoteInteractor downloads weather forecast through network
  */
+@Suppress("UNCHECKED_CAST")
 class HourlyForecastViewModelFactory(
     private val temperatureType: TemperatureType,
     private val connectivityObserver: ConnectivityObserver,

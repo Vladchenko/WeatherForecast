@@ -24,6 +24,20 @@ import kotlinx.coroutines.launch
 /**
  * Binds forecast flows to UI, delegates dialogs/permission to controller and callbacks,
  * small focused collect methods.
+ *
+ * @constructor
+ * @property forecastViewModel view model for weather forecast
+ * @property appBarViewModel view model for user notification in AppBar
+ * @property geoLocationViewModel view model for geo location
+ * @property hourlyForecastViewModel view model to show hourly forecast
+ * @property statusRenderer to show status of the app to user
+ * @property dialogController to operate alert dialogs
+ * @property resourceManager to get app resources
+ * @property permissionResolver to request location permission from system resolver
+ * @property onGotoCitySelection callback for city selection
+ * @property onRequestLocationPermission callback for requesting location permission
+ * @property onPermanentlyDenied callback for permanently denied location permission
+ * @property onNegativeNoPermission callback for negative response to location permission
  */
 class ForecastCoordinator(
     private val forecastViewModel: WeatherForecastViewModel,

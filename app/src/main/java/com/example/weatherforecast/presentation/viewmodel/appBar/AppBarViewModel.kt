@@ -16,10 +16,16 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 /**
- * ViewModel for AppBar
+ * ViewModel responsible for managing the state of the AppBar (toolbar) in the UI.
  *
- * @property resourceManager to get string resources
- * @property appBarStateConverter to convert forecast ui state to appbar ui state
+ * Observes and reacts to changes in the forecast state and user messages,
+ * updating the title, subtitle, and subtitle color accordingly.
+ *
+ * This ViewModel implements [StatusDisplay] to handle display of info, warning,
+ * and error messages in the app bar's subtitle area.
+ *
+ * @property resourceManager Provides access to string resources
+ * @property appBarStateConverter Converts [ForecastUiState] into [AppBarState] for UI rendering
  */
 @HiltViewModel
 class AppBarViewModel @Inject constructor(
@@ -29,6 +35,11 @@ class AppBarViewModel @Inject constructor(
 
     private val _appBarState = MutableStateFlow(AppBarState())
 
+    /**
+     * Read-only StateFlow emitting the current [AppBarState].
+     *
+     * Observed by the UI to update the toolbar's appearance (title, subtitle, colors).
+     */
     val appBarState: StateFlow<AppBarState> = _appBarState.asStateFlow()
 
     override fun showStatus(status: StatusDisplay.Status) {
@@ -63,7 +74,12 @@ class AppBarViewModel @Inject constructor(
     }
 
     /**
-     * Update appbar state using [forecastUiState]
+     * Updates the entire AppBar state based on the current forecast UI state.
+     *
+     * Uses [appBarStateConverter] to transform [ForecastUiState] into a corresponding
+     * [AppBarState], including dynamic title, subtitle, and styling.
+     *
+     * @param forecastUiState The current state of the forecast screen
      */
     fun updateAppBarState(forecastUiState: ForecastUiState) {
         val appBarState = appBarStateConverter.convert(
@@ -73,6 +89,14 @@ class AppBarViewModel @Inject constructor(
         _appBarState.update { appBarState }
     }
 
+    /**
+     * Updates only the title of the AppBar.
+     *
+     * Use this method when you need to change the title independently
+     * of the full forecast state update (e.g., during navigation).
+     *
+     * @param title New title text to display
+     */
     fun updateTitle(title: String) {
         _appBarState.update { it.copy(title = title) }
     }

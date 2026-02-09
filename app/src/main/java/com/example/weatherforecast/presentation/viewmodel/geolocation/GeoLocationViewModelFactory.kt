@@ -12,6 +12,7 @@ import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 /**
  * GeoLocationViewModel factory
  *
+ * @constructor
  * @property permissionChecker to check if needed permission is provided
  * @property geoLocationHelper provides geo location service
  * @property geoLocator provides geo location service
@@ -19,6 +20,7 @@ import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
  * @property chosenCityInteractor downloads a previously chosen city
  * @property coroutineDispatchers dispatchers for coroutines
  */
+@Suppress("UNCHECKED_CAST")
 class GeoLocationViewModelFactory(
     private val permissionChecker: PermissionChecker,
     private val geoLocationHelper: Geolocator,
