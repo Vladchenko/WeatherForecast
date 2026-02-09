@@ -79,7 +79,12 @@ class ForecastCoordinator(
 
     private suspend fun collectCityRequestFailedFlow(flow: SharedFlow<String>) {
         flow.collect { city ->
-            statusRenderer.showStatus(resourceManager.getString(R.string.geo_location_by_city_define, city))
+            statusRenderer.showStatus(
+                resourceManager.getString(
+                    R.string.geo_location_by_city_define,
+                    city
+                )
+            )
             geoLocationViewModel.defineLocationByCity(city)
         }
     }
