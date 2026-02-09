@@ -1,6 +1,5 @@
 package com.example.weatherforecast.di
 
-import android.app.Application
 import android.content.Context
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.WeatherForecastApiService
@@ -197,8 +196,8 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideForecastViewModelFactory(
-        app: Application,
         temperatureType: TemperatureType,
+        resourceManager: ResourceManager,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
@@ -207,8 +206,8 @@ class WeatherForecastModule {
         uiConverter: ForecastDomainToUiConverter
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
-            app,
             temperatureType,
+            resourceManager,
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers,

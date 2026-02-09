@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation.viewmodel.forecast
 
-import android.app.Application
 import android.location.Location
 import android.location.LocationManager
 import android.util.Log
@@ -22,6 +21,7 @@ import com.example.weatherforecast.models.domain.WeatherForecast
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverter
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
+import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
@@ -35,9 +35,9 @@ import javax.inject.Inject
 /**
  * ViewModel for weather forecast downloading.
  *
- * @param app application
  * @param connectivityObserver internet connectivity observer
  * @property temperatureType type of temperature
+ * @property resourceManager to get android specific resources
  * @property coroutineDispatchers for coroutines
  * @property chosenCityInteractor city chosen by user persistence interactor
  * @property forecastLocalInteractor local forecast interactor
@@ -45,9 +45,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(
-    private val app: Application,
     connectivityObserver: ConnectivityObserver,
     private val temperatureType: TemperatureType,
+    private val resourceManager: ResourceManager,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastLocalInteractor: WeatherForecastLocalInteractor,
@@ -287,11 +287,11 @@ class WeatherForecastViewModel @Inject constructor(
     private fun getUiModel(forecastModel: WeatherForecast) =
         forecastDomainToUiConverter.convert(
             model = forecastModel,
-            defaultErrorMessage = app.getString(R.string.bad_date_format),
+            defaultErrorMessage = resourceManager.getString(R.string.bad_date_format),
             getWeatherIconId = { weatherType ->
                 getWeatherTypeIcon(
-                    app.resources,
-                    app.packageName,
+                    resourceManager.getResources(),
+                    resourceManager.getPackageName(),
                     weatherType
                 )
             }

@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation.viewmodel.forecast
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.connectivity.ConnectivityObserver
@@ -10,11 +9,13 @@ import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverter
+import com.example.weatherforecast.utils.ResourceManager
 
 /**
  * WeatherForecastViewModel factory
  *
  * @property temperatureType type of temperature
+ * @property resourceManager resource manager
  * @property connectivityObserver internet connectivity observer
  * @property coroutineDispatchers coroutines dispatchers
  * @property chosenCityInteractor downloads a previously chosen city
@@ -22,8 +23,8 @@ import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConv
  * @property forecastRemoteInteractor downloads weather forecast through network
  */
 class WeatherForecastViewModelFactory(
-    private val app: Application,
     private val temperatureType: TemperatureType,
+    private val resourceManager: ResourceManager,
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -35,9 +36,9 @@ class WeatherForecastViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WeatherForecastViewModel::class.java)) {
             return WeatherForecastViewModel(
-                app,
                 connectivityObserver,
                 temperatureType,
+                resourceManager,
                 coroutineDispatchers,
                 chosenCityInteractor,
                 forecastLocalInteractor,
