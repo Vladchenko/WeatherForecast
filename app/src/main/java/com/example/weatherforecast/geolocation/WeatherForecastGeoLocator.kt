@@ -35,7 +35,7 @@ class WeatherForecastGeoLocator(
             }.addOnFailureListener { exception ->
                 onDefineLocationFailure(exception, locationListener)
             }.addOnCanceledListener {
-                Log.e(TAG, "Define location cancelled")
+                Log.e(TAG, "Geo location cancelled")
                 locationListener.onCurrentGeoLocationFail(context.getString(R.string.current_location_cancelled))
             }
         } catch (sec: SecurityException) {

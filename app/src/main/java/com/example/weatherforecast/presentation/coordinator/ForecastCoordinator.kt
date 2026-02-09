@@ -4,6 +4,7 @@ import android.location.Location
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.weatherforecast.R
+import com.example.weatherforecast.geolocation.PermissionResolver
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.presentation.Message
 import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.ForecastDialogController
@@ -32,6 +33,7 @@ class ForecastCoordinator(
     private val statusRenderer: StatusRenderer,
     private val dialogController: ForecastDialogController,
     private val resourceManager: ResourceManager,
+    private val permissionResolver: PermissionResolver,
     private val onGotoCitySelection: () -> Unit,
     private val onRequestLocationPermission: () -> Unit,
     private val onPermanentlyDenied: () -> Unit,
@@ -70,6 +72,7 @@ class ForecastCoordinator(
 
     private suspend fun collectChosenCityNotFoundFlow(flow: SharedFlow<String>) {
         flow.collect { city ->
+            statusRenderer.showStatus(resourceManager.getString(R.string.selected_city_not_found))
             dialogController.showChosenCityNotFound(city) {
                 forecastViewModel.gotoCitySelection()
             }
@@ -104,21 +107,30 @@ class ForecastCoordinator(
                     statusRenderer.showStatus(resourceManager.getString(R.string.geo_location_permission_required))
                     onRequestLocationPermission()
                 }
+
                 GeoLocationPermission.Denied -> {
                     statusRenderer.showWarning(resourceManager.getString(R.string.current_location_denied))
                     dialogController.showNoPermission(
-                        onPositive = { geoLocationViewModel.requestGeoLocationPermission() },
+                        onPositive = {
+                            geoLocationViewModel.resetGeoLocationRequestAttempts()
+                            permissionResolver.requestLocationPermission()
+                        },
                         onNegative = onNegativeNoPermission
                     )
                 }
+
                 GeoLocationPermission.Granted -> {
                     statusRenderer.showStatus(resourceManager.getString(R.string.current_location_triangulating))
                     geoLocationViewModel.defineCurrentGeoLocation()
                 }
+
                 GeoLocationPermission.PermanentlyDenied -> {
                     statusRenderer.showError(resourceManager.getString(R.string.current_location_denied_permanently))
                     dialogController.showPermissionPermanentlyDenied(
-                        onPositive = {},
+                        onPositive = {
+                            geoLocationViewModel.resetGeoLocationRequestAttempts()
+                            permissionResolver.requestLocationPermission()
+                        },
                         onNegative = onPermanentlyDenied
                     )
                 }
@@ -164,6 +176,7 @@ class ForecastCoordinator(
             statusRenderer: StatusRenderer,
             dialogController: ForecastDialogController,
             resourceManager: ResourceManager,
+            permissionResolver: PermissionResolver,
             onGotoCitySelection: () -> Unit,
             onRequestLocationPermission: () -> Unit,
             onPermanentlyDenied: () -> Unit,
@@ -176,6 +189,7 @@ class ForecastCoordinator(
             statusRenderer,
             dialogController,
             resourceManager,
+            permissionResolver,
             onGotoCitySelection,
             onRequestLocationPermission,
             onPermanentlyDenied,

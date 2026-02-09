@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation.view.fragments.forecast
 
-import android.Manifest
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
+import com.example.weatherforecast.geolocation.PermissionResolver
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
 import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.ForecastDialogControllerFactory
 import com.example.weatherforecast.presentation.coordinator.ForecastCoordinator
@@ -35,23 +35,14 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ForecastFragment : Fragment() {
 
-    @Inject
-    lateinit var statusRendererFactory: StatusRenderer.Factory
-
-    @Inject
-    lateinit var forecastCoordinatorFactory: ForecastCoordinator.Factory
-
-    @Inject
-    lateinit var resourceManager: ResourceManager
+    @Inject lateinit var statusRendererFactory: StatusRenderer.Factory
+    @Inject lateinit var forecastCoordinatorFactory: ForecastCoordinator.Factory
+    @Inject lateinit var permissionResolver: PermissionResolver
+    @Inject lateinit var resourceManager: ResourceManager
 
     private var mainView: View? = null
-    private val arguments: ForecastFragmentArgs by navArgs()
+    private val args: ForecastFragmentArgs by navArgs()
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission())
-        { isGranted ->
-            geoLocationViewModel.onPermissionResolution(isGranted)
-        }
     private val forecastViewModel by activityViewModels<WeatherForecastViewModel>()
     private val appBarViewModel by activityViewModels<AppBarViewModel>()
     private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
@@ -60,30 +51,32 @@ class ForecastFragment : Fragment() {
     private lateinit var statusRenderer: StatusRenderer
     private lateinit var coordinator: ForecastCoordinator
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            // Пока нет данных — можно показать заглушку или пустой экран
-            setContent {
-                // Будет обновляться динамически в onViewCreated
-                // TODO Отобразить заглушку
-            }
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            permissionResolver.handlePermissionResult(isGranted)
         }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return ComposeView(requireContext())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mainView = view
         super.onViewCreated(view, savedInstanceState)
-        val alertDialogHelper = AlertDialogHelper(requireActivity())
-        val dialogController = ForecastDialogControllerFactory(
-            resourceManager,
-            alertDialogHelper
+        mainView = view
+
+        permissionResolver.connect(
+            launcher = requestPermissionLauncher,
+            onPermissionResult = { isGranted ->
+                geoLocationViewModel.onPermissionResolution(isGranted)
+            }
         )
+
+        val alertDialogHelper = AlertDialogHelper(requireActivity())
+        val dialogController = ForecastDialogControllerFactory(resourceManager, alertDialogHelper)
             .create(requireActivity() as AppCompatActivity)
 
         statusRenderer = statusRendererFactory.create(appBarViewModel)
+
         coordinator = forecastCoordinatorFactory.create(
             forecastViewModel = forecastViewModel,
             appBarViewModel = appBarViewModel,
@@ -92,25 +85,23 @@ class ForecastFragment : Fragment() {
             statusRenderer = statusRenderer,
             dialogController = dialogController,
             resourceManager = resourceManager,
+            permissionResolver = permissionResolver,
             onGotoCitySelection = { gotoCitySelectionScreen() },
-            onRequestLocationPermission = { requestLocationPermission() },
-            onPermanentlyDenied = { requireActivity().finish() },
-            onNegativeNoPermission = { activity?.finish() }
+            onRequestLocationPermission = { permissionResolver.requestLocationPermission() },
+            onNegativeNoPermission = { activity?.finish() },
+            onPermanentlyDenied = { activity?.finish() }
         )
+
         coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
-        val chosenCity = arguments.chosenCity
-        statusRenderer.showDownloadingStatusFor(chosenCity)
-        forecastViewModel.launchWeatherForecast(chosenCity)
+
+        statusRenderer.showDownloadingStatusFor(args.chosenCity)
+        forecastViewModel.launchWeatherForecast(args.chosenCity)
 
         (view as ComposeView).setContent {
             CurrentTimeForecastLayout(
                 mainContentTextColor = Color.Black,
-                onCityClick = {
-                    gotoCitySelectionScreen()
-                },
-                onBackClick = {
-                    activity?.finish()
-                },
+                onCityClick = { gotoCitySelectionScreen() },
+                onBackClick = { activity?.finish() },
                 appBarViewModel = appBarViewModel,
                 viewModel = forecastViewModel,
                 hourlyViewModel = hourlyForecastViewModel
@@ -118,11 +109,12 @@ class ForecastFragment : Fragment() {
         }
     }
 
-    private fun requestLocationPermission() {
-        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
     private fun gotoCitySelectionScreen() {
         findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
+    }
+
+    override fun onDestroyView() {
+        mainView = null
+        super.onDestroyView()
     }
 }

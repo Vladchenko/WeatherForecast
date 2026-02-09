@@ -111,6 +111,11 @@ class GeoLocationViewModel @Inject constructor(
         }
     }
 
+    fun resetGeoLocationRequestAttempts() {
+        permissionRequests = 0
+        geoLocatingAttempts = 0
+    }
+
     fun defineCurrentGeoLocation() {
         geoLocator.defineCurrentLocation(object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
