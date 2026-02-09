@@ -73,7 +73,7 @@ class ForecastFragment : Fragment() {
 
         val alertDialogHelper = AlertDialogHelper(requireActivity())
         val dialogController = ForecastDialogControllerFactory(resourceManager, alertDialogHelper)
-            .create(requireActivity() as AppCompatActivity)
+            .create()
 
         statusRenderer = statusRendererFactory.create(appBarViewModel)
 

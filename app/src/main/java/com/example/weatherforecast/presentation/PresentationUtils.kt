@@ -1,9 +1,6 @@
 package com.example.weatherforecast.presentation
 
 import android.content.res.Resources
-import android.view.View
-import androidx.appcompat.app.AlertDialog
-import androidx.core.view.doOnDetach
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
@@ -62,15 +59,6 @@ object PresentationUtils {
         } else {
             R.drawable.icon_clearsky
         }
-    }
-
-    /**
-     * Correct way to close alert dialog
-     *
-     * @param view of alert dialog to close it.
-     */
-    fun AlertDialog.closeWith(view: View) {
-        view.doOnDetach { this.cancel() }
     }
 
     private const val ICON_PREFIX = "icon_"
