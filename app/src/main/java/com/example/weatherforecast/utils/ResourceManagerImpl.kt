@@ -2,6 +2,8 @@ package com.example.weatherforecast.utils
 
 import android.content.Context
 import android.content.res.Resources
+import android.util.TypedValue
+import androidx.annotation.AttrRes
 import androidx.annotation.StringRes
 import javax.inject.Inject
 
@@ -28,5 +30,18 @@ class ResourceManagerImpl @Inject constructor(
 
     override fun getPackageName(): String {
         return context.packageName
+    }
+
+    override fun getColor(color: Int): Int {
+        return context.getColor(color)
+    }
+
+    override fun getThemeColorRes(@AttrRes attrResId: Int): Int {
+        val typedValue = TypedValue()
+        return if (context.theme.resolveAttribute(attrResId, typedValue, true)) {
+            typedValue.resourceId.takeIf { it != 0 } ?: typedValue.data
+        } else {
+            android.R.color.black
+        }
     }
 }

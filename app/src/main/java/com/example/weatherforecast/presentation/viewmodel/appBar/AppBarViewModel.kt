@@ -1,9 +1,10 @@
 package com.example.weatherforecast.presentation.viewmodel.appBar
 
+import androidx.annotation.AttrRes
 import androidx.lifecycle.ViewModel
+import com.example.weatherforecast.R
 import com.example.weatherforecast.models.presentation.AppBarState
 import com.example.weatherforecast.models.presentation.MessageType
-import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.converter.appbar.AppBarStateConverter
 import com.example.weatherforecast.presentation.status.StatusDisplay
 import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
@@ -44,32 +45,9 @@ class AppBarViewModel @Inject constructor(
 
     override fun showStatus(status: StatusDisplay.Status) {
         when (status.type) {
-            MessageType.INFO -> {
-                _appBarState.update {
-                    it.copy(
-                        subtitle = status.text,
-                        subtitleColor = PresentationUtils.getToolbarSubtitleColor(MessageType.INFO)
-                    )
-                }
-            }
-
-            MessageType.WARNING -> {
-                _appBarState.update {
-                    it.copy(
-                        subtitle = status.text,
-                        subtitleColor = PresentationUtils.getToolbarSubtitleColor(MessageType.WARNING)
-                    )
-                }
-            }
-
-            MessageType.ERROR -> {
-                _appBarState.update {
-                    it.copy(
-                        subtitle = status.text,
-                        subtitleColor = PresentationUtils.getToolbarSubtitleColor(MessageType.ERROR)
-                    )
-                }
-            }
+            MessageType.INFO -> updateSubtitle(status.text, R.attr.colorInfo)
+            MessageType.WARNING -> updateSubtitle(status.text, R.attr.colorWarning)
+            MessageType.ERROR -> updateSubtitle(status.text, R.attr.colorError)
         }
     }
 
@@ -82,10 +60,7 @@ class AppBarViewModel @Inject constructor(
      * @param forecastUiState The current state of the forecast screen
      */
     fun updateAppBarState(forecastUiState: ForecastUiState) {
-        val appBarState = appBarStateConverter.convert(
-            forecastState = forecastUiState,
-            resourceManager = resourceManager,
-        )
+        val appBarState = appBarStateConverter.convert(forecastState = forecastUiState)
         _appBarState.update { appBarState }
     }
 
@@ -99,5 +74,11 @@ class AppBarViewModel @Inject constructor(
      */
     fun updateTitle(title: String) {
         _appBarState.update { it.copy(title = title) }
+    }
+
+    private fun updateSubtitle(text: String, @AttrRes colorAttr: Int) {
+        _appBarState.update {
+            it.copy(subtitle = text, subtitleColorAttr = colorAttr) // ← Сохраняем атрибут, не цвет
+        }
     }
 }

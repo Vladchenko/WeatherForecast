@@ -284,8 +284,8 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideAppBarStateConverter(): AppBarStateConverter {
-        return AppBarStateConverter()
+    fun provideAppBarStateConverter(resourceManager: ResourceManager,): AppBarStateConverter {
+        return AppBarStateConverter(resourceManager)
     }
 
     @Singleton

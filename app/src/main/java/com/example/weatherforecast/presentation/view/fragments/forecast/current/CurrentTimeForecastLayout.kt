@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.PresentationUtils
+import com.example.weatherforecast.presentation.themeColor
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyForecastLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
@@ -117,7 +118,7 @@ fun CurrentTimeForecastLayout(
                         Text(
                             modifier = Modifier,
                             text = appBarUiState.value.subtitle,
-                            color = appBarUiState.value.subtitleColor,
+                            color = themeColor(appBarUiState.value.subtitleColorAttr),
                             fontSize = fontSize.value,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -273,7 +274,6 @@ private fun MainContent(
 /**
  * Displays a full-screen semi-transparent overlay with a loading spinner.
  *
- * Shown when [viewModel.showProgressBarState] is true.
  * Uses a white background with 60% opacity to dim the underlying content.
  */
 @Composable

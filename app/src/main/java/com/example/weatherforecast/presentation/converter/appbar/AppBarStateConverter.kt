@@ -2,8 +2,6 @@ package com.example.weatherforecast.presentation.converter.appbar
 
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.presentation.AppBarState
-import com.example.weatherforecast.models.presentation.MessageType
-import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.viewmodel.forecast.DataSource
 import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
 import com.example.weatherforecast.utils.ResourceManager
@@ -11,22 +9,23 @@ import javax.inject.Inject
 
 /**
  * Converter forecast ui state to an appbar ui state.
+ *
+ * @property resourceManager Helper to retrieve localized strings from resources
  */
-class AppBarStateConverter @Inject constructor() {
+class AppBarStateConverter @Inject constructor(
+    private val resourceManager: ResourceManager
+) {
 
     /**
-     * Convert [forecastState] to [AppBarState], having [resourceManager] to get resource strings.
+     * Convert [forecastState] to [AppBarState]
      */
-    fun convert(
-        forecastState: ForecastUiState,
-        resourceManager: ResourceManager
-    ): AppBarState {
+    fun convert(forecastState: ForecastUiState): AppBarState {
         return when (forecastState) {
             is ForecastUiState.Loading -> {
                 AppBarState(
                     title = resourceManager.getString(R.string.app_name),
                     subtitle = resourceManager.getString(R.string.forecast_for_city_loading),
-                    subtitleColor = PresentationUtils.getToolbarSubtitleColor(MessageType.INFO),
+                    subtitleColorAttr = resourceManager.getThemeColorRes(R.attr.colorInfo),
                 )
             }
 
@@ -34,7 +33,7 @@ class AppBarStateConverter @Inject constructor() {
                 AppBarState(
                     title = resourceManager.getString(R.string.app_name),
                     subtitle = resourceManager.getString(R.string.forecast_for_city_error),
-                    subtitleColor = PresentationUtils.getToolbarSubtitleColor(MessageType.ERROR),
+                    subtitleColorAttr = resourceManager.getThemeColorRes(R.attr.colorError),
                 )
             }
 
@@ -45,7 +44,7 @@ class AppBarStateConverter @Inject constructor() {
                         R.string.forecast_for_city_success,
                         forecastState.forecast.city
                     ),
-                    subtitleColor = getToolbarSubtitleColor(forecastState),
+                    subtitleColorAttr = getToolbarSubtitleColor(forecastState),
                 )
             }
         }
@@ -53,8 +52,8 @@ class AppBarStateConverter @Inject constructor() {
 
     private fun getToolbarSubtitleColor(forecast: ForecastUiState.Success) =
         if (forecast.source == DataSource.REMOTE) {
-            PresentationUtils.getToolbarSubtitleColor(MessageType.INFO)
+            resourceManager.getThemeColorRes(R.attr.colorInfo)
         } else {
-            PresentationUtils.getToolbarSubtitleColor(MessageType.WARNING)
+            resourceManager.getThemeColorRes(R.attr.colorWarning)
         }
 }

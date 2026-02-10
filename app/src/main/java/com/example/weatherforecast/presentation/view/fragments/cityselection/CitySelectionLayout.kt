@@ -46,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -116,7 +117,7 @@ fun CitySelectionLayout(
                         )
                         Text(
                             text = appbarState.subtitle,
-                            color = appbarState.subtitleColor,
+                            color = colorResource(appbarState.subtitleColorAttr),
                             fontSize = PresentationUtils.getToolbarSubtitleFontSize(appbarState.subtitle).sp,   //TODO Move to model
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

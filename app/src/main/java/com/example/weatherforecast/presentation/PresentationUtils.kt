@@ -2,12 +2,8 @@ package com.example.weatherforecast.presentation
 
 import android.content.res.Resources
 import com.example.weatherforecast.R
-import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
-import com.example.weatherforecast.presentation.PresentationConstants.ERROR_STATUS_COLOR
-import com.example.weatherforecast.presentation.PresentationConstants.SUCCESS_STATUS_COLOR
-import com.example.weatherforecast.presentation.PresentationConstants.WARNING_STATUS_COLOR
 
 /**
  * Presentation layer utility methods.
@@ -32,16 +28,6 @@ object PresentationUtils {
             APPBAR_SUBTITLE_SMALL_FONT_SIZE
         } else {
             APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
-        }
-
-    /**
-     * Defines a color for toolbar by its [type]
-     */
-    fun getToolbarSubtitleColor(type: MessageType) =
-        when(type) {
-            MessageType.INFO -> SUCCESS_STATUS_COLOR
-            MessageType.WARNING -> WARNING_STATUS_COLOR
-            MessageType.ERROR -> ERROR_STATUS_COLOR
         }
 
     /**
