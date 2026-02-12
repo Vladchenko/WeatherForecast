@@ -1,6 +1,10 @@
 package com.example.weatherforecast.presentation.alertdialog.dialogcontroller
 
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
+import com.example.weatherforecast.presentation.alertdialog.delegates.GeoLocationAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.delegates.LocationPermissionAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.delegates.NoLocationPermissionPermanentlyAlertDialogDelegate
+import com.example.weatherforecast.presentation.alertdialog.delegates.SelectedCityNotFoundAlertDialogDelegate
 import com.example.weatherforecast.utils.ResourceManager
 
 /**
@@ -16,14 +20,14 @@ class ForecastDialogControllerImpl(
 ) : ForecastDialogController {
 
     override fun showChosenCityNotFound(city: String, onPositive: () -> Unit) {
-        val alertDialog = dialogHelper.getAlertDialogBuilderToChooseAnotherCity(
-            city,
-            resourceManager,
-            onPositiveClick = onPositive,
-            onNegativeClick = {}
+        dialogHelper.getAlertDialogBuilder(
+            SelectedCityNotFoundAlertDialogDelegate(
+                city,
+                resourceManager,
+                onPositiveClick = onPositive,
+                onNegativeClick = {}
+            )
         ).show()
-        alertDialog?.setCancelable(false)
-        alertDialog?.setCanceledOnTouchOutside(false)
     }
 
     override fun showLocationDefined(
@@ -31,36 +35,36 @@ class ForecastDialogControllerImpl(
         onPositive: (String) -> Unit,
         onNegative: () -> Unit
     ) {
-        val alertDialog = dialogHelper.getGeoLocationAlertDialogBuilder(
-            message,
-            resourceManager,
-            onPositiveClick = onPositive,
-            onNegativeClick = onNegative
+        dialogHelper.getAlertDialogBuilder(
+            GeoLocationAlertDialogDelegate(
+                message,
+                resourceManager,
+                onPositiveClick = onPositive,
+                onNegativeClick = onNegative
+            )
         ).show()
-        alertDialog?.setCancelable(false)
-        alertDialog?.setCanceledOnTouchOutside(false)
     }
 
     override fun showNoPermission(onPositive: () -> Unit, onNegative: () -> Unit) {
-        val alertDialog = dialogHelper.getLocationPermissionAlertDialogBuilder(
-            resourceManager,
-            onPositiveClick = onPositive,
-            onNegativeClick = onNegative
+        dialogHelper.getAlertDialogBuilder(
+            LocationPermissionAlertDialogDelegate(
+                resourceManager,
+                onPositiveClick = onPositive,
+                onNegativeClick = onNegative
+            )
         ).show()
-        alertDialog?.setCancelable(false)
-        alertDialog?.setCanceledOnTouchOutside(false)
     }
 
     override fun showPermissionPermanentlyDenied(
         onPositive: () -> Unit,
         onNegative: () -> Unit
     ) {
-        val alertDialog = dialogHelper.getNoLocationPermissionPermanentlyAlertDialogBuilder(
-            resourceManager,
-            onPositiveClick = { onPositive() },
-            onNegativeClick = { onNegative() }
+        dialogHelper.getAlertDialogBuilder(
+            NoLocationPermissionPermanentlyAlertDialogDelegate(
+                resourceManager,
+                onPositiveClick = { onPositive() },
+                onNegativeClick = { onNegative() }
+            )
         ).show()
-        alertDialog?.setCancelable(false)
-        alertDialog?.setCanceledOnTouchOutside(false)
     }
 }

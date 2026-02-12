@@ -17,10 +17,12 @@ import com.example.weatherforecast.utils.ResourceManager
  * @property onPositiveClick Callback triggered when the "OK" button is pressed
  * @property onNegativeClick Callback triggered when the "Cancel" button is pressed (not currently set in builder)
  */
-class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
-                                              private val resourceManager: ResourceManager,
-                                              private val onPositiveClick: () -> Unit,
-                                              private val onNegativeClick: () -> Unit) {
+class SelectedCityNotFoundAlertDialogDelegate(
+    private val city: String,
+    private val resourceManager: ResourceManager,
+    private val onPositiveClick: () -> Unit,
+    private val onNegativeClick: () -> Unit
+) : AlertDialogDelegate {
 
     /**
      * Creates and configures an [AlertDialog.Builder] for displaying the city not found dialog.
@@ -31,7 +33,7 @@ class SelectedCityNotFoundAlertDialogDelegate(private val city: String,
      * @param context Android context required to build the dialog
      * @return Configured [AlertDialog.Builder] instance
      */
-    fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
+    override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(resourceManager.getString(R.string.no_selected_city_forecast, city))
         builder.setMessage(resourceManager.getString(R.string.no_selected_city_forecast_message))

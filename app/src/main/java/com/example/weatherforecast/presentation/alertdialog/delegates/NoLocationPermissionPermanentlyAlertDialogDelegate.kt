@@ -20,7 +20,7 @@ class NoLocationPermissionPermanentlyAlertDialogDelegate(
     private val resourceManager: ResourceManager,
     private val onPositiveClick: (String) -> Unit,
     private val onNegativeClick: () -> Unit
-) {
+): AlertDialogDelegate {
 
     /**
      * Creates and returns a configured [AlertDialog.Builder] for this dialog.
@@ -31,7 +31,7 @@ class NoLocationPermissionPermanentlyAlertDialogDelegate(
      * @param context Android context required to build the dialog
      * @return Fully configured [AlertDialog.Builder] instance
      */
-    fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
+    override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(resourceManager.getString(R.string.current_location_denied))
         builder.setMessage(resourceManager.getString(R.string.current_location_denied_permanently))

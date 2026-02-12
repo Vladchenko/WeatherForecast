@@ -16,15 +16,17 @@ import com.example.weatherforecast.utils.ResourceManager
  * @property onPositiveClick ok button click callback
  * @property onNegativeClick cancel button click callback
  */
-class GeoLocationAlertDialogDelegate(private val city: String,
-                                     private val resourceManager: ResourceManager,
-                                     private val onPositiveClick: (String) -> Unit,
-                                     private val onNegativeClick: () -> Unit) {
+class GeoLocationAlertDialogDelegate(
+    private val city: String,
+    private val resourceManager: ResourceManager,
+    private val onPositiveClick: (String) -> Unit,
+    private val onNegativeClick: () -> Unit
+) : AlertDialogDelegate {
 
     /**
      * Get [AlertDialog.Builder] using [Context]
      */
-    fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
+    override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(resourceManager.getString(R.string.geo_location_title))
         builder.setMessage(resourceManager.getString(R.string.geo_location_message, city))
