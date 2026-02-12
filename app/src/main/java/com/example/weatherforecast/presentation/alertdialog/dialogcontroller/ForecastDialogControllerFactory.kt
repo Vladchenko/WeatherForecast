@@ -1,16 +1,16 @@
 package com.example.weatherforecast.presentation.alertdialog.dialogcontroller
 
+import com.example.weatherforecast.presentation.alertdialog.AlertDialogFactory
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
-import com.example.weatherforecast.utils.ResourceManager
 
 /**
  * Creates [ForecastDialogController].
  *
- * @property resourceManager to provide needed resources
+ * @property alertDialogFactory to provide alert dialogs
  * @property dialogHelper to provide alert dialog builders
  */
 class ForecastDialogControllerFactory(
-    private val resourceManager: ResourceManager,
+    private val alertDialogFactory: AlertDialogFactory,
     private val dialogHelper: AlertDialogHelper
 ) {
     /**
@@ -18,6 +18,6 @@ class ForecastDialogControllerFactory(
      */
     fun create(): ForecastDialogController =
         ForecastDialogControllerImpl(
-            resourceManager = resourceManager,
+            alertDialogFactory = alertDialogFactory,
             dialogHelper = dialogHelper)
 }

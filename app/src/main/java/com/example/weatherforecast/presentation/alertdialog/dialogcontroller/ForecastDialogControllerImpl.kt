@@ -1,69 +1,67 @@
 package com.example.weatherforecast.presentation.alertdialog.dialogcontroller
 
+import com.example.weatherforecast.presentation.alertdialog.AlertDialogFactory
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
-import com.example.weatherforecast.presentation.alertdialog.delegates.GeoLocationAlertDialogDelegate
-import com.example.weatherforecast.presentation.alertdialog.delegates.LocationPermissionAlertDialogDelegate
-import com.example.weatherforecast.presentation.alertdialog.delegates.NoLocationPermissionPermanentlyAlertDialogDelegate
-import com.example.weatherforecast.presentation.alertdialog.delegates.SelectedCityNotFoundAlertDialogDelegate
-import com.example.weatherforecast.utils.ResourceManager
 
 /**
  * Implementation of [ForecastDialogController]
  *
  * @constructor
- * @property resourceManager to provide localized strings for dialogs.
+ * @property alertDialogFactory to provide alert dialogs.
  * @property dialogHelper to build dialogs.
  */
 class ForecastDialogControllerImpl(
-    private val resourceManager: ResourceManager,
+    private val alertDialogFactory: AlertDialogFactory,
     private val dialogHelper: AlertDialogHelper,
 ) : ForecastDialogController {
 
-    override fun showChosenCityNotFound(city: String, onPositive: () -> Unit) {
-        dialogHelper.getAlertDialogBuilder(
-            SelectedCityNotFoundAlertDialogDelegate(
+    override fun showChosenCityNotFound(
+        city: String,
+        onPositiveClick: () -> Unit
+    ) {
+        dialogHelper.createDialog(
+            alertDialogFactory.createCityNotFoundDelegate(
                 city,
-                resourceManager,
-                onPositiveClick = onPositive,
-                onNegativeClick = {}
+                onPositiveClick,
+                { }
             )
         ).show()
     }
 
     override fun showLocationDefined(
         message: String,
-        onPositive: (String) -> Unit,
-        onNegative: () -> Unit
+        onPositiveClick: (String) -> Unit,
+        onNegativeClick: () -> Unit
     ) {
-        dialogHelper.getAlertDialogBuilder(
-            GeoLocationAlertDialogDelegate(
+        dialogHelper.createDialog(
+            alertDialogFactory.createGeoLocationDelegate(
                 message,
-                resourceManager,
-                onPositiveClick = onPositive,
-                onNegativeClick = onNegative
+                onPositive = onPositiveClick,
+                onNegative = onNegativeClick
             )
         ).show()
     }
 
-    override fun showNoPermission(onPositive: () -> Unit, onNegative: () -> Unit) {
-        dialogHelper.getAlertDialogBuilder(
-            LocationPermissionAlertDialogDelegate(
-                resourceManager,
-                onPositiveClick = onPositive,
-                onNegativeClick = onNegative
+    override fun showNoPermission(
+        onPositiveClick: () -> Unit,
+        onNegativeClick: () -> Unit
+    ) {
+        dialogHelper.createDialog(
+            alertDialogFactory.createLocationPermissionDelegate(
+                onPositive = onPositiveClick,
+                onNegative = onNegativeClick
             )
         ).show()
     }
 
     override fun showPermissionPermanentlyDenied(
-        onPositive: () -> Unit,
-        onNegative: () -> Unit
+        onPositiveClick: () -> Unit,
+        onNegativeClick: () -> Unit
     ) {
-        dialogHelper.getAlertDialogBuilder(
-            NoLocationPermissionPermanentlyAlertDialogDelegate(
-                resourceManager,
-                onPositiveClick = { onPositive() },
-                onNegativeClick = { onNegative() }
+        dialogHelper.createDialog(
+            alertDialogFactory.createPermissionPermanentlyDeniedDelegate(
+                onPositive = onPositiveClick,
+                onNegative = onNegativeClick
             )
         ).show()
     }

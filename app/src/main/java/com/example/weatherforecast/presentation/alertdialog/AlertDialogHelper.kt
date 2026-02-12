@@ -25,7 +25,7 @@ class AlertDialogHelper(private val context: Context) {
      * @param alertDialogDelegate A fully configured builder (typically from a delegate)
      * @return A ready-to-show [AlertDialog] instance with enforced behavior
      */
-    fun getAlertDialogBuilder(alertDialogDelegate: AlertDialogDelegate): AlertDialog {
+    fun createDialog(alertDialogDelegate: AlertDialogDelegate): AlertDialog {
         val alertDialogBuilder = alertDialogDelegate.getAlertDialogBuilder(context)
         Log.d(TAG, "Create alertDialog by its delegate")
         val dialog = alertDialogBuilder.create()

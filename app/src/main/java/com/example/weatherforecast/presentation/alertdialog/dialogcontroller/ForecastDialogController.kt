@@ -9,37 +9,37 @@ interface ForecastDialogController {
      * Shows dialog when city that user picked up is not found
      *
      * @param city that user picked up
-     * @param onPositive callback when user clicks positive button
+     * @param onPositiveClick callback when user clicks positive button click
      */
-    fun showChosenCityNotFound(city: String, onPositive: () -> Unit)
+    fun showChosenCityNotFound(city: String, onPositiveClick: () -> Unit)
 
     /**
      * Shows dialog when location is defined
      *
      * @param message to show
-     * @param onPositive callback when user clicks positive button
-     * @param onNegative callback when user clicks negative button
+     * @param onPositiveClick callback when user clicks positive button
+     * @param onNegativeClick callback when user clicks negative button
      */
     fun showLocationDefined(
         message: String,
-        onPositive: (String) -> Unit,
-        onNegative: () -> Unit
+        onPositiveClick: (String) -> Unit,
+        onNegativeClick: () -> Unit
     )
 
     /**
      * Shows dialog when permission to provide geo location for the current device is not granted
      *
-     * @param onPositive callback when user clicks positive button
-     * @param onNegative callback when user clicks negative button
+     * @param onPositiveClick callback when user clicks positive button
+     * @param onNegativeClick callback when user clicks negative button
      */
-    fun showNoPermission(onPositive: () -> Unit, onNegative: () -> Unit)
+    fun showNoPermission(onPositiveClick: () -> Unit, onNegativeClick: () -> Unit)
 
     /**
      * Shows dialog when permission to provide geo location for the current device is permanently denied
      *
-     * @param onPositive callback when user clicks positive button
-     * @param onNegative callback when user clicks negative button
+     * @param onPositiveClick callback when user clicks positive button
+     * @param onNegativeClick callback when user clicks negative button
      */
-    fun showPermissionPermanentlyDenied(onPositive: () -> Unit,
-                                        onNegative: () -> Unit)
+    fun showPermissionPermanentlyDenied(onPositiveClick: () -> Unit,
+                                        onNegativeClick: () -> Unit)
 }

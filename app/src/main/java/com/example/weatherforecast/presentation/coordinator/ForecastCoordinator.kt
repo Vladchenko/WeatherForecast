@@ -130,11 +130,11 @@ class ForecastCoordinator(
                 GeoLocationPermission.Denied -> {
                     statusRenderer.showWarning(resourceManager.getString(R.string.current_location_denied))
                     dialogController.showNoPermission(
-                        onPositive = {
+                        onPositiveClick = {
                             geoLocationViewModel.resetGeoLocationRequestAttempts()
                             permissionResolver.requestLocationPermission()
                         },
-                        onNegative = onNegativeNoPermission
+                        onNegativeClick = onNegativeNoPermission
                     )
                 }
 
@@ -146,11 +146,11 @@ class ForecastCoordinator(
                 GeoLocationPermission.PermanentlyDenied -> {
                     statusRenderer.showError(resourceManager.getString(R.string.current_location_denied_permanently))
                     dialogController.showPermissionPermanentlyDenied(
-                        onPositive = {
+                        onPositiveClick = {
                             geoLocationViewModel.resetGeoLocationRequestAttempts()
                             permissionResolver.requestLocationPermission()
                         },
-                        onNegative = onPermanentlyDenied
+                        onNegativeClick = onPermanentlyDenied
                     )
                 }
             }
@@ -161,12 +161,12 @@ class ForecastCoordinator(
         flow.collect { message ->
             dialogController.showLocationDefined(
                 message = message,
-                onPositive = { city ->
+                onPositiveClick = { city ->
                     statusRenderer.showDownloadingStatusFor(city)
                     forecastViewModel.updateChosenCityState(city)
                     forecastViewModel.launchWeatherForecast(city)
                 },
-                onNegative = {
+                onNegativeClick = {
                     statusRenderer.showCitySelectionStatus()
                     forecastViewModel.gotoCitySelection()
                 }

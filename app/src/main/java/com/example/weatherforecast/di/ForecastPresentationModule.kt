@@ -1,5 +1,6 @@
 package com.example.weatherforecast.di
 
+import com.example.weatherforecast.presentation.alertdialog.AlertDialogFactory
 import com.example.weatherforecast.presentation.coordinator.ForecastCoordinator
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.utils.ResourceManager
@@ -41,5 +42,11 @@ object ForecastPresentationModule {
     @Provides
     fun provideForecastCoordinatorFactory(): ForecastCoordinator.Factory {
         return ForecastCoordinator.Factory()
+    }
+
+    @Singleton
+    @Provides
+    fun provideAlertDialogFactory(resourceManager: ResourceManager): AlertDialogFactory {
+        return AlertDialogFactory(resourceManager)
     }
 }

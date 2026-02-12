@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.weatherforecast.R
 import com.example.weatherforecast.geolocation.PermissionResolver
+import com.example.weatherforecast.presentation.alertdialog.AlertDialogFactory
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
 import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.ForecastDialogControllerFactory
 import com.example.weatherforecast.presentation.coordinator.ForecastCoordinator
@@ -37,6 +38,7 @@ class ForecastFragment : Fragment() {
     @Inject lateinit var forecastCoordinatorFactory: ForecastCoordinator.Factory
     @Inject lateinit var permissionResolver: PermissionResolver
     @Inject lateinit var resourceManager: ResourceManager
+    @Inject lateinit var alertDialogFactory: AlertDialogFactory
 
     private var mainView: View? = null
     private val args: ForecastFragmentArgs by navArgs()
@@ -70,7 +72,7 @@ class ForecastFragment : Fragment() {
         )
 
         val alertDialogHelper = AlertDialogHelper(requireActivity())
-        val dialogController = ForecastDialogControllerFactory(resourceManager, alertDialogHelper)
+        val dialogController = ForecastDialogControllerFactory(alertDialogFactory, alertDialogHelper)
             .create()
 
         statusRenderer = statusRendererFactory.create(appBarViewModel)
