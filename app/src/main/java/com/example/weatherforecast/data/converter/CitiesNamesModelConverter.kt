@@ -4,6 +4,7 @@ import com.example.weatherforecast.models.data.WeatherForecastCityResponse
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
@@ -15,6 +16,7 @@ class CitiesNamesModelConverter {
      * Convert [dataModel] and [error] to domain-layer model
      * @return domain-layer model
      */
+    @InternalSerializationApi
     fun convert(
         dataModel: Response<List<WeatherForecastCityResponse>>,
         error: String

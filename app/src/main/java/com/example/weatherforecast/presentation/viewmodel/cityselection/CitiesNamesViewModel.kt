@@ -1,9 +1,6 @@
 package com.example.weatherforecast.presentation.viewmodel.cityselection
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
@@ -45,24 +42,24 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
-    private val _cityMaskState: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
-    private val _citiesNamesState: MutableState<CitiesNamesDomainModel?> = mutableStateOf(null)
-
     /**
      * StateFlow representing the current city name mask entered by the user.
      *
      * Used to track user input for auto-completion. Updates trigger city name lookups.
      */
-    val cityMaskState: StateFlow<CityItem>
-        get() = _cityMaskState
+    val cityMaskStateFlow: StateFlow<CityItem>
+        get() = _cityMaskStateFlow
 
     /**
      * Current list of city names matching the input mask.
      *
      * Nullable — `null` indicates no search has been performed yet or results were cleared.
      */
-    val citiesNamesState: State<CitiesNamesDomainModel?>
-        get() = _citiesNamesState
+    val citiesNamesStateFlow: StateFlow<CitiesNamesDomainModel?>
+        get() = _citiesNamesStateFlow
+
+    private val _cityMaskStateFlow: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
+    private val _citiesNamesStateFlow: MutableStateFlow<CitiesNamesDomainModel?> = MutableStateFlow(null)
 
     init {
         showMessage(R.string.city_selection_title)
@@ -86,7 +83,7 @@ class CitiesNamesViewModel @Inject constructor(
      * Requests a list of cities whose names start with the given [city] prefix.
      *
      * Launches a coroutine to load data via [CitiesNamesInteractor].
-     * Updates [citiesNamesState] with the result or shows an error if applicable.
+     * Updates [citiesNamesStateFlow] with the result or shows an error if applicable.
      *
      * @param city Prefix string to filter city names (e.g., "Kaz")
      */
@@ -94,7 +91,7 @@ class CitiesNamesViewModel @Inject constructor(
         Log.d(TAG, "Fetching cities for mask: $city")
         viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
             val response = citiesNamesInteractor.loadCitiesNames(city)
-            _citiesNamesState.value = response
+            _citiesNamesStateFlow.value = response
             if (response.error.isNotBlank()) {
                 Log.d(TAG, "Error from interactor: ${response.error}")
                 showError(response.error)
@@ -120,7 +117,7 @@ class CitiesNamesViewModel @Inject constructor(
      * Resets the search query, typically used when the user wants to start over.
      */
     fun clearCityMask() {
-        _cityMaskState.value = CityItem("")
+        _cityMaskStateFlow.value = CityItem("")
     }
 
     /**
@@ -129,7 +126,7 @@ class CitiesNamesViewModel @Inject constructor(
      * Does not affect the input mask. Used to reset suggestion UI independently.
      */
     fun clearCitiesNames() {
-        _citiesNamesState.value = null
+        _citiesNamesStateFlow.value = null
     }
 
     companion object {

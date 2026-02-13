@@ -99,8 +99,9 @@ fun CitySelectionLayout(
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val cityState by viewModel.cityMaskState.collectAsStateWithLifecycle()
+    val cityState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarState by appBarViewModel.appBarState.collectAsStateWithLifecycle()
+    val citiesNamesState by viewModel.citiesNamesStateFlow.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -155,8 +156,7 @@ fun CitySelectionLayout(
                         cityName = cityState,
                         queryLabel = queryLabel,
                         modifier = Modifier,
-                        cityMaskPredictions = viewModel.citiesNamesState.value?.cities.orEmpty()
-                            .toPersistentList(),
+                        cityMaskPredictions = citiesNamesState?.cities.orEmpty().toPersistentList(),
                         cityMaskAction = cityMaskAction(
                             keyboardController,
                             { scope },

@@ -7,6 +7,7 @@ import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteD
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
@@ -24,6 +25,7 @@ class CitiesNamesRepositoryImpl(
     private val modelsConverter: CitiesNamesModelConverter,
 ) : CitiesNamesRepository {
 
+    @InternalSerializationApi
     override suspend fun loadCitiesNames(token: String) =
         withContext(coroutineDispatchers.io) {
             return@withContext try {
