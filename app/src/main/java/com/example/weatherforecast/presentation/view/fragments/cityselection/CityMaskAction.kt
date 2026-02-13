@@ -27,4 +27,4 @@ sealed class CityMaskAction {
  * @property cityMask The current text input used to filter city suggestions
  */
 @Immutable
-data class CityItem(var cityMask: String)
+data class CityItem(val cityMask: String)

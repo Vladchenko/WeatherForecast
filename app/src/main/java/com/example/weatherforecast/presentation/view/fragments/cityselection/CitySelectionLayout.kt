@@ -163,8 +163,9 @@ fun CitySelectionLayout(
                             onCityClicked,
                             viewModel::clearCityMask,
                             viewModel::clearCitiesNames,
-                            viewModel::getCitiesNamesForMask
-                        )
+                            viewModel::getCitiesNamesForMask,
+                        ),
+                        viewModel
                     )
                 }
             }
@@ -411,7 +412,8 @@ private fun AddressEdit(
     queryLabel: String,
     modifier: Modifier,
     cityMaskPredictions: ImmutableList<CityDomainModel>,
-    cityMaskAction: (CityMaskAction) -> Unit
+    cityMaskAction: (CityMaskAction) -> Unit,
+    viewModel: CitiesNamesViewModel
 ) {
     Column(
         modifier = modifier.padding(top = 8.dp),
@@ -424,7 +426,7 @@ private fun AddressEdit(
             useOutlined = true,
             onQueryChanged = { updatedCityMask ->
                 if (updatedCityMask.isNotBlank()) {
-                    cityName.cityMask = updatedCityMask
+                    viewModel.updateCityMask(updatedCityMask)
                     cityMaskAction(CityMaskAction.OnCityMaskChange(cityName.cityMask))
                 }
             },

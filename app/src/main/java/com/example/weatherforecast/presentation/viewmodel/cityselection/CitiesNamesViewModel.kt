@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -121,12 +122,19 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     /**
+     * Updates the current city name mask input.
+     */
+    fun updateCityMask(newMask: String) {
+        _cityMaskStateFlow.value = _cityMaskStateFlow.value.copy(cityMask = newMask)
+    }
+
+    /**
      * Clears the list of suggested city names.
      *
      * Does not affect the input mask. Used to reset suggestion UI independently.
      */
     fun clearCitiesNames() {
-        _citiesNamesStateFlow.value = null
+        _citiesNamesStateFlow.update { null }
     }
 
     companion object {
