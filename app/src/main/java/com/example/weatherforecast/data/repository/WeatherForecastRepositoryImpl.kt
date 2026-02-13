@@ -10,6 +10,7 @@ import com.example.weatherforecast.models.data.WeatherForecastResponse
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.domain.WeatherForecast
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
@@ -29,6 +30,7 @@ class WeatherForecastRepositoryImpl(
     private val temperatureType: TemperatureType
 ) : WeatherForecastRepository {
 
+    @InternalSerializationApi
     override suspend fun loadAndSaveRemoteForecastForCity(
         temperatureType: TemperatureType,
         city: String
@@ -44,6 +46,7 @@ class WeatherForecastRepositoryImpl(
             return@withContext LoadResult.Remote(result)
         }
 
+    @InternalSerializationApi
     override suspend fun loadAndSaveRemoteForecastForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
@@ -62,6 +65,7 @@ class WeatherForecastRepositoryImpl(
             return@withContext LoadResult.Remote(result)
         }
 
+    @InternalSerializationApi
     override suspend fun loadLocalForecast(city: String, remoteError: String) =
         withContext(coroutineDispatchers.io) {
             val response: WeatherForecast
@@ -75,6 +79,7 @@ class WeatherForecastRepositoryImpl(
             return@withContext LoadResult.Local(response, remoteError)
         }
 
+    @InternalSerializationApi
     private suspend fun saveForecast(response: WeatherForecastResponse) =
         withContext(coroutineDispatchers.io) {
             weatherForecastLocalDataSource.saveForecastData(response)

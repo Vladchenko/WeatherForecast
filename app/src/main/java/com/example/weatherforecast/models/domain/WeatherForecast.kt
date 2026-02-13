@@ -9,6 +9,7 @@ import androidx.compose.runtime.Immutable
  * @property coordinate of longitude and latitude
  * @property dateTime on which a forecast is provided
  * @property temperature for the city
+ * @property iconCode weather icon code
  * @property weatherType like rain, snow, etc
  * @property temperatureType like Celsius, Fahrenheit
  * @property serverError if there is an error from remote server
@@ -18,6 +19,7 @@ data class WeatherForecast(
     val coordinate: Coordinate,
     val dateTime: String,
     val temperature: String,
+    val iconCode: String,
     val weatherType: String,
     val temperatureType: String,
     val serverError: String

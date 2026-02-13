@@ -1,7 +1,13 @@
 package com.example.weatherforecast.data.database
 
 import androidx.room.TypeConverter
-import com.example.weatherforecast.models.data.*
+import com.example.weatherforecast.models.data.Clouds
+import com.example.weatherforecast.models.data.Coordinate
+import com.example.weatherforecast.models.data.Main
+import com.example.weatherforecast.models.data.System
+import com.example.weatherforecast.models.data.Weather
+import com.example.weatherforecast.models.data.Wind
+import kotlinx.serialization.InternalSerializationApi
 import org.json.JSONObject
 
 /**
@@ -9,6 +15,7 @@ import org.json.JSONObject
  */
 class WeatherForecastTypeConverters {
     @TypeConverter
+    @InternalSerializationApi
     fun fromCoordinate(source: Coordinate): String {
         return JSONObject().apply {
             put("lat", source.latitude)
@@ -17,6 +24,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun toCoordinate(source: String): Coordinate {
         val json = JSONObject(source)
         return Coordinate(
@@ -26,6 +34,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun fromWeather(source: List<Weather>): String {
         return JSONObject().apply {
             put("weather", source.map { weather ->
@@ -40,6 +49,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun toWeather(stringList: String): List<Weather> {
         val json = JSONObject(stringList)
         val weatherArray = json.getJSONArray("weather")
@@ -55,6 +65,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun fromMain(source: Main): String {
         return JSONObject().apply {
             put("temp", source.temp)
@@ -67,6 +78,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun toMain(source: String): Main {
         val json = JSONObject(source)
         return Main(
@@ -80,6 +92,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun fromWind(source: Wind): String {
         return JSONObject().apply {
             put("speed", source.speed)
@@ -89,6 +102,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun toWind(source: String): Wind {
         val json = JSONObject(source)
         return Wind(
@@ -99,6 +113,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun fromClouds(source: Clouds): String {
         return JSONObject().apply {
             put("all", source.all)
@@ -106,6 +121,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun toClouds(source: String): Clouds {
         val json = JSONObject(source)
         return Clouds(
@@ -114,6 +130,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun fromSystem(source: System): String {
         return JSONObject().apply {
             put("type", source.type)
@@ -125,6 +142,7 @@ class WeatherForecastTypeConverters {
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun toSystem(source: String): System {
         val json = JSONObject(source)
         return System(

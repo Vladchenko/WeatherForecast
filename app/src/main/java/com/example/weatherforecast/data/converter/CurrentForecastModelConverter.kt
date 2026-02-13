@@ -6,6 +6,7 @@ import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.models.data.WeatherForecastResponse
 import com.example.weatherforecast.models.domain.Coordinate
 import com.example.weatherforecast.models.domain.WeatherForecast
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import kotlin.math.roundToInt
 
@@ -22,6 +23,7 @@ class CurrentForecastModelConverter {
      * @param response from remote server
      * @return domain data model
      */
+    @InternalSerializationApi
     fun convert(
         temperatureType: TemperatureType,
         city: String,
@@ -40,6 +42,7 @@ class CurrentForecastModelConverter {
             ),
             dateTime = responseBody?.dateTime.toString(),
             temperature = convertTemperature(temperatureType, temperature),
+            iconCode = weather?.icon ?: "0",
             weatherType = weather?.description.orEmpty(),
             temperatureType = defineTemperatureSign(temperatureType),
             serverError = response.errorBody()?.string().orEmpty()

@@ -288,12 +288,8 @@ class WeatherForecastViewModel @Inject constructor(
         forecastDomainToUiConverter.convert(
             model = forecastModel,
             defaultErrorMessage = resourceManager.getString(R.string.bad_date_format),
-            getWeatherIconId = { weatherType ->
-                getWeatherTypeIcon(
-                    resourceManager.getResources(),
-                    resourceManager.getPackageName(),
-                    weatherType
-                )
+            getWeatherIconId = { weatherIconId ->
+                getWeatherTypeIcon(weatherIconId)
             }
         )
 

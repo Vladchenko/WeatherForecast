@@ -22,12 +22,12 @@ class ForecastDomainToUiConverterImpl: ForecastDomainToUiConverter {
             dateTime = model.dateTime,
             errorMessage = defaultErrorMessage
         )
-        val iconId = getWeatherIconId(model.weatherType)
+        val iconId = getWeatherIconId(model.iconCode)
         return WeatherForecastUi(
             city = model.city,
             coordinate = Coordinate(model.coordinate.latitude, model.coordinate.longitude),
             dateTime = displayDate,
-            weatherImageId = iconId,
+            weatherIconId = iconId,
             temperature = model.temperature,
             weatherType = model.weatherType,
             temperatureType = model.temperatureType,

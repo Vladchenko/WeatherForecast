@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation
 
-import android.content.res.Resources
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
@@ -31,23 +30,40 @@ object PresentationUtils {
         }
 
     /**
-     * Weather type icon retrieving from [resources], having a path to this icon, i.e. [packageName]
-     * and weather description, i.e. [weatherType] specified.
+     * Defining weather type icon by [weatherIconId].
+     * Codes present at https://openweathermap.org/weather-conditions#Icon-list
      */
-    fun getWeatherTypeIcon(resources: Resources, packageName: String, weatherType: String): Int {
-        val resourceId = resources.getIdentifier(
-            ICON_PREFIX + weatherType.replace(" ", ""),
-            DRAWABLE_RESOURCE_TYPE,
-            packageName
-        )
+    fun getWeatherTypeIcon(weatherIconId: String): Int {
+        val resourceId = weatherIconMap[weatherIconId] ?: 0
         return if (resourceId > 0) {
             resourceId
         } else {
-            R.drawable.icon_clearsky
+            R.drawable.ic_0
         }
     }
 
-    private const val ICON_PREFIX = "icon_"
-    private const val DRAWABLE_RESOURCE_TYPE = "drawable"
+    private val weatherIconMap by lazy {
+        mapOf(
+            "01d" to R.drawable.ic_01d,
+            "01n" to R.drawable.ic_01n,
+            "02d" to R.drawable.ic_02d,
+            "02n" to R.drawable.ic_02n,
+            "03d" to R.drawable.ic_03d,
+            "03n" to R.drawable.ic_03n,
+            "04d" to R.drawable.ic_04d,
+            "04n" to R.drawable.ic_04n,
+            "09d" to R.drawable.ic_09d,
+            "09n" to R.drawable.ic_09n,
+            "10d" to R.drawable.ic_10d,
+            "10n" to R.drawable.ic_10n,
+            "11d" to R.drawable.ic_11d,
+            "11n" to R.drawable.ic_11n,
+            "13d" to R.drawable.ic_13d,
+            "13n" to R.drawable.ic_13n,
+            "50d" to R.drawable.ic_50d,
+            "50n" to R.drawable.ic_50n,
+        )
+    }
+
     const val SHARED_PREFERENCES_KEY = "Shared preferences key"
 }

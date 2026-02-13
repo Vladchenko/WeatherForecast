@@ -258,7 +258,7 @@ private fun MainContent(
             )
             Image(
                 modifier = Modifier.padding(start = 8.dp),
-                painter = painterResource(id = uiState.forecast.weatherImageId),
+                painter = painterResource(id = uiState.forecast.weatherIconId),
                 contentDescription = uiState.forecast.weatherType
             )
         }

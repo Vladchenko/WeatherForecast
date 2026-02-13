@@ -13,7 +13,7 @@ import androidx.compose.runtime.Immutable
  * @property city Name of the city for which the forecast is displayed
  * @property coordinate Geographic coordinates (latitude and longitude) of the city
  * @property dateTime Formatted date and time of the forecast
- * @property weatherImageId Resource ID of the weather condition icon (e.g., sunny, rainy)
+ * @property weatherIconId Id of the weather condition icon (e.g., sunny, rainy)
  * @property temperature Current temperature as a formatted string
  * @property weatherType Description of the weather condition (e.g., "clear sky", "light rain")
  * @property temperatureType Unit of temperature measurement (e.g., "°C", "°F")
@@ -23,7 +23,7 @@ data class WeatherForecastUi(
     val city: String,
     val coordinate: Coordinate,
     val dateTime: String,
-    val weatherImageId: Int,
+    val weatherIconId: Int,
     val temperature: String,
     val weatherType: String,
     val temperatureType: String,
