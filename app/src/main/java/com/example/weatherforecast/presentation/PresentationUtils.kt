@@ -1,5 +1,9 @@
 package com.example.weatherforecast.presentation
 
+import android.content.Context
+import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.compose.ui.graphics.Color
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
@@ -63,6 +67,13 @@ object PresentationUtils {
             "50d" to R.drawable.ic_50d,
             "50n" to R.drawable.ic_50n,
         )
+    }
+
+    fun Context.resolveColorAttr(@AttrRes attr: Int): Color {
+        return TypedValue().run {
+            theme.resolveAttribute(attr, this, true)
+            Color(this.data)
+        }
     }
 
     const val SHARED_PREFERENCES_KEY = "Shared preferences key"

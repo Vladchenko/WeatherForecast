@@ -43,10 +43,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -59,6 +59,7 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
+import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -118,7 +119,7 @@ fun CitySelectionLayout(
                         )
                         Text(
                             text = appbarState.subtitle,
-                            color = colorResource(appbarState.subtitleColorAttr),
+                            color = LocalContext.current.resolveColorAttr(appbarState.subtitleColorAttr),
                             fontSize = PresentationUtils.getToolbarSubtitleFontSize(appbarState.subtitle).sp,   //TODO Move to model
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

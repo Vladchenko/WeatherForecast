@@ -1,5 +1,6 @@
 package com.example.weatherforecast.models.presentation
 
+import androidx.annotation.AttrRes
 import com.example.weatherforecast.R
 
 
@@ -16,7 +17,7 @@ import com.example.weatherforecast.R
 data class AppBarState(
     val title: String = "",
     val subtitle: String = "",
-    val subtitleColorAttr: Int = R.attr.colorInfo,
+    @param:AttrRes val subtitleColorAttr: Int = R.attr.colorInfo,
     val isVisible: Boolean = true,
     val actionsVisible: Boolean = true,
     val navigationIconVisible: Boolean = true
