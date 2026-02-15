@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.weatherforecast.data.database.CitiesNamesDAO
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import com.example.weatherforecast.models.data.WeatherForecastCityResponse
+import kotlinx.serialization.InternalSerializationApi
 
 /**
  * [CitiesNamesLocalDataSource] implementation
@@ -12,12 +13,14 @@ import com.example.weatherforecast.models.data.WeatherForecastCityResponse
  */
 class CitiesNamesLocalDataSourceImpl(private val dao: CitiesNamesDAO) : CitiesNamesLocalDataSource {
 
+    @InternalSerializationApi
     override fun loadCitiesNames(token: String): List<WeatherForecastCityResponse> {
         val model = dao.getCitiesNames(token)
         Log.d("CitiesNamesLocalDataSourceImpl", model.toString())
         return model
     }
 
+    @InternalSerializationApi
     override suspend fun deleteAllCitiesNames() {
         dao.deleteAll()
     }

@@ -1,6 +1,7 @@
 package com.example.weatherforecast.data.repository.datasource
 
 import com.example.weatherforecast.models.data.WeatherForecastResponse
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
@@ -11,10 +12,12 @@ interface WeatherForecastRemoteDataSource {
     /**
      * Receive weather forecast for [city].
      */
+    @InternalSerializationApi
     suspend fun loadForecastForCity(city: String): Response<WeatherForecastResponse>
 
     /**
      * Receive weather forecast for a location defined by [latitude] and [longitude].
      */
+    @InternalSerializationApi
     suspend fun loadForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse>
 }

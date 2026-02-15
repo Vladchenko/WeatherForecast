@@ -7,6 +7,7 @@ import com.example.weatherforecast.models.data.HourlyForecastResponse
 import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.HourlyForecastItemDomainModel
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import kotlin.math.roundToInt
 
@@ -14,6 +15,7 @@ import kotlin.math.roundToInt
  * Converts data layer model to domain one for hourly weather forecast
  */
 class HourlyForecastModelsConverter {
+    @InternalSerializationApi
     fun convert(
         temperatureType: TemperatureType,
         city: String,

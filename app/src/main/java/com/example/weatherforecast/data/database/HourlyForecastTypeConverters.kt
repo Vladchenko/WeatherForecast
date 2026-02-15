@@ -5,6 +5,7 @@ import com.example.weatherforecast.models.data.City
 import com.example.weatherforecast.models.data.HourlyForecastItem
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Type converters for Room database to handle complex data types.
@@ -13,11 +14,13 @@ class HourlyForecastTypeConverters {
     private val gson = Gson()
 
     @TypeConverter
+    @InternalSerializationApi
     fun fromHourlyForecastList(value: List<HourlyForecastItem>): String {
         return gson.toJson(value)
     }
 
     @TypeConverter
+    @InternalSerializationApi
     fun toHourlyForecastList(value: String): List<HourlyForecastItem> {
         val listType = object : TypeToken<List<HourlyForecastItem>>() {}.type
         return gson.fromJson(value, listType)

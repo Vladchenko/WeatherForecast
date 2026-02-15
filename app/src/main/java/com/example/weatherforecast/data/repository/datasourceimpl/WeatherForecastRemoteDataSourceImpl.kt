@@ -5,6 +5,7 @@ import com.example.weatherforecast.data.repository.datasource.WeatherForecastRem
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.models.data.WeatherForecastResponse
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
@@ -20,12 +21,14 @@ class WeatherForecastRemoteDataSourceImpl(
     private val responseProcessor: ResponseProcessor
 ) : WeatherForecastRemoteDataSource {
 
+    @InternalSerializationApi
     override suspend fun loadForecastForCity(city: String): Response<WeatherForecastResponse> {
         val response = apiService.getWeatherForecast(city)
         loggingService.logApiResponse(TAG, "Weather forecast response for city = $city", response.body())
         return responseProcessor.processResponse(response)
     }
 
+    @InternalSerializationApi
     override suspend fun loadForecastForLocation(latitude: Double, longitude: Double): Response<WeatherForecastResponse> {
         // Note: Location-based API is no longer supported in the current version
         throw UnsupportedOperationException("Location-based weather forecast is no longer supported")

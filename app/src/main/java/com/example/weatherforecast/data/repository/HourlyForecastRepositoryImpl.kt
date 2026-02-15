@@ -11,6 +11,7 @@ import com.example.weatherforecast.models.domain.HourlyForecastDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
@@ -20,16 +21,15 @@ import retrofit2.Response
  * @property hourlyForecastLocalDataSource source of local data for domain layer
  * @property modelsConverter converts server response to domain entity
  * @property coroutineDispatchers dispatchers for coroutines
- * @property temperatureType like celsius, fahrenheit
  */
 class HourlyForecastRepositoryImpl(
     private val hourlyForecastRemoteDataSource: HourlyForecastRemoteDataSource,
     private val hourlyForecastLocalDataSource: HourlyForecastLocalDataSource,
     private val modelsConverter: HourlyForecastModelsConverter,
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val temperatureType: TemperatureType
 ) : HourlyForecastRepository {
 
+    @InternalSerializationApi
     override suspend fun loadHourlyForecastForCity(
         temperatureType: TemperatureType,
         city: String
@@ -45,6 +45,7 @@ class HourlyForecastRepositoryImpl(
             return@withContext LoadResult.Remote(result)
         }
 
+    @InternalSerializationApi
     override suspend fun loadHourlyForecastForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
@@ -63,6 +64,7 @@ class HourlyForecastRepositoryImpl(
             return@withContext LoadResult.Remote(result)
         }
 
+    @InternalSerializationApi
     override suspend fun loadLocalForecast(city: String, remoteError: String) =
         withContext(coroutineDispatchers.io) {
             val response: HourlyForecastDomainModel
@@ -76,6 +78,7 @@ class HourlyForecastRepositoryImpl(
             return@withContext LoadResult.Local(response, remoteError)
         }
 
+    @InternalSerializationApi
     private suspend fun saveForecast(response: HourlyForecastResponse) =
         withContext(coroutineDispatchers.io) {
             launch {

@@ -5,6 +5,7 @@ import com.example.weatherforecast.data.repository.datasource.HourlyForecastRemo
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.models.data.HourlyForecastResponse
+import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
@@ -20,6 +21,7 @@ class HourlyForecastRemoteDataSourceImpl(
     private val responseProcessor: ResponseProcessor
 ) : HourlyForecastRemoteDataSource {
 
+    @InternalSerializationApi
     override suspend fun loadHourlyForecastForCity(city: String): Response<HourlyForecastResponse> {
         val response = apiService.getHourlyForecast(city)
         loggingService.logApiResponse(
@@ -30,6 +32,7 @@ class HourlyForecastRemoteDataSourceImpl(
         return responseProcessor.processResponse(response)
     }
 
+    @InternalSerializationApi
     override suspend fun loadHourlyForecastForLocation(
         latitude: Double,
         longitude: Double
