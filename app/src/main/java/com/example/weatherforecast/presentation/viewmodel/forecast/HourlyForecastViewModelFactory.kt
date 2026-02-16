@@ -3,7 +3,7 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.connectivity.ConnectivityObserver
-import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyForecastLocalInteractor
@@ -12,7 +12,6 @@ import com.example.weatherforecast.domain.forecast.HourlyForecastRemoteInteracto
 /**
  * WeatherForecastViewModel factory
  *
- * @property temperatureType type of temperature
  * @property connectivityObserver internet connectivity observer
  * @property coroutineDispatchers coroutines dispatchers
  * @property chosenCityInteractor downloads a previously chosen city
@@ -21,7 +20,7 @@ import com.example.weatherforecast.domain.forecast.HourlyForecastRemoteInteracto
  */
 @Suppress("UNCHECKED_CAST")
 class HourlyForecastViewModelFactory(
-    private val temperatureType: TemperatureType,
+    private val preferencesManager: PreferencesManager,
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -32,7 +31,7 @@ class HourlyForecastViewModelFactory(
         return HourlyForecastViewModel(
             connectivityObserver,
             coroutineDispatchers,
-            temperatureType,
+            preferencesManager,
             chosenCityInteractor,
             forecastLocalInteractor,
             forecastRemoteInteractor

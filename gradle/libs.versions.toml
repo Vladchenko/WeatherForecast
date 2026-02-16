@@ -4,6 +4,7 @@ activityKtx = "1.8.2"
 appcompat = "1.6.1"
 constraintlayout = "2.1.4"
 coreKtx = "1.12.0"
+datastore = "1.1.1"
 espressoCore = "3.5.1"
 fragmentKtx = "1.6.2"
 hiltAndroid = "2.50"
@@ -45,6 +46,7 @@ androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "ui" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "ui" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-hilt-common = { module = "androidx.hilt:hilt-common", version.ref = "hiltCommon" }
@@ -62,7 +64,6 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx"
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
-hilt-android-gradle = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroid" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlinVersion" }
 kotlin-immutableCollections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinImmutableCollections" }
@@ -82,7 +83,6 @@ application = { id = 'com.android.application', version.ref = "agp" }
 android-library = { id = 'com.android.library', version.ref = "agp" }
 hilt = { id = 'com.google.dagger.hilt.android', version.ref = "hiltAndroid" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlinVersion" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "kspVersion" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinVersion" }
 navigation-args = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navargs" }

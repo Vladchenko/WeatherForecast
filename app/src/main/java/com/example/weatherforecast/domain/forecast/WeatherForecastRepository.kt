@@ -35,6 +35,7 @@ interface WeatherForecastRepository {
      */
     suspend fun loadLocalForecast(
         city: String,
+        temperatureType: TemperatureType,
         remoteError: String
     ): LoadResult<WeatherForecast>
 }

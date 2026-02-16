@@ -1,11 +1,14 @@
 package com.example.weatherforecast.di
 
+import android.content.Context
+import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.dispatchers.CoroutineDispatchersImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -35,8 +38,9 @@ class CoreModule {
 
     @Singleton
     @Provides
-    fun provideTemperatureType(): TemperatureType {
-        return TemperatureType.CELSIUS
+    fun providePreferencesManager(coroutineScope: CoroutineScope,
+                                  @ApplicationContext context: Context): PreferencesManager {
+        return PreferencesManager(context, coroutineScope)
     }
 
     @Singleton

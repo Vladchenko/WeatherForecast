@@ -3,19 +3,20 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.connectivity.ConnectivityObserver
-import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastLocalInteractor
 import com.example.weatherforecast.domain.forecast.WeatherForecastRemoteInteractor
 import com.example.weatherforecast.presentation.converter.ForecastDomainToUiConverter
 import com.example.weatherforecast.utils.ResourceManager
+import kotlinx.serialization.InternalSerializationApi
 
 /**
  * WeatherForecastViewModel factory
  *
- * @property temperatureType type of temperature
  * @property resourceManager resource manager
+ * @property preferencesManager to provide preferences for application
  * @property connectivityObserver internet connectivity observer
  * @property coroutineDispatchers coroutines dispatchers
  * @property chosenCityInteractor downloads a previously chosen city
@@ -23,8 +24,8 @@ import com.example.weatherforecast.utils.ResourceManager
  * @property forecastRemoteInteractor downloads weather forecast through network
  */
 class WeatherForecastViewModelFactory(
-    private val temperatureType: TemperatureType,
     private val resourceManager: ResourceManager,
+    private val preferencesManager: PreferencesManager,
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -32,13 +33,15 @@ class WeatherForecastViewModelFactory(
     private val forecastRemoteInteractor: WeatherForecastRemoteInteractor,
     private val uiConverter: ForecastDomainToUiConverter,
 ) : ViewModelProvider.Factory {
+
+    @InternalSerializationApi
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WeatherForecastViewModel::class.java)) {
             return WeatherForecastViewModel(
                 connectivityObserver,
-                temperatureType,
                 resourceManager,
+                preferencesManager,
                 coroutineDispatchers,
                 chosenCityInteractor,
                 forecastLocalInteractor,

@@ -20,14 +20,12 @@ import retrofit2.Response
  * @property weatherForecastLocalDataSource source of local data for domain layer
  * @property modelsConverter converts server response to domain entity
  * @property coroutineDispatchers dispatchers for coroutines
- * @property temperatureType like celsius, fahrenheit
  */
 class WeatherForecastRepositoryImpl(
     private val weatherForecastRemoteDataSource: WeatherForecastRemoteDataSource,
     private val weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
     private val modelsConverter: CurrentForecastModelConverter,
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val temperatureType: TemperatureType
 ) : WeatherForecastRepository {
 
     @InternalSerializationApi
@@ -66,7 +64,11 @@ class WeatherForecastRepositoryImpl(
         }
 
     @InternalSerializationApi
-    override suspend fun loadLocalForecast(city: String, remoteError: String) =
+    override suspend fun loadLocalForecast(
+        city: String,
+        temperatureType: TemperatureType,
+        remoteError: String
+    ) =
         withContext(coroutineDispatchers.io) {
             val response: WeatherForecast
             val datasourceResponse =

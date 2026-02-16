@@ -14,6 +14,7 @@ interface HourlyForecastRepository {
      */
     suspend fun loadLocalForecast(
         city: String,
+        temperatureType: TemperatureType,
         remoteError: String
     ): LoadResult<HourlyForecastDomainModel>
 

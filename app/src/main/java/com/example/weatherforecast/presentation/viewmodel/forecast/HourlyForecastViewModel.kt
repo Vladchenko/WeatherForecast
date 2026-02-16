@@ -10,7 +10,7 @@ import com.example.weatherforecast.data.api.customexceptions.CityNotFoundExcepti
 import com.example.weatherforecast.data.api.customexceptions.NetworkTimeoutException
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
-import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyForecastLocalInteractor
@@ -23,6 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +33,6 @@ import javax.inject.Inject
  * @constructor
  * @param connectivityObserver observes internet connectivity state.
  * @param coroutineDispatchers dispatchers coroutines.
- * @property temperatureType current temperature type.
  * @property chosenCityInteractor interactor to get chosen city.
  * @property forecastLocalInteractor interactor to get saved hourly forecast.
  * @property forecastRemoteInteractor interactor to get remote hourly forecast.
@@ -41,7 +41,7 @@ import javax.inject.Inject
 class HourlyForecastViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
     coroutineDispatchers: CoroutineDispatchers,
-    private val temperatureType: TemperatureType,
+    private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastLocalInteractor: HourlyForecastLocalInteractor,
     private val forecastRemoteInteractor: HourlyForecastRemoteInteractor,
@@ -84,6 +84,7 @@ class HourlyForecastViewModel @Inject constructor(
     fun getHourlyForecastForCity(city: String) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
+            val temperatureType = preferencesManager.temperatureType.first()
             val result = forecastRemoteInteractor.loadHourlyForecastForCity(
                 temperatureType,
                 city
@@ -98,6 +99,7 @@ class HourlyForecastViewModel @Inject constructor(
     fun getHourlyForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
+            val temperatureType = preferencesManager.temperatureType.first()
             val result = forecastRemoteInteractor.loadHourlyForecastForLocation(
                 temperatureType,
                 cityModel.location.latitude,
@@ -113,10 +115,11 @@ class HourlyForecastViewModel @Inject constructor(
     fun getLocalCity() {
         viewModelScope.launch(exceptionHandler) {
             val cityModel = chosenCityInteractor.loadChosenCity()
+            val temperatureType = preferencesManager.temperatureType.first()
             if (cityModel.city.isBlank()) {
                 showError(R.string.default_city_absent)
             } else {
-                forecastLocalInteractor.loadForecast(cityModel.city, "")
+                forecastLocalInteractor.loadForecast(cityModel.city, temperatureType, "")
             }
         }
     }

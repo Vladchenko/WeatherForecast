@@ -7,6 +7,7 @@ import com.example.weatherforecast.data.converter.CurrentForecastModelConverter
 import com.example.weatherforecast.data.converter.HourlyForecastModelsConverter
 import com.example.weatherforecast.data.database.HourlyForecastDAO
 import com.example.weatherforecast.data.database.WeatherForecastDAO
+import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.repository.HourlyForecastRepositoryImpl
 import com.example.weatherforecast.data.repository.WeatherForecastRepositoryImpl
 import com.example.weatherforecast.data.repository.datasource.HourlyForecastLocalDataSource
@@ -165,14 +166,12 @@ class WeatherForecastModule {
         weatherForecastLocalDataSource: WeatherForecastLocalDataSource,
         converter: CurrentForecastModelConverter,
         coroutineDispatchers: CoroutineDispatchers,
-        temperaturesType: TemperatureType
     ): WeatherForecastRepository {
         return WeatherForecastRepositoryImpl(
             weatherForecastRemoteDataSource,
             weatherForecastLocalDataSource,
             converter,
-            coroutineDispatchers,
-            temperaturesType
+            coroutineDispatchers
         )
     }
 
@@ -182,15 +181,13 @@ class WeatherForecastModule {
         hourlyForecastRemoteDataSource: HourlyForecastRemoteDataSource,
         hourlyForecastLocalDataSource: HourlyForecastLocalDataSource,
         converter: HourlyForecastModelsConverter,
-        coroutineDispatchers: CoroutineDispatchers,
-        temperaturesType: TemperatureType
+        coroutineDispatchers: CoroutineDispatchers
     ): HourlyForecastRepository {
         return HourlyForecastRepositoryImpl(
             hourlyForecastRemoteDataSource,
             hourlyForecastLocalDataSource,
             converter,
             coroutineDispatchers,
-            temperaturesType
         )
     }
 
@@ -221,8 +218,8 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideForecastViewModelFactory(
-        temperatureType: TemperatureType,
         resourceManager: ResourceManager,
+        preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
@@ -231,8 +228,8 @@ class WeatherForecastModule {
         uiConverter: ForecastDomainToUiConverter
     ): WeatherForecastViewModelFactory {
         return WeatherForecastViewModelFactory(
-            temperatureType,
             resourceManager,
+            preferencesManager,
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers,
@@ -246,6 +243,7 @@ class WeatherForecastModule {
     @Provides
     fun provideHourlyForecastViewModelFactory(
         temperatureType: TemperatureType,
+        preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
@@ -253,7 +251,7 @@ class WeatherForecastModule {
         forecastRemoteInteractor: HourlyForecastRemoteInteractor
     ): HourlyForecastViewModelFactory {
         return HourlyForecastViewModelFactory(
-            temperatureType,
+            preferencesManager,
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers,

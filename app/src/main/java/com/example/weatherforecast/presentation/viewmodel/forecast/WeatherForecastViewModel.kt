@@ -10,6 +10,7 @@ import com.example.weatherforecast.data.api.customexceptions.CityNotFoundExcepti
 import com.example.weatherforecast.data.api.customexceptions.NetworkTimeoutException
 import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
@@ -46,8 +47,8 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherForecastViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
-    private val temperatureType: TemperatureType,
     private val resourceManager: ResourceManager,
+    private val preferencesManager: PreferencesManager,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastLocalInteractor: WeatherForecastLocalInteractor,
@@ -82,6 +83,8 @@ class WeatherForecastViewModel @Inject constructor(
 
     private var chosenCity: String? = null
     private var currentJob: Job? = null
+
+    private lateinit var temperatureType: TemperatureType
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
@@ -127,6 +130,15 @@ class WeatherForecastViewModel @Inject constructor(
         showProgressBarState.value = false
         throwable.stackTrace.forEach {
             Log.e(TAG, it.toString())
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            preferencesManager.temperatureType.collect { tempType ->
+                Log.d(TAG, "Temperature unit changed: $tempType")
+                temperatureType = tempType
+            }
         }
     }
 
@@ -195,7 +207,7 @@ class WeatherForecastViewModel @Inject constructor(
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val result = forecastLocalInteractor.loadForecast(
-                city, remoteError
+                city, temperatureType, remoteError
             )
             processServerResponse(result)
         }

@@ -65,7 +65,7 @@ class HourlyForecastRepositoryImpl(
         }
 
     @InternalSerializationApi
-    override suspend fun loadLocalForecast(city: String, remoteError: String) =
+    override suspend fun loadLocalForecast(city: String, temperatureType: TemperatureType, remoteError: String) =
         withContext(coroutineDispatchers.io) {
             val response: HourlyForecastDomainModel
             val datasourceResponse =

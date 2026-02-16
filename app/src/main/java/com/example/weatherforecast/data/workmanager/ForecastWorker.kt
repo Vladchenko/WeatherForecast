@@ -3,17 +3,18 @@ package com.example.weatherforecast.data.workmanager
 import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.weatherforecast.data.converter.CurrentForecastModelConverter
+import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.models.domain.LoadResult
+import com.example.weatherforecast.models.domain.WeatherForecast
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -25,8 +26,7 @@ import java.util.Locale
  *
  * @param context to create a worker for WorkManager
  * @param params adjust the worker
- * @property coroutineScope to run coroutines
- * @property temperatureType weather type
+ * @property preferencesManager to provide temperature type
  * @property chosenCityRepository to download chosen city
  * @property converter to convert forecast data to domain model
  * @property weatherForecastRepository to perform downloading of forecast
@@ -35,37 +35,53 @@ import java.util.Locale
 class ForecastWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val coroutineScope: CoroutineScope,
-    private val temperatureType: TemperatureType,
+    private val preferencesManager: PreferencesManager,
     private val chosenCityRepository: ChosenCityRepository,
     private val converter: CurrentForecastModelConverter,
     private val weatherForecastRepository: WeatherForecastRepository,
-) : Worker(context, params) {
+) : CoroutineWorker(context, params) {
 
-    override fun doWork(): Result {
-        coroutineScope.launch {
+    override suspend fun doWork(): Result =
+        try {
+            var tempType = TemperatureType.CELSIUS
             try {
-                val city = chosenCityRepository.loadChosenCity().city
-                val forecastResponse =
-                    weatherForecastRepository.loadAndSaveRemoteForecastForCity(
-                        temperatureType,
-                        city
-                    )
-                Log.i(
-                    TAG,
-                    LOG_MESSAGE +
-                            SimpleDateFormat(
-                                TIMESTAMP_PATTERN,
-                                Locale.getDefault()
-                            ).format(Date((forecastResponse as LoadResult.Remote).data.dateTime.toLong() * 1000))
-                )
+                tempType = preferencesManager.temperatureType.first()
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
-                Result.failure()
             }
+            var city = ""
+            try {
+                city = chosenCityRepository.loadChosenCity().city
+            } catch (e: Exception) {
+                Log.e(TAG, e.toString())
+            }
+            var forecastResponse: LoadResult<WeatherForecast>? = null
+            try {
+                forecastResponse =
+                    weatherForecastRepository.loadAndSaveRemoteForecastForCity(
+                        tempType,
+                        city
+                    )
+            } catch (e: Exception) {
+                Log.e(TAG, e.toString())
+            }
+            // Только если это Remote — логируем успешный запуск
+            if (forecastResponse is LoadResult.Remote) {
+                Log.i(
+                    TAG,
+                    LOG_MESSAGE + SimpleDateFormat(TIMESTAMP_PATTERN, Locale.getDefault())
+                        .format(Date(forecastResponse.data.dateTime.toLong() * 1000))
+                )
+                Result.success()
+            } else {
+                Log.w(TAG, "Прогноз не был загружен: $forecastResponse")
+                Result.retry() // или success(), в зависимости от логики
+            }
+        } catch (e: Throwable) {
+            Log.e(TAG, "КРИТИЧЕСКАЯ ОШИБКА в doWork()", e)
+            Result.failure()
         }
-        return Result.success()
-    }
+
 
     companion object {
         private const val TAG = "ForecastWorker"
