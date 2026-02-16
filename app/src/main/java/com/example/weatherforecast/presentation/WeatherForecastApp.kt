@@ -1,6 +1,7 @@
 package com.example.weatherforecast.presentation
 
 import android.app.Application
+import androidx.work.Configuration
 import com.example.weatherforecast.data.workmanager.WorkerStarter
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -11,9 +12,18 @@ import javax.inject.Inject
  * during app startup to ensure periodic weather data updates via WorkManager.
  */
 @HiltAndroidApp
-class WeatherForecastApp : Application() {
+class WeatherForecastApp() : Application(), Configuration.Provider {
 
-    @Inject lateinit var workerStarter: WorkerStarter
+    @Inject
+    lateinit var workerFactory: androidx.hilt.work.HiltWorkerFactory
+
+    @Inject
+    lateinit var workerStarter: WorkerStarter
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     override fun onCreate() {
         super.onCreate()

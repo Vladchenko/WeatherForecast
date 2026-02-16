@@ -7,11 +7,9 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.weatherforecast.data.converter.CurrentForecastModelConverter
 import com.example.weatherforecast.data.preferences.PreferencesManager
-import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.WeatherForecastRepository
 import com.example.weatherforecast.models.domain.LoadResult
-import com.example.weatherforecast.models.domain.WeatherForecast
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -43,42 +41,24 @@ class ForecastWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result =
         try {
-            var tempType = TemperatureType.CELSIUS
-            try {
-                tempType = preferencesManager.temperatureType.first()
-            } catch (e: Exception) {
-                Log.e(TAG, e.toString())
-            }
-            var city = ""
-            try {
-                city = chosenCityRepository.loadChosenCity().city
-            } catch (e: Exception) {
-                Log.e(TAG, e.toString())
-            }
-            var forecastResponse: LoadResult<WeatherForecast>? = null
-            try {
-                forecastResponse =
+            val tempType = preferencesManager.temperatureType.first()
+            val city = chosenCityRepository.loadChosenCity().city
+            val forecastResponse =
                     weatherForecastRepository.loadAndSaveRemoteForecastForCity(
                         tempType,
                         city
                     )
-            } catch (e: Exception) {
-                Log.e(TAG, e.toString())
-            }
-            // Только если это Remote — логируем успешный запуск
-            if (forecastResponse is LoadResult.Remote) {
-                Log.i(
-                    TAG,
-                    LOG_MESSAGE + SimpleDateFormat(TIMESTAMP_PATTERN, Locale.getDefault())
-                        .format(Date(forecastResponse.data.dateTime.toLong() * 1000))
-                )
-                Result.success()
-            } else {
-                Log.w(TAG, "Прогноз не был загружен: $forecastResponse")
-                Result.retry() // или success(), в зависимости от логики
-            }
-        } catch (e: Throwable) {
-            Log.e(TAG, "КРИТИЧЕСКАЯ ОШИБКА в doWork()", e)
+            Log.i(
+                TAG,
+                LOG_MESSAGE +
+                        SimpleDateFormat(
+                            TIMESTAMP_PATTERN,
+                            Locale.getDefault()
+                        ).format(Date((forecastResponse as LoadResult.Remote).data.dateTime.toLong() * 1000))
+            )
+            Result.success()
+        } catch (e: Exception) {
+            Log.e(TAG,  e.message.toString())
             Result.failure()
         }
 

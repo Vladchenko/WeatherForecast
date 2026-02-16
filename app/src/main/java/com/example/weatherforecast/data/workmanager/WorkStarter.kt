@@ -10,6 +10,8 @@ import javax.inject.Inject
 
 /**
  * Starts the periodic forecast download work
+ *
+ * @property workManager to provide periodic work
  */
 class WorkerStarter @Inject constructor(
     private val workManager: WorkManager

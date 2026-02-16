@@ -1,7 +1,6 @@
 package com.example.weatherforecast.di
 
 import android.content.Context
-import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.example.weatherforecast.BuildConfig
@@ -77,20 +76,6 @@ class NetworkModule {
     @Provides
     fun provideCityApiService(retrofit: Retrofit): CityApiService {
         return retrofit.create(CityApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideWorkManagerConfiguration(workerFactory: HiltWorkerFactory): Configuration =
-        Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
-
-    @Singleton
-    @Provides
-    fun provideWorkManager(@ApplicationContext applicationContext: Context): WorkManager {
-        val workManager = WorkManager.getInstance(applicationContext)
-        return workManager
     }
 
     @Singleton

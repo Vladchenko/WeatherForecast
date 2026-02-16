@@ -20,7 +20,6 @@ import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecas
 import com.example.weatherforecast.data.repository.datasourceimpl.WeatherForecastRemoteDataSourceImpl
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
-import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.data.util.permission.PermissionChecker
 import com.example.weatherforecast.data.util.permission.PermissionCheckerImpl
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
@@ -242,7 +241,6 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideHourlyForecastViewModelFactory(
-        temperatureType: TemperatureType,
         preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
