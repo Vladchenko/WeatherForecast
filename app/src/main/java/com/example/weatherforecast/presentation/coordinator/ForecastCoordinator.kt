@@ -58,7 +58,6 @@ class ForecastCoordinator(
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { collectMessageFlow(forecastViewModel.messageFlow) }
-                launch { collectCityRequestFailedFlow(forecastViewModel.cityRequestFailedFlow) }
                 launch { forecastViewModel.gotoCitySelectionFlow.collect { onGotoCitySelection() } }
                 launch { collectChosenCityNotFoundFlow(forecastViewModel.chosenCityNotFoundFlow) }
                 launch { collectChosenCityBlankFlow(forecastViewModel.chosenCityBlankFlow) }
@@ -77,21 +76,9 @@ class ForecastCoordinator(
         flow.collect { statusRenderer.updateFromMessage(it) }
     }
 
-    private suspend fun collectCityRequestFailedFlow(flow: SharedFlow<String>) {
-        flow.collect { city ->
-            statusRenderer.showStatus(
-                resourceManager.getString(
-                    R.string.geo_location_by_city_define,
-                    city
-                )
-            )
-            geoLocationViewModel.defineLocationByCity(city)
-        }
-    }
-
     private suspend fun collectChosenCityNotFoundFlow(flow: SharedFlow<String>) {
         flow.collect { city ->
-            statusRenderer.showStatus(resourceManager.getString(R.string.selected_city_not_found))
+            statusRenderer.showWarning(resourceManager.getString(R.string.selected_city_not_found))
             dialogController.showChosenCityNotFound(city) {
                 forecastViewModel.gotoCitySelection()
             }

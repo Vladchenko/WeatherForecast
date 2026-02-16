@@ -61,8 +61,6 @@ class WeatherForecastViewModel @Inject constructor(
         get() = _forecastState
     val chosenCityFlow: StateFlow<String>
         get() = _chosenCityStateFlow
-    val cityRequestFailedFlow: SharedFlow<String>
-        get() = _cityRequestFailedFlow
     val chosenCityBlankFlow: SharedFlow<Unit>
         get() = _chosenCityBlankFlow
     val chosenCityNotFoundFlow: SharedFlow<String>
@@ -76,7 +74,6 @@ class WeatherForecastViewModel @Inject constructor(
     private val _forecastState = MutableStateFlow<ForecastUiState>(ForecastUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow("")
     private val _chosenCityNotFoundFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
-    private val _cityRequestFailedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val _gotoCitySelectionFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     //endregion flows
@@ -90,7 +87,7 @@ class WeatherForecastViewModel @Inject constructor(
         Log.e(TAG, throwable.message.orEmpty())
         when (throwable) {
             is CityNotFoundException -> {
-                _cityRequestFailedFlow.tryEmit(throwable.city)
+                _chosenCityNotFoundFlow.tryEmit(throwable.city)
             }
 
             is NoInternetException -> {
@@ -201,13 +198,13 @@ class WeatherForecastViewModel @Inject constructor(
     }
 
     /**
-     * Download weather forecast on a [city], providing a [remoteError] on why remote request failed.
+     * Download weather forecast on a [city], providing a [error] on why remote request failed.
      */
-    private fun downloadLocalForecastForCity(city: String, remoteError: String) {
+    private fun downloadLocalForecastForCity(city: String, error: String) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val result = forecastLocalInteractor.loadForecast(
-                city, temperatureType, remoteError
+                city, temperatureType, error
             )
             processServerResponse(result)
         }
