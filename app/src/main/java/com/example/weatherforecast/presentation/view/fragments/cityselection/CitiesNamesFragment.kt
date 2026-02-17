@@ -38,7 +38,7 @@ class CitiesNamesFragment : Fragment() {
                     citySelectionTitle = getString(R.string.city_selection_from_dropdown),
                     queryLabel = getString(R.string.city_typing_begin),
                     { findNavController().popBackStack() },
-                    { openForecastFragment(it) },   // This call should be done in viewmodel,
+                    { openCurrentWeatherFragment(it) },   // This call should be done in viewmodel,
                     // but in this very case, somehow, CitiesNamesViewModel's livedata that calls
                     // forecastscreen, fires right away when a CitiesNames screen is opened (
                     // i.e. CurrentForecast -> CitiesNames -> CurrentForecast call is performed)
@@ -56,7 +56,7 @@ class CitiesNamesFragment : Fragment() {
      *
      * @param chosenCity Name of the city to display weather for
      */
-    private fun openForecastFragment(chosenCity: String) {
+    private fun openCurrentWeatherFragment(chosenCity: String) {
         val action =
             CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(
                 chosenCity

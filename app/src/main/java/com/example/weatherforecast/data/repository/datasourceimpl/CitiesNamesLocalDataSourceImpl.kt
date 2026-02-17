@@ -3,7 +3,7 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 import android.util.Log
 import com.example.weatherforecast.data.database.CitiesNamesDAO
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
-import com.example.weatherforecast.models.data.WeatherForecastCityResponse
+import com.example.weatherforecast.models.data.CitiesNamesResponse
 import kotlinx.serialization.InternalSerializationApi
 
 /**
@@ -14,7 +14,7 @@ import kotlinx.serialization.InternalSerializationApi
 class CitiesNamesLocalDataSourceImpl(private val dao: CitiesNamesDAO) : CitiesNamesLocalDataSource {
 
     @InternalSerializationApi
-    override fun loadCitiesNames(token: String): List<WeatherForecastCityResponse> {
+    override fun loadCitiesNames(token: String): List<CitiesNamesResponse> {
         val model = dao.getCitiesNames(token)
         Log.d("CitiesNamesLocalDataSourceImpl", model.toString())
         return model

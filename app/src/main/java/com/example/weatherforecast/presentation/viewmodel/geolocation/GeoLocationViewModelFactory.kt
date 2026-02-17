@@ -6,8 +6,8 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.util.permission.PermissionChecker
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
+import com.example.weatherforecast.geolocation.DeviceLocationProvider
 import com.example.weatherforecast.geolocation.Geolocator
-import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 
 /**
  * GeoLocationViewModel factory
@@ -24,7 +24,7 @@ import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 class GeoLocationViewModelFactory(
     private val permissionChecker: PermissionChecker,
     private val geoLocationHelper: Geolocator,
-    private val geoLocator: WeatherForecastGeoLocator,
+    private val geoLocator: DeviceLocationProvider,
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,

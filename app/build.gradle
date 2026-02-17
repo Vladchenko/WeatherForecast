@@ -127,11 +127,9 @@ dependencies {
     implementation libs.retrofit
     implementation libs.retrofit.converter.gson
 
-    ksp libs.androidx.hilt.compiler
+    ksp libs.hilt.compiler
 
     ksp libs.room
-
-    compileOnly libs.hilt.compiler
 
     testImplementation libs.junit
 

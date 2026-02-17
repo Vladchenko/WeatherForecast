@@ -7,7 +7,7 @@ import com.example.weatherforecast.models.presentation.AppBarState
 import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.presentation.converter.appbar.AppBarStateConverter
 import com.example.weatherforecast.presentation.status.StatusDisplay
-import com.example.weatherforecast.presentation.viewmodel.forecast.ForecastUiState
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +26,7 @@ import javax.inject.Inject
  * and error messages in the app bar's subtitle area.
  *
  * @property resourceManager Provides access to string resources
- * @property appBarStateConverter Converts [ForecastUiState] into [AppBarState] for UI rendering
+ * @property appBarStateConverter Converts [WeatherUiState] into [AppBarState] for UI rendering
  */
 @HiltViewModel
 class AppBarViewModel @Inject constructor(
@@ -54,13 +54,13 @@ class AppBarViewModel @Inject constructor(
     /**
      * Updates the entire AppBar state based on the current forecast UI state.
      *
-     * Uses [appBarStateConverter] to transform [ForecastUiState] into a corresponding
+     * Uses [appBarStateConverter] to transform [WeatherUiState] into a corresponding
      * [AppBarState], including dynamic title, subtitle, and styling.
      *
-     * @param forecastUiState The current state of the forecast screen
+     * @param weatherUiState The current state of the forecast screen
      */
-    fun updateAppBarState(forecastUiState: ForecastUiState) {
-        val appBarState = appBarStateConverter.convert(forecastState = forecastUiState)
+    fun updateAppBarState(weatherUiState: WeatherUiState) {
+        val appBarState = appBarStateConverter.convert(forecastState = weatherUiState)
         _appBarState.update { appBarState }
     }
 

@@ -1,6 +1,10 @@
 package com.example.weatherforecast.data.api.customexceptions
 
-import retrofit2.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.HttpException
+import retrofit2.Invocation
+import retrofit2.Response
 import java.io.IOException
 import java.net.SocketTimeoutException
 
@@ -52,19 +56,23 @@ class CallWithErrorHandling(
 
         return when (t) {
             is HttpException -> {
-                mapper?.map(t) ?: WeatherForecastException("HTTP Error: ${t.code()} - ${t.message()}")
+                mapper?.map(t) ?: WeatherException("HTTP Error: ${t.code()} - ${t.message()}")
             }
             is SocketTimeoutException -> {
-                WeatherForecastException("Connection timeout. Please check your internet connection.")
+                WeatherException("Connection timeout. Please check your internet connection.")
             }
             is IOException -> {
-                WeatherForecastException("Network error. Please check your internet connection.")
+                WeatherException("Network error. Please check your internet connection.")
             }
             else -> {
-                WeatherForecastException("An unexpected error occurred: ${t.message}")
+                WeatherException("An unexpected error occurred: ${t.message}")
             }
         }
     }
 
     override fun clone() = CallWithErrorHandling(delegate.clone())
+
+    companion object {
+        private const val TAG = "CallWithErrorHandling"
+    }
 }

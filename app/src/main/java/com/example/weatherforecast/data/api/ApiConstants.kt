@@ -1,20 +1,20 @@
 package com.example.weatherforecast.data.api
 
+import com.example.weatherforecast.data.api.ApiConstants.CURRENT_WEATHER
 import com.example.weatherforecast.data.api.ApiConstants.GEO_DIRECT
-import com.example.weatherforecast.data.api.ApiConstants.HOURLY_FORECAST
-import com.example.weatherforecast.data.api.ApiConstants.WEATHER_DATA
+import com.example.weatherforecast.data.api.ApiConstants.HOURLY_WEATHER
 
 
 /**
  * Object containing constant API endpoints used throughout the application.
  *
- * These paths are appended to the base URL (defined in [BuildConfig.API_BASE_URL])
+ * These paths are appended to the base URL (defined in [com.example.weatherforecast.BuildConfig.API_BASE_URL])
  * when making network requests via Retrofit.
  *
  * All constants represent relative paths for different OpenWeatherMap API services:
  * - [GEO_DIRECT]: Geocoding API for converting city names to coordinates
- * - [WEATHER_DATA]: Current weather data for a specific location
- * - [HOURLY_FORECAST]: 5-day / 3-hour forecast data (used for hourly forecast display)
+ * - [CURRENT_WEATHER]: Current weather data for a specific location
+ * - [HOURLY_WEATHER]: 5-day / 3-hour forecast data (used for hourly forecast display)
  */
 object ApiConstants {
     /**
@@ -35,7 +35,7 @@ object ApiConstants {
      *
      * Example: `data/2.5/weather?q=London&appid={API key}`
      */
-    const val WEATHER_DATA = "data/2.5/weather"
+    const val CURRENT_WEATHER = "data/2.5/weather"
 
     /**
      * Endpoint for retrieving 5-day / 3-hour forecast data.
@@ -45,5 +45,5 @@ object ApiConstants {
      *
      * Example: `data/2.5/forecast?q=London&appid={API key}`
      */
-    const val HOURLY_FORECAST = "data/2.5/forecast"
+    const val HOURLY_WEATHER = "data/2.5/forecast"
 }

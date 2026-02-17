@@ -1,0 +1,44 @@
+package com.example.weatherforecast.data.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.weatherforecast.models.data.CitiesNamesResponse
+import com.example.weatherforecast.models.data.CurrentWeatherResponse
+import com.example.weatherforecast.models.data.HourlyWeatherResponse
+import kotlinx.serialization.InternalSerializationApi
+
+/**
+ * Room database for storing weather forecast data.
+ * This database contains tables for weather forecasts and city names.
+ */
+@Database(
+    entities = [CurrentWeatherResponse::class, CitiesNamesResponse::class, HourlyWeatherResponse::class],
+    version = 5
+)
+@InternalSerializationApi
+abstract class WeatherForecastDatabase : RoomDatabase() {
+    abstract fun getCitiesNamesInstance(): CitiesNamesDAO
+    abstract fun getWeatherForecastInstance(): CurrentWeatherDAO
+    abstract fun getHourlyForecastInstance(): HourlyWeatherDAO
+
+    companion object {
+        @Volatile
+        private var INSTANCE: WeatherForecastDatabase? = null
+
+        fun getInstance(context: Context): WeatherForecastDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    WeatherForecastDatabase::class.java,
+                    "weather_forecast_database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}

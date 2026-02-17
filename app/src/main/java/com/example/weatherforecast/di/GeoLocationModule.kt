@@ -2,9 +2,9 @@ package com.example.weatherforecast.di
 
 import android.content.Context
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
+import com.example.weatherforecast.geolocation.DeviceLocationProvider
 import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.geolocation.GeolocatorImpl
-import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,13 +19,13 @@ import javax.inject.Singleton
  * are scoped to the application lifecycle.
  *
  * It supplies:
- * - A [WeatherForecastGeoLocator] instance for handling location permission checks and requests
+ * - A [DeviceLocationProvider] instance for handling location permission checks and requests
  * - A [Geolocator] implementation ([GeolocatorImpl]) for retrieving device location via GPS/network
  *
  * Dependencies require the application context and, in the case of [Geolocator], a [CoroutineDispatchers]
  * instance for performing asynchronous location operations.
  *
- * @see WeatherForecastGeoLocator
+ * @see DeviceLocationProvider
  * @see Geolocator
  * @see GeolocatorImpl
  */
@@ -35,8 +35,8 @@ class GeoLocationModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastGeoLocator(@ApplicationContext context: Context): WeatherForecastGeoLocator {
-        return WeatherForecastGeoLocator(context)
+    fun provideWeatherForecastGeoLocator(@ApplicationContext context: Context): DeviceLocationProvider {
+        return DeviceLocationProvider(context)
     }
 
     @Singleton

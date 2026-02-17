@@ -8,9 +8,9 @@ import com.example.weatherforecast.data.api.customexceptions.GeoLocationExceptio
 import com.example.weatherforecast.data.util.permission.PermissionChecker
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
+import com.example.weatherforecast.geolocation.DeviceLocationProvider
 import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.Geolocator
-import com.example.weatherforecast.geolocation.WeatherForecastGeoLocator
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +37,7 @@ class GeoLocationViewModel @Inject constructor(
     private val permissionChecker: PermissionChecker,
     private val geoLocationHelper: Geolocator,
     connectivityObserver: ConnectivityObserver,
-    private val geoLocator: WeatherForecastGeoLocator,
+    private val geoLocator: DeviceLocationProvider,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {

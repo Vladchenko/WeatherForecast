@@ -1,6 +1,6 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import com.example.weatherforecast.models.data.WeatherForecastCityResponse
+import com.example.weatherforecast.models.data.CitiesNamesResponse
 import kotlinx.serialization.InternalSerializationApi
 
 /**
@@ -11,7 +11,7 @@ interface CitiesNamesLocalDataSource {
      * Retrieve cities names for [token].
      */
     @InternalSerializationApi
-    fun loadCitiesNames(token: String): List<WeatherForecastCityResponse>
+    fun loadCitiesNames(token: String): List<CitiesNamesResponse>
 
     /**
      * Delete all cities names.

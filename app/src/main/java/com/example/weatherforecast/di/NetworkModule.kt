@@ -7,7 +7,7 @@ import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.connectivity.ConnectivityObserverImpl
 import com.example.weatherforecast.data.api.CityApiService
-import com.example.weatherforecast.data.api.WeatherForecastApiService
+import com.example.weatherforecast.data.api.WeatherApiService
 import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
 import dagger.Module
 import dagger.Provides
@@ -32,7 +32,7 @@ import javax.inject.Singleton
  *   - [GsonConverterFactory] for JSON parsing
  *   - [ErrorsCallAdapterFactory] to handle API errors as sealed results
  *   - Base URL from [BuildConfig.API_BASE_URL]
- * - API service interfaces: [WeatherForecastApiService] and [CityApiService]
+ * - API service interfaces: [WeatherApiService] and [CityApiService]
  * - [WorkManager] and its [Configuration] for background task scheduling
  * - [ConnectivityObserver] implementation to monitor network state changes
  *
@@ -40,7 +40,7 @@ import javax.inject.Singleton
  * background work coordination, and reactive connectivity awareness throughout the app.
  *
  * @see Retrofit
- * @see WeatherForecastApiService
+ * @see WeatherApiService
  * @see CityApiService
  * @see WorkManager
  * @see ConnectivityObserver
@@ -68,8 +68,8 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastApiService(retrofit: Retrofit): WeatherForecastApiService {
-        return retrofit.create(WeatherForecastApiService::class.java)
+    fun provideWeatherForecastApiService(retrofit: Retrofit): WeatherApiService {
+        return retrofit.create(WeatherApiService::class.java)
     }
 
     @Singleton

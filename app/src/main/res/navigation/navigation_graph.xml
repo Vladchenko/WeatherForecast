@@ -25,7 +25,7 @@
 
     <fragment
         android:id="@+id/currentTimeForecastFragment"
-        android:name="com.example.weatherforecast.presentation.view.fragments.forecast.ForecastFragment"
+        android:name="com.example.weatherforecast.presentation.view.fragments.forecast.WeatherFragment"
         android:label="CurrentTimeForecastFragment">
         <action
             android:id="@+id/action_currentTimeForecastFragment_to_citiesNamesFragment"

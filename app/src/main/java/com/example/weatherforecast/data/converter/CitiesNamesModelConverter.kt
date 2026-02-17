@@ -1,6 +1,6 @@
 package com.example.weatherforecast.data.converter
 
-import com.example.weatherforecast.models.data.WeatherForecastCityResponse
+import com.example.weatherforecast.models.data.CitiesNamesResponse
 import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
 import com.example.weatherforecast.models.domain.CityDomainModel
 import kotlinx.collections.immutable.toPersistentList
@@ -18,7 +18,7 @@ class CitiesNamesModelConverter {
      */
     @InternalSerializationApi
     fun convert(
-        dataModel: Response<List<WeatherForecastCityResponse>>,
+        dataModel: Response<List<CitiesNamesResponse>>,
         error: String
     ): CitiesNamesDomainModel {
         val cities = dataModel.body()?.map {

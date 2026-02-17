@@ -3,8 +3,8 @@ package com.example.weatherforecast.di
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.weatherforecast.data.database.CitiesNamesDAO
-import com.example.weatherforecast.data.database.HourlyForecastDAO
-import com.example.weatherforecast.data.database.WeatherForecastDAO
+import com.example.weatherforecast.data.database.CurrentWeatherDAO
+import com.example.weatherforecast.data.database.HourlyWeatherDAO
 import com.example.weatherforecast.data.database.WeatherForecastDatabase
 import dagger.Module
 import dagger.Provides
@@ -24,8 +24,8 @@ import javax.inject.Singleton
  * - A singleton [WeatherForecastDatabase] instance using Room, which serves as the main database
  *   for storing weather forecasts, hourly data, and city names
  * - Data Access Objects (DAOs) for each entity:
- *   - [WeatherForecastDAO] – for current weather data
- *   - [HourlyForecastDAO] – for hourly forecast entries
+ *   - [CurrentWeatherDAO] – for current weather data
+ *   - [HourlyWeatherDAO] – for hourly forecast entries
  * - [CitiesNamesDAO] – for cached city name suggestions
  * - A [SharedPreferences] instance for lightweight persistent storage,
  *   used to save user preferences such as the selected city
@@ -34,8 +34,8 @@ import javax.inject.Singleton
  * across the app and supports proper dependency injection.
  *
  * @see WeatherForecastDatabase
- * @see WeatherForecastDAO
- * @see HourlyForecastDAO
+ * @see CurrentWeatherDAO
+ * @see HourlyWeatherDAO
  * @see CitiesNamesDAO
  * @see SharedPreferences
  */
@@ -61,14 +61,14 @@ object PersistenceModule {
     @Provides
     @Singleton
     @InternalSerializationApi
-    fun provideWeatherForecastDAO(database: WeatherForecastDatabase): WeatherForecastDAO {
+    fun provideWeatherForecastDAO(database: WeatherForecastDatabase): CurrentWeatherDAO {
         return database.getWeatherForecastInstance()
     }
 
     @Provides
     @Singleton
     @InternalSerializationApi
-    fun provideHourlyForecastDAO(database: WeatherForecastDatabase): HourlyForecastDAO {
+    fun provideHourlyForecastDAO(database: WeatherForecastDatabase): HourlyWeatherDAO {
         return database.getHourlyForecastInstance()
     }
 

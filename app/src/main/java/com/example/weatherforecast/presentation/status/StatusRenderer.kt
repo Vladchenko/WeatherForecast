@@ -148,7 +148,7 @@ class StatusRenderer(
 
     /**
      * Factory for creating [StatusRenderer] with ViewModel (not available in DI graph).
-     * Provided via [com.example.weatherforecast.di.ForecastPresentationModule].
+     * Provided via [com.example.weatherforecast.di.PresentationModule].
      */
     class Factory(private val resourceManager: ResourceManager) {
         fun create(statusTarget: StatusDisplay): StatusRenderer =
