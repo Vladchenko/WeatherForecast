@@ -36,12 +36,15 @@ class HourlyWeatherRepositoryImpl(
     ): LoadResult<HourlyWeatherDomainModel> =
         withContext(coroutineDispatchers.io) {
             val response = hourlyWeatherRemoteDataSource.loadHourlyWeatherForCity(city)
+            val body = response.body() ?: return@withContext LoadResult.Error(
+                Exception("hourly weather response for city has empty body")
+            )
             val result = modelsConverter.convert(
                 temperatureType,
                 city,
                 response
             )
-            saveWeather(response.body()!!)     //NPE handled in hourlyWeatherViewModel's exceptionHandler
+            saveWeather(body)
             return@withContext LoadResult.Remote(result)
         }
 
@@ -55,12 +58,15 @@ class HourlyWeatherRepositoryImpl(
             val result: HourlyWeatherDomainModel
             val response =
                 hourlyWeatherRemoteDataSource.loadHourlyWeatherForLocation(latitude, longitude)
+            val body = response.body() ?: return@withContext LoadResult.Error(
+                Exception("hourly weather response for location has empty body")
+            )
             result = modelsConverter.convert(
                 temperatureType,
-                response.body()!!.city.name,
+                body.city.name,
                 response
             )
-            saveWeather(response.body()!!)     //NPE handled in hourlyWeatherViewModel's exceptionHandler
+            saveWeather(body)
             return@withContext LoadResult.Remote(result)
         }
 

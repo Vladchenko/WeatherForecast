@@ -40,7 +40,11 @@ class CurrentWeatherRepositoryImpl(
                 city,
                 response
             )
-            saveWeather(response.body()!!)     //NPE handled in WeatherForecastViewModel's exceptionHandler
+            val body = response.body()
+                ?: return@withContext LoadResult.Error(
+                    Exception("current weather response for city has empty body")
+                )
+            saveWeather(body)
             return@withContext LoadResult.Remote(result)
         }
 
@@ -54,12 +58,16 @@ class CurrentWeatherRepositoryImpl(
             val result: CurrentWeather
             val response =
                 currentWeatherRemoteDataSource.loadWeatherForLocation(latitude, longitude)
+            val body = response.body()
+                ?: return@withContext LoadResult.Error(
+                    Exception("weather response for location has empty body")
+                )
             result = modelsConverter.convert(
                 temperatureType,
-                response.body()!!.city,
+                body.city,
                 response
             )
-            saveWeather(response.body()!!)     //NPE handled in WeatherForecastViewModel's exceptionHandler
+            saveWeather(body)
             return@withContext LoadResult.Remote(result)
         }
 
