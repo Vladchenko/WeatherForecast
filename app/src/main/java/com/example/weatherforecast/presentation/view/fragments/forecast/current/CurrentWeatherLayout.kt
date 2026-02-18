@@ -96,10 +96,10 @@ fun CurrentWeatherLayout(
         viewModel.internetConnectedState
             .drop(1)    // First entry is dropped, since redundant
             .collect { isConnected ->
-            if (isConnected) {
-                viewModel.launchWeatherForecast(viewModel.chosenCityFlow.value)
+                if (isConnected) {
+                    viewModel.launchWeatherForecast(viewModel.chosenCityFlow.value)
+                }
             }
-        }
     }
 
     Scaffold(
@@ -132,13 +132,14 @@ fun CurrentWeatherLayout(
                 },
                 actions = {
                     IconButton(
-                        onClick =
-                            {
-                                showHourlyForecast = !showHourlyForecast
-                                hourlyViewModel.getHourlyForecastForCity(
-                                    (forecastUiState.value as WeatherUiState.Success).forecast.city
-                                )
+                        onClick = {
+                            showHourlyForecast = !showHourlyForecast
+                            val city =
+                                (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city
+                            if (city != null) {
+                                hourlyViewModel.getHourlyForecastForCity(city)
                             }
+                        }
                     ) {
                         Icon(Icons.Default.Timeline, "hourlyForecast")
                     }
@@ -147,30 +148,50 @@ fun CurrentWeatherLayout(
         },
         content = { innerPadding ->
             BackgroundImage(innerPadding)
-            AnimatedVisibility(
-                visible = viewModel.showProgressBarState.value,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                ShowProgressBar()
-            }
-            if (!viewModel.showProgressBarState.value) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    MainContent(
-                        innerPadding,
-                        mainContentTextColor,
-                        onCityClick,
-                        (forecastUiState.value as WeatherUiState.Success)
-                    )
-                    if (showHourlyForecast) {
-                        HourlyWeatherLayout(
-                            hourlyWeather = hourlyViewModel.hourlyForecastState.value,
+            when (val state = forecastUiState.value) {
+                is WeatherUiState.Loading -> {
+                    AnimatedVisibility(
+                        visible = viewModel.showProgressBarState.value,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        ShowProgressBar()
+                    }
+                }
+
+                is WeatherUiState.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Error: ${state.message}",
+                            color = Color.Red,
+                            textAlign = TextAlign.Center
                         )
+                    }
+                }
+
+                is WeatherUiState.Success -> {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        MainContent(
+                            innerPadding = innerPadding,
+                            mainContentTextColor = mainContentTextColor,
+                            onCityClick = onCityClick,
+                            uiState = state
+                        )
+                        if (showHourlyForecast) {
+                            HourlyWeatherLayout(
+                                hourlyWeather = hourlyViewModel.hourlyForecastState.value,
+                            )
+                        }
                     }
                 }
             }
