@@ -44,7 +44,7 @@ class WeatherWorker @AssistedInject constructor(
             val tempType = preferencesManager.temperatureType.first()
             val city = chosenCityRepository.loadChosenCity().city
             val weatherResponse =
-                currentWeatherRepository.loadAndSaveRemoteWeatherForCity(
+                currentWeatherRepository.refreshWeatherForCity(
                     tempType,
                     city
                 )

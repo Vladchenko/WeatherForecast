@@ -15,7 +15,7 @@ class HourlyWeatherRemoteInteractor(private val weatherForecastRepository: Hourl
         temperatureType: TemperatureType,
         city: String
     ): LoadResult<HourlyWeatherDomainModel> {
-        return weatherForecastRepository.loadHourlyWeatherForCity(temperatureType, city)
+        return weatherForecastRepository.refreshWeatherForCity(temperatureType, city)
     }
 
     suspend fun loadHourlyForecastForLocation(
@@ -23,6 +23,6 @@ class HourlyWeatherRemoteInteractor(private val weatherForecastRepository: Hourl
         latitude: Double,
         longitude: Double
     ): LoadResult<HourlyWeatherDomainModel> {
-        return weatherForecastRepository.loadHourlyWeatherForLocation(temperatureType, latitude, longitude)
+        return weatherForecastRepository.refreshWeatherForLocation(temperatureType, latitude, longitude)
     }
 }

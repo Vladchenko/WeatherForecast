@@ -15,7 +15,7 @@ class CurrentWeatherRemoteInteractor(private val currentWeatherRepository: Curre
         temperatureType: TemperatureType,
         city: String
     ): LoadResult<CurrentWeather> {
-        return currentWeatherRepository.loadAndSaveRemoteWeatherForCity(temperatureType, city)
+        return currentWeatherRepository.refreshWeatherForCity(temperatureType, city)
     }
 
     suspend fun loadForecastForLocation(
@@ -23,7 +23,7 @@ class CurrentWeatherRemoteInteractor(private val currentWeatherRepository: Curre
         latitude: Double,
         longitude: Double
     ): LoadResult<CurrentWeather> {
-        return currentWeatherRepository.loadAndSaveRemoteWeatherForLocation(
+        return currentWeatherRepository.refreshWeatherForLocation(
             temperatureType,
             latitude,
             longitude

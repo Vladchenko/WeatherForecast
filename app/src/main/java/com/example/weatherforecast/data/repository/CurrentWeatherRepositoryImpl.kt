@@ -29,7 +29,7 @@ class CurrentWeatherRepositoryImpl(
 ) : CurrentWeatherRepository {
 
     @InternalSerializationApi
-    override suspend fun loadAndSaveRemoteWeatherForCity(
+    override suspend fun refreshWeatherForCity(
         temperatureType: TemperatureType,
         city: String
     ): LoadResult<CurrentWeather> =
@@ -45,7 +45,7 @@ class CurrentWeatherRepositoryImpl(
         }
 
     @InternalSerializationApi
-    override suspend fun loadAndSaveRemoteWeatherForLocation(
+    override suspend fun refreshWeatherForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double

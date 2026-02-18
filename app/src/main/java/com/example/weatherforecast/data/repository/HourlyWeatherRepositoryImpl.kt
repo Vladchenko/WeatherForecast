@@ -30,7 +30,7 @@ class HourlyWeatherRepositoryImpl(
 ) : HourlyWeatherRepository {
 
     @InternalSerializationApi
-    override suspend fun loadHourlyWeatherForCity(
+    override suspend fun refreshWeatherForCity(
         temperatureType: TemperatureType,
         city: String
     ): LoadResult<HourlyWeatherDomainModel> =
@@ -46,7 +46,7 @@ class HourlyWeatherRepositoryImpl(
         }
 
     @InternalSerializationApi
-    override suspend fun loadHourlyWeatherForLocation(
+    override suspend fun refreshWeatherForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double

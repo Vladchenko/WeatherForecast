@@ -137,7 +137,7 @@ class HourlyWeatherViewModel @Inject constructor(
             is LoadResult.Local -> {
                 // Not used for hourly forecast
             }
-            is LoadResult.Fail -> {
+            is LoadResult.Error -> {
                 showError(result.exception.toString())
             }
         }

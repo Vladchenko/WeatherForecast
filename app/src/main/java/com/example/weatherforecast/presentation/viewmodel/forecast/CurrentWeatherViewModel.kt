@@ -242,7 +242,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 showLocalForecast(result.data.copy(city = city))
             }
 
-            is LoadResult.Fail -> {
+            is LoadResult.Error -> {
                 showError(result.exception.message.toString())
             }
         }
@@ -266,7 +266,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 showLocalForecast(result.data)
             }
 
-            is LoadResult.Fail -> {
+            is LoadResult.Error -> {
                 showError(result.exception.message.toString())
             }
         }

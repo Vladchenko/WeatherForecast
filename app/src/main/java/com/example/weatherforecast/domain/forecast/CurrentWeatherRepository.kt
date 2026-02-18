@@ -14,7 +14,7 @@ interface CurrentWeatherRepository {
      *
      * @return result with data model
      */
-    suspend fun loadAndSaveRemoteWeatherForCity(
+    suspend fun refreshWeatherForCity(
         temperatureType: TemperatureType,
         city: String
     ): LoadResult<CurrentWeather>
@@ -24,7 +24,7 @@ interface CurrentWeatherRepository {
      *
      * @return result with data model
      */
-    suspend fun loadAndSaveRemoteWeatherForLocation(
+    suspend fun refreshWeatherForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
