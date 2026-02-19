@@ -7,15 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
-import com.example.weatherforecast.data.api.customexceptions.NetworkTimeoutException
-import com.example.weatherforecast.data.api.customexceptions.NoInternetException
-import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
-import com.example.weatherforecast.domain.forecast.CurrentWeatherLocalInteractor
-import com.example.weatherforecast.domain.forecast.CurrentWeatherRemoteInteractor
+import com.example.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.CurrentWeather
 import com.example.weatherforecast.models.domain.LoadResult
@@ -41,7 +37,6 @@ import javax.inject.Inject
  * @property resourceManager to get android specific resources
  * @property coroutineDispatchers for coroutines
  * @property chosenCityInteractor city chosen by user persistence interactor
- * @property forecastLocalInteractor local forecast interactor
  * @property forecastRemoteInteractor remote forecast interactor
  */
 @HiltViewModel
@@ -51,8 +46,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
-    private val forecastLocalInteractor: CurrentWeatherLocalInteractor,
-    private val forecastRemoteInteractor: CurrentWeatherRemoteInteractor,
+    private val forecastRemoteInteractor: CurrentWeatherInteractor,
     private val weatherDomainToUiConverter: WeatherDomainToUiConverter,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
@@ -88,30 +82,6 @@ class CurrentWeatherViewModel @Inject constructor(
         when (throwable) {
             is CityNotFoundException -> {
                 _chosenCityNotFoundFlow.tryEmit(throwable.city)
-            }
-
-            is NoInternetException -> {
-                showError(throwable.message.toString())
-                downloadLocalForecastForCity(
-                    chosenCity.orEmpty(),   // TODO Is it ok that orEmpty ?
-                    throwable.message.toString()
-                )
-            }
-
-            is NetworkTimeoutException -> {
-                showError(throwable.message.toString())
-                // Try to get local data as fallback
-                downloadLocalForecastForCity(
-                    chosenCity.orEmpty(),
-                    throwable.message.toString()
-                )
-            }
-
-            is NoSuchDatabaseEntryException -> {
-                showError(
-                    R.string.database_forecast_for_city_not_found,
-                    chosenCity.orEmpty()
-                )
             }
 
             is NumberFormatException -> {
@@ -198,19 +168,6 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Download weather forecast on a [city], providing a [error] on why remote request failed.
-     */
-    private fun downloadLocalForecastForCity(city: String, error: String) {
-        showProgressBarState.value = true
-        viewModelScope.launch(exceptionHandler) {
-            val result = forecastLocalInteractor.loadForecast(
-                city, temperatureType, error
-            )
-            processServerResponse(result)
-        }
-    }
-
-    /**
      * Download remote weather forecast on a [cityModel] for location.
      */
     fun downloadRemoteForecastForLocation(cityModel: CityLocationModel) {
@@ -263,6 +220,7 @@ class CurrentWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Local -> {
+                showWarning(result.remoteError)
                 showLocalForecast(result.data)
             }
 

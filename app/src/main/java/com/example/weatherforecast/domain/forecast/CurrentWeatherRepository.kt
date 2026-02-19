@@ -33,7 +33,7 @@ interface CurrentWeatherRepository {
     /**
      * Retrieve cached weather for [city] and provide [remoteError] describing why remote forecast failed
      */
-    suspend fun loadCachedWeather(
+    suspend fun loadCachedWeatherForCity(
         city: String,
         temperatureType: TemperatureType,
         remoteError: String

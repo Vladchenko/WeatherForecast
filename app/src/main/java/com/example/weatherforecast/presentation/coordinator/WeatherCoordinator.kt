@@ -11,7 +11,6 @@ import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.Wea
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
-import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyWeatherViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
@@ -29,7 +28,6 @@ import kotlinx.coroutines.launch
  * @property forecastViewModel view model for weather forecast
  * @property appBarViewModel view model for user notification in AppBar
  * @property geoLocationViewModel view model for geo location
- * @property hourlyWeatherViewModel view model to show hourly forecast
  * @property statusRenderer to show status of the app to user
  * @property dialogController to operate alert dialogs
  * @property resourceManager to get app resources
@@ -43,7 +41,6 @@ class WeatherCoordinator(
     private val forecastViewModel: CurrentWeatherViewModel,
     private val appBarViewModel: AppBarViewModel,
     private val geoLocationViewModel: GeoLocationViewModel,
-    private val hourlyWeatherViewModel: HourlyWeatherViewModel,
     private val statusRenderer: StatusRenderer,
     private val dialogController: WeatherDialogController,
     private val resourceManager: ResourceManager,
@@ -66,7 +63,6 @@ class WeatherCoordinator(
                 launch { collectGeoLocationPermissionFlow(geoLocationViewModel.geoGeoLocationPermissionFlow) }
                 launch { collectGeoLocationDefineCitySuccessFlow(geoLocationViewModel.geoLocationDefineCitySuccessFlow) }
                 launch { geoLocationViewModel.selectCityFlow.collect { onGotoCitySelection() } }
-                launch { collectRemoteRequestFailedFlow(hourlyWeatherViewModel.remoteRequestFailedFlow) }
                 launch { collectForecastState(forecastViewModel.forecastState) }
             }
         }
@@ -161,10 +157,6 @@ class WeatherCoordinator(
         }
     }
 
-    private suspend fun collectRemoteRequestFailedFlow(flow: SharedFlow<String>) {
-        flow.collect { hourlyWeatherViewModel.getLocalCity() }
-    }
-
     private suspend fun collectForecastState(flow: StateFlow<WeatherUiState>) {
         flow.collect { state -> appBarViewModel.updateAppBarState(state) }
     }
@@ -178,7 +170,6 @@ class WeatherCoordinator(
             forecastViewModel: CurrentWeatherViewModel,
             appBarViewModel: AppBarViewModel,
             geoLocationViewModel: GeoLocationViewModel,
-            hourlyWeatherViewModel: HourlyWeatherViewModel,
             statusRenderer: StatusRenderer,
             dialogController: WeatherDialogController,
             resourceManager: ResourceManager,
@@ -191,7 +182,6 @@ class WeatherCoordinator(
             forecastViewModel,
             appBarViewModel,
             geoLocationViewModel,
-            hourlyWeatherViewModel,
             statusRenderer,
             dialogController,
             resourceManager,

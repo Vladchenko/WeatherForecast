@@ -73,6 +73,10 @@ open class AbstractViewModel(
         _messageFlow.tryEmit(Message.Success(Message.Content.Resource(resId, args)))
     }
 
+    fun showWarning(message: String) {
+        _messageFlow.tryEmit(Message.Warning(Message.Content.Text(message)))
+    }
+
     fun showError(@StringRes resId: Int, vararg args: Any) {
         _messageFlow.tryEmit(Message.Error(Message.Content.Resource(resId, args)))
     }

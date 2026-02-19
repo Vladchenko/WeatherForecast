@@ -7,6 +7,7 @@ import com.example.weatherforecast.data.repository.datasource.CurrentWeatherRemo
 import com.example.weatherforecast.data.repository.datasource.HourlyWeatherLocalDataSource
 import com.example.weatherforecast.models.data.HourlyWeatherResponse
 import kotlinx.serialization.InternalSerializationApi
+import retrofit2.Response
 
 /**
  * [CurrentWeatherRemoteDataSource] implementation.
@@ -16,10 +17,10 @@ import kotlinx.serialization.InternalSerializationApi
 class HourlyWeatherLocalDataSourceImpl(private val dao: HourlyWeatherDAO) : HourlyWeatherLocalDataSource {
 
     @InternalSerializationApi
-    override suspend fun getHourlyWeather(city: String): HourlyWeatherResponse {
+    override suspend fun getHourlyWeather(city: String): Response<HourlyWeatherResponse> {
         Log.d("HourlyForecastLocalDataSourceImpl", "$city city forecast loaded successfully")
         val entry = dao.getHourlyForecast(city) ?: throw NoSuchDatabaseEntryException(city)
-        return entry
+        return Response.success(entry)
     }
 
     @InternalSerializationApi

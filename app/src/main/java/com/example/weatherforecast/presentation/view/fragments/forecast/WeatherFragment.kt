@@ -81,7 +81,6 @@ class WeatherFragment : Fragment() {
             forecastViewModel = forecastViewModel,
             appBarViewModel = appBarViewModel,
             geoLocationViewModel = geoLocationViewModel,
-            hourlyWeatherViewModel = hourlyWeatherViewModel,
             statusRenderer = statusRenderer,
             dialogController = dialogController,
             resourceManager = resourceManager,

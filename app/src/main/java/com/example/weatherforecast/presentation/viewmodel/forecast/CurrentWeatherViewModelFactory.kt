@@ -6,8 +6,7 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
-import com.example.weatherforecast.domain.forecast.CurrentWeatherLocalInteractor
-import com.example.weatherforecast.domain.forecast.CurrentWeatherRemoteInteractor
+import com.example.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import com.example.weatherforecast.utils.ResourceManager
 import kotlinx.serialization.InternalSerializationApi
@@ -20,8 +19,7 @@ import kotlinx.serialization.InternalSerializationApi
  * @property connectivityObserver internet connectivity observer
  * @property coroutineDispatchers coroutines dispatchers
  * @property chosenCityInteractor downloads a previously chosen city
- * @property forecastLocalInteractor downloads weather forecast from database
- * @property forecastRemoteInteractor downloads weather forecast through network
+ * @property weatherInteractor downloads weather forecast through network
  */
 class CurrentWeatherViewModelFactory(
     private val resourceManager: ResourceManager,
@@ -29,8 +27,7 @@ class CurrentWeatherViewModelFactory(
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
-    private val forecastLocalInteractor: CurrentWeatherLocalInteractor,
-    private val forecastRemoteInteractor: CurrentWeatherRemoteInteractor,
+    private val weatherInteractor: CurrentWeatherInteractor,
     private val uiConverter: WeatherDomainToUiConverter,
 ) : ViewModelProvider.Factory {
 
@@ -44,8 +41,7 @@ class CurrentWeatherViewModelFactory(
                 preferencesManager,
                 coroutineDispatchers,
                 chosenCityInteractor,
-                forecastLocalInteractor,
-                forecastRemoteInteractor,
+                weatherInteractor,
                 uiConverter
             ) as T
         }

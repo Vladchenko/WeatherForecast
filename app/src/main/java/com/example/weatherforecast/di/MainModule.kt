@@ -24,11 +24,9 @@ import com.example.weatherforecast.data.util.permission.PermissionChecker
 import com.example.weatherforecast.data.util.permission.PermissionCheckerImpl
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
-import com.example.weatherforecast.domain.forecast.CurrentWeatherLocalInteractor
-import com.example.weatherforecast.domain.forecast.CurrentWeatherRemoteInteractor
+import com.example.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import com.example.weatherforecast.domain.forecast.CurrentWeatherRepository
-import com.example.weatherforecast.domain.forecast.HourlyWeatherLocalInteractor
-import com.example.weatherforecast.domain.forecast.HourlyWeatherRemoteInteractor
+import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherRepository
 import com.example.weatherforecast.geolocation.DeviceLocationProvider
 import com.example.weatherforecast.geolocation.Geolocator
@@ -192,26 +190,14 @@ class MainModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastRemoteInteractor(currentWeatherRepository: CurrentWeatherRepository): CurrentWeatherRemoteInteractor {
-        return CurrentWeatherRemoteInteractor(currentWeatherRepository)
+    fun provideWeatherForecastRemoteInteractor(currentWeatherRepository: CurrentWeatherRepository): CurrentWeatherInteractor {
+        return CurrentWeatherInteractor(currentWeatherRepository)
     }
 
     @Singleton
     @Provides
-    fun provideWeatherForecastLocalInteractor(currentWeatherRepository: CurrentWeatherRepository): CurrentWeatherLocalInteractor {
-        return CurrentWeatherLocalInteractor(currentWeatherRepository)
-    }
-
-    @Singleton
-    @Provides
-    fun provideHourlyForecastRemoteInteractor(hourlyWeatherRepository: HourlyWeatherRepository): HourlyWeatherRemoteInteractor {
-        return HourlyWeatherRemoteInteractor(hourlyWeatherRepository)
-    }
-
-    @Singleton
-    @Provides
-    fun provideHourlyForecastLocalInteractor(hourlyWeatherRepository: HourlyWeatherRepository): HourlyWeatherLocalInteractor {
-        return HourlyWeatherLocalInteractor(hourlyWeatherRepository)
+    fun provideHourlyForecastRemoteInteractor(hourlyWeatherRepository: HourlyWeatherRepository): HourlyWeatherInteractor {
+        return HourlyWeatherInteractor(hourlyWeatherRepository)
     }
 
     @Singleton
@@ -222,8 +208,7 @@ class MainModule {
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
-        forecastLocalInteractor: CurrentWeatherLocalInteractor,
-        forecastRemoteInteractor: CurrentWeatherRemoteInteractor,
+        forecastRemoteInteractor: CurrentWeatherInteractor,
         uiConverter: WeatherDomainToUiConverter
     ): CurrentWeatherViewModelFactory {
         return CurrentWeatherViewModelFactory(
@@ -232,7 +217,6 @@ class MainModule {
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers,
-            forecastLocalInteractor,
             forecastRemoteInteractor,
             uiConverter
         )
@@ -245,15 +229,13 @@ class MainModule {
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
-        forecastLocalInteractor: HourlyWeatherLocalInteractor,
-        forecastRemoteInteractor: HourlyWeatherRemoteInteractor
+        forecastRemoteInteractor: HourlyWeatherInteractor
     ): HourlyWeatherViewModelFactory {
         return HourlyWeatherViewModelFactory(
             preferencesManager,
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers,
-            forecastLocalInteractor,
             forecastRemoteInteractor
         )
     }

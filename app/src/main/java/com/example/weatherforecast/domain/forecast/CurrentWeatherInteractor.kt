@@ -9,7 +9,7 @@ import com.example.weatherforecast.models.domain.LoadResult
  *
  * @property currentWeatherRepository provides domain-layer data.
  */
-class CurrentWeatherRemoteInteractor(private val currentWeatherRepository: CurrentWeatherRepository) {
+class CurrentWeatherInteractor(private val currentWeatherRepository: CurrentWeatherRepository) {
 
     suspend fun loadForecastForCity(
         temperatureType: TemperatureType,

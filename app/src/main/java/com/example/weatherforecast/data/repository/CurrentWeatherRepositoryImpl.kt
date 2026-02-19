@@ -11,7 +11,6 @@ import com.example.weatherforecast.models.domain.CurrentWeather
 import com.example.weatherforecast.models.domain.LoadResult
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.InternalSerializationApi
-import retrofit2.Response
 
 /**
  * WeatherForecastRepository implementation. Provides data for domain layer.
@@ -34,19 +33,46 @@ class CurrentWeatherRepositoryImpl(
         city: String
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
-            val response = currentWeatherRemoteDataSource.loadWeatherForCity(city)
-            val result = modelsConverter.convert(
-                temperatureType,
-                city,
-                response
-            )
-            val body = response.body()
-                ?: return@withContext LoadResult.Error(
-                    Exception("current weather response for city has empty body")
-                )
-            saveWeather(body)
-            return@withContext LoadResult.Remote(result)
+            try {
+                return@withContext loadWeatherForCityAndSave(city, temperatureType)
+            } catch (ex: Exception) {
+                return@withContext loadCachedWeatherForCityOrError(city, temperatureType, ex)
+            }
         }
+
+    @InternalSerializationApi
+    private suspend fun loadWeatherForCityAndSave(
+        city: String,
+        temperatureType: TemperatureType
+    ): LoadResult<CurrentWeather> {
+        val response = currentWeatherRemoteDataSource.loadWeatherForCity(city)
+        val result = modelsConverter.convert(
+            temperatureType,
+            city,
+            response
+        )
+        val body = response.body()
+            ?: return LoadResult.Error(
+                Exception("current weather response for city has empty body")
+            )
+        saveWeather(body)
+        return LoadResult.Remote(result)
+    }
+
+    @InternalSerializationApi
+    private suspend fun loadCachedWeatherForCityOrError(
+        city: String,
+        temperatureType: TemperatureType,
+        ex: Exception
+    ): LoadResult<CurrentWeather> {
+        return try {
+            loadCachedWeatherForCity(
+                city, temperatureType, ex.message.toString()
+            )
+        } catch (ex: Exception) {
+            LoadResult.Error(ex)
+        }
+    }
 
     @InternalSerializationApi
     override suspend fun refreshWeatherForLocation(
@@ -55,32 +81,44 @@ class CurrentWeatherRepositoryImpl(
         longitude: Double
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
-            val result: CurrentWeather
-            val response =
-                currentWeatherRemoteDataSource.loadWeatherForLocation(latitude, longitude)
-            val body = response.body()
-                ?: return@withContext LoadResult.Error(
-                    Exception("weather response for location has empty body")
-                )
-            result = modelsConverter.convert(
-                temperatureType,
-                body.city,
-                response
-            )
-            saveWeather(body)
-            return@withContext LoadResult.Remote(result)
+            try {
+                return@withContext loadWeatherForLocationAndSave(latitude, longitude, temperatureType)
+            } catch (ex: Exception) {
+                // TODO Implement loading weather for location from local db
+                return@withContext LoadResult.Error(ex)
+            }
         }
 
     @InternalSerializationApi
-    override suspend fun loadCachedWeather(
+    private suspend fun loadWeatherForLocationAndSave(
+        latitude: Double,
+        longitude: Double,
+        temperatureType: TemperatureType
+    ): LoadResult<CurrentWeather> {
+        val response =
+            currentWeatherRemoteDataSource.loadWeatherForLocation(latitude, longitude)
+        val body = response.body()
+            ?: return LoadResult.Error(
+                Exception("weather response for location has empty body")
+            )
+        val result = modelsConverter.convert(
+            temperatureType,
+            body.city,
+            response
+        )
+        saveWeather(body)
+        return LoadResult.Remote(result)
+    }
+
+    @InternalSerializationApi
+    override suspend fun loadCachedWeatherForCity(
         city: String,
         temperatureType: TemperatureType,
         remoteError: String
     ) =
         withContext(coroutineDispatchers.io) {
             val response: CurrentWeather
-            val datasourceResponse =
-                Response.success(currentWeatherLocalDataSource.loadWeather(city))
+            val datasourceResponse = currentWeatherLocalDataSource.loadWeather(city)
             response = modelsConverter.convert(
                 temperatureType,
                 city,

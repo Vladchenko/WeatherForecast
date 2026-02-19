@@ -12,7 +12,6 @@ import com.example.weatherforecast.models.domain.LoadResult
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.InternalSerializationApi
-import retrofit2.Response
 
 /**
  * WeatherForecastRepository implementation. Provides data for domain layer.
@@ -35,18 +34,49 @@ class HourlyWeatherRepositoryImpl(
         city: String
     ): LoadResult<HourlyWeatherDomainModel> =
         withContext(coroutineDispatchers.io) {
-            val response = hourlyWeatherRemoteDataSource.loadHourlyWeatherForCity(city)
-            val body = response.body() ?: return@withContext LoadResult.Error(
-                Exception("hourly weather response for city has empty body")
-            )
+            try {
+                return@withContext loadHourlyWeatherAndSave(city, temperatureType)
+            } catch (e: Exception) {
+                return@withContext loadLocalHourlyWeatherOrError(city, temperatureType, e)
+            }
+        }
+
+    @InternalSerializationApi
+    private suspend fun loadHourlyWeatherAndSave(
+        city: String,
+        temperatureType: TemperatureType
+    ): LoadResult<HourlyWeatherDomainModel> {
+        val response = hourlyWeatherRemoteDataSource.loadHourlyWeatherForCity(city)
+        val body = response.body() ?: return LoadResult.Error(
+            Exception("hourly weather response for city has empty body")
+        )
+        val result = modelsConverter.convert(
+            temperatureType,
+            city,
+            response
+        )
+        saveWeather(body)
+        return LoadResult.Remote(result)
+    }
+
+    @InternalSerializationApi
+    private suspend fun loadLocalHourlyWeatherOrError(
+        city: String,
+        temperatureType: TemperatureType,
+        e: Exception
+    ): LoadResult<HourlyWeatherDomainModel> {
+        try {
+            val response = hourlyWeatherLocalDataSource.getHourlyWeather(city)
             val result = modelsConverter.convert(
                 temperatureType,
                 city,
                 response
             )
-            saveWeather(body)
-            return@withContext LoadResult.Remote(result)
+            return LoadResult.Local(result, e.message.toString())
+        } catch (e: Exception) {
+            return LoadResult.Error(e)
         }
+    }
 
     @InternalSerializationApi
     override suspend fun refreshWeatherForLocation(
@@ -78,8 +108,7 @@ class HourlyWeatherRepositoryImpl(
     ) =
         withContext(coroutineDispatchers.io) {
             val response: HourlyWeatherDomainModel
-            val datasourceResponse =
-                Response.success(hourlyWeatherLocalDataSource.getHourlyWeather(city))
+            val datasourceResponse = hourlyWeatherLocalDataSource.getHourlyWeather(city)
             response = modelsConverter.convert(
                 temperatureType,
                 city,
