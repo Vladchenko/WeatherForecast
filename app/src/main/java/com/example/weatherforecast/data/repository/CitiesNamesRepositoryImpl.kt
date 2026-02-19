@@ -1,6 +1,5 @@
 package com.example.weatherforecast.data.repository
 
-import com.example.weatherforecast.data.api.customexceptions.NoInternetException
 import com.example.weatherforecast.data.converter.CitiesNamesModelConverter
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
@@ -30,7 +29,7 @@ class CitiesNamesRepositoryImpl(
         withContext(coroutineDispatchers.io) {
             return@withContext try {
                 modelsConverter.convert(remoteDataSource.loadCitiesNames(token), "")
-            } catch (ex: NoInternetException) {
+            } catch (ex: Exception) {
                 modelsConverter.convert(
                     Response.success(localDataSource.loadCitiesNames(token)),
                     ex.message.orEmpty()
