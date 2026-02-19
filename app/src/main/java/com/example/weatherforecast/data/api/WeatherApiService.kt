@@ -4,8 +4,6 @@ import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.ApiConstants.CURRENT_WEATHER
 import com.example.weatherforecast.data.api.ApiConstants.GEO_DIRECT
 import com.example.weatherforecast.data.api.ApiConstants.HOURLY_WEATHER
-import com.example.weatherforecast.data.api.customexceptions.ExceptionsMapper
-import com.example.weatherforecast.data.api.customexceptions.WeatherExceptionMapper
 import com.example.weatherforecast.models.data.CitiesNamesResponse
 import com.example.weatherforecast.models.data.CurrentWeatherResponse
 import com.example.weatherforecast.models.data.HourlyWeatherResponse
@@ -26,7 +24,6 @@ interface WeatherApiService {
      * @return Response containing weather forecast data
      */
     @InternalSerializationApi
-    @ExceptionsMapper(WeatherExceptionMapper::class)
     @GET(CURRENT_WEATHER)
     suspend fun getCurrentWeather(
         @Query("q") cityName: String,
@@ -41,7 +38,6 @@ interface WeatherApiService {
      * @return Response containing hourly forecast data
      */
     @InternalSerializationApi
-    @ExceptionsMapper(WeatherExceptionMapper::class)
     @GET(HOURLY_WEATHER)
     suspend fun getHourlyWeather(
         @Query("q") cityName: String,
@@ -71,7 +67,6 @@ interface CityApiService {
      * @return Response containing list of matching cities
      */
     @InternalSerializationApi
-    @ExceptionsMapper(WeatherExceptionMapper::class)
     @GET(GEO_DIRECT)
     suspend fun searchCities(
         @Query("q") cityName: String,
