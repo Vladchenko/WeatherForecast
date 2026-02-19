@@ -39,7 +39,9 @@ class HourlyWeatherViewModel @Inject constructor(
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
-    val hourlyForecastState: MutableState<HourlyWeatherDomainModel?> = mutableStateOf(null)
+    val hourlyForecastState: StateFlow<HourlyWeatherDomainModel?>
+        get() = _hourlyForecastState
+    private val _hourlyForecastState = MutableStateFlow<HourlyWeatherDomainModel?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.message.orEmpty())
@@ -94,7 +96,7 @@ class HourlyWeatherViewModel @Inject constructor(
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
-                hourlyForecastState.value = result.data
+                _hourlyForecastState.tryEmit(result.data)
                 showMessage(
                     R.string.forecast_for_city_success,
                     result.data.city
@@ -112,4 +114,4 @@ class HourlyWeatherViewModel @Inject constructor(
     companion object {
         private const val TAG = "HourlyForecastViewModel"
     }
-} 
+}
