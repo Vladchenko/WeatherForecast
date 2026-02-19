@@ -84,10 +84,6 @@ class CurrentWeatherViewModel @Inject constructor(
                 _chosenCityNotFoundFlow.tryEmit(throwable.city)
             }
 
-            is NumberFormatException -> {
-                showError(throwable.message.orEmpty())
-            }
-
             else -> {
                 Log.e(TAG, throwable.message.orEmpty())
                 Log.e(TAG, throwable.stackTraceToString())
