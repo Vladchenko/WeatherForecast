@@ -8,7 +8,6 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.connectivity.ConnectivityObserverImpl
 import com.example.weatherforecast.data.api.CityApiService
 import com.example.weatherforecast.data.api.WeatherApiService
-import com.example.weatherforecast.data.api.customexceptions.ErrorsCallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,7 +29,6 @@ import javax.inject.Singleton
  * - A configured [Retrofit] instance with:
  *   - [OkHttpClient] featuring HTTP logging (in debug builds)
  *   - [GsonConverterFactory] for JSON parsing
- *   - [ErrorsCallAdapterFactory] to handle API errors as sealed results
  *   - Base URL from [BuildConfig.API_BASE_URL]
  * - API service interfaces: [WeatherApiService] and [CityApiService]
  * - [WorkManager] and its [Configuration] for background task scheduling
@@ -59,7 +57,6 @@ class NetworkModule {
             addInterceptor(loggingInterceptor)
         }.build()
         return Retrofit.Builder()
-            .addCallAdapterFactory(ErrorsCallAdapterFactory())
             .addConverterFactory(GsonConverterFactory.create())
             .baseUrl(BuildConfig.API_BASE_URL)
             .client(client)

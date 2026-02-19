@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
-import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
@@ -78,22 +77,9 @@ class CurrentWeatherViewModel @Inject constructor(
     private lateinit var temperatureType: TemperatureType
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, throwable.message.orEmpty())
-        when (throwable) {
-            is CityNotFoundException -> {
-                _chosenCityNotFoundFlow.tryEmit(throwable.city)
-            }
-
-            else -> {
-                Log.e(TAG, throwable.message.orEmpty())
-                Log.e(TAG, throwable.stackTraceToString())
-                showError(throwable.message.toString())
-            }
-        }
+        Log.e(TAG, throwable.stackTraceToString())
+        showError(throwable.message.toString())
         showProgressBarState.value = false
-        throwable.stackTrace.forEach {
-            Log.e(TAG, it.toString())
-        }
     }
 
     init {

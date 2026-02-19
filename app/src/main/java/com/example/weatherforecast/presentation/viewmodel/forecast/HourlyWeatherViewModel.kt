@@ -1,12 +1,9 @@
 package com.example.weatherforecast.presentation.viewmodel.forecast
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
-import com.example.weatherforecast.data.api.customexceptions.CityNotFoundException
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
@@ -17,6 +14,8 @@ import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -44,21 +43,9 @@ class HourlyWeatherViewModel @Inject constructor(
     private val _hourlyForecastState = MutableStateFlow<HourlyWeatherDomainModel?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, throwable.message.orEmpty())
-        when (throwable) {
-            is CityNotFoundException -> {
-                showError(throwable.message)
-            }
-            else -> {
-                Log.e(TAG, throwable.message.orEmpty())
-                Log.e(TAG, throwable.stackTraceToString())
-                showError(throwable.message.toString())
-            }
-        }
+        Log.e(TAG, throwable.stackTraceToString())
+        showError(throwable.message.toString())
         showProgressBarState.value = false
-        throwable.stackTrace.forEach {
-            Log.e(TAG, it.toString())
-        }
     }
 
     /**
