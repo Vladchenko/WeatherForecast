@@ -87,7 +87,7 @@ fun CurrentWeatherLayout(
 ) {
     val forecastUiState = viewModel.forecastState.collectAsStateWithLifecycle()
     val appBarUiState = appBarViewModel.appBarState.collectAsStateWithLifecycle()
-    val hourlyForecastUiState = hourlyViewModel.hourlyForecastState.collectAsStateWithLifecycle()
+    val hourlyForecastUiState = hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
     val fontSize = remember {
         derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitle).sp }
     }
@@ -138,7 +138,7 @@ fun CurrentWeatherLayout(
                             val city =
                                 (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city
                             if (city != null) {
-                                hourlyViewModel.getHourlyForecastForCity(city)
+                                hourlyViewModel.getHourlyWeatherForCity(city)
                             }
                         }
                     ) {

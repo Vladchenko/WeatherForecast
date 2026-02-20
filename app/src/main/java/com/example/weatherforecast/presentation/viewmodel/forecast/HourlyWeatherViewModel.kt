@@ -43,9 +43,9 @@ class HourlyWeatherViewModel @Inject constructor(
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
-    val hourlyForecastState: StateFlow<HourlyWeatherDomainModel?>
-        get() = _hourlyForecastState
-    private val _hourlyForecastState = MutableStateFlow<HourlyWeatherDomainModel?>(null)
+    val hourlyWeatherStateFlow: StateFlow<HourlyWeatherDomainModel?>
+        get() = _hourlyWeatherStateFlow
+    private val _hourlyWeatherStateFlow = MutableStateFlow<HourlyWeatherDomainModel?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Log.e(TAG, throwable.stackTraceToString())
@@ -56,7 +56,7 @@ class HourlyWeatherViewModel @Inject constructor(
     /**
      * Download hourly weather forecast on a [city].
      */
-    fun getHourlyForecastForCity(city: String) {
+    fun getHourlyWeatherForCity(city: String) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureType.first()
@@ -71,11 +71,11 @@ class HourlyWeatherViewModel @Inject constructor(
     /**
      * Download hourly weather forecast on a [cityModel].
      */
-    fun getHourlyForecastForLocation(cityModel: CityLocationModel) {
+    fun getHourlyWeatherForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureType.first()
-            val result = hourlyWeatherInteractor.loadHourlyForecastForLocation(
+            val result = hourlyWeatherInteractor.loadHourlyWeatherForLocation(
                 temperatureType,
                 cityModel.location.latitude,
                 cityModel.location.longitude
@@ -88,7 +88,7 @@ class HourlyWeatherViewModel @Inject constructor(
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
-                _hourlyForecastState.tryEmit(result.data)
+                _hourlyWeatherStateFlow.tryEmit(result.data)
                 showMessage(
                     R.string.forecast_for_city_success,
                     result.data.city
@@ -119,6 +119,6 @@ class HourlyWeatherViewModel @Inject constructor(
     }
 
     companion object {
-        private const val TAG = "HourlyForecastViewModel"
+        private const val TAG = "HourlyWeatherViewModel"
     }
 }

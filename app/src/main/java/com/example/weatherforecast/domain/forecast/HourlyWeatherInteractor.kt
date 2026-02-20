@@ -18,7 +18,7 @@ class HourlyWeatherInteractor(private val weatherForecastRepository: HourlyWeath
         return weatherForecastRepository.refreshWeatherForCity(temperatureType, city)
     }
 
-    suspend fun loadHourlyForecastForLocation(
+    suspend fun loadHourlyWeatherForLocation(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
