@@ -9,9 +9,11 @@ import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.HourlyWeatherDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
+import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,8 @@ import javax.inject.Inject
  * @constructor
  * @param connectivityObserver observes internet connectivity state.
  * @param coroutineDispatchers dispatchers coroutines.
+ * @property resourceManager resource manager.
+ * @property preferencesManager preferences manager.
  * @property chosenCityInteractor interactor to get chosen city.
  * @property hourlyWeatherInteractor interactor to get hourly weather forecast.
  */
@@ -33,6 +37,7 @@ import javax.inject.Inject
 class HourlyWeatherViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
     coroutineDispatchers: CoroutineDispatchers,
+    private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
@@ -59,7 +64,7 @@ class HourlyWeatherViewModel @Inject constructor(
                 temperatureType,
                 city
             )
-            processServerResponse(result)
+            processServerResponse(city, result)
         }
     }
 
@@ -75,11 +80,11 @@ class HourlyWeatherViewModel @Inject constructor(
                 cityModel.location.latitude,
                 cityModel.location.longitude
             )
-            processServerResponse(result)
+            processServerResponse(cityModel.city, result)
         }
     }
 
-    private fun processServerResponse(result: LoadResult<HourlyWeatherDomainModel>) {
+    private fun processServerResponse(city: String, result: LoadResult<HourlyWeatherDomainModel>) {
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
@@ -89,11 +94,26 @@ class HourlyWeatherViewModel @Inject constructor(
                     result.data.city
                 )
             }
+
             is LoadResult.Local -> {
-                // TODO Implement
+                // TODO Implement showing local hourly forecast
+                // showLocalForecast(result.data)
+                showWarning(
+                    resourceManager.getString(
+                        R.string.forecast_for_city_outdated, city
+                    )
+                )
             }
+
             is LoadResult.Error -> {
-                showError(result.exception.toString())
+                showError(
+                    when (result.error) {
+                        is ForecastError.NoInternet ->
+                            resourceManager.getString(R.string.disconnected)
+
+                        else -> resourceManager.getString(R.string.forecast_for_city_error)
+                    }
+                )
             }
         }
     }

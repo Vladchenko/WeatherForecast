@@ -74,7 +74,12 @@ class WeatherCoordinator(
 
     private suspend fun collectChosenCityNotFoundFlow(flow: SharedFlow<String>) {
         flow.collect { city ->
-            statusRenderer.showWarning(resourceManager.getString(R.string.selected_city_not_found))
+            statusRenderer.showWarning(
+                resourceManager.getString(
+                    R.string.no_selected_city_forecast,
+                    city
+                )
+            )
             dialogController.showChosenCityNotFound(city) {
                 forecastViewModel.gotoCitySelection()
             }

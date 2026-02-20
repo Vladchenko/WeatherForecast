@@ -13,6 +13,7 @@ import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.CurrentWeather
+import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
@@ -145,7 +146,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 temperatureType,
                 city
             )
-            processServerResponse(result)
+            processServerResponse(city, result)
         }
     }
 
@@ -154,45 +155,27 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun downloadRemoteForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
-        currentJob?.cancel() // Отменяем предыдущий запрос
+        currentJob?.cancel() // Cancel previous job
         currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadForecastForLocation(
                 temperatureType,
                 cityModel.location.latitude,
                 cityModel.location.longitude
             )
-            processServerResponseForLocation(cityModel.city, result)
+            processServerResponse(cityModel.city, result)
         }
     }
 
-    private fun processServerResponseForLocation(
+    private fun processServerResponse(
         city: String,
         result: LoadResult<CurrentWeather>
     ) {
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
-                // City in response is different than city in request
-                showRemoteForecast(result.data.copy(city = city))
-            }
-
-            is LoadResult.Local -> {
-                // City in response is different than city in request
-                showLocalForecast(result.data.copy(city = city))
-            }
-
-            is LoadResult.Error -> {
-                showError(result.exception.message.toString())
-            }
-        }
-    }
-
-    private fun processServerResponse(result: LoadResult<CurrentWeather>) {
-        showProgressBarState.value = false
-        when (result) {
-            is LoadResult.Remote -> {
                 viewModelScope.launch {
-                    showRemoteForecast(result.data)
+                    // City in response is different to city in request
+                    showRemoteForecast(result.data.copy(city = city))
                     val location = getLocation(result)
                     chosenCityInteractor.saveChosenCity(
                         city = result.data.city,
@@ -202,12 +185,30 @@ class CurrentWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Local -> {
-                showWarning(result.remoteError)
-                showLocalForecast(result.data)
+                showWarning(
+                    resourceManager.getString(
+                        R.string.forecast_for_city_outdated, city
+                    )
+                )
+                // City in response is different to city in request
+                showLocalForecast(result.data.copy(city = city))
             }
 
             is LoadResult.Error -> {
-                showError(result.exception.message.toString())
+                when (result.error) {
+                    is ForecastError.NoInternet -> showError(R.string.disconnected)
+                    is ForecastError.CityNotFound -> {
+                        showWarning(
+                            resourceManager.getString(
+                                R.string.no_selected_city_forecast,
+                                city
+                            )
+                        )
+                        _chosenCityNotFoundFlow.tryEmit(city)
+                    }
+
+                    else -> showError(resourceManager.getString(R.string.forecast_for_city_error))
+                }
             }
         }
     }

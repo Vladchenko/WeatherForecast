@@ -225,6 +225,7 @@ class MainModule {
     @Singleton
     @Provides
     fun provideHourlyForecastViewModelFactory(
+        resourceManager: ResourceManager,
         preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
@@ -232,6 +233,7 @@ class MainModule {
         forecastRemoteInteractor: HourlyWeatherInteractor
     ): HourlyWeatherViewModelFactory {
         return HourlyWeatherViewModelFactory(
+            resourceManager,
             preferencesManager,
             connectivityObserver,
             chosenCityInteractor,

@@ -7,10 +7,13 @@ import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
+import com.example.weatherforecast.utils.ResourceManager
 
 /**
  * WeatherForecastViewModel factory
  *
+ * @property resourceManager resource manager
+ * @property preferencesManager preferences manager
  * @property connectivityObserver internet connectivity observer
  * @property coroutineDispatchers coroutines dispatchers
  * @property chosenCityInteractor downloads a previously chosen city
@@ -18,6 +21,7 @@ import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
  */
 @Suppress("UNCHECKED_CAST")
 class HourlyWeatherViewModelFactory(
+    private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
@@ -28,6 +32,7 @@ class HourlyWeatherViewModelFactory(
         return HourlyWeatherViewModel(
             connectivityObserver,
             coroutineDispatchers,
+            resourceManager,
             preferencesManager,
             chosenCityInteractor,
             forecastRemoteInteractor

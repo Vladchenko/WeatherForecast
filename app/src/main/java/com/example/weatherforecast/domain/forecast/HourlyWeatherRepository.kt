@@ -1,6 +1,7 @@
 package com.example.weatherforecast.domain.forecast
 
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.HourlyWeatherDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
 
@@ -15,7 +16,7 @@ interface HourlyWeatherRepository {
     suspend fun loadCachedWeather(
         city: String,
         temperatureType: TemperatureType,
-        remoteError: String
+        remoteError: ForecastError
     ): LoadResult<HourlyWeatherDomainModel>
 
     /**
