@@ -18,14 +18,14 @@ class HourlyWeatherLocalDataSourceImpl(private val dao: HourlyWeatherDAO) : Hour
 
     @InternalSerializationApi
     override suspend fun getHourlyWeather(city: String): Response<HourlyWeatherResponse> {
-        Log.d("HourlyForecastLocalDataSourceImpl", "$city city forecast loaded successfully")
         val entry = dao.getHourlyForecast(city) ?: throw NoSuchDatabaseEntryException(city)
+        Log.d("HourlyWeatherLocalDataSourceImpl", "$city city forecast loaded successfully")
         return Response.success(entry)
     }
 
     @InternalSerializationApi
     override suspend fun saveHourlyWeather(response: HourlyWeatherResponse) {
         dao.insertHourlyForecast(response)
-        Log.d("HourlyForecastLocalDataSourceImpl", "${response.city} city forecast saved successfully")
+        Log.d("HourlyForecastLocalDataSourceImpl", "${response.city} hourly weather saved successfully")
     }
 }

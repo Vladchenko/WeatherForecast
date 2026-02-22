@@ -76,6 +76,7 @@ class HourlyWeatherViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureType.first()
             val result = hourlyWeatherInteractor.loadHourlyWeatherForLocation(
+                cityModel.city,
                 temperatureType,
                 cityModel.location.latitude,
                 cityModel.location.longitude
@@ -96,8 +97,7 @@ class HourlyWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Local -> {
-                // TODO Implement showing local hourly forecast
-                // showLocalForecast(result.data)
+                _hourlyWeatherStateFlow.tryEmit(result.data)
                 showWarning(
                     resourceManager.getString(
                         R.string.forecast_for_city_outdated, city

@@ -15,14 +15,15 @@ class HourlyWeatherInteractor(private val weatherForecastRepository: HourlyWeath
         temperatureType: TemperatureType,
         city: String
     ): LoadResult<HourlyWeatherDomainModel> {
-        return weatherForecastRepository.refreshWeatherForCity(temperatureType, city)
+        return weatherForecastRepository.refreshWeatherForCity(city, temperatureType)
     }
 
     suspend fun loadHourlyWeatherForLocation(
+        city: String,
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
     ): LoadResult<HourlyWeatherDomainModel> {
-        return weatherForecastRepository.refreshWeatherForLocation(temperatureType, latitude, longitude)
+        return weatherForecastRepository.refreshWeatherForLocation(city, temperatureType, latitude, longitude)
     }
 }

@@ -21,7 +21,7 @@ import kotlinx.serialization.InternalSerializationApi
 @InternalSerializationApi
 @Entity(tableName = "hourlyForecasts")
 @TypeConverters(HourlyWeatherTypeConverters::class)
-data class HourlyWeatherResponse constructor(
+data class HourlyWeatherResponse(
     @PrimaryKey
     @SerializedName("city")
     val city: City,

@@ -19,13 +19,13 @@ class CurrentWeatherLocalDataSourceImpl(private val dao: CurrentWeatherDAO) : Cu
     @InternalSerializationApi
     override suspend fun loadWeather(city:String): Response<CurrentWeatherResponse> {
         val entry = dao.getCityForecast(city) ?: throw NoSuchDatabaseEntryException(city)
-        Log.d("WeatherForecastLocalDataSourceImpl", "${entry.city} city forecast loaded successfully")
+        Log.d("WeatherLocalDataSourceImpl", "${entry.city} city forecast loaded successfully")
         return Response.success(entry)
     }
 
     @InternalSerializationApi
     override suspend fun saveWeather(response: CurrentWeatherResponse) {
         dao.insertCityForecast(response)
-        Log.d("WeatherForecastLocalDataSourceImpl", "${response.city} city forecast saved successfully")
+        Log.d("WeatherLocalDataSourceImpl", "${response.city} weather saved successfully")
     }
 }
