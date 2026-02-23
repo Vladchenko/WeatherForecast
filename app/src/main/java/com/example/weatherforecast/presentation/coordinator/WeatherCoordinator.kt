@@ -11,6 +11,7 @@ import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.Wea
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
+import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyWeatherViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
@@ -25,7 +26,8 @@ import kotlinx.coroutines.launch
  * small focused collect methods.
  *
  * @constructor
- * @property forecastViewModel view model for weather forecast
+ * @property forecastViewModel view model for weather weather
+ * @property hourlyViewModel view model for hourly weather
  * @property appBarViewModel view model for user notification in AppBar
  * @property geoLocationViewModel view model for geo location
  * @property statusRenderer to show status of the app to user
@@ -39,6 +41,7 @@ import kotlinx.coroutines.launch
  */
 class WeatherCoordinator(
     private val forecastViewModel: CurrentWeatherViewModel,
+    private val hourlyViewModel: HourlyWeatherViewModel,
     private val appBarViewModel: AppBarViewModel,
     private val geoLocationViewModel: GeoLocationViewModel,
     private val statusRenderer: StatusRenderer,
@@ -55,6 +58,7 @@ class WeatherCoordinator(
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { collectMessageFlow(forecastViewModel.messageFlow) }
+                launch { collectMessageFlow(hourlyViewModel.messageFlow) }
                 launch { forecastViewModel.gotoCitySelectionFlow.collect { onGotoCitySelection() } }
                 launch { collectChosenCityNotFoundFlow(forecastViewModel.chosenCityNotFoundFlow) }
                 launch { collectChosenCityBlankFlow(forecastViewModel.chosenCityBlankFlow) }
@@ -173,6 +177,7 @@ class WeatherCoordinator(
     class Factory {
         fun create(
             forecastViewModel: CurrentWeatherViewModel,
+            hourlyViewModel: HourlyWeatherViewModel,
             appBarViewModel: AppBarViewModel,
             geoLocationViewModel: GeoLocationViewModel,
             statusRenderer: StatusRenderer,
@@ -185,6 +190,7 @@ class WeatherCoordinator(
             onNegativeNoPermission: () -> Unit
         ): WeatherCoordinator = WeatherCoordinator(
             forecastViewModel,
+            hourlyViewModel,
             appBarViewModel,
             geoLocationViewModel,
             statusRenderer,

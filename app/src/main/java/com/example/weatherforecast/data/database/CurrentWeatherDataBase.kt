@@ -15,7 +15,7 @@ import kotlinx.serialization.InternalSerializationApi
  */
 @Database(
     entities = [CurrentWeatherResponse::class, CitiesNamesResponse::class, HourlyWeatherResponse::class],
-    version = 5
+    version = 6
 )
 @InternalSerializationApi
 abstract class WeatherForecastDatabase : RoomDatabase() {

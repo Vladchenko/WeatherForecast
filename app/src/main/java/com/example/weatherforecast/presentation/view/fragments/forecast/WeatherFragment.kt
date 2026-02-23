@@ -80,6 +80,7 @@ class WeatherFragment : Fragment() {
         coordinator = weatherCoordinatorFactory.create(
             forecastViewModel = forecastViewModel,
             appBarViewModel = appBarViewModel,
+            hourlyViewModel = hourlyWeatherViewModel,
             geoLocationViewModel = geoLocationViewModel,
             statusRenderer = statusRenderer,
             dialogController = dialogController,

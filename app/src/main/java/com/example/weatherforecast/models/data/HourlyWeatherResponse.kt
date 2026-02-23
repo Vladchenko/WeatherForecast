@@ -1,5 +1,7 @@
 package com.example.weatherforecast.models.data
 
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
@@ -23,8 +25,12 @@ import kotlinx.serialization.InternalSerializationApi
 @TypeConverters(HourlyWeatherTypeConverters::class)
 data class HourlyWeatherResponse(
     @PrimaryKey
-    @SerializedName("city")
+    @ColumnInfo(name = "city_id")
+    val cityId: Long,
+
+    @Embedded(prefix = "city_")
     val city: City,
+
     @SerializedName("list")
     val hourlyForecasts: List<HourlyWeatherItem>
 )
@@ -60,13 +66,10 @@ data class HourlyWeatherItem(
  *
  * Used as part of [HourlyWeatherResponse] and serves as the primary key in the database.
  *
- * @property id Unique city identifier assigned by OpenWeatherMap
  * @property name Name of the city
  * @property country Country code (e.g., "RU", "US")
  */
 data class City(
-    @SerializedName("id")
-    val id: Long,
     @SerializedName("name")
     val name: String,
     @SerializedName("country")

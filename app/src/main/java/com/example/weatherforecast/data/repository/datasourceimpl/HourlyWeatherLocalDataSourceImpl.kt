@@ -14,6 +14,7 @@ import retrofit2.Response
  *
  * @property dao of Retrofit library to download weather forecast data
  */
+@InternalSerializationApi
 class HourlyWeatherLocalDataSourceImpl(private val dao: HourlyWeatherDAO) : HourlyWeatherLocalDataSource {
 
     @InternalSerializationApi

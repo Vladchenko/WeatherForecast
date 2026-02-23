@@ -11,12 +11,12 @@ import kotlinx.serialization.InternalSerializationApi
  * DAO interface for handling hourly forecast data in the local database
  */
 @Dao
+@InternalSerializationApi
 interface HourlyWeatherDAO {
-    @InternalSerializationApi
-    @Query("SELECT * FROM hourlyForecasts WHERE city = :city")
-    suspend fun getHourlyForecast(city: String): HourlyWeatherResponse?
 
-    @InternalSerializationApi
+    @Query("SELECT * FROM hourlyForecasts WHERE city_name = :cityName")
+    suspend fun getHourlyForecast(cityName: String): HourlyWeatherResponse?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHourlyForecast(forecast: HourlyWeatherResponse)
-} 
+}
