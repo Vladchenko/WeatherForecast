@@ -94,7 +94,7 @@ class WeatherFragment : Fragment() {
 
         coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
 
-        statusRenderer.showDownloadingStatusFor(args.chosenCity)
+        statusRenderer.showLoadingStatusFor(args.chosenCity)
         forecastViewModel.launchWeatherForecast(args.chosenCity)
 
         (view as ComposeView).setContent {

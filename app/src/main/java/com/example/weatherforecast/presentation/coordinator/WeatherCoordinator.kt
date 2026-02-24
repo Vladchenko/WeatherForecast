@@ -100,7 +100,7 @@ class WeatherCoordinator(
     private suspend fun collectGeoLocationByCitySuccessFlow(flow: SharedFlow<CityLocationModel>) {
         flow.collect { location ->
             statusRenderer.showStatus(resourceManager.getString(R.string.current_location_success))
-            forecastViewModel.downloadRemoteForecastForLocation(location)
+            forecastViewModel.loadRemoteForecastForLocation(location)
         }
     }
 
@@ -154,7 +154,7 @@ class WeatherCoordinator(
             dialogController.showLocationDefined(
                 message = message,
                 onPositiveClick = { city ->
-                    statusRenderer.showDownloadingStatusFor(city)
+                    statusRenderer.showLoadingStatusFor(city)
                     forecastViewModel.updateChosenCityState(city)
                     forecastViewModel.launchWeatherForecast(city)
                 },

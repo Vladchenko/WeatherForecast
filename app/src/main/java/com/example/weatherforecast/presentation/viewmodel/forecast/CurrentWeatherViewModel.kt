@@ -114,7 +114,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 )
                 cityModel.city
             }
-            downloadWeatherForecast(city)
+            loadWeatherForecast(city)
         }
     }
 
@@ -126,23 +126,23 @@ class CurrentWeatherViewModel @Inject constructor(
     /**
      * Download a forecast or call blank chosen city callback, depending on a presence of a [city]
      */
-    private fun downloadWeatherForecast(city: String) {
+    private fun loadWeatherForecast(city: String) {
         if (city.isBlank()) {
             _chosenCityBlankFlow.tryEmit(Unit)
         } else {
             chosenCity = city
-            downloadRemoteForecastForCity(city)
+            loadRemoteForecastForCity(city)
         }
     }
 
     /**
      * Download weather forecast on a [city].
      */
-    fun downloadRemoteForecastForCity(city: String) {
+    fun loadRemoteForecastForCity(city: String) {
         showProgressBarState.value = true
         if (currentJob?.isActive == true) return    // Return if there is a job already running
         currentJob = viewModelScope.launch(exceptionHandler) {
-            val result = forecastRemoteInteractor.loadForecastForCity(
+            val result = forecastRemoteInteractor.loadWeatherForCity(
                 temperatureType,
                 city
             )
@@ -153,11 +153,11 @@ class CurrentWeatherViewModel @Inject constructor(
     /**
      * Download remote weather forecast on a [cityModel] for location.
      */
-    fun downloadRemoteForecastForLocation(cityModel: CityLocationModel) {
+    fun loadRemoteForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         currentJob?.cancel() // Cancel previous job
         currentJob = viewModelScope.launch(exceptionHandler) {
-            val result = forecastRemoteInteractor.loadForecastForLocation(
+            val result = forecastRemoteInteractor.loadWeatherForLocation(
                 temperatureType,
                 cityModel.location.latitude,
                 cityModel.location.longitude
@@ -204,6 +204,8 @@ class CurrentWeatherViewModel @Inject constructor(
                                 city
                             )
                         )
+                        // TODO Call loadWeatherForLocation and if it fails, call _chosenCityNotFoundFlow.tryEmit(city)
+                        // TODO Maybe call it in repository
                         _chosenCityNotFoundFlow.tryEmit(city)
                     }
 

@@ -23,15 +23,27 @@ class CurrentWeatherRemoteDataSourceImpl(
 
     @InternalSerializationApi
     override suspend fun loadWeatherForCity(city: String): Response<CurrentWeatherResponse> {
-        val response = apiService.getCurrentWeather(city)
-        loggingService.logApiResponse(TAG, "Weather forecast response for city = $city", response.body())
+        val response = apiService.getCurrentWeatherForCity(city)
+        loggingService.logApiResponse(
+            TAG,
+            "Weather forecast response for city = $city",
+            response.body()
+        )
         return responseProcessor.processResponse(response)
     }
 
     @InternalSerializationApi
-    override suspend fun loadWeatherForLocation(latitude: Double, longitude: Double): Response<CurrentWeatherResponse> {
-        // Note: Location-based API is no longer supported in the current version
-        throw UnsupportedOperationException("Location-based weather forecast is no longer supported")
+    override suspend fun loadWeatherForLocation(
+        latitude: Double,
+        longitude: Double
+    ): Response<CurrentWeatherResponse> {
+        val response = apiService.getCurrentWeatherForLocation(latitude, longitude)
+        loggingService.logApiResponse(
+            TAG,
+            "Weather forecast response for location as lat=$latitude, lon=$longitude",
+            response.body()
+        )
+        return responseProcessor.processResponse(response)
     }
 
     companion object {

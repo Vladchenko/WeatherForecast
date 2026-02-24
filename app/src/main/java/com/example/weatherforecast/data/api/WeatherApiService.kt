@@ -17,17 +17,30 @@ import retrofit2.http.Query
  */
 interface WeatherApiService {
     /**
-     * Get current weather forecast for a city by name.
-     *
-     * @param cityName Name of the city
-     * @param apiKey API key for authentication
-     * @return Response containing weather forecast data
+     * Get [CurrentWeatherResponse] current weather forecast for a city by [cityName],
+     * providing [apiKey] for authentication on server.
      */
     @InternalSerializationApi
     @GET(CURRENT_WEATHER)
-    suspend fun getCurrentWeather(
+    suspend fun getCurrentWeatherForCity(
         @Query("q") cityName: String,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
+    ): Response<CurrentWeatherResponse>
+
+
+    /**
+     * Get [CurrentWeatherResponse] current weather forecast for a location by [lat] and [lon] coordinate,
+     * providing [apiKey] for authentication on server.
+     */
+    @InternalSerializationApi
+    @GET(CURRENT_WEATHER)
+    suspend fun getCurrentWeatherForLocation(
+        @Query("lat")
+        lat: Double,
+        @Query("lon")
+        lon: Double,
+        @Query("appid")
+        apiKey: String = BuildConfig.API_KEY
     ): Response<CurrentWeatherResponse>
 
     /**
@@ -45,7 +58,7 @@ interface WeatherApiService {
     ): Response<HourlyWeatherResponse>
 
     @InternalSerializationApi
-    @GET("data/2.5/forecast")
+    @GET(HOURLY_WEATHER)
     suspend fun getHourlyForecastByLocation(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,

@@ -125,7 +125,7 @@ class StatusRenderer(
      *
      * @param city Name of the city being loaded
      */
-    fun showDownloadingStatusFor(city: String) {
+    fun showLoadingStatusFor(city: String) {
         if (city.isBlank()) {
             statusDisplay.showStatus(
                 StatusDisplay.Status(
