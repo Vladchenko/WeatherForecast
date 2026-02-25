@@ -1,22 +1,31 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import com.example.weatherforecast.models.data.HourlyWeatherResponse
-import kotlinx.serialization.InternalSerializationApi
-import retrofit2.Response
+import com.example.weatherforecast.models.data.database.HourlyWeatherEntity
 
 /**
  * Local data source interface
  */
+/**
+ * Interface for local data source providing access to cached hourly weather data.
+ *
+ * Implemented by Room database via DAO.
+ */
 interface HourlyWeatherLocalDataSource {
-    /**
-     * Download weather forecast from a local storage, having [city] as a request parameter
-     */
-    @InternalSerializationApi
-    suspend fun getHourlyWeather(city: String): Response<HourlyWeatherResponse>
 
     /**
-     * Save weather forecast data to local storage as a whole [response]
+     * Retrieves main entity with city metadata by city name.
+     *
+     * @param city Name of the city
+     * @return [HourlyWeatherEntity] if found, null otherwise
      */
-    @InternalSerializationApi
-    suspend fun saveHourlyWeather(response: HourlyWeatherResponse)
+    suspend fun getHourlyWeather(city: String): HourlyWeatherEntity?
+
+    /**
+     * Saves or updates main weather header and associated hourly items.
+     *
+     * Uses REPLACE strategy for conflict resolution.
+     *
+     * @param entity Complete entity containing city metadata and list of forecasts
+     */
+    suspend fun saveHourlyWeather(entity: HourlyWeatherEntity)
 }

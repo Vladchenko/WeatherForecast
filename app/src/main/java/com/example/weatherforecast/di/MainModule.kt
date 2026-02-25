@@ -3,10 +3,12 @@ package com.example.weatherforecast.di
 import android.content.Context
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.WeatherApiService
-import com.example.weatherforecast.data.converter.CurrentWeatherModelConverter
-import com.example.weatherforecast.data.converter.HourlyWeatherModelConverter
 import com.example.weatherforecast.data.database.CurrentWeatherDAO
 import com.example.weatherforecast.data.database.HourlyWeatherDAO
+import com.example.weatherforecast.data.mapper.CurrentWeatherDtoMapper
+import com.example.weatherforecast.data.mapper.CurrentWeatherEntityMapper
+import com.example.weatherforecast.data.mapper.HourlyWeatherDtoMapper
+import com.example.weatherforecast.data.mapper.HourlyWeatherEntityMapper
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.repository.CurrentWeatherRepositoryImpl
 import com.example.weatherforecast.data.repository.HourlyWeatherRepositoryImpl
@@ -44,35 +46,51 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 /**
- * Dagger Hilt module that provides core business logic and presentation-layer dependencies
+ * Dagger Hilt module that provides core data mapping, repository, and presentation-layer dependencies
  * for the weather forecast feature.
  *
  * This module is installed in the [SingletonComponent], ensuring that all provided instances
  * are scoped to the application lifecycle and shared across components.
  *
  * It supplies:
- * - Data converters: [CurrentWeatherModelConverter], [HourlyWeatherModelConverter],
- *   and [WeatherDomainToUiConverter] for transforming API responses to domain and UI models
- * - Local and remote data sources for current and hourly forecasts, using DAOs and API services
- * - Repositories ([CurrentWeatherRepositoryImpl], [HourlyWeatherRepositoryImpl]) that encapsulate
- *   data access logic with proper threading via [CoroutineDispatchers]
- * - Interactors (use cases) for local and remote forecast operations
- * - ViewModel factories for:
- *   - [CurrentWeatherViewModelFactory] – main forecast screen
- *   - [HourlyWeatherViewModelFactory] – hourly forecast panel
- *   - [GeoLocationViewModelFactory] – location permission and retrieval logic
- *   - [AppBarViewModelFactory] – app bar title/subtitle management
- * - Supporting utilities: [PermissionChecker], [ResourceManager], [LoggingService], [ResponseProcessor]
+ * - **Mappers** (not TypeConverters):
+ *   - [CurrentWeatherDtoMapper] and [HourlyWeatherDtoMapper] – convert API responses (DTOs) to domain models
+ *   - [CurrentWeatherEntityMapper] and [HourlyWeatherEntityMapper] – map between database entities and domain models
+ *   These mappers enable clean separation between layers instead of using Room TypeConverters for complex objects.
  *
- * Enables clean separation of concerns, testability, and dependency injection throughout the app.
+ * - **Data sources**:
+ *   - Local ([CurrentWeatherLocalDataSourceImpl], [HourlyWeatherLocalDataSourceImpl]) using Room DAOs
+ *   - Remote ([CurrentWeatherRemoteDataSourceImpl], [HourlyWeatherRemoteDataSourceImpl]) using [WeatherApiService]
+ *   Both include logging and response processing via [LoggingService] and [ResponseProcessor]
+ *
+ * - **Repositories**:
+ *   - [CurrentWeatherRepositoryImpl] and [HourlyWeatherRepositoryImpl] orchestrate data flow between local/remote sources,
+ *     using mappers and [CoroutineDispatchers] for background execution
+ *
+ * - **Interactors (use cases)**:
+ *   - [CurrentWeatherInteractor] and [HourlyWeatherInteractor] serve as entry points for business logic
+ *
+ * - **ViewModel factories**:
+ *   - [CurrentWeatherViewModelFactory], [HourlyWeatherViewModelFactory], [GeoLocationViewModelFactory], [AppBarViewModelFactory]
+ *     inject required dependencies including interactors, converters, and utilities
+ *
+ * - **Supporting utilities**:
+ *   - [PermissionCheckerImpl] – handles runtime location permissions
+ *   - [ResourceManagerImpl] – provides string and UI resources
+ *   - [WeatherDomainToUiConverterImpl] – transforms domain models into UI state
+ *   - [AppBarStateConverter] – manages app bar title/subtitle based on location and connectivity
+ *
+ * This setup ensures a clean architecture with dependency inversion, testability, and full control over data transformation
+ * through explicit mappers rather than implicit Room TypeConverters.
  *
  * @see CurrentWeatherRepository
  * @see CurrentWeatherViewModelFactory
  * @see GeoLocationViewModelFactory
- * @see AppBarStateConverter
+ * @see WeatherDomainToUiConverter
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -122,6 +140,7 @@ class MainModule {
 
     @Singleton
     @Provides
+    @InternalSerializationApi
     fun provideHourlyForecastLocalDataSource(forecastDAO: HourlyWeatherDAO): HourlyWeatherLocalDataSource {
         return HourlyWeatherLocalDataSourceImpl(forecastDAO)
     }
@@ -140,51 +159,73 @@ class MainModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastDomainConverter(): CurrentWeatherModelConverter {
-        return CurrentWeatherModelConverter()
-    }
-
-    @Singleton
-    @Provides
     fun provideWeatherForecastUiConverter(): WeatherDomainToUiConverter {
         return WeatherDomainToUiConverterImpl()
     }
 
     @Singleton
     @Provides
-    fun provideHourlyForecastConverter(): HourlyWeatherModelConverter {
-        return HourlyWeatherModelConverter()
+    @InternalSerializationApi
+    fun provideCurrentWeatherDtoMapper(): CurrentWeatherDtoMapper {
+        return CurrentWeatherDtoMapper()
     }
 
     @Singleton
     @Provides
+    @InternalSerializationApi
+    fun provideCurrentWeatherEntityMapper(): CurrentWeatherEntityMapper {
+        return CurrentWeatherEntityMapper()
+    }
+
+    @Singleton
+    @Provides
+    @InternalSerializationApi
     fun provideWeatherForecastRepository(
-        currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource,
-        currentWeatherLocalDataSource: CurrentWeatherLocalDataSource,
-        converter: CurrentWeatherModelConverter,
+        dtoMapper: CurrentWeatherDtoMapper,
+        entityMapper: CurrentWeatherEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
+        currentWeatherLocalDataSource: CurrentWeatherLocalDataSource,
+        currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource,
     ): CurrentWeatherRepository {
         return CurrentWeatherRepositoryImpl(
-            currentWeatherRemoteDataSource,
+            dtoMapper,
+            entityMapper,
+            coroutineDispatchers,
             currentWeatherLocalDataSource,
-            converter,
-            coroutineDispatchers
+            currentWeatherRemoteDataSource
         )
     }
 
     @Singleton
     @Provides
+    @InternalSerializationApi
+    fun provideHourlyWeatherDtoMapper(): HourlyWeatherDtoMapper {
+        return HourlyWeatherDtoMapper()
+    }
+
+    @Singleton
+    @Provides
+    @InternalSerializationApi
+    fun provideHourlyWeatherEntityMapper(): HourlyWeatherEntityMapper {
+        return HourlyWeatherEntityMapper()
+    }
+
+    @Singleton
+    @Provides
+    @InternalSerializationApi
     fun provideHourlyForecastRepository(
-        hourlyWeatherRemoteDataSource: HourlyWeatherRemoteDataSource,
+        dtoMapper: HourlyWeatherDtoMapper,
+        entityMapper: HourlyWeatherEntityMapper,
+        coroutineDispatchers: CoroutineDispatchers,
         hourlyWeatherLocalDataSource: HourlyWeatherLocalDataSource,
-        converter: HourlyWeatherModelConverter,
-        coroutineDispatchers: CoroutineDispatchers
+        hourlyWeatherRemoteDataSource: HourlyWeatherRemoteDataSource
     ): HourlyWeatherRepository {
         return HourlyWeatherRepositoryImpl(
-            hourlyWeatherRemoteDataSource,
-            hourlyWeatherLocalDataSource,
-            converter,
             coroutineDispatchers,
+            dtoMapper,
+            entityMapper,
+            hourlyWeatherLocalDataSource,
+            hourlyWeatherRemoteDataSource,
         )
     }
 

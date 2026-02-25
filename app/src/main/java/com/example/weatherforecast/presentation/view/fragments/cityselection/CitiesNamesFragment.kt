@@ -12,6 +12,7 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 
 /**
  * Fragment for selecting a city from a list of suggestions based on user input.
@@ -27,6 +28,7 @@ class CitiesNamesFragment : Fragment() {
     private val appBarViewModel by activityViewModels<AppBarViewModel>()
     private val citiesNamesViewModel by activityViewModels<CitiesNamesViewModel>()
 
+    @FlowPreview
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,7 +40,7 @@ class CitiesNamesFragment : Fragment() {
                     citySelectionTitle = getString(R.string.city_selection_from_dropdown),
                     queryLabel = getString(R.string.city_typing_begin),
                     { findNavController().popBackStack() },
-                    { openCurrentWeatherFragment(it) },   // This call should be done in viewmodel,
+                    { chosenCity -> openCurrentWeatherFragment(chosenCity) },   // This call should be done in viewmodel,
                     // but in this very case, somehow, CitiesNamesViewModel's livedata that calls
                     // forecastscreen, fires right away when a CitiesNames screen is opened (
                     // i.e. CurrentForecast -> CitiesNames -> CurrentForecast call is performed)

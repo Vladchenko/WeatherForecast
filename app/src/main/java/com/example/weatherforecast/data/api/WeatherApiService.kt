@@ -4,9 +4,9 @@ import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.data.api.ApiConstants.CURRENT_WEATHER
 import com.example.weatherforecast.data.api.ApiConstants.GEO_DIRECT
 import com.example.weatherforecast.data.api.ApiConstants.HOURLY_WEATHER
-import com.example.weatherforecast.models.data.CitiesNamesResponse
-import com.example.weatherforecast.models.data.CurrentWeatherResponse
-import com.example.weatherforecast.models.data.HourlyWeatherResponse
+import com.example.weatherforecast.models.data.network.CitiesSearchResultDto
+import com.example.weatherforecast.models.data.network.CurrentWeatherDto
+import com.example.weatherforecast.models.data.network.HourlyWeatherDto
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import retrofit2.http.GET
@@ -17,7 +17,7 @@ import retrofit2.http.Query
  */
 interface WeatherApiService {
     /**
-     * Get [CurrentWeatherResponse] current weather forecast for a city by [cityName],
+     * Get [CurrentWeatherDto] current weather forecast for a city by [cityName],
      * providing [apiKey] for authentication on server.
      */
     @InternalSerializationApi
@@ -25,11 +25,11 @@ interface WeatherApiService {
     suspend fun getCurrentWeatherForCity(
         @Query("q") cityName: String,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<CurrentWeatherResponse>
+    ): Response<CurrentWeatherDto>
 
 
     /**
-     * Get [CurrentWeatherResponse] current weather forecast for a location by [lat] and [lon] coordinate,
+     * Get [CurrentWeatherDto] current weather forecast for a location by [lat] and [lon] coordinate,
      * providing [apiKey] for authentication on server.
      */
     @InternalSerializationApi
@@ -41,7 +41,7 @@ interface WeatherApiService {
         lon: Double,
         @Query("appid")
         apiKey: String = BuildConfig.API_KEY
-    ): Response<CurrentWeatherResponse>
+    ): Response<CurrentWeatherDto>
 
     /**
      * Get hourly forecast for a city by name.
@@ -55,7 +55,7 @@ interface WeatherApiService {
     suspend fun getHourlyWeather(
         @Query("q") cityName: String,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<HourlyWeatherResponse>
+    ): Response<HourlyWeatherDto>
 
     @InternalSerializationApi
     @GET(HOURLY_WEATHER)
@@ -64,7 +64,7 @@ interface WeatherApiService {
         @Query("lon") longitude: Double,
         @Query("appid") apiKey: String = BuildConfig.API_KEY,
         @Query("units") units: String = "metric"
-    ): Response<HourlyWeatherResponse>
+    ): Response<HourlyWeatherDto>
 }
 
 /**
@@ -85,5 +85,5 @@ interface CityApiService {
         @Query("q") cityName: String,
         @Query("limit") limit: Int = 5,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<List<CitiesNamesResponse>>
+    ): Response<List<CitiesSearchResultDto>>
 }

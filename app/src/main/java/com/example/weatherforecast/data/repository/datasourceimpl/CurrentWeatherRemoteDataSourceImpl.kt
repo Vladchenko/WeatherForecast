@@ -4,7 +4,7 @@ import com.example.weatherforecast.data.api.WeatherApiService
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
-import com.example.weatherforecast.models.data.CurrentWeatherResponse
+import com.example.weatherforecast.models.data.network.CurrentWeatherDto
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
@@ -22,7 +22,7 @@ class CurrentWeatherRemoteDataSourceImpl(
 ) : CurrentWeatherRemoteDataSource {
 
     @InternalSerializationApi
-    override suspend fun loadWeatherForCity(city: String): Response<CurrentWeatherResponse> {
+    override suspend fun loadWeatherForCity(city: String): Response<CurrentWeatherDto> {
         val response = apiService.getCurrentWeatherForCity(city)
         loggingService.logApiResponse(
             TAG,
@@ -36,7 +36,7 @@ class CurrentWeatherRemoteDataSourceImpl(
     override suspend fun loadWeatherForLocation(
         latitude: Double,
         longitude: Double
-    ): Response<CurrentWeatherResponse> {
+    ): Response<CurrentWeatherDto> {
         val response = apiService.getCurrentWeatherForLocation(latitude, longitude)
         loggingService.logApiResponse(
             TAG,

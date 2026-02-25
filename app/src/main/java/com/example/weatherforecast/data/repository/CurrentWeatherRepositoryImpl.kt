@@ -1,13 +1,15 @@
 package com.example.weatherforecast.data.repository
 
 import android.util.Log
-import com.example.weatherforecast.data.converter.CurrentWeatherModelConverter
+import com.example.weatherforecast.data.mapper.CurrentWeatherDtoMapper
+import com.example.weatherforecast.data.mapper.CurrentWeatherEntityMapper
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.CurrentWeatherRepository
-import com.example.weatherforecast.models.data.CurrentWeatherResponse
+import com.example.weatherforecast.models.data.database.CurrentWeatherEntity
+import com.example.weatherforecast.models.data.network.CurrentWeatherDto
 import com.example.weatherforecast.models.domain.CurrentWeather
 import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.LoadResult
@@ -18,16 +20,19 @@ import retrofit2.Response
 /**
  * WeatherForecastRepository implementation. Provides data for domain layer.
  *
+ * @property dtoMapper mapper for DTOs
+ * @property entityMapper mapper for entities
+ * @property coroutineDispatchers dispatchers for coroutines
  * @property currentWeatherRemoteDataSource source of remote data for domain layer
  * @property currentWeatherLocalDataSource source of local data for domain layer
- * @property modelsConverter converts server response to domain entity
- * @property coroutineDispatchers dispatchers for coroutines
  */
+@InternalSerializationApi
 class CurrentWeatherRepositoryImpl(
-    private val currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource,
-    private val currentWeatherLocalDataSource: CurrentWeatherLocalDataSource,
-    private val modelsConverter: CurrentWeatherModelConverter,
+    private val dtoMapper: CurrentWeatherDtoMapper,
+    private val entityMapper: CurrentWeatherEntityMapper,
     private val coroutineDispatchers: CoroutineDispatchers,
+    private val currentWeatherLocalDataSource: CurrentWeatherLocalDataSource,
+    private val currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource,
 ) : CurrentWeatherRepository {
 
     @InternalSerializationApi
@@ -54,7 +59,7 @@ class CurrentWeatherRepositoryImpl(
     ): LoadResult<CurrentWeather> {
         val response = currentWeatherRemoteDataSource.loadWeatherForCity(city)
         return if (response.isSuccessful) {
-            handleSuccessResponse(response, temperatureType, city)
+            handleSuccessResponse(response, temperatureType)
         } else {
             handleApiError(response)
         }
@@ -62,9 +67,8 @@ class CurrentWeatherRepositoryImpl(
 
     @InternalSerializationApi
     private suspend fun handleSuccessResponse(
-        response: Response<CurrentWeatherResponse>,
-        temperatureType: TemperatureType,
-        city: String
+        response: Response<CurrentWeatherDto>,
+        temperatureType: TemperatureType
     ): LoadResult<CurrentWeather> {
         val body = response.body()
             ?: return LoadResult.Error(
@@ -72,9 +76,10 @@ class CurrentWeatherRepositoryImpl(
                     Exception("Response for city is successful, but its body is empty")
                 )
             )
-        val result = modelsConverter.convert(temperatureType, city, response)
-        saveWeather(body)
-        return LoadResult.Remote(result)
+        val dbEntity = dtoMapper.toEntity(body)
+        saveWeather(dbEntity)
+        val domainModel = entityMapper.toDomain(dbEntity, temperatureType)
+        return LoadResult.Remote(domainModel)
     }
 
     private fun handleApiError(response: Response<*>): LoadResult<CurrentWeather> {
@@ -146,9 +151,13 @@ class CurrentWeatherRepositoryImpl(
         return if (response.isSuccessful) {
             val body = response.body()
                 ?: return LoadResult.Error(ForecastError.NetworkError(Exception("Response for location is successful, but its body is empty")))
-            val result = modelsConverter.convert(temperatureType, body.city, response)
-            saveWeather(body)
-            LoadResult.Remote(result)
+//            val result = modelsConverter.convert(temperatureType, body.name, response)
+//            saveWeather(body)
+//            LoadResult.Remote(result)
+            val dbEntity = dtoMapper.toEntity(body)
+            saveWeather(dbEntity)
+            val domainModel = entityMapper.toDomain(dbEntity, temperatureType)
+            return LoadResult.Remote(domainModel)
         } else {
             handleApiError(response)
         }
@@ -161,13 +170,22 @@ class CurrentWeatherRepositoryImpl(
         remoteError: ForecastError
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
-            val datasourceResponse = currentWeatherLocalDataSource.loadWeather(city)
-            val domainModel = modelsConverter.convert(temperatureType, city, datasourceResponse)
-            LoadResult.Local(domainModel, remoteError)
+            return@withContext try {
+                val localModel = currentWeatherLocalDataSource.loadWeather(city)
+                val domainModel = entityMapper.toDomain(localModel.body()!!, temperatureType)
+                LoadResult.Local(domainModel, remoteError)
+            } catch (ex: Exception) {
+                Log.e(TAG, "Failed to load cached weather for city $city: $ex")
+                LoadResult.Error(
+                    ForecastError.LocalDataCorrupted(
+                        message = "Local database query failed: $ex"
+                    )
+                )
+            }
         }
 
     @InternalSerializationApi
-    private suspend fun saveWeather(response: CurrentWeatherResponse) =
+    private suspend fun saveWeather(response: CurrentWeatherEntity) =
         withContext(coroutineDispatchers.io) {
             currentWeatherLocalDataSource.saveWeather(response)
         }

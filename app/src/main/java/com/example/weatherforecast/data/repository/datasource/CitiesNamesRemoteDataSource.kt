@@ -1,6 +1,6 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import com.example.weatherforecast.models.data.CitiesNamesResponse
+import com.example.weatherforecast.models.data.network.CitiesSearchResultDto
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
@@ -12,5 +12,5 @@ interface CitiesNamesRemoteDataSource {
      * Retrieve cities names for [token].
      */
     @InternalSerializationApi
-    suspend fun loadCitiesNames(token: String): Response<List<CitiesNamesResponse>>
+    suspend fun loadCitiesNames(token: String): Response<List<CitiesSearchResultDto>>
 }

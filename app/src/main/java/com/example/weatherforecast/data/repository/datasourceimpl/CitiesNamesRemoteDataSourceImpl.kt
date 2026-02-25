@@ -3,7 +3,7 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 import android.util.Log
 import com.example.weatherforecast.data.api.CityApiService
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
-import com.example.weatherforecast.models.data.CitiesNamesResponse
+import com.example.weatherforecast.models.data.network.CitiesSearchResultDto
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
@@ -15,7 +15,7 @@ import retrofit2.Response
 class CitiesNamesRemoteDataSourceImpl(private val apiService: CityApiService) : CitiesNamesRemoteDataSource {
 
     @InternalSerializationApi
-    override suspend fun loadCitiesNames(token: String): Response<List<CitiesNamesResponse>> {
+    override suspend fun loadCitiesNames(token: String): Response<List<CitiesSearchResultDto>> {
         val response = apiService.searchCities(token)
         Log.d(TAG, "Cities search response: ${response.body()}")
         return response

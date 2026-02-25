@@ -1,13 +1,14 @@
 package com.example.weatherforecast.data.repository
 
 import android.util.Log
-import com.example.weatherforecast.data.converter.HourlyWeatherModelConverter
+import com.example.weatherforecast.data.mapper.HourlyWeatherDtoMapper
+import com.example.weatherforecast.data.mapper.HourlyWeatherEntityMapper
 import com.example.weatherforecast.data.repository.datasource.HourlyWeatherLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.HourlyWeatherRemoteDataSource
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.HourlyWeatherRepository
-import com.example.weatherforecast.models.data.HourlyWeatherResponse
+import com.example.weatherforecast.models.data.network.HourlyWeatherDto
 import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.HourlyWeatherDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
@@ -16,155 +17,127 @@ import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
- * WeatherForecastRepository implementation. Provides data for domain layer.
+ * Repository implementation for hourly weather data.
  *
- * @property hourlyWeatherRemoteDataSource source of remote data for domain layer
- * @property hourlyWeatherLocalDataSource source of local data for domain layer
- * @property modelsConverter converts server response to domain entity
- * @property coroutineDispatchers dispatchers for coroutines
+ * Uses remote and local data sources with proper mapping between layers.
  */
+@InternalSerializationApi
 class HourlyWeatherRepositoryImpl(
-    private val hourlyWeatherRemoteDataSource: HourlyWeatherRemoteDataSource,
-    private val hourlyWeatherLocalDataSource: HourlyWeatherLocalDataSource,
-    private val modelsConverter: HourlyWeatherModelConverter,
-    private val coroutineDispatchers: CoroutineDispatchers,
+    private val dispatchers: CoroutineDispatchers,
+    private val dtoMapper: HourlyWeatherDtoMapper,
+    private val entityMapper: HourlyWeatherEntityMapper,
+    private val localDataSource: HourlyWeatherLocalDataSource,
+    private val remoteDataSource: HourlyWeatherRemoteDataSource
 ) : HourlyWeatherRepository {
 
-    @InternalSerializationApi
     override suspend fun refreshWeatherForCity(
         city: String,
         temperatureType: TemperatureType
     ): LoadResult<HourlyWeatherDomainModel> =
-        withContext(coroutineDispatchers.io) {
+        withContext(dispatchers.io) {
             safeApiCall(
-                apiCall = { hourlyWeatherRemoteDataSource.loadHourlyWeatherForCity(city) },
+                apiCall = { remoteDataSource.loadHourlyWeatherForCity(city) },
                 city = city,
-                temperatureType = temperatureType,
-                fallbackError = { code, message ->
-                    when (code) {
-                        404 -> ForecastError.CityNotFound(city = city, message = message)
-                        401 -> ForecastError.ApiKeyInvalid(message)
-                        in 500..599 -> ForecastError.ServerError(code, message)
-                        else -> ForecastError.NetworkError(Exception("HTTP $code $message"))
-                    }
-                }
+                temperatureType = temperatureType
             )
         }
 
-    @InternalSerializationApi
     override suspend fun refreshWeatherForLocation(
         city: String,
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
     ): LoadResult<HourlyWeatherDomainModel> =
-        withContext(coroutineDispatchers.io) {
+        withContext(dispatchers.io) {
             safeApiCall(
-                apiCall = {
-                    hourlyWeatherRemoteDataSource.loadHourlyWeatherForLocation(
-                        latitude,
-                        longitude
-                    )
-                },
+                apiCall = { remoteDataSource.loadHourlyWeatherForLocation(latitude, longitude) },
                 city = city,
-                temperatureType = temperatureType,
-                fallbackError = { code, message ->
-                    when (code) {
-                        404 -> ForecastError.CityNotFound(city = city, message = message)
-                        401 -> ForecastError.ApiKeyInvalid(message)
-                        in 500..599 -> ForecastError.ServerError(code, message)
-                        else -> ForecastError.NetworkError(Exception("HTTP $code $message"))
-                    }
-                }
+                temperatureType = temperatureType
             )
         }
 
-    @InternalSerializationApi
     override suspend fun loadCachedWeather(
         city: String,
         temperatureType: TemperatureType,
         remoteError: ForecastError
     ): LoadResult<HourlyWeatherDomainModel> =
-        withContext(coroutineDispatchers.io) {
+        withContext(dispatchers.io) {
             try {
-                val response = hourlyWeatherLocalDataSource.getHourlyWeather(city)
-                val result = modelsConverter.convert(temperatureType, city, response)
-                Log.d(TAG, "Hourly weather loaded from local storage on city: $city")
-                LoadResult.Local(result, remoteError)
-            } catch (ex: Exception) {
-                Log.e(TAG, "Failed to load cached weather: $ex")
-                LoadResult.Error(remoteError)
+                val entity = localDataSource.getHourlyWeather(city) ?: return@withContext LoadResult.Error(
+                    ForecastError.NoDataAvailable("No cached data found for city: $city")
+                )
+
+                val domainModel = entityMapper.toDomain(entity, temperatureType)
+
+                Log.d(TAG, "Loaded hourly weather from cache for city: $city")
+                LoadResult.Local(domainModel, remoteError)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load cached hourly weather for $city", e)
+                LoadResult.Error(ForecastError.LocalDataCorrupted("Cache read failed: ${e.message}"))
             }
         }
 
-    /**
-     * Executes API call safely and tries to load from cache on any error.
-     */
-    @Suppress("UNCHECKED_CAST")
-    @InternalSerializationApi
-    private suspend fun <T> safeApiCall(
-        apiCall: suspend () -> Response<T>,
+    private suspend fun safeApiCall(
+        apiCall: suspend () -> Response<HourlyWeatherDto>,
         city: String,
-        temperatureType: TemperatureType,
-        fallbackError: (Int, String) -> ForecastError
+        temperatureType: TemperatureType
     ): LoadResult<HourlyWeatherDomainModel> {
         return try {
             val response = apiCall()
-            if (response.isSuccessful) {
-                val body = response.body() ?: return LoadResult.Error(
-                    ForecastError.NetworkError(Exception("Response is successful but body is null"))
-                )
-                val cityName = if (body is HourlyWeatherResponse) body.city.name else city
-                val result = modelsConverter.convert(
-                    temperatureType,
-                    cityName,
-                    response as Response<HourlyWeatherResponse>
-                )
-                saveWeather(body as HourlyWeatherResponse)
-                Log.d(TAG, "\"$city\"")
-                LoadResult.Remote(result)
+            if (response.isSuccessful && response.body() != null) {
+                handleSuccessResponse(response.body()!!, city, temperatureType)
             } else {
-                val message = try {
-                    response.errorBody()?.string() ?: "HTTP ${response.code()} error"
-                } catch (ex: Exception) {
-                    "Failed to read error body: $ex"
-                }
-                val error = fallbackError(response.code(), message)
-                Log.d(TAG, "\"$city\", error: \"$error")
-                loadLocalHourlyWeatherOrError(city, temperatureType, error)
+                handleApiError(response, city, temperatureType)
             }
-        } catch (ex: Exception) {
-            val error = when (ex) {
-                is ForecastError -> ex
-                else -> ForecastError.NetworkError(ex)
+        } catch (e: Exception) {
+            val error = when (e) {
+                is ForecastError -> e
+                else -> ForecastError.NetworkError(e)
             }
-            Log.e(TAG, "\"$city\", error: \"$error")
-            loadLocalHourlyWeatherOrError(city, temperatureType, error)
+            Log.e(TAG, "Network error for city: $city", e)
+            loadCachedWeather(city, temperatureType, error)
         }
     }
 
-    @InternalSerializationApi
-    private suspend fun loadLocalHourlyWeatherOrError(
+    private suspend fun handleSuccessResponse(
+        dto: HourlyWeatherDto,
         city: String,
-        temperatureType: TemperatureType,
-        remoteError: ForecastError
+        temperatureType: TemperatureType
     ): LoadResult<HourlyWeatherDomainModel> {
-        return try {
-            val response = hourlyWeatherLocalDataSource.getHourlyWeather(city)
-            val result = modelsConverter.convert(temperatureType, city, response)
-            Log.d(TAG, "Hourly weather loaded from local storage on city: $city")
-            LoadResult.Local(result, remoteError)
-        } catch (ex: Throwable) {
-            Log.e(TAG, "Hourly weather failed loading from cache: \"$ex\"")
-            LoadResult.Error(remoteError)
-        }
+        // Convert DTO → DB entity
+        val entity = dtoMapper.toEntity(dto)
+
+        // Save to DB
+        localDataSource.saveHourlyWeather(entity)
+
+        // Map to domain
+        val domainModel = entityMapper.toDomain(entity, temperatureType)
+
+        Log.d(TAG, "Saved and mapped hourly weather for city: $city")
+        return LoadResult.Remote(domainModel)
     }
 
-    @InternalSerializationApi
-    private suspend fun saveWeather(response: HourlyWeatherResponse) =
-        withContext(coroutineDispatchers.io) {
-            hourlyWeatherLocalDataSource.saveHourlyWeather(response)
+    private suspend fun handleApiError(
+        response: Response<*>,
+        city: String,
+        temperatureType: TemperatureType
+    ): LoadResult<HourlyWeatherDomainModel> {
+        val message = try {
+            response.errorBody()?.string() ?: "HTTP ${response.code()} error"
+        } catch (e: Exception) {
+            "Failed to read error body: $e"
         }
+
+        val error = when (response.code()) {
+            404 -> ForecastError.CityNotFound(city = city, message = message)
+            401 -> ForecastError.ApiKeyInvalid(message)
+            in 500..599 -> ForecastError.ServerError(response.code(), message)
+            else -> ForecastError.NetworkError(Exception("HTTP ${response.code()} $message"))
+        }
+
+        Log.d(TAG, "API error for $city: $error")
+        return loadCachedWeather(city, temperatureType, error)
+    }
 
     companion object {
         private const val TAG = "HourlyWeatherRepository"

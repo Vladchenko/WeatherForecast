@@ -4,8 +4,9 @@ import android.app.Application
 import android.content.Context
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.CityApiService
-import com.example.weatherforecast.data.converter.CitiesNamesModelConverter
 import com.example.weatherforecast.data.database.CitiesNamesDAO
+import com.example.weatherforecast.data.mapper.CitiesSearchDtoMapper
+import com.example.weatherforecast.data.mapper.CitiesSearchEntityMapper
 import com.example.weatherforecast.data.repository.ChosenCityRepositoryImpl
 import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
 import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSource
@@ -25,6 +26,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 /**
@@ -49,6 +51,20 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class CitiesNamesModule {
+
+    @Singleton
+    @Provides
+    @InternalSerializationApi
+    fun provideCitiesSearchDtoMapper(): CitiesSearchDtoMapper {
+        return CitiesSearchDtoMapper()
+    }
+
+    @Singleton
+    @Provides
+    @InternalSerializationApi
+    fun provideCitiesSearchEntityMapper(): CitiesSearchEntityMapper {
+        return CitiesSearchEntityMapper()
+    }
 
     @Singleton
     @Provides
@@ -87,23 +103,20 @@ class CitiesNamesModule {
 
     @Singleton
     @Provides
-    fun provideCitiesNamesConverter(): CitiesNamesModelConverter {
-        return CitiesNamesModelConverter()
-    }
-
-    @Singleton
-    @Provides
+    @InternalSerializationApi
     fun provideCitiesNamesRepository(
+        dtoMapper: CitiesSearchDtoMapper,
+        entityMapper: CitiesSearchEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
-        converter: CitiesNamesModelConverter,
         citiesNamesLocalDataSource: CitiesNamesLocalDataSource,
         citiesNamesRemoteDataSource: CitiesNamesRemoteDataSource
     ): CitiesNamesRepository {
         return CitiesNamesRepositoryImpl(
+            dtoMapper,
+            entityMapper,
             coroutineDispatchers,
             citiesNamesLocalDataSource,
             citiesNamesRemoteDataSource,
-            converter
         )
     }
 

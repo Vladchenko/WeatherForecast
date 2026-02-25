@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.weatherforecast.data.converter.CurrentWeatherModelConverter
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.CurrentWeatherRepository
@@ -26,7 +25,6 @@ import java.util.Locale
  * @param params adjust the worker
  * @property preferencesManager to provide temperature type
  * @property chosenCityRepository to download chosen city
- * @property converter to convert forecast data to domain model
  * @property currentWeatherRepository to perform downloading of forecast
  */
 @HiltWorker
@@ -35,7 +33,6 @@ class WeatherWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val preferencesManager: PreferencesManager,
     private val chosenCityRepository: ChosenCityRepository,
-    private val converter: CurrentWeatherModelConverter,
     private val currentWeatherRepository: CurrentWeatherRepository,
 ) : CoroutineWorker(context, params) {
 

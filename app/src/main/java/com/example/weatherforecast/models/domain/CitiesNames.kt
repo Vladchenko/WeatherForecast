@@ -10,7 +10,7 @@ import javax.annotation.concurrent.Immutable
  * @property error message if cities list failed to be fetched
  */
 @Immutable
-data class CitiesNamesDomainModel(
+data class CitiesNames(
     val cities: ImmutableList<CityDomainModel>,
     val error: String
 )

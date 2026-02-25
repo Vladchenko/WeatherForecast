@@ -5,9 +5,8 @@ import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntry
 import com.example.weatherforecast.data.database.HourlyWeatherDAO
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
 import com.example.weatherforecast.data.repository.datasource.HourlyWeatherLocalDataSource
-import com.example.weatherforecast.models.data.HourlyWeatherResponse
+import com.example.weatherforecast.models.data.database.HourlyWeatherEntity
 import kotlinx.serialization.InternalSerializationApi
-import retrofit2.Response
 
 /**
  * [CurrentWeatherRemoteDataSource] implementation.
@@ -18,15 +17,15 @@ import retrofit2.Response
 class HourlyWeatherLocalDataSourceImpl(private val dao: HourlyWeatherDAO) : HourlyWeatherLocalDataSource {
 
     @InternalSerializationApi
-    override suspend fun getHourlyWeather(city: String): Response<HourlyWeatherResponse> {
+    override suspend fun getHourlyWeather(city: String): HourlyWeatherEntity {
         val entry = dao.getHourlyForecast(city) ?: throw NoSuchDatabaseEntryException(city)
         Log.d("HourlyWeatherLocalDataSourceImpl", "$city city forecast loaded successfully")
-        return Response.success(entry)
+        return entry
     }
 
     @InternalSerializationApi
-    override suspend fun saveHourlyWeather(response: HourlyWeatherResponse) {
-        dao.insertHourlyForecast(response)
-        Log.d("HourlyForecastLocalDataSourceImpl", "${response.city} hourly weather saved successfully")
+    override suspend fun saveHourlyWeather(entity: HourlyWeatherEntity) {
+        dao.insertHourlyForecast(entity)
+        Log.d("HourlyForecastLocalDataSourceImpl", "${entity.cityName} hourly weather saved successfully")
     }
 }
