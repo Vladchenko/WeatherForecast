@@ -88,8 +88,8 @@ fun CurrentWeatherLayout(
     val forecastUiState = viewModel.forecastState.collectAsStateWithLifecycle()
     val appBarUiState = appBarViewModel.appBarState.collectAsStateWithLifecycle()
     val hourlyForecastUiState = hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
-    val fontSize = remember {
-        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitle).sp }
+    val fontSize by remember {
+        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitleSize) }
     }
     var showHourlyForecast by remember { mutableStateOf(false) }
 
@@ -120,7 +120,7 @@ fun CurrentWeatherLayout(
                             modifier = Modifier,
                             text = appBarUiState.value.subtitle,
                             color = themeColor(appBarUiState.value.subtitleColorAttr),
-                            fontSize = fontSize.value,
+                            fontSize = fontSize,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

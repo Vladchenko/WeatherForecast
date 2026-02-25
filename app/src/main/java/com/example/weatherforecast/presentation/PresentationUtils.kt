@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.TextUnit
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
 import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
@@ -24,14 +25,18 @@ object PresentationUtils {
         }
 
     /**
-     * Get font size for [subtitle] length.
+     * Get font size for the toolbar subtitle based on its [SubtitleSize].
+     *
+     * @param subtitleSize the logical size of the subtitle (e.g., Small, Normal, Large)
+     * @return the corresponding font size in [TextUnit] (sp)
      */
-    fun getToolbarSubtitleFontSize(subtitle: String) =
-        if (subtitle.length > 50) {
-            APPBAR_SUBTITLE_SMALL_FONT_SIZE
-        } else {
-            APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
+    fun getToolbarSubtitleFontSize(subtitleSize: SubtitleSize): TextUnit {
+        return when (subtitleSize) {
+            SubtitleSize.Small -> APPBAR_SUBTITLE_SMALL_FONT_SIZE
+            SubtitleSize.Normal -> APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
+            SubtitleSize.Large -> APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
         }
+    }
 
     /**
      * Defining weather type icon by [weatherIconId].

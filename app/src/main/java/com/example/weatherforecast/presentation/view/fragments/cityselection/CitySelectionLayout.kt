@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonSkippableComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,9 +102,12 @@ fun CitySelectionLayout(
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val cityState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
-    val appbarState by appBarViewModel.appBarState.collectAsStateWithLifecycle()
-    val citiesNamesState by viewModel.citiesNamesStateFlow.collectAsStateWithLifecycle()
+    val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
+    val appbarUiState by appBarViewModel.appBarState.collectAsStateWithLifecycle()
+    val citiesNamesUiState by viewModel.citiesNamesStateFlow.collectAsStateWithLifecycle()
+    val fontSize by remember {
+        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appbarUiState.subtitleSize) }
+    }
 
     Scaffold(
         topBar = {
@@ -116,12 +120,12 @@ fun CitySelectionLayout(
                         Text(
                             modifier = Modifier
                                 .padding(top = 4.dp),
-                            text = appbarState.title
+                            text = appbarUiState.title
                         )
                         Text(
-                            text = appbarState.subtitle,
-                            color = LocalContext.current.resolveColorAttr(appbarState.subtitleColorAttr),
-                            fontSize = PresentationUtils.getToolbarSubtitleFontSize(appbarState.subtitle).sp,   //TODO Move to model
+                            text = appbarUiState.subtitle,
+                            color = LocalContext.current.resolveColorAttr(appbarUiState.subtitleColorAttr),
+                            fontSize = fontSize,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -155,10 +159,10 @@ fun CitySelectionLayout(
                         fontSize = 16.sp
                     )
                     AddressEdit(
-                        cityName = cityState,
+                        cityName = cityUiState,
                         queryLabel = queryLabel,
                         modifier = Modifier,
-                        cityMaskPredictions = citiesNamesState?.cities.orEmpty().toPersistentList(),
+                        cityMaskPredictions = citiesNamesUiState?.cities.orEmpty().toPersistentList(),
                         cityMaskAction = cityMaskAction(
                             keyboardController,
                             { scope },
