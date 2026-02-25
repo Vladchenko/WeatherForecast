@@ -7,13 +7,16 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
-import com.example.weatherforecast.models.domain.CitiesNamesDomainModel
-import com.example.weatherforecast.presentation.view.fragments.cityselection.CityItem
+import com.example.weatherforecast.models.domain.CitiesNames
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,6 +39,7 @@ import javax.inject.Inject
  * @property coroutineDispatchers Provides dispatchers for coroutine execution
  * @property citiesNamesInteractor Business logic handler for city name operations
  */
+@FlowPreview
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
@@ -48,7 +52,7 @@ class CitiesNamesViewModel @Inject constructor(
      *
      * Used to track user input for auto-completion. Updates trigger city name lookups.
      */
-    val cityMaskStateFlow: StateFlow<CityItem>
+    val cityMaskStateFlow: StateFlow<String>
         get() = _cityMaskStateFlow
 
     /**
@@ -56,13 +60,14 @@ class CitiesNamesViewModel @Inject constructor(
      *
      * Nullable — `null` indicates no search has been performed yet or results were cleared.
      */
-    val citiesNamesStateFlow: StateFlow<CitiesNamesDomainModel?>
+    val citiesNamesStateFlow: StateFlow<CitiesNames?>
         get() = _citiesNamesStateFlow
 
-    private val _cityMaskStateFlow: MutableStateFlow<CityItem> = MutableStateFlow(CityItem(""))
-    private val _citiesNamesStateFlow: MutableStateFlow<CitiesNamesDomainModel?> = MutableStateFlow(null)
+    private val _cityMaskStateFlow: MutableStateFlow<String> = MutableStateFlow("")
+    private val _citiesNamesStateFlow: MutableStateFlow<CitiesNames?> = MutableStateFlow(null)
 
     init {
+        startDebouncedSearch()
         showMessage(R.string.city_selection_title)
     }
 
@@ -79,6 +84,33 @@ class CitiesNamesViewModel @Inject constructor(
             }
         }
     }
+
+    @FlowPreview
+    private fun startDebouncedSearch() {
+        viewModelScope.launch {
+            _cityMaskStateFlow
+                .debounce(1000)
+                .filter { it.isNotBlank() }
+                .distinctUntilChanged()
+                .collect { query ->
+                    fetchCities(query)
+                }
+        }
+    }
+
+    private suspend fun fetchCities(query: String) {
+        try {
+            val response = citiesNamesInteractor.loadCitiesNames(query)
+            _citiesNamesStateFlow.value = response
+            if (response.error.isNotBlank()) {
+                showError(response.error)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading cities for query: $query", e)
+            showError(e.message.toString())
+        }
+    }
+
 
     /**
      * Requests a list of cities whose names start with the given [city] prefix.
@@ -118,14 +150,16 @@ class CitiesNamesViewModel @Inject constructor(
      * Resets the search query, typically used when the user wants to start over.
      */
     fun clearCityMask() {
-        _cityMaskStateFlow.value = CityItem("")
+        _cityMaskStateFlow.value = ""
     }
 
     /**
      * Updates the current city name mask input.
      */
     fun updateCityMask(newMask: String) {
-        _cityMaskStateFlow.value = _cityMaskStateFlow.value.copy(cityMask = newMask)
+        viewModelScope.launch {
+            _cityMaskStateFlow.emit(newMask) // Отправляем в поток
+        }
     }
 
     /**

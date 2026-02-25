@@ -65,6 +65,7 @@ import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNa
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 
 /**
@@ -86,7 +87,7 @@ import kotlinx.coroutines.launch
  * @param appBarViewModel ViewModel providing UI state for the app bar (title, subtitle, colors)
  * @param viewModel ViewModel managing city name search and suggestions
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 @NonSkippableComposable
 fun CitySelectionLayout(
@@ -407,9 +408,10 @@ private fun <T> AutoCompleteUI(
  * @param cityMaskPredictions List of matching cities to display as suggestions
  * @param cityMaskAction Handler for user actions (typing, selection, etc.)
  */
+@FlowPreview
 @Composable
 private fun AddressEdit(
-    cityName: CityItem,
+    cityName: String,
     queryLabel: String,
     modifier: Modifier,
     cityMaskPredictions: ImmutableList<CityDomainModel>,
@@ -422,13 +424,12 @@ private fun AddressEdit(
     ) {
         AutoCompleteUI(
             modifier = Modifier.fillMaxWidth(),
-            query = cityName.cityMask,
+            query = cityName,
             queryLabel = queryLabel,
             useOutlined = true,
             onQueryChanged = { updatedCityMask ->
                 if (updatedCityMask.isNotBlank()) {
                     viewModel.updateCityMask(updatedCityMask)
-                    cityMaskAction(CityMaskAction.OnCityMaskChange(cityName.cityMask))
                 }
             },
             predictions = cityMaskPredictions,
