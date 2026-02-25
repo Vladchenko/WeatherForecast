@@ -6,6 +6,7 @@ import com.example.weatherforecast.data.mapper.CurrentWeatherEntityMapper
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
 import com.example.weatherforecast.data.util.TemperatureType
+import com.example.weatherforecast.data.util.WeatherErrorMapper
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.CurrentWeatherRepository
 import com.example.weatherforecast.models.data.database.CurrentWeatherEntity
@@ -18,13 +19,41 @@ import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 
 /**
- * WeatherForecastRepository implementation. Provides data for domain layer.
+ * Implementation of [CurrentWeatherRepository] that provides current weather data
+ * by combining remote and local data sources with fallback and caching strategies.
  *
- * @property dtoMapper mapper for DTOs
- * @property entityMapper mapper for entities
- * @property coroutineDispatchers dispatchers for coroutines
- * @property currentWeatherRemoteDataSource source of remote data for domain layer
- * @property currentWeatherLocalDataSource source of local data for domain layer
+ * ## Responsibilities
+ * - Fetches real-time weather data from the remote API (by city name or coordinates).
+ * - Saves successfully fetched data to the local cache using [CurrentWeatherLocalDataSource].
+ * - On failure (network issues, HTTP errors), attempts to load previously cached data.
+ * - Maps data between layers:
+ *   - Network DTO → Database Entity → Domain Model ([CurrentWeather])
+ * - Handles errors uniformly using [WeatherErrorMapper] and provides meaningful [ForecastError] instances.
+ *
+ * ## Data Flow Strategy
+ * 1. Try to fetch fresh data from [CurrentWeatherRemoteDataSource].
+ * 2. If successful:
+ *    - Map DTO to entity and save via [saveWeather].
+ *    - Return [LoadResult.Remote] with domain model.
+ * 3. If request fails:
+ *    - Use [WeatherErrorMapper.mapToLoadResult] to convert error into [ForecastError].
+ *    - Attempt to load cached data via [loadCachedWeatherForCity], returning [LoadResult.Local] if available.
+ * 4. If no cache exists or reading fails — return [LoadResult.Error].
+ *
+ * ## Error Handling
+ * Errors are processed consistently:
+ * - HTTP errors (404, 401, 5xx) → mapped via [handleApiError] → [WeatherErrorMapper]
+ * - Network exceptions (NoInternet, IOException) → caught in `catch` block → mapped via [WeatherErrorMapper]
+ * - Local database errors → result in [ForecastError.LocalDataCorrupted]
+ *
+ * This ensures a unified error experience across the app.
+ *
+ * @property dtoMapper Mapper for converting [CurrentWeatherDto] to [CurrentWeatherEntity].
+ * @property entityMapper Mapper for converting [CurrentWeatherEntity] to [CurrentWeather].
+ * @property coroutineDispatchers Dispatcher provider for coroutine context management.
+ * @property currentWeatherLocalDataSource Data source for persistent storage of current weather.
+ * @property currentWeatherRemoteDataSource Data source for fetching data from the remote API.
+ *
  */
 @InternalSerializationApi
 class CurrentWeatherRepositoryImpl(
@@ -42,44 +71,50 @@ class CurrentWeatherRepositoryImpl(
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
             try {
-                loadWeatherForCityAndSave(city, temperatureType)
+                val response = currentWeatherRemoteDataSource.loadWeatherForCity(city)
+                fetchAndSave(response, temperatureType)
+                    ?: loadCachedWeatherForCityOrError(
+                        city,
+                        temperatureType,
+                        ForecastError.NetworkError(Exception("Empty response body"))
+                    )
             } catch (ex: Exception) {
-                val error = when (ex) {
-                    is ForecastError -> ex
-                    else -> ForecastError.NetworkError(ex)
-                }
+                val error = if (ex is ForecastError) ex else ForecastError.NetworkError(ex)
                 loadCachedWeatherForCityOrError(city, temperatureType, error)
             }
         }
 
     @InternalSerializationApi
-    private suspend fun loadWeatherForCityAndSave(
-        city: String,
+    override suspend fun refreshWeatherForLocation(
+        temperatureType: TemperatureType,
+        latitude: Double,
+        longitude: Double
+    ): LoadResult<CurrentWeather> =
+        withContext(coroutineDispatchers.io) {
+            try {
+                val response =
+                    currentWeatherRemoteDataSource.loadWeatherForLocation(latitude, longitude)
+                fetchAndSave(response, temperatureType)
+                    ?: LoadResult.Error(ForecastError.NetworkError(Exception("Empty response body")))
+            } catch (ex: Exception) {
+                return@withContext WeatherErrorMapper.mapToLoadResult(ex)
+            }
+        }
+
+    @InternalSerializationApi
+    private suspend fun fetchAndSave(
+        response: Response<CurrentWeatherDto>,
         temperatureType: TemperatureType
-    ): LoadResult<CurrentWeather> {
-        val response = currentWeatherRemoteDataSource.loadWeatherForCity(city)
+    ): LoadResult<CurrentWeather>? {
         return if (response.isSuccessful) {
-            handleSuccessResponse(response, temperatureType)
+            val body = response.body() ?: return null
+            val entity = dtoMapper.toEntity(body)
+            saveWeather(entity)
+            val domainModel = entityMapper.toDomain(entity, temperatureType)
+            LoadResult.Remote(domainModel)
         } else {
             handleApiError(response)
         }
-    }
-
-    @InternalSerializationApi
-    private suspend fun handleSuccessResponse(
-        response: Response<CurrentWeatherDto>,
-        temperatureType: TemperatureType
-    ): LoadResult<CurrentWeather> {
-        val body = response.body()
-            ?: return LoadResult.Error(
-                ForecastError.NetworkError(
-                    Exception("Response for city is successful, but its body is empty")
-                )
-            )
-        val dbEntity = dtoMapper.toEntity(body)
-        saveWeather(dbEntity)
-        val domainModel = entityMapper.toDomain(dbEntity, temperatureType)
-        return LoadResult.Remote(domainModel)
     }
 
     private fun handleApiError(response: Response<*>): LoadResult<CurrentWeather> {
@@ -91,22 +126,7 @@ class CurrentWeatherRepositoryImpl(
         }
         Log.e(TAG, "HTTP ${response.code()}: $errorMessage")
 
-        val error = when (response.code()) {
-            404 -> ForecastError.CityNotFound(
-                city = extractCityFromUrl(response),
-                message = errorMessage
-            )
-
-            401 -> ForecastError.ApiKeyInvalid(errorMessage)
-            in 500..599 -> ForecastError.ServerError(response.code(), errorMessage)
-            else -> ForecastError.NetworkError(Exception("HTTP ${response.code()} $errorMessage"))
-        }
-
-        return LoadResult.Error(error)
-    }
-
-    private fun extractCityFromUrl(response: Response<*>): String {
-        return response.raw().request.url.pathSegments.lastOrNull() ?: "Unknown city"
+        return WeatherErrorMapper.mapToLoadResult(response)
     }
 
     @InternalSerializationApi
@@ -120,46 +140,6 @@ class CurrentWeatherRepositoryImpl(
         } catch (ex: Exception) {
             Log.e(TAG, "Failed to load cached weather for city $city: $ex")
             LoadResult.Error(ForecastError.NoInternet)
-        }
-    }
-
-    @InternalSerializationApi
-    override suspend fun refreshWeatherForLocation(
-        temperatureType: TemperatureType,
-        latitude: Double,
-        longitude: Double
-    ): LoadResult<CurrentWeather> =
-        withContext(coroutineDispatchers.io) {
-            try {
-                loadWeatherForLocationAndSave(latitude, longitude, temperatureType)
-            } catch (ex: Exception) {
-                val error = when (ex) {
-                    is ForecastError -> ex
-                    else -> ForecastError.NetworkError(ex)
-                }
-                LoadResult.Error(error)
-            }
-        }
-
-    @InternalSerializationApi
-    private suspend fun loadWeatherForLocationAndSave(
-        latitude: Double,
-        longitude: Double,
-        temperatureType: TemperatureType
-    ): LoadResult<CurrentWeather> {
-        val response = currentWeatherRemoteDataSource.loadWeatherForLocation(latitude, longitude)
-        return if (response.isSuccessful) {
-            val body = response.body()
-                ?: return LoadResult.Error(ForecastError.NetworkError(Exception("Response for location is successful, but its body is empty")))
-//            val result = modelsConverter.convert(temperatureType, body.name, response)
-//            saveWeather(body)
-//            LoadResult.Remote(result)
-            val dbEntity = dtoMapper.toEntity(body)
-            saveWeather(dbEntity)
-            val domainModel = entityMapper.toDomain(dbEntity, temperatureType)
-            return LoadResult.Remote(domainModel)
-        } else {
-            handleApiError(response)
         }
     }
 
