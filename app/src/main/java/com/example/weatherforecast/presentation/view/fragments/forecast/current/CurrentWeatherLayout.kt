@@ -102,6 +102,14 @@ fun CurrentWeatherLayout(
                 }
             }
     }
+    LaunchedEffect(showHourlyForecast) {
+        if (showHourlyForecast) {
+            val city = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city
+            if (city != null && hourlyForecastUiState.value == null) {
+                hourlyViewModel.getHourlyWeatherForCity(city)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -135,11 +143,6 @@ fun CurrentWeatherLayout(
                     IconButton(
                         onClick = {
                             showHourlyForecast = !showHourlyForecast
-                            val city =
-                                (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city
-                            if (city != null) {
-                                hourlyViewModel.getHourlyWeatherForCity(city)
-                            }
                         }
                     ) {
                         Icon(Icons.Default.Timeline, "hourlyForecast")
@@ -188,7 +191,7 @@ fun CurrentWeatherLayout(
                             onCityClick = onCityClick,
                             uiState = state
                         )
-                        if (showHourlyForecast) {
+                        AnimatedVisibility(visible = showHourlyForecast) {
                             HourlyWeatherLayout(
                                 hourlyWeather = hourlyForecastUiState.value,
                             )
