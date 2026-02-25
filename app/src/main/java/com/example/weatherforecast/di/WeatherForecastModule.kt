@@ -94,7 +94,7 @@ import javax.inject.Singleton
  */
 @Module
 @InstallIn(SingletonComponent::class)
-class MainModule {
+class WeatherForecastModule {
 
     @Singleton
     @Provides

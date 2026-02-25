@@ -50,7 +50,7 @@ import javax.inject.Singleton
  */
 @Module
 @InstallIn(SingletonComponent::class)
-class CitiesNamesModule {
+class CityManagementModule {
 
     @Singleton
     @Provides
