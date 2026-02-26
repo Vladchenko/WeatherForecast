@@ -37,7 +37,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,11 +62,10 @@ import com.example.weatherforecast.presentation.PresentationUtils.getFullCityNam
 import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
+import com.example.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.launch
 
 /**
  * Layout for a city selection screen.
@@ -83,25 +81,22 @@ import kotlinx.coroutines.launch
  * @param toolbarTitle Text to display in the toolbar (not currently used — title comes from [appBarViewModel])
  * @param citySelectionTitle Title shown above the search field
  * @param queryLabel Hint text for the city search input field
- * @param onBackClick Callback triggered when the back button is clicked
- * @param onCityClicked Callback invoked with the full city name when a city is selected
+ * @param onEvent Callback for handling user interactions
  * @param appBarViewModel ViewModel providing UI state for the app bar (title, subtitle, colors)
  * @param viewModel ViewModel managing city name search and suggestions
  */
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
+@FlowPreview
 @NonSkippableComposable
+@ExperimentalMaterial3Api
 fun CitySelectionLayout(
     toolbarTitle: String,
     citySelectionTitle: String,
     queryLabel: String,
-    onBackClick: () -> Unit,
-    onCityClicked: (String) -> Unit,
+    onEvent: (CitySelectionEvent) -> Unit,
     appBarViewModel: AppBarViewModel,
     viewModel: CitiesNamesViewModel
 ) {
-    val scope = rememberCoroutineScope()
-    val keyboardController = LocalSoftwareKeyboardController.current
     val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarUiState by appBarViewModel.appBarState.collectAsStateWithLifecycle()
     val citiesNamesUiState by viewModel.citiesNamesStateFlow.collectAsStateWithLifecycle()
@@ -132,7 +127,7 @@ fun CitySelectionLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = { onEvent(CitySelectionEvent.NavigateUp) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon")
                     }
                 },
@@ -162,81 +157,15 @@ fun CitySelectionLayout(
                         cityName = cityUiState,
                         queryLabel = queryLabel,
                         modifier = Modifier,
-                        cityMaskPredictions = citiesNamesUiState?.cities.orEmpty().toPersistentList(),
-                        cityMaskAction = cityMaskAction(
-                            keyboardController,
-                            { scope },
-                            onCityClicked,
-                            viewModel::clearCityMask,
-                            viewModel::clearCitiesNames,
-                            viewModel::getCitiesNamesForMask,
-                        ),
-                        viewModel
+                        cityMaskPredictions = citiesNamesUiState?.cities.orEmpty()
+                            .toPersistentList(),
+                        onEvent
                     )
                 }
             }
         }
     )
 }
-
-/**
- * Returns an event handler for city mask (search query) actions.
- *
- * Handles various user interactions like typing, selecting a suggestion, clearing input, or pressing "Done".
- *
- * @param keyboardController Controller to hide the soft keyboard when needed
- * @param scope Provides a [CoroutineScope] for launching coroutines
- * @param onCityClicked Called when a city is selected; receives the full city name
- * @param onCityMaskEmptied Callback to clear the current city mask input
- * @param onCitiesNamesEmptied Callback to clear the list of suggested cities
- * @param getCitiesNamesForMask Loads city suggestions based on the current input mask
- *
- * @return A function that takes a [CityMaskAction] and performs the corresponding operation
- */
-@Composable
-private fun cityMaskAction(
-    keyboardController: SoftwareKeyboardController?,
-    scope: () -> CoroutineScope,
-    onCityClicked: (String) -> Unit,
-    onCityMaskEmptied: () -> Unit,
-    onCitiesNamesEmptied: () -> Unit,
-    getCitiesNamesForMask: (String) -> Unit
-): (CityMaskAction) -> Unit =
-    { action: CityMaskAction ->
-        when (action) {
-            is CityMaskAction.OnCitySelected -> {
-                keyboardController?.hide()
-                scope.invoke().launch {
-                    onCityClicked(
-                        getFullCityName(
-                            action.selectedCity.name,
-                            action.selectedCity.state,
-                            action.selectedCity.country
-                        )
-                    )
-                }
-            }
-
-            is CityMaskAction.OnCityMaskChange -> {
-                scope.invoke().launch {
-                    getCitiesNamesForMask(action.cityMask)
-                }
-            }
-
-            is CityMaskAction.OnCityMaskAutoCompleteDone -> {
-                keyboardController?.hide()
-            }
-
-            is CityMaskAction.OnCityMaskAutoCompleteClear -> {
-                onCityMaskEmptied.invoke()
-                onCitiesNamesEmptied.invoke()
-            }
-
-            is CityMaskAction.OnCitiesOptionsClear -> {
-                onCitiesNamesEmptied.invoke()
-            }
-        }
-    }
 
 /**
  * A reusable text field with a clear button and "Done" action support.
@@ -406,21 +335,19 @@ private fun <T> AutoCompleteUI(
  *
  * Wraps [AutoCompleteUI] with specific logic for city name search.
  *
- * @param cityName Current city input state (wrapper with mutable [CityItem.cityMask])
+ * @param cityName Current city input state
  * @param queryLabel Hint text for the search field
  * @param modifier Modifier for layout customization
  * @param cityMaskPredictions List of matching cities to display as suggestions
- * @param cityMaskAction Handler for user actions (typing, selection, etc.)
  */
-@FlowPreview
 @Composable
 private fun AddressEdit(
     cityName: String,
     queryLabel: String,
     modifier: Modifier,
     cityMaskPredictions: ImmutableList<CityDomainModel>,
-    cityMaskAction: (CityMaskAction) -> Unit,
-    viewModel: CitiesNamesViewModel
+    onEvent: (CitySelectionEvent) -> Unit,
+    keyboardController: SoftwareKeyboardController? = LocalSoftwareKeyboardController.current
 ) {
     Column(
         modifier = modifier.padding(top = 8.dp),
@@ -433,39 +360,33 @@ private fun AddressEdit(
             useOutlined = true,
             onQueryChanged = { updatedCityMask ->
                 if (updatedCityMask.isNotBlank()) {
-                    viewModel.updateCityMask(updatedCityMask)
+                    onEvent(CitySelectionEvent.UpdateQuery(updatedCityMask))
                 }
             },
             predictions = cityMaskPredictions,
             onClearClick = {
-                cityMaskAction(CityMaskAction.OnCityMaskAutoCompleteClear)
+                onEvent(CitySelectionEvent.ClearQuery)
             },
             onDoneActionClick = {
-                cityMaskAction(CityMaskAction.OnCityMaskAutoCompleteDone)
+                keyboardController?.hide()
             },
             onItemClick = { selectedCity ->
-                cityMaskAction(
-                    CityMaskAction.OnCitySelected(
-                        selectedCity
+                onEvent(
+                    CitySelectionEvent.SelectCity(
+                        getFullCityName(selectedCity.name, selectedCity.state, selectedCity.country)
                     )
                 )
-                cityMaskAction(
-                    CityMaskAction.OnCityMaskAutoCompleteClear
-                )
-                cityMaskAction(
-                    CityMaskAction.OnCitiesOptionsClear
-                )
+                onEvent(CitySelectionEvent.ClearQuery)
+                keyboardController?.hide()
             }
-        ) {
+        ) { city ->
             Text(
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.onPrimary)
                     .padding(8.dp),
                 color = Color.Black,
-                text = with(it) {
-                    getFullCityName(name, state, country)
-                },
+                text = getFullCityName(city.name, city.state, city.country),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )

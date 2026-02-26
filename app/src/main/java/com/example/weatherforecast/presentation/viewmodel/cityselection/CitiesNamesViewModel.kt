@@ -12,12 +12,13 @@ import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -47,6 +48,8 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
+    val navigationEvent: SharedFlow<CityNavigationEvent?>
+        get() = _navigationEvent
     /**
      * StateFlow representing the current city name mask entered by the user.
      *
@@ -54,7 +57,6 @@ class CitiesNamesViewModel @Inject constructor(
      */
     val cityMaskStateFlow: StateFlow<String>
         get() = _cityMaskStateFlow
-
     /**
      * Current list of city names matching the input mask.
      *
@@ -62,6 +64,8 @@ class CitiesNamesViewModel @Inject constructor(
      */
     val citiesNamesStateFlow: StateFlow<CitiesNames?>
         get() = _citiesNamesStateFlow
+
+    private val _navigationEvent = MutableSharedFlow<CityNavigationEvent?>()
 
     private val _cityMaskStateFlow: MutableStateFlow<String> = MutableStateFlow("")
     private val _citiesNamesStateFlow: MutableStateFlow<CitiesNames?> = MutableStateFlow(null)
@@ -98,6 +102,29 @@ class CitiesNamesViewModel @Inject constructor(
         }
     }
 
+    fun onEvent(event: CitySelectionEvent) {
+        when (event) {
+            is CitySelectionEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.NavigateUp)
+
+            is CitySelectionEvent.SelectCity -> sendNavigationEvent(CityNavigationEvent.OpenWeatherFor(event.city))
+
+            is CitySelectionEvent.ClearQuery -> {
+                _cityMaskStateFlow.value = ""
+                _citiesNamesStateFlow.value = null
+            }
+
+            is CitySelectionEvent.UpdateQuery -> {
+                _cityMaskStateFlow.value = event.mask
+            }
+        }
+    }
+
+    private fun sendNavigationEvent(event: CityNavigationEvent) {
+        viewModelScope.launch {
+            _navigationEvent.emit(event)
+        }
+    }
+
     private suspend fun fetchCities(query: String) {
         try {
             val response = citiesNamesInteractor.loadCitiesNames(query)
@@ -111,64 +138,16 @@ class CitiesNamesViewModel @Inject constructor(
         }
     }
 
-
-    /**
-     * Requests a list of cities whose names start with the given [city] prefix.
-     *
-     * Launches a coroutine to load data via [CitiesNamesInteractor].
-     * Updates [citiesNamesStateFlow] with the result or shows an error if applicable.
-     *
-     * @param city Prefix string to filter city names (e.g., "Kaz")
-     */
-    fun getCitiesNamesForMask(city: String) {
-        Log.d(TAG, "Fetching cities for mask: $city")
-        viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
-            val response = citiesNamesInteractor.loadCitiesNames(city)
-            _citiesNamesStateFlow.value = response
-            if (response.error.isNotBlank()) {
-                Log.d(TAG, "Error from interactor: ${response.error}")
-                showError(response.error)
-            }
-        }
-    }
-
     /**
      * Deletes all stored city name entries from the local database.
      *
      * Useful for clearing cache or resetting data. Executes in a background coroutine.
      */
-    fun deleteAllCitiesNames() {
+    private fun deleteAllCitiesNames() {
         Log.d(TAG, "Deleting all city names from database")
         viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
             citiesNamesInteractor.deleteAllCitiesNames()
         }
-    }
-
-    /**
-     * Clears the current city name mask input.
-     *
-     * Resets the search query, typically used when the user wants to start over.
-     */
-    fun clearCityMask() {
-        _cityMaskStateFlow.value = ""
-    }
-
-    /**
-     * Updates the current city name mask input.
-     */
-    fun updateCityMask(newMask: String) {
-        viewModelScope.launch {
-            _cityMaskStateFlow.emit(newMask) // Отправляем в поток
-        }
-    }
-
-    /**
-     * Clears the list of suggested city names.
-     *
-     * Does not affect the input mask. Used to reset suggestion UI independently.
-     */
-    fun clearCitiesNames() {
-        _citiesNamesStateFlow.update { null }
     }
 
     companion object {
