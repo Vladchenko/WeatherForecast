@@ -59,7 +59,7 @@ class HourlyWeatherViewModel @Inject constructor(
     fun getHourlyWeatherForCity(city: String) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
-            val temperatureType = preferencesManager.temperatureType.first()
+            val temperatureType = preferencesManager.temperatureTypeStateFlow.first()
             val result = hourlyWeatherInteractor.loadHourlyForecastForCity(
                 temperatureType,
                 city
@@ -74,7 +74,7 @@ class HourlyWeatherViewModel @Inject constructor(
     fun getHourlyWeatherForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
-            val temperatureType = preferencesManager.temperatureType.first()
+            val temperatureType = preferencesManager.temperatureTypeStateFlow.first()
             val result = hourlyWeatherInteractor.loadHourlyWeatherForLocation(
                 cityModel.city,
                 temperatureType,

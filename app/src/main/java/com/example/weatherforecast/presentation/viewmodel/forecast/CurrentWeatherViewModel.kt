@@ -51,24 +51,24 @@ class CurrentWeatherViewModel @Inject constructor(
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
     //region flows
-    val forecastState: StateFlow<WeatherUiState>
-        get() = _forecastState
-    val chosenCityFlow: StateFlow<String>
+    val forecastStateFlow: StateFlow<WeatherUiState>
+        get() = _forecastStateFlow
+    val chosenCityStateFlow: StateFlow<String>
         get() = _chosenCityStateFlow
-    val chosenCityBlankFlow: SharedFlow<Unit>
-        get() = _chosenCityBlankFlow
-    val chosenCityNotFoundFlow: SharedFlow<String>
-        get() = _chosenCityNotFoundFlow
-    val gotoCitySelectionFlow: SharedFlow<Unit>
-        get() = _gotoCitySelectionFlow
+    val chosenCityBlankStateFlow: SharedFlow<Unit>
+        get() = _chosenCityBlankSharedFlow
+    val chosenCityNotFoundStateFlow: SharedFlow<String>
+        get() = _chosenCityNotFoundSharedFlow
+    val gotoCitySelectionStateFlow: SharedFlow<Unit>
+        get() = _gotoCitySelectionSharedFlow
 
-    private val _chosenCityBlankFlow = MutableSharedFlow<Unit>(
+    private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
     )
-    private val _forecastState = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
+    private val _forecastStateFlow = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow("")
-    private val _chosenCityNotFoundFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
-    private val _gotoCitySelectionFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    private val _gotoCitySelectionSharedFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     //endregion flows
 
@@ -85,7 +85,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            preferencesManager.temperatureType.collect { tempType ->
+            preferencesManager.temperatureTypeStateFlow.collect { tempType ->
                 Log.d(TAG, "Temperature unit changed: $tempType")
                 temperatureType = tempType
             }
@@ -96,7 +96,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * Go to city selection screen.
      */
     fun gotoCitySelection() {
-        _gotoCitySelectionFlow.tryEmit(Unit)
+        _gotoCitySelectionSharedFlow.tryEmit(Unit)
     }
 
     /**
@@ -128,7 +128,7 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     private fun loadWeatherForecast(city: String) {
         if (city.isBlank()) {
-            _chosenCityBlankFlow.tryEmit(Unit)
+            _chosenCityBlankSharedFlow.tryEmit(Unit)
         } else {
             chosenCity = city
             loadRemoteForecastForCity(city)
@@ -206,7 +206,7 @@ class CurrentWeatherViewModel @Inject constructor(
                         )
                         // TODO Call loadWeatherForLocation and if it fails, call _chosenCityNotFoundFlow.tryEmit(city)
                         // TODO Maybe call it in repository
-                        _chosenCityNotFoundFlow.tryEmit(city)
+                        _chosenCityNotFoundSharedFlow.tryEmit(city)
                     }
 
                     else -> showError(resourceManager.getString(R.string.forecast_for_city_error))
@@ -223,14 +223,14 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     private fun showRemoteForecast(forecastModel: CurrentWeather) {
-        _forecastState.value = WeatherUiState.Success(
+        _forecastStateFlow.value = WeatherUiState.Success(
             getUiModel(forecastModel),
             DataSource.REMOTE
         )
     }
 
     private fun showLocalForecast(forecastModel: CurrentWeather) {
-        _forecastState.value = WeatherUiState.Success(
+        _forecastStateFlow.value = WeatherUiState.Success(
             getUiModel(forecastModel),
             DataSource.LOCAL
         )

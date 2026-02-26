@@ -85,8 +85,8 @@ fun CurrentWeatherLayout(
     viewModel: CurrentWeatherViewModel,
     hourlyViewModel: HourlyWeatherViewModel,
 ) {
-    val forecastUiState = viewModel.forecastState.collectAsStateWithLifecycle()
-    val appBarUiState = appBarViewModel.appBarState.collectAsStateWithLifecycle()
+    val forecastUiState = viewModel.forecastStateFlow.collectAsStateWithLifecycle()
+    val appBarUiState = appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val hourlyForecastUiState = hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
     val fontSize by remember {
         derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitleSize) }
@@ -94,11 +94,11 @@ fun CurrentWeatherLayout(
     var showHourlyForecast by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.internetConnectedState
+        viewModel.internetConnectedStateFlow
             .drop(1)    // First entry is dropped, since redundant
             .collect { isConnected ->
                 if (isConnected) {
-                    viewModel.launchWeatherForecast(viewModel.chosenCityFlow.value)
+                    viewModel.launchWeatherForecast(viewModel.chosenCityStateFlow.value)
                 }
             }
     }

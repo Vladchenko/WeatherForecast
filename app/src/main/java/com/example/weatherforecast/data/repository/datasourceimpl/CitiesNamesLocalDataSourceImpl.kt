@@ -14,7 +14,7 @@ import kotlinx.serialization.InternalSerializationApi
 class CitiesNamesLocalDataSourceImpl(private val dao: CitiesNamesDAO) : CitiesNamesLocalDataSource {
 
     @InternalSerializationApi
-    override fun loadCitiesNames(token: String): List<CitySearchEntity> {
+    override suspend fun loadCitiesNames(token: String): List<CitySearchEntity> {
         val model = dao.getCitiesNames(token)
         Log.d("CitiesNamesLocalDataSourceImpl", model.toString())
         return model

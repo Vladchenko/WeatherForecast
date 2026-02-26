@@ -57,17 +57,17 @@ class WeatherCoordinator(
     fun startObserving(scope: CoroutineScope, lifecycle: Lifecycle) {
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { collectMessageFlow(forecastViewModel.messageFlow) }
-                launch { collectMessageFlow(hourlyViewModel.messageFlow) }
-                launch { forecastViewModel.gotoCitySelectionFlow.collect { onGotoCitySelection() } }
-                launch { collectChosenCityNotFoundFlow(forecastViewModel.chosenCityNotFoundFlow) }
-                launch { collectChosenCityBlankFlow(forecastViewModel.chosenCityBlankFlow) }
+                launch { collectMessageFlow(forecastViewModel.messageSharedFlow) }
+                launch { collectMessageFlow(hourlyViewModel.messageSharedFlow) }
+                launch { forecastViewModel.gotoCitySelectionStateFlow.collect { onGotoCitySelection() } }
+                launch { collectChosenCityNotFoundFlow(forecastViewModel.chosenCityNotFoundStateFlow) }
+                launch { collectChosenCityBlankFlow(forecastViewModel.chosenCityBlankStateFlow) }
                 launch { collectGeoLocationByCitySuccessFlow(geoLocationViewModel.geoLocationByCitySuccessFlow) }
                 launch { collectGeoLocationSuccessFlow(geoLocationViewModel.geoLocationSuccessFlow) }
                 launch { collectGeoLocationPermissionFlow(geoLocationViewModel.geoGeoLocationPermissionFlow) }
                 launch { collectGeoLocationDefineCitySuccessFlow(geoLocationViewModel.geoLocationDefineCitySuccessFlow) }
-                launch { geoLocationViewModel.selectCityFlow.collect { onGotoCitySelection() } }
-                launch { collectForecastState(forecastViewModel.forecastState) }
+                launch { geoLocationViewModel.selectCitySharedFlow.collect { onGotoCitySelection() } }
+                launch { collectForecastState(forecastViewModel.forecastStateFlow) }
             }
         }
     }

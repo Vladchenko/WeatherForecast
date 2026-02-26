@@ -48,7 +48,7 @@ class CitiesNamesRepositoryImpl(
             }
         }
 
-    private fun loadFromCacheOrThrow(token: String): CitiesNames {
+    private suspend fun loadFromCacheOrThrow(token: String): CitiesNames {
         return try {
             val cachedEntities = localDataSource.loadCitiesNames(token)
             if (cachedEntities.isEmpty()) {

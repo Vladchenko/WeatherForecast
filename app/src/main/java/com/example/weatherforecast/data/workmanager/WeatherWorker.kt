@@ -38,7 +38,7 @@ class WeatherWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result =
         try {
-            val tempType = preferencesManager.temperatureType.first()
+            val tempType = preferencesManager.temperatureTypeStateFlow.first()
             val city = chosenCityRepository.loadChosenCity().city
             val weatherResponse =
                 currentWeatherRepository.refreshWeatherForCity(

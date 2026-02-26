@@ -98,7 +98,7 @@ fun CitySelectionLayout(
     viewModel: CitiesNamesViewModel
 ) {
     val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
-    val appbarUiState by appBarViewModel.appBarState.collectAsStateWithLifecycle()
+    val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val citiesNamesUiState by viewModel.citiesNamesStateFlow.collectAsStateWithLifecycle()
     val fontSize by remember {
         derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appbarUiState.subtitleSize) }

@@ -3,7 +3,6 @@ package com.example.weatherforecast.data.preferences
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.weatherforecast.data.util.TemperatureType
@@ -36,9 +35,9 @@ class PreferencesManager @Inject constructor(
      * Flow of user's preferred temperature unit. Emits current value immediately.
      * Default: [TemperatureType.CELSIUS].
      */
-    val temperatureType: StateFlow<TemperatureType> = context.dataStore.data
+    val temperatureTypeStateFlow: StateFlow<TemperatureType> = context.dataStore.data
         .map { preferences ->
-            when (preferences[Keys.TEMPERATURE_UNIT]) {
+            when (preferences[TEMPERATURE_UNIT]) {
                 "KELVIN" -> TemperatureType.KELVIN
                 "FAHRENHEIT" -> TemperatureType.FAHRENHEIT
                 "CELSIUS" -> TemperatureType.CELSIUS
@@ -51,20 +50,7 @@ class PreferencesManager @Inject constructor(
             initialValue = TemperatureType.CELSIUS
         )
 
-    /**
-     * Saves new temperature unit preference.
-     */
-    suspend fun setTemperatureType(type: TemperatureType) {
-        context.dataStore.edit { preferences ->
-            preferences[Keys.TEMPERATURE_UNIT] = when (type) {
-                TemperatureType.CELSIUS -> "CELSIUS"
-                TemperatureType.FAHRENHEIT -> "FAHRENHEIT"
-                TemperatureType.KELVIN -> "KELVIN"
-            }
-        }
-    }
-
-    companion object Keys {
+    companion object {
         private val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
     }
 }

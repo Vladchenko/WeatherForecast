@@ -11,7 +11,7 @@ interface CitiesNamesLocalDataSource {
      * Retrieve cities names matching [token].
      */
     @InternalSerializationApi
-    fun loadCitiesNames(token: String): List<CitySearchEntity>
+    suspend fun loadCitiesNames(token: String): List<CitySearchEntity>
 
     /**
      * Delete all cities names.

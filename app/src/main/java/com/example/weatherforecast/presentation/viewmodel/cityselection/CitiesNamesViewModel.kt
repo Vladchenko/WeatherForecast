@@ -48,25 +48,38 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
+    /**
+     * A [SharedFlow] that emits navigation events based on user actions.
+     *
+     * Emits values such as:
+     * - [CityNavigationEvent.NavigateUp] — when the user requests to go back
+     * - [CityNavigationEvent.OpenWeatherFor] — when a city is selected
+     *
+     * The UI layer should collect this flow to perform navigation actions.
+     * Events are emitted one-off and should be consumed immediately.
+     */
     val navigationEventFlow: SharedFlow<CityNavigationEvent?>
         get() = _navigationEventFlow
+
     /**
-     * StateFlow representing the current city name mask entered by the user.
+     * A [StateFlow] that emits the current user input for city name search.
      *
-     * Used to track user input for auto-completion. Updates trigger city name lookups.
+     * This value is updated via [onEvent] with [CitySelectionEvent.UpdateQuery].
+     * Used internally to trigger debounced city name lookups.
      */
     val cityMaskStateFlow: StateFlow<String>
         get() = _cityMaskStateFlow
+
     /**
-     * Current list of city names matching the input mask.
+     * A [StateFlow] that holds the latest list of cities matching the current search query.
      *
-     * Nullable — `null` indicates no search has been performed yet or results were cleared.
+     * Value is `null` if no search has been performed or results were cleared.
+     * Updated automatically after a successful call to [fetchCities].
      */
     val citiesNamesStateFlow: StateFlow<CitiesNames?>
         get() = _citiesNamesStateFlow
 
     private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent?>()
-
     private val _cityMaskStateFlow: MutableStateFlow<String> = MutableStateFlow("")
     private val _citiesNamesStateFlow: MutableStateFlow<CitiesNames?> = MutableStateFlow(null)
 
@@ -102,6 +115,17 @@ class CitiesNamesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handles incoming UI events related to city selection.
+     *
+     * Supported events:
+     * - [CitySelectionEvent.UpdateQuery]: Updates the search query and triggers a debounced search.
+     * - [CitySelectionEvent.ClearQuery]: Clears the current query and removes suggestion results.
+     * - [CitySelectionEvent.SelectCity]: Navigates to the weather screen for the selected city.
+     * - [CitySelectionEvent.NavigateUp]: Requests navigation back to the previous screen.
+     *
+     * @param event the user action to process
+     */
     fun onEvent(event: CitySelectionEvent) {
         when (event) {
             is CitySelectionEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.NavigateUp)
@@ -138,11 +162,6 @@ class CitiesNamesViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Deletes all stored city name entries from the local database.
-     *
-     * Useful for clearing cache or resetting data. Executes in a background coroutine.
-     */
     private fun deleteAllCitiesNames() {
         Log.d(TAG, "Deleting all city names from database")
         viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {

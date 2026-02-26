@@ -34,14 +34,15 @@ class AppBarViewModel @Inject constructor(
     private val appBarStateConverter: AppBarStateConverter
 ) : ViewModel(), StatusDisplay {
 
-    private val _appBarState = MutableStateFlow(AppBarState())
-
     /**
      * Read-only StateFlow emitting the current [AppBarState].
      *
      * Observed by the UI to update the toolbar's appearance (title, subtitle, colors).
      */
-    val appBarState: StateFlow<AppBarState> = _appBarState.asStateFlow()
+    val appBarStateFlow: StateFlow<AppBarState>
+        get() = _appBarStateFlow.asStateFlow()
+
+    private val _appBarStateFlow = MutableStateFlow(AppBarState())
 
     override fun showStatus(status: StatusDisplay.Status) {
         when (status.type) {
@@ -61,7 +62,7 @@ class AppBarViewModel @Inject constructor(
      */
     fun updateAppBarState(weatherUiState: WeatherUiState) {
         val appBarState = appBarStateConverter.convert(forecastState = weatherUiState)
-        _appBarState.update { appBarState }
+        _appBarStateFlow.update { appBarState }
     }
 
     /**
@@ -73,11 +74,11 @@ class AppBarViewModel @Inject constructor(
      * @param title New title text to display
      */
     fun updateTitle(title: String) {
-        _appBarState.update { it.copy(title = title) }
+        _appBarStateFlow.update { it.copy(title = title) }
     }
 
     private fun updateSubtitle(text: String, @AttrRes colorAttr: Int) {
-        _appBarState.update {
+        _appBarStateFlow.update {
             it.copy(subtitle = text, subtitleColorAttr = colorAttr) // ← Сохраняем атрибут, не цвет
         }
     }
