@@ -48,8 +48,8 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
 
-    val navigationEvent: SharedFlow<CityNavigationEvent?>
-        get() = _navigationEvent
+    val navigationEventFlow: SharedFlow<CityNavigationEvent?>
+        get() = _navigationEventFlow
     /**
      * StateFlow representing the current city name mask entered by the user.
      *
@@ -65,7 +65,7 @@ class CitiesNamesViewModel @Inject constructor(
     val citiesNamesStateFlow: StateFlow<CitiesNames?>
         get() = _citiesNamesStateFlow
 
-    private val _navigationEvent = MutableSharedFlow<CityNavigationEvent?>()
+    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent?>()
 
     private val _cityMaskStateFlow: MutableStateFlow<String> = MutableStateFlow("")
     private val _citiesNamesStateFlow: MutableStateFlow<CitiesNames?> = MutableStateFlow(null)
@@ -121,7 +121,7 @@ class CitiesNamesViewModel @Inject constructor(
 
     private fun sendNavigationEvent(event: CityNavigationEvent) {
         viewModelScope.launch {
-            _navigationEvent.emit(event)
+            _navigationEventFlow.emit(event)
         }
     }
 

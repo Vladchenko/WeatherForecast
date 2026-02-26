@@ -6,7 +6,7 @@ package com.example.weatherforecast.presentation.viewmodel.cityselection
  * These are one-shot events (not state) that instruct the UI layer to perform navigation actions.
  * Should be consumed immediately and not stored.
  *
- * @see CitiesNamesViewModel.navigationEvent
+ * @see CitiesNamesViewModel.navigationEventFlow
  */
 sealed interface CityNavigationEvent {
     /**
