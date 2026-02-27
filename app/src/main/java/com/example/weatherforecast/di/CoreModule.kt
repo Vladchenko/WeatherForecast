@@ -5,6 +5,7 @@ import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.dispatchers.CoroutineDispatchersImpl
+import com.example.weatherforecast.models.data.DataErrorToForecastErrorMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,4 +55,9 @@ class CoreModule {
     fun provideCoroutineScope(coroutineDispatchers: CoroutineDispatchers): CoroutineScope {
         return CoroutineScope(SupervisorJob() + coroutineDispatchers.default)
     }
+
+    @Singleton
+    @Provides
+    fun provideDataErrorToForecastErrorMapper(): DataErrorToForecastErrorMapper =
+        DataErrorToForecastErrorMapper()
 }

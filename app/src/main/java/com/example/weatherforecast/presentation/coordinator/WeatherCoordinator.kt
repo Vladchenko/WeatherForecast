@@ -66,7 +66,7 @@ class WeatherCoordinator(
                 launch { collectGeoLocationSuccessFlow(geoLocationViewModel.geoLocationSuccessFlow) }
                 launch { collectGeoLocationPermissionFlow(geoLocationViewModel.geoGeoLocationPermissionFlow) }
                 launch { collectGeoLocationDefineCitySuccessFlow(geoLocationViewModel.geoLocationDefineCitySuccessFlow) }
-                launch { geoLocationViewModel.selectCitySharedFlow.collect { onGotoCitySelection() } }
+                launch { geoLocationViewModel.selectCityFlow.collect { onGotoCitySelection() } }
                 launch { collectForecastState(forecastViewModel.forecastStateFlow) }
             }
         }

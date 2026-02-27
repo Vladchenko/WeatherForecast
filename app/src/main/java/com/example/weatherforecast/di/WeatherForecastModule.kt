@@ -32,6 +32,7 @@ import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherRepository
 import com.example.weatherforecast.geolocation.DeviceLocationProvider
 import com.example.weatherforecast.geolocation.Geolocator
+import com.example.weatherforecast.models.data.DataErrorToForecastErrorMapper
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverterImpl
 import com.example.weatherforecast.presentation.converter.appbar.AppBarStateConverter
@@ -126,6 +127,7 @@ class WeatherForecastModule {
         return CurrentWeatherLocalDataSourceImpl(forecastDAO)
     }
 
+    @InternalSerializationApi
     @Singleton
     @Provides
     fun provideWeatherForecastRemoteDataSource(
@@ -184,6 +186,7 @@ class WeatherForecastModule {
         dtoMapper: CurrentWeatherDtoMapper,
         entityMapper: CurrentWeatherEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
+        errorMapper: DataErrorToForecastErrorMapper,
         currentWeatherLocalDataSource: CurrentWeatherLocalDataSource,
         currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource,
     ): CurrentWeatherRepository {
@@ -191,6 +194,7 @@ class WeatherForecastModule {
             dtoMapper,
             entityMapper,
             coroutineDispatchers,
+            errorMapper,
             currentWeatherLocalDataSource,
             currentWeatherRemoteDataSource
         )
@@ -217,6 +221,7 @@ class WeatherForecastModule {
         dtoMapper: HourlyWeatherDtoMapper,
         entityMapper: HourlyWeatherEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
+        errorMapper: DataErrorToForecastErrorMapper,
         hourlyWeatherLocalDataSource: HourlyWeatherLocalDataSource,
         hourlyWeatherRemoteDataSource: HourlyWeatherRemoteDataSource
     ): HourlyWeatherRepository {
@@ -224,6 +229,7 @@ class WeatherForecastModule {
             coroutineDispatchers,
             dtoMapper,
             entityMapper,
+            errorMapper,
             hourlyWeatherLocalDataSource,
             hourlyWeatherRemoteDataSource,
         )
