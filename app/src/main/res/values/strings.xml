@@ -1,40 +1,44 @@
 <resources>
-    <string name="app_name">Weather forecast v1.0</string>
-    <string name="bad_date_format">Bad date format</string>
+    <string name="app_name">Weather Forecast v1.0</string>
+    <string name="bad_date_format">Invalid date format</string>
 
-    <string name="city_selection_title">City selection</string>
-    <string name="city_selection_from_dropdown">Type city and pick one from a dropdown list below</string>
-    <string name="city_typing_begin">Begin typing city name …</string>
+    <!-- City Selection -->
+    <string name="city_selection_title">Select City</string>
+    <string name="city_selection_from_dropdown">Type a city and select from the list</string>
+    <string name="city_typing_begin">Start typing a city name…</string>
 
+    <!-- Database & Loading -->
     <string name="database_forecast_for_city_not_found">Forecast for %1$s not found in database</string>
-    <string name="default_city_absent">City was not defined earlier, cannot load from DB</string>
+    <string name="default_city_absent">No city selected. Cannot load forecast.</string>
 
-    <string name="forecast_for_city_loading">Downloading for %1$s</string>
-    <string name="forecast_for_city_success">Provided for %1$s</string>
-    <string name="forecast_for_city_error">Failed for %1$s</string>
+    <string name="forecast_for_city_loading">Loading forecast for %1$s</string>
+    <string name="forecast_for_city_success">Forecast for %1$s loaded</string>
+    <string name="forecast_for_city_error">Failed to load forecast for %1$s</string>
 
-    <string name="forecast_for_city_outdated">Outdated forecast for city %1$s</string>
-    <string name="forecast_downloading">Forecast is downloading</string>
+    <string name="forecast_for_city_outdated">Outdated forecast for %1$s</string>
+    <string name="forecast_downloading">Downloading forecast…</string>
 
-    <string name="no_selected_city_forecast">Server has no forecast for %1$s</string>
-    <string name="no_selected_city_forecast_message">Forecast for city %1$s is not available, please choose another city</string>
+    <!-- Server Errors -->
+    <string name="no_selected_city_forecast">No forecast for %1$s</string>
+    <string name="no_selected_city_forecast_message">Forecast for %1$s is unavailable. Please choose another city.</string>
 
-    <string name="connected">Internet connection available</string>
-    <string name="disconnected">Internet connection not available</string>
+    <!-- Network -->
+    <string name="connected">Connected to internet</string>
+    <string name="disconnected">No internet connection</string>
     <string name="hourly_forecast">Hourly Forecast</string>
 
-    <string name="geo_location_title">Area geo location</string>
-    <string name="geo_location_message">Google Maps defined your location as %1$s. Do you agree ?</string>
-    <string name="defining_city_from_geo_location">Defining city from geo location</string>
-    <string name="current_location_triangulating">Current geo location defining …</string>
-    <string name="current_location_cancelled">Geo location cancelled</string>
-    <string name="current_location_success">Defining geo location from city success</string>
-    <string name="current_location_denied">Current geo location permission denied</string>
-    <string name="current_location_denied_permanently">Current geo location permission permanently denied.
-        You may grant it by clicking permissions in following window and remove it from denied ones or quit
-        and you will be asked to grant permission again next time.</string>
-    <string name="geo_location_by_city_define">Geo location for city %1$s defining</string>
-    <string name="geo_location_fail_error_text">Cannot get location, check network connection</string>
-    <string name="geo_location_permission_required">Local geo location permission required</string>
-    <string name="geo_location_permission_offer">This app requires geo location permission to find out your location. Please agree to grant permission or quit.</string>
+    <!-- Geolocation -->
+    <string name="geo_location_title">Location</string>
+    <string name="geo_location_message">Your location is %1$s. Confirm?</string>
+    <string name="defining_city_from_geo_location">Finding city from location…</string>
+    <string name="current_location_triangulating">Detecting your location…</string>
+    <string name="current_location_cancelled">Location detection cancelled</string>
+    <string name="current_location_success">Location detected successfully</string>
+    <string name="current_location_denied">Location permission denied</string>
+    <string name="current_location_denied_permanently">Location permission permanently denied.\nEnable it in app settings or try again later.</string>
+
+    <string name="geo_location_by_city_define">Finding location for %1$s…</string>
+    <string name="geo_location_fail_error_text">Unable to get location. Check your connection.</string>
+    <string name="geo_location_permission_required">Location permission required</string>
+    <string name="geo_location_permission_offer">This app needs location access to detect your area. Allow permission or exit.</string>
 </resources>
