@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.preferences.PreferencesManager
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.CurrentWeatherInteractor
@@ -14,6 +15,7 @@ import kotlinx.serialization.InternalSerializationApi
 /**
  * WeatherForecastViewModel factory
  *
+ * @property loggingService centralized service for application logging
  * @property resourceManager resource manager
  * @property preferencesManager to provide preferences for application
  * @property connectivityObserver internet connectivity observer
@@ -22,6 +24,7 @@ import kotlinx.serialization.InternalSerializationApi
  * @property weatherInteractor downloads weather forecast through network
  */
 class CurrentWeatherViewModelFactory(
+    private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val connectivityObserver: ConnectivityObserver,
@@ -37,6 +40,7 @@ class CurrentWeatherViewModelFactory(
         if (modelClass.isAssignableFrom(CurrentWeatherViewModel::class.java)) {
             return CurrentWeatherViewModel(
                 connectivityObserver,
+                loggingService,
                 resourceManager,
                 preferencesManager,
                 coroutineDispatchers,

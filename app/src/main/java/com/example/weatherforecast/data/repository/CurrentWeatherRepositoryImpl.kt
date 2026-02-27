@@ -1,10 +1,10 @@
 package com.example.weatherforecast.data.repository
 
-import android.util.Log
 import com.example.weatherforecast.data.mapper.CurrentWeatherDtoMapper
 import com.example.weatherforecast.data.mapper.CurrentWeatherEntityMapper
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.CurrentWeatherRepository
@@ -58,6 +58,7 @@ import kotlinx.serialization.InternalSerializationApi
  * All operations are dispatched on [CoroutineDispatchers.io], making this repository safe to use on any thread
  * when called within structured concurrency.
  *
+ * @property loggingService to log events
  * @property dtoMapper Mapper for converting [CurrentWeatherDto] to [CurrentWeatherEntity].
  * @property entityMapper Mapper for converting [CurrentWeatherEntity] to [CurrentWeather].
  * @property coroutineDispatchers Dispatcher provider for background execution.
@@ -67,6 +68,7 @@ import kotlinx.serialization.InternalSerializationApi
  */
 @InternalSerializationApi
 class CurrentWeatherRepositoryImpl(
+    private val loggingService: LoggingService,
     private val dtoMapper: CurrentWeatherDtoMapper,
     private val entityMapper: CurrentWeatherEntityMapper,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -125,7 +127,7 @@ class CurrentWeatherRepositoryImpl(
             val domainModel = entityMapper.toDomain(entity, temperatureType)
             LoadResult.Remote(domainModel)
         } catch (ex: Exception) {
-            Log.e(TAG, "Failed to map or save weather data: $ex")
+            loggingService.logError(TAG, "Failed to map or save weather data: $ex")
             null
         }
     }
@@ -139,7 +141,7 @@ class CurrentWeatherRepositoryImpl(
         return try {
             loadCachedWeatherForCity(city, temperatureType, remoteError)
         } catch (ex: Exception) {
-            Log.e(TAG, "Failed to load cached weather for city $city: $ex")
+            loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex")
             LoadResult.Error(ForecastError.NoInternet)
         }
     }
@@ -156,7 +158,7 @@ class CurrentWeatherRepositoryImpl(
                 val domainModel = entityMapper.toDomain(localModel, temperatureType)
                 LoadResult.Local(domainModel, remoteError)
             } catch (ex: Exception) {
-                Log.e(TAG, "Failed to load cached weather for city $city: $ex")
+                loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex")
                 LoadResult.Error(
                     ForecastError.LocalDataCorrupted(
                         message = "Local database query failed: $ex"

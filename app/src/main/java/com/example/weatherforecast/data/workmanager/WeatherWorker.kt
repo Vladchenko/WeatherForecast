@@ -1,11 +1,11 @@
 package com.example.weatherforecast.data.workmanager
 
 import android.content.Context
-import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.weatherforecast.data.preferences.PreferencesManager
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.domain.forecast.CurrentWeatherRepository
 import com.example.weatherforecast.models.domain.LoadResult
@@ -17,20 +17,23 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Worker to systematically download weather forecast from network
+ * Worker to systematically download weather forecast from network.
  *
- * @constructor creates an instance with a dependencies provided
+ * This worker runs periodically via [WorkManager] to refresh the current weather data
+ * for the chosen city. It uses the latest temperature unit preference and logs execution time.
  *
- * @param context to create a worker for WorkManager
- * @param params adjust the worker
+ * @property context to create a worker for WorkManager
+ * @property params adjust the worker
+ * @property loggingService centralized service for structured logging
  * @property preferencesManager to provide temperature type
- * @property chosenCityRepository to download chosen city
+ * @property chosenCityRepository to load the chosen city
  * @property currentWeatherRepository to perform downloading of forecast
  */
 @HiltWorker
 class WeatherWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
+    private val loggingService: LoggingService,
     private val preferencesManager: PreferencesManager,
     private val chosenCityRepository: ChosenCityRepository,
     private val currentWeatherRepository: CurrentWeatherRepository,
@@ -45,20 +48,18 @@ class WeatherWorker @AssistedInject constructor(
                     tempType,
                     city
                 )
-            Log.i(
-                TAG,
-                LOG_MESSAGE +
-                        SimpleDateFormat(
-                            TIMESTAMP_PATTERN,
-                            Locale.getDefault()
-                        ).format(Date((weatherResponse as LoadResult.Remote).data.dateTime.toLong() * 1000))
+
+            val timestamp = SimpleDateFormat(TIMESTAMP_PATTERN, Locale.getDefault()).format(
+                Date((weatherResponse as LoadResult.Remote).data.dateTime.toLong() * 1000)
             )
+
+            loggingService.logInfoEvent(TAG, LOG_MESSAGE + timestamp)
             Result.success()
+
         } catch (e: Exception) {
-            Log.e(TAG, e.message.toString())
+            loggingService.logError(TAG, "Failed to update weather in background", e)
             Result.failure()
         }
-
 
     companion object {
         private const val TAG = "WeatherWorker"

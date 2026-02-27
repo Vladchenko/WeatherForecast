@@ -1,6 +1,5 @@
 package com.example.weatherforecast.presentation.converter
 
-import android.util.Log
 import com.example.weatherforecast.models.domain.CurrentWeather
 import com.example.weatherforecast.models.presentation.Coordinate
 import com.example.weatherforecast.models.presentation.CurrentWeatherUi
@@ -40,12 +39,7 @@ class WeatherDomainToUiConverterImpl: WeatherDomainToUiConverter {
             SimpleDateFormat(UI_DATE_FORMAT, Locale.getDefault())
                 .format(Date(dateTime.toLong() * 1000))
         } catch (ex: Exception) {
-            Log.e(TAG, ex.message.toString())
             errorMessage
         }
-    }
-
-    companion object {
-        private const val TAG = "ForecastDomainToUiConverterImpl"
     }
 }

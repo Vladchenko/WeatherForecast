@@ -1,10 +1,10 @@
 package com.example.weatherforecast.presentation.viewmodel.cityselection
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNames
@@ -34,9 +34,11 @@ import javax.inject.Inject
  *
  * It uses [CitiesNamesInteractor] to retrieve data and respects internet connectivity
  * via [ConnectivityObserver]. All coroutines are launched in [viewModelScope]
- * with proper exception handling.
+ * with proper exception handling. Logging is performed using [LoggingService] instead of direct
+ * calls to [android.util.Log], ensuring consistent and testable logging behavior across the app.
  *
  * @property connectivityObserver Observes network connectivity state
+ * @property loggingService Service for structured logging across the application
  * @property coroutineDispatchers Provides dispatchers for coroutine execution
  * @property citiesNamesInteractor Business logic handler for city name operations
  */
@@ -44,6 +46,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
+    private val loggingService: LoggingService,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val citiesNamesInteractor: CitiesNamesInteractor,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
@@ -89,19 +92,25 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, throwable.message.orEmpty(), throwable)
+        loggingService.logError(TAG, throwable.message.orEmpty(), throwable)
         when (throwable) {
             is NoSuchDatabaseEntryException -> {
                 showError(R.string.default_city_absent)
-                Log.d(TAG, "Default city not found in database", throwable)
+                loggingService.logError(TAG, "Default city not found in database", throwable)
             }
             is Exception -> {
                 showError(throwable.message.toString())
-                Log.e(TAG, "Unexpected error in city name loading", throwable)
+                loggingService.logError(TAG, "Unexpected error in city name loading", throwable)
             }
         }
     }
 
+    /**
+     * Starts observing the city mask input with debounce, filtering, and distinct emission.
+     *
+     * Waits 1 second after user stops typing, ignores empty queries, and avoids duplicate work.
+     * Triggers a city name lookup via [fetchCities] upon valid input.
+     */
     @FlowPreview
     private fun startDebouncedSearch() {
         viewModelScope.launch {
@@ -143,12 +152,28 @@ class CitiesNamesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sends a navigation event through the shared flow.
+     *
+     * Launched in [viewModelScope] to ensure lifecycle-safe emission.
+     *
+     * @param event The navigation event to emit
+     */
     private fun sendNavigationEvent(event: CityNavigationEvent) {
         viewModelScope.launch {
             _navigationEventFlow.emit(event)
         }
     }
 
+    /**
+     * Fetches city names matching the given query from the domain layer.
+     *
+     * On success, updates [citiesNamesStateFlow] with the result.
+     * If an error is returned by the interactor, shows it via [showError].
+     * Any exceptions are caught and logged via [loggingService].
+     *
+     * @param query The city name mask entered by the user
+     */
     private suspend fun fetchCities(query: String) {
         try {
             val response = citiesNamesInteractor.loadCitiesNames(query)
@@ -157,13 +182,19 @@ class CitiesNamesViewModel @Inject constructor(
                 showError(response.error)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading cities for query: $query", e)
+            loggingService.logError(TAG, "Error loading cities for query: $query", e)
             showError(e.message.toString())
         }
     }
 
+    /**
+     * Deletes all cached city names from the database.
+     *
+     * Logs the operation at debug level and runs on IO dispatcher with error handling.
+     * Useful for clearing outdated or corrupted data.
+     */
     private fun deleteAllCitiesNames() {
-        Log.d(TAG, "Deleting all city names from database")
+        loggingService.logInfoEvent(TAG, "Deleting all city names from database")
         viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
             citiesNamesInteractor.deleteAllCitiesNames()
         }

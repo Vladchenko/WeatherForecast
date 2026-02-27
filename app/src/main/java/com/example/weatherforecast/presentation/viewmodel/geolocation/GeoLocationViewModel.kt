@@ -1,10 +1,10 @@
 package com.example.weatherforecast.presentation.viewmodel.geolocation
 
 import android.location.Location
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.GeoLocationException
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.permission.PermissionChecker
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
@@ -25,19 +25,21 @@ import javax.inject.Inject
  * View model for geo location or city name of a device.
  *
  * @constructor
- * @property permissionChecker to check if needed permission is provided
  * @property geoLocationHelper provides geo location service
+ * @property loggingService centralized service for application logging
  * @param connectivityObserver provides connectivity state
  * @property geoLocator provides geo location service
+ * @property permissionChecker to check if needed permission is provided
  * @property chosenCityInteractor saves/loads chosen city
  * @property coroutineDispatchers dispatchers for coroutines
  */
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(
-    private val permissionChecker: PermissionChecker,
     private val geoLocationHelper: Geolocator,
+    private val loggingService: LoggingService,
     connectivityObserver: ConnectivityObserver,
     private val geoLocator: DeviceLocationProvider,
+    private val permissionChecker: PermissionChecker,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
 ) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
@@ -72,8 +74,8 @@ class GeoLocationViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         showProgressBarState.value = false
-        Log.e(TAG, throwable.message.orEmpty())
-        Log.e(TAG, throwable.stackTraceToString())
+        loggingService.logError(TAG, throwable.message.orEmpty())
+        loggingService.logError(TAG, throwable.stackTraceToString())
 
         if (throwable is GeoLocationException) {
             showError(throwable.message.toString())
@@ -108,7 +110,7 @@ class GeoLocationViewModel @Inject constructor(
                 _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.PermanentlyDenied)
             } else {
                 _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Requested)
-                Log.i(TAG, "Geo location permission requested")
+                loggingService.logInfoEvent(TAG, "Geo location permission requested")
             }
         }
     }
@@ -126,12 +128,12 @@ class GeoLocationViewModel @Inject constructor(
             }
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {
-                Log.e(TAG, errorMessage)
+                loggingService.logError(TAG, errorMessage)
                 showError(errorMessage)
             }
 
             override fun onNoGeoLocationPermission() {
-                Log.i(TAG, "No geo location permission - requesting it")
+                loggingService.logInfoEvent(TAG, "No geo location permission - requesting it")
                 requestGeoLocationPermission()
             }
         })
@@ -155,13 +157,13 @@ class GeoLocationViewModel @Inject constructor(
         viewModelScope.launch(coroutineDispatchers.io) {
             try {
                 val location = geoLocationHelper.defineLocationByCity(city)
-                Log.i(
+                loggingService.logInfoEvent(
                     TAG,
                     "Geo location defined successfully for city = $city, location = $location"
                 )
                 val cityModel = CityLocationModel(city, location)
                 saveChosenCity(cityModel)
-                Log.i(TAG, "City and its location saved successfully.")
+                loggingService.logInfoEvent(TAG, "City and its location saved successfully.")
                 _geoLocationByCitySuccessFlow.tryEmit(cityModel)
             } catch (ex: Exception) {
                 showError(ex.message.toString())
@@ -178,7 +180,10 @@ class GeoLocationViewModel @Inject constructor(
                 locationModel.city,
                 locationModel.location
             )
-            Log.d(TAG, "Chosen city saved to database: ${locationModel.city}")
+            loggingService.logDebugEvent(
+                TAG,
+                "Chosen city saved to database: ${locationModel.city}"
+            )
         }
     }
 
@@ -188,7 +193,7 @@ class GeoLocationViewModel @Inject constructor(
     fun defineCityNameByLocation(location: Location) {
         viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
             val city = geoLocationHelper.defineCityNameByLocation(location)
-            Log.d(
+            loggingService.logDebugEvent(
                 TAG,
                 "City defined successfully by location = $location, city = $city"
             )

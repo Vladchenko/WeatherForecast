@@ -15,6 +15,7 @@ import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteD
 import com.example.weatherforecast.data.repository.datasourceimpl.ChosenCityLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
@@ -91,20 +92,23 @@ class CityManagementModule {
 
     @Singleton
     @Provides
-    fun provideCitiesNamesLocalDataSource(dao: CitiesNamesDAO): CitiesNamesLocalDataSource {
-        return CitiesNamesLocalDataSourceImpl(dao)
+    fun provideCitiesNamesLocalDataSource(loggingService: LoggingService,
+                                          dao: CitiesNamesDAO): CitiesNamesLocalDataSource {
+        return CitiesNamesLocalDataSourceImpl(dao, loggingService)
     }
 
     @Singleton
     @Provides
-    fun provideCitiesNamesRemoteDataSource(cityApiService: CityApiService): CitiesNamesRemoteDataSource {
-        return CitiesNamesRemoteDataSourceImpl(cityApiService)
+    fun provideCitiesNamesRemoteDataSource(cityApiService: CityApiService,
+                                           loggingService: LoggingService): CitiesNamesRemoteDataSource {
+        return CitiesNamesRemoteDataSourceImpl(cityApiService, loggingService)
     }
 
     @Singleton
     @Provides
     @InternalSerializationApi
     fun provideCitiesNamesRepository(
+        loggingService: LoggingService,
         dtoMapper: CitiesSearchDtoMapper,
         entityMapper: CitiesSearchEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
@@ -112,6 +116,7 @@ class CityManagementModule {
         citiesNamesRemoteDataSource: CitiesNamesRemoteDataSource
     ): CitiesNamesRepository {
         return CitiesNamesRepositoryImpl(
+            loggingService,
             dtoMapper,
             entityMapper,
             coroutineDispatchers,
@@ -129,11 +134,13 @@ class CityManagementModule {
     @Singleton
     @Provides
     fun provideCitiesNamesViewModelFactory(
+        loggingService: LoggingService,
         connectivityObserver: ConnectivityObserver,
         coroutineDispatchers: CoroutineDispatchers,
         citiesNamesInteractor: CitiesNamesInteractor
     ): CitiesNamesViewModelFactory {
         return CitiesNamesViewModelFactory(
+            loggingService,
             connectivityObserver,
             coroutineDispatchers,
             citiesNamesInteractor

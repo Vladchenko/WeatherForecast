@@ -1,7 +1,6 @@
 package com.example.weatherforecast.presentation.alertdialog
 
 import android.content.Context
-import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import com.example.weatherforecast.presentation.alertdialog.delegates.AlertDialogDelegate
 
@@ -27,14 +26,9 @@ class AlertDialogHelper(private val context: Context) {
      */
     fun createDialog(alertDialogDelegate: AlertDialogDelegate): AlertDialog {
         val alertDialogBuilder = alertDialogDelegate.getAlertDialogBuilder(context)
-        Log.d(TAG, "Create alertDialog by its delegate")
         val dialog = alertDialogBuilder.create()
         dialog.setCancelable(false)
         dialog.setCanceledOnTouchOutside(false)
         return dialog
-    }
-
-    companion object {
-        private const val TAG = "AlertDialogHelper"
     }
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.preferences.PreferencesManager
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
@@ -21,6 +22,7 @@ import com.example.weatherforecast.utils.ResourceManager
  */
 @Suppress("UNCHECKED_CAST")
 class HourlyWeatherViewModelFactory(
+    private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val connectivityObserver: ConnectivityObserver,
@@ -32,6 +34,7 @@ class HourlyWeatherViewModelFactory(
         return HourlyWeatherViewModel(
             connectivityObserver,
             coroutineDispatchers,
+            loggingService,
             resourceManager,
             preferencesManager,
             chosenCityInteractor,

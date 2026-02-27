@@ -2,11 +2,11 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 
 import android.location.Location
 import android.location.LocationManager
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.preferences.PreferencesManager
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
@@ -32,16 +32,27 @@ import javax.inject.Inject
 /**
  * ViewModel for weather forecast downloading.
  *
- * @param connectivityObserver internet connectivity observer
- * @property temperatureType type of temperature
- * @property resourceManager to get android specific resources
- * @property coroutineDispatchers for coroutines
- * @property chosenCityInteractor city chosen by user persistence interactor
- * @property forecastRemoteInteractor remote forecast interactor
+ * This ViewModel handles:
+ * - Loading current weather data from remote or local sources
+ * - Managing UI state via [forecastStateFlow]
+ * - Responding to city selection and location-based requests
+ * - Persisting chosen city and its coordinates
+ * - Handling errors and showing appropriate messages
+ * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
+ *
+ * @property connectivityObserver observes internet connectivity state
+ * @property loggingService centralized service for application logging
+ * @property resourceManager provides access to Android resources (strings, etc.)
+ * @property preferencesManager manages user preferences (e.g. temperature unit)
+ * @property coroutineDispatchers configures dispatchers for coroutines
+ * @property chosenCityInteractor handles persistence of the selected city
+ * @property forecastRemoteInteractor loads current weather data
+ * @property weatherDomainToUiConverter converts domain models to UI models
  */
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
+    private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -63,7 +74,7 @@ class CurrentWeatherViewModel @Inject constructor(
         get() = _gotoCitySelectionSharedFlow
 
     private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
-        extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
+        extraBufferCapacity = 1
     )
     private val _forecastStateFlow = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow("")
@@ -78,7 +89,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private lateinit var temperatureType: TemperatureType
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, throwable.stackTraceToString())
+        loggingService.logError(TAG, "Unexpected error in weather forecast loading", throwable)
         showError(throwable.message.toString())
         showProgressBarState.value = false
     }
@@ -86,31 +97,34 @@ class CurrentWeatherViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             preferencesManager.temperatureTypeStateFlow.collect { tempType ->
-                Log.d(TAG, "Temperature unit changed: $tempType")
+                loggingService.logDebugEvent(TAG, "Temperature unit changed: $tempType")
                 temperatureType = tempType
             }
         }
     }
 
     /**
-     * Go to city selection screen.
+     * Navigates to the city selection screen by emitting an event.
      */
     fun gotoCitySelection() {
         _gotoCitySelectionSharedFlow.tryEmit(Unit)
     }
 
     /**
-     * Launch weather forecast downloading, having a [chosenCity] provided from a city picker fragment.
+     * Launches weather forecast download using the provided [chosenCity].
+     * If blank, attempts to load the last saved city from [chosenCityInteractor].
+     *
+     * @param chosenCity the city name selected by the user
      */
     fun launchWeatherForecast(chosenCity: String) {
         viewModelScope.launch(exceptionHandler) {
-            // If chosenCity is blank, then return cityModel.city
             val city = chosenCity.ifBlank {
                 val cityModel = chosenCityInteractor.loadChosenCity()
-                Log.d(
+                loggingService.logDebugEvent(
                     TAG,
-                    "No chosen city from picker fragment. Downloaded from database: city = ${cityModel.city}, " +
-                            "lat = ${cityModel.location.latitude}, lon = ${cityModel.location.longitude}"
+                    "No chosen city from picker fragment. Loaded from database: " +
+                            "city = ${cityModel.city}, lat = ${cityModel.location.latitude}, " +
+                            "lon = ${cityModel.location.longitude}"
                 )
                 cityModel.city
             }
@@ -118,13 +132,19 @@ class CurrentWeatherViewModel @Inject constructor(
         }
     }
 
-    /** Update a state of a chosen city with [city]. */
+    /**
+     * Updates the UI state with the selected city name.
+     *
+     * @param city the name of the city to display
+     */
     fun updateChosenCityState(city: String) {
         _chosenCityStateFlow.value = city
     }
 
     /**
-     * Download a forecast or call blank chosen city callback, depending on a presence of a [city]
+     * Loads weather forecast for the given [city], or emits a blank city event if empty.
+     *
+     * @param city the city name to load forecast for
      */
     private fun loadWeatherForecast(city: String) {
         if (city.isBlank()) {
@@ -136,11 +156,14 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Download weather forecast on a [city].
+     * Initiates remote forecast loading for a specific [city].
+     * Cancels any ongoing request to avoid multiple concurrent jobs.
+     *
+     * @param city the city name to fetch weather for
      */
     fun loadRemoteForecastForCity(city: String) {
         showProgressBarState.value = true
-        if (currentJob?.isActive == true) return    // Return if there is a job already running
+        if (currentJob?.isActive == true) return
         currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadWeatherForCity(
                 temperatureType,
@@ -151,11 +174,13 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Download remote weather forecast on a [cityModel] for location.
+     * Initiates remote forecast loading based on geographic [cityModel] location.
+     *
+     * @param cityModel contains city name and coordinates
      */
     fun loadRemoteForecastForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
-        currentJob?.cancel() // Cancel previous job
+        currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadWeatherForLocation(
                 temperatureType,
@@ -166,6 +191,13 @@ class CurrentWeatherViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Processes the server response and updates UI accordingly.
+     * Handles remote, local, and error cases.
+     *
+     * @param city the requested city name
+     * @param result the result from the interactor
+     */
     private fun processServerResponse(
         city: String,
         result: LoadResult<CurrentWeather>
@@ -174,7 +206,6 @@ class CurrentWeatherViewModel @Inject constructor(
         when (result) {
             is LoadResult.Remote -> {
                 viewModelScope.launch {
-                    // City in response is different to city in request
                     showRemoteForecast(result.data.copy(city = city))
                     val location = getLocation(result)
                     chosenCityInteractor.saveChosenCity(
@@ -190,7 +221,6 @@ class CurrentWeatherViewModel @Inject constructor(
                         R.string.forecast_for_city_outdated, city
                     )
                 )
-                // City in response is different to city in request
                 showLocalForecast(result.data.copy(city = city))
             }
 
@@ -204,22 +234,22 @@ class CurrentWeatherViewModel @Inject constructor(
                                 city
                             )
                         )
-                        // TODO Call loadWeatherForLocation and if it fails, call _chosenCityNotFoundFlow.tryEmit(city)
-                        // TODO Maybe call it in repository
                         _chosenCityNotFoundSharedFlow.tryEmit(city)
                     }
-
-                    else -> showError(resourceManager.getString(R.string.forecast_for_city_error))
+                    else -> {
+                        loggingService.logError(TAG, "Error loading forecast for city: $city", Exception(result.error.toString()))
+                        showError(resourceManager.getString(R.string.forecast_for_city_error))
+                    }
                 }
             }
         }
     }
 
     private fun getLocation(result: LoadResult.Remote<CurrentWeather>): Location {
-        val location = Location(LocationManager.NETWORK_PROVIDER)
-        location.latitude = result.data.coordinate.latitude
-        location.longitude = result.data.coordinate.longitude
-        return location
+        return Location(LocationManager.NETWORK_PROVIDER).apply {
+            latitude = result.data.coordinate.latitude
+            longitude = result.data.coordinate.longitude
+        }
     }
 
     private fun showRemoteForecast(forecastModel: CurrentWeather) {

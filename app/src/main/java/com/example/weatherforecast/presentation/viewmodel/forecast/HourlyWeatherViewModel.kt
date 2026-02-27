@@ -1,10 +1,10 @@
 package com.example.weatherforecast.presentation.viewmodel.forecast
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.preferences.PreferencesManager
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
@@ -23,20 +23,28 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Viewmodel for hourly weather forecast.
+ * ViewModel for hourly weather forecast.
  *
- * @constructor
- * @param connectivityObserver observes internet connectivity state.
- * @param coroutineDispatchers dispatchers coroutines.
- * @property resourceManager resource manager.
- * @property preferencesManager preferences manager.
- * @property chosenCityInteractor interactor to get chosen city.
- * @property hourlyWeatherInteractor interactor to get hourly weather forecast.
+ * This ViewModel handles:
+ * - Loading hourly weather data from remote or local sources
+ * - Managing UI state via [hourlyWeatherStateFlow]
+ * - Responding to city name or location-based requests
+ * - Displaying success, warning, and error messages
+ * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
+ *
+ * @property connectivityObserver observes internet connectivity state
+ * @property loggingService centralized service for application logging
+ * @property resourceManager provides access to Android resources (strings, etc.)
+ * @property preferencesManager manages user preferences (e.g. temperature unit)
+ * @property coroutineDispatchers configures dispatchers for coroutines
+ * @property chosenCityInteractor handles retrieval of the selected city
+ * @property hourlyWeatherInteractor loads hourly weather data
  */
 @HiltViewModel
 class HourlyWeatherViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
     coroutineDispatchers: CoroutineDispatchers,
+    private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
@@ -48,13 +56,15 @@ class HourlyWeatherViewModel @Inject constructor(
     private val _hourlyWeatherStateFlow = MutableStateFlow<HourlyWeatherDomainModel?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(TAG, throwable.stackTraceToString())
+        loggingService.logError(TAG, "Unexpected error in hourly weather loading", throwable)
         showError(throwable.message.toString())
         showProgressBarState.value = false
     }
 
     /**
-     * Download hourly weather forecast on a [city].
+     * Downloads hourly weather forecast for the specified [city].
+     *
+     * @param city the name of the city to fetch weather for
      */
     fun getHourlyWeatherForCity(city: String) {
         showProgressBarState.value = true
@@ -69,7 +79,9 @@ class HourlyWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Download hourly weather forecast on a [cityModel].
+     * Downloads hourly weather forecast based on geographic [cityModel] location.
+     *
+     * @param cityModel contains city name and coordinates
      */
     fun getHourlyWeatherForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
@@ -89,7 +101,7 @@ class HourlyWeatherViewModel @Inject constructor(
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
-                _hourlyWeatherStateFlow.tryEmit(result.data)
+                _hourlyWeatherStateFlow.value = result.data
                 showMessage(
                     R.string.forecast_for_city_success,
                     result.data.city
@@ -97,7 +109,7 @@ class HourlyWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Local -> {
-                _hourlyWeatherStateFlow.tryEmit(result.data)
+                _hourlyWeatherStateFlow.value = result.data
                 showWarning(
                     resourceManager.getString(
                         R.string.forecast_for_city_outdated, city
@@ -111,7 +123,14 @@ class HourlyWeatherViewModel @Inject constructor(
                         is ForecastError.NoInternet ->
                             resourceManager.getString(R.string.disconnected)
 
-                        else -> resourceManager.getString(R.string.forecast_for_city_error)
+                        else -> {
+                            loggingService.logError(
+                                TAG,
+                                "Error loading hourly forecast for city: $city",
+                                Exception(result.error.toString())
+                            )
+                            resourceManager.getString(R.string.forecast_for_city_error)
+                        }
                     }
                 )
             }

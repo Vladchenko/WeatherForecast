@@ -1,10 +1,10 @@
 package com.example.weatherforecast.data.repository
 
-import android.util.Log
 import com.example.weatherforecast.data.mapper.HourlyWeatherDtoMapper
 import com.example.weatherforecast.data.mapper.HourlyWeatherEntityMapper
 import com.example.weatherforecast.data.repository.datasource.HourlyWeatherLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.HourlyWeatherRemoteDataSource
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.HourlyWeatherRepository
@@ -44,6 +44,7 @@ import kotlinx.serialization.InternalSerializationApi
  * Errors from data layer ([DataError]) are mapped to domain-level [ForecastError] using [DataErrorToForecastErrorMapper].
  * This ensures consistent error handling across all repositories without leaking data-layer types.
  *
+ * @property loggingService to log events
  * @property dispatchers Dispatcher provider for coroutine context management.
  * @property dtoMapper Mapper for converting [HourlyWeatherDto] to database entity.
  * @property entityMapper Mapper for converting entity to [HourlyWeatherDomainModel].
@@ -53,6 +54,7 @@ import kotlinx.serialization.InternalSerializationApi
  */
 @InternalSerializationApi
 class HourlyWeatherRepositoryImpl(
+    private val loggingService: LoggingService,
     private val dispatchers: CoroutineDispatchers,
     private val dtoMapper: HourlyWeatherDtoMapper,
     private val entityMapper: HourlyWeatherEntityMapper,
@@ -107,10 +109,10 @@ class HourlyWeatherRepositoryImpl(
                         ForecastError.NoDataAvailable("No cached data found for city: $city")
                     )
                 val domainModel = entityMapper.toDomain(entity, temperatureType)
-                Log.d(TAG, "Loaded hourly weather from cache for city: $city")
+                loggingService.logDebugEvent(TAG, "Loaded hourly weather from cache for city: $city")
                 LoadResult.Local(domainModel, remoteError)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to load cached hourly weather for $city", e)
+                loggingService.logError(TAG, "Failed to load cached hourly weather for $city", e)
                 LoadResult.Error(ForecastError.LocalDataCorrupted("Cache read failed: ${e.message}"))
             }
         }
@@ -124,10 +126,10 @@ class HourlyWeatherRepositoryImpl(
             val entity = dtoMapper.toEntity(dto)
             localDataSource.saveHourlyWeather(entity)
             val domainModel = entityMapper.toDomain(entity, temperatureType)
-            Log.d(TAG, "Saved and mapped hourly weather for city: $city")
+            loggingService.logDebugEvent(TAG, "Saved and mapped hourly weather for city: $city")
             LoadResult.Remote(domainModel)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to map or save hourly weather for city: $city", e)
+            loggingService.logError(TAG, "Failed to map or save hourly weather for city: $city", e)
             LoadResult.Error(ForecastError.LocalDataCorrupted("Mapping or saving failed: ${e.message}"))
         }
     }

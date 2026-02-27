@@ -123,8 +123,11 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastLocalDataSource(forecastDAO: CurrentWeatherDAO): CurrentWeatherLocalDataSource {
-        return CurrentWeatherLocalDataSourceImpl(forecastDAO)
+    fun provideWeatherForecastLocalDataSource(
+        loggingService: LoggingService,
+        forecastDAO: CurrentWeatherDAO
+    ): CurrentWeatherLocalDataSource {
+        return CurrentWeatherLocalDataSourceImpl(forecastDAO, loggingService)
     }
 
     @InternalSerializationApi
@@ -143,8 +146,8 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     @InternalSerializationApi
-    fun provideHourlyForecastLocalDataSource(forecastDAO: HourlyWeatherDAO): HourlyWeatherLocalDataSource {
-        return HourlyWeatherLocalDataSourceImpl(forecastDAO)
+    fun provideHourlyForecastLocalDataSource(loggingService: LoggingService, forecastDAO: HourlyWeatherDAO): HourlyWeatherLocalDataSource {
+        return HourlyWeatherLocalDataSourceImpl(forecastDAO, loggingService)
     }
 
     @Singleton
@@ -183,6 +186,7 @@ class WeatherForecastModule {
     @Provides
     @InternalSerializationApi
     fun provideWeatherForecastRepository(
+        loggingService: LoggingService,
         dtoMapper: CurrentWeatherDtoMapper,
         entityMapper: CurrentWeatherEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
@@ -191,6 +195,7 @@ class WeatherForecastModule {
         currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource,
     ): CurrentWeatherRepository {
         return CurrentWeatherRepositoryImpl(
+            loggingService,
             dtoMapper,
             entityMapper,
             coroutineDispatchers,
@@ -218,6 +223,7 @@ class WeatherForecastModule {
     @Provides
     @InternalSerializationApi
     fun provideHourlyForecastRepository(
+        loggingService: LoggingService,
         dtoMapper: HourlyWeatherDtoMapper,
         entityMapper: HourlyWeatherEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
@@ -226,6 +232,7 @@ class WeatherForecastModule {
         hourlyWeatherRemoteDataSource: HourlyWeatherRemoteDataSource
     ): HourlyWeatherRepository {
         return HourlyWeatherRepositoryImpl(
+            loggingService,
             coroutineDispatchers,
             dtoMapper,
             entityMapper,
@@ -250,6 +257,7 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideForecastViewModelFactory(
+        loggingService: LoggingService,
         resourceManager: ResourceManager,
         preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
@@ -259,6 +267,7 @@ class WeatherForecastModule {
         uiConverter: WeatherDomainToUiConverter
     ): CurrentWeatherViewModelFactory {
         return CurrentWeatherViewModelFactory(
+            loggingService,
             resourceManager,
             preferencesManager,
             connectivityObserver,
@@ -272,6 +281,7 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideHourlyForecastViewModelFactory(
+        loggingService: LoggingService,
         resourceManager: ResourceManager,
         preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
@@ -280,6 +290,7 @@ class WeatherForecastModule {
         forecastRemoteInteractor: HourlyWeatherInteractor
     ): HourlyWeatherViewModelFactory {
         return HourlyWeatherViewModelFactory(
+            loggingService,
             resourceManager,
             preferencesManager,
             connectivityObserver,
@@ -292,17 +303,19 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideGeoLocationViewModelFactory(
-        permissionChecker: PermissionChecker,
         geoLocationHelper: Geolocator,
+        loggingService: LoggingService,
         geoLocator: DeviceLocationProvider,
+        permissionChecker: PermissionChecker,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
     ): GeoLocationViewModelFactory {
         return GeoLocationViewModelFactory(
-            permissionChecker,
+            loggingService,
             geoLocationHelper,
             geoLocator,
+            permissionChecker,
             connectivityObserver,
             chosenCityInteractor,
             coroutineDispatchers
@@ -311,7 +324,7 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideAppBarStateConverter(resourceManager: ResourceManager,): AppBarStateConverter {
+    fun provideAppBarStateConverter(resourceManager: ResourceManager): AppBarStateConverter {
         return AppBarStateConverter(resourceManager)
     }
 

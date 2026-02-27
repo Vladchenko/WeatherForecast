@@ -1,10 +1,10 @@
 package com.example.weatherforecast.data.repository
 
-import android.util.Log
 import com.example.weatherforecast.data.mapper.CitiesSearchDtoMapper
 import com.example.weatherforecast.data.mapper.CitiesSearchEntityMapper
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
+import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.models.domain.CitiesNames
@@ -14,6 +14,7 @@ import kotlinx.serialization.InternalSerializationApi
 /**
  * CitiesNamesRepository implementation to retrieve cities names.
  *
+ * @property loggingService to log events
  * @property dtoMapper mapper to convert dto to entity
  * @property entityMapper mapper to convert entity to model
  * @property coroutineDispatchers dispatchers for coroutines
@@ -22,6 +23,7 @@ import kotlinx.serialization.InternalSerializationApi
  */
 @InternalSerializationApi
 class CitiesNamesRepositoryImpl(
+    private val loggingService: LoggingService,
     private val dtoMapper: CitiesSearchDtoMapper,
     private val entityMapper: CitiesSearchEntityMapper,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -43,7 +45,7 @@ class CitiesNamesRepositoryImpl(
                     loadFromCacheOrThrow(token)
                 }
             } catch (ex: Exception) {
-                Log.e(TAG, "Error loading cities names", ex)
+                loggingService.logError(TAG, "Error loading cities names", ex)
                 loadFromCacheOrThrow(token)
             }
         }
