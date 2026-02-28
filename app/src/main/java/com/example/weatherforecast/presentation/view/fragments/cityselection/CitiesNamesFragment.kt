@@ -8,13 +8,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
+import com.example.weatherforecast.presentation.coordinator.CitiesNamesCoordinator
 import com.example.weatherforecast.presentation.navigation.WeatherNavigator
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
+import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
+import javax.inject.Inject
 
 /**
  * Fragment for selecting a city from a list of suggestions based on user input.
@@ -27,15 +33,21 @@ import kotlinx.coroutines.FlowPreview
 @AndroidEntryPoint
 class CitiesNamesFragment : Fragment() {
 
+    @Inject
+    lateinit var statusRendererFactory: StatusRenderer.Factory
+
+    @Inject
+    lateinit var resourceManager: ResourceManager
+
+    private val viewModel by viewModels<CitiesNamesViewModel>()
     private val appBarViewModel by activityViewModels<AppBarViewModel>()
 
-    @FlowPreview
-    private val citiesNamesViewModel by activityViewModels<CitiesNamesViewModel>()
-
+    private lateinit var statusRenderer: StatusRenderer
+    private lateinit var coordinator: CitiesNamesCoordinator
     private val navigator by lazy { WeatherNavigator(findNavController()) }
 
-    @ExperimentalMaterial3Api
     @FlowPreview
+    @ExperimentalMaterial3Api
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,20 +55,25 @@ class CitiesNamesFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 CitySelectionLayout(
-                    toolbarTitle = getString(R.string.app_name),
                     citySelectionTitle = getString(R.string.city_selection_from_dropdown),
                     queryLabel = getString(R.string.city_typing_begin),
-                    onEvent = { event -> citiesNamesViewModel.onEvent(event) },
+                    onEvent = { event -> viewModel.onEvent(event) },
                     appBarViewModel = appBarViewModel,
-                    viewModel = citiesNamesViewModel
+                    viewModel = viewModel
                 )
             }
         }
     }
 
-    @FlowPreview
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navigator.start(viewLifecycleOwner, citiesNamesViewModel.navigationEventFlow)
+
+        navigator.start(viewLifecycleOwner, viewModel.navigationEventFlow)
+
+        statusRenderer = statusRendererFactory.create(appBarViewModel)
+        coordinator = CitiesNamesCoordinator(viewModel, statusRenderer)
+        coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
+
+        statusRenderer.showCitySelectionStatus()
     }
 }

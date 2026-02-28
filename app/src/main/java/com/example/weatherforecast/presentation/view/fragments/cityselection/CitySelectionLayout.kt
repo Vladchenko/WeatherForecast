@@ -78,7 +78,6 @@ import kotlinx.coroutines.FlowPreview
  *
  * The screen supports keyboard hiding, clearing input, and handling city selection.
  *
- * @param toolbarTitle Text to display in the toolbar (not currently used — title comes from [appBarViewModel])
  * @param citySelectionTitle Title shown above the search field
  * @param queryLabel Hint text for the city search input field
  * @param onEvent Callback for handling user interactions
@@ -90,7 +89,6 @@ import kotlinx.coroutines.FlowPreview
 @NonSkippableComposable
 @ExperimentalMaterial3Api
 fun CitySelectionLayout(
-    toolbarTitle: String,
     citySelectionTitle: String,
     queryLabel: String,
     onEvent: (CitySelectionEvent) -> Unit,

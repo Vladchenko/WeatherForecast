@@ -3,7 +3,7 @@
     <string name="bad_date_format">Invalid date format</string>
 
     <!-- City Selection -->
-    <string name="city_selection_title">Select City</string>
+    <string name="city_selection_title">Select city to provide weather for</string>
     <string name="city_selection_from_dropdown">Type a city and select from the list</string>
     <string name="city_typing_begin">Start typing a city name…</string>
 
