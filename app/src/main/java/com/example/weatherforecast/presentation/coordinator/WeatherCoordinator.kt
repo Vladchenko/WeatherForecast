@@ -2,7 +2,6 @@ package com.example.weatherforecast.presentation.coordinator
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.weatherforecast.R
 import com.example.weatherforecast.geolocation.PermissionResolver
 import com.example.weatherforecast.models.presentation.Message
 import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.WeatherDialogController
@@ -19,43 +18,41 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Coordinates UI logic between multiple view models and presentation components.
+ * Coordinates high-level UI logic for the weather forecast screen.
  *
- * Acts as a central orchestrator that observes state and events from various view models
- * ([CurrentWeatherViewModel], [HourlyWeatherViewModel], [GeoLocationViewModel]) and translates them
- * into appropriate UI actions such as status updates, dialog displays, or navigation triggers.
+ * Acts as the central orchestrator that connects view models with presentation components,
+ * translating state changes into appropriate UI actions. Designed to keep fragments and activities
+ * free of coordination logic, improving testability and separation of concerns.
  *
  * ## Responsibilities
- * - Observes message flows for displaying transient UI feedback (success, error, warning)
- * - Handles special cases like missing or invalid city input
- * - Updates the app bar based on current weather state
- * - Delegates geolocation coordination to [GeoLocationCoordinator]
- * - Ensures lifecycle-safe observation using [repeatOnLifecycle]
+ * - Observes message flows from weather view models and updates status via [StatusRenderer]
+ * - Synchronizes app bar state with current weather UI state
+ * - Delegates specialized workflows to dedicated coordinators:
+ *   - [GeoLocationCoordinator] handles location-based forecast retrieval
+ *   - [CitySelectionCoordinator] manages fallback strategies for invalid or missing city input
  *
- * ## Design Pattern
- * Implements the **Coordinator pattern** to decouple navigation and side-effect handling
- * from UI controllers (Activities/Fragments), improving testability and separation of concerns.
+ * ## Lifecycle Management
+ * Uses [repeatOnLifecycle] to ensure observation occurs only during active lifecycle states,
+ * preventing memory leaks and unnecessary processing. Must be started with [startObserving].
  *
  * ## Thread Safety
- * All coroutine collections occur on the main thread via [repeatOnLifecycle], ensuring safe access
- * to UI components. Designed to be launched within a lifecycle-aware scope (e.g., `lifecycleScope`).
+ * All coroutine collections occur on the main thread via [lifecycle.repeatOnLifecycle],
+ * ensuring safe access to UI components.
  *
- * @property statusRenderer Responsible for displaying statuses (loading, success, error) in the UI
- * @property appBarViewModel Controls the state of the application's top app bar
- * @property resourceManager Provides access to string resources for dynamic message construction
+ * @property statusRenderer Displays transient statuses (loading, success, error)
+ * @property appBarViewModel Controls top app bar appearance based on weather state
  * @property hourlyViewModel Source of hourly forecast data and related messages
- * @property dialogController Manages presentation of alert dialogs to the user
- * @property forecastViewModel Source of current weather data, UI state, and user-initiated actions
+ * @property forecastViewModel Main source of current weather data and user actions
  * @property geoLocationCoordinator Handles geolocation-specific workflow and user interactions
+ * @property citySelectionCoordinator Manages responses to blank or invalid city input
  */
 class WeatherCoordinator private constructor(
     private val statusRenderer: StatusRenderer,
     private val appBarViewModel: AppBarViewModel,
-    private val resourceManager: ResourceManager,
     private val hourlyViewModel: HourlyWeatherViewModel,
-    private val dialogController: WeatherDialogController,
     private val forecastViewModel: CurrentWeatherViewModel,
-    private val geoLocationCoordinator: GeoLocationCoordinator
+    private val geoLocationCoordinator: GeoLocationCoordinator,
+    private val citySelectionCoordinator: CitySelectionCoordinator
 ) {
 
     /**
@@ -63,14 +60,14 @@ class WeatherCoordinator private constructor(
      *
      * Launches concurrent coroutines to collect:
      * - Message events from both current and hourly weather view models
-     * - City not found and blank city input states
      * - Changes in overall weather UI state for app bar synchronization
      *
-     * Also initializes observation in the [geoLocationCoordinator] to ensure full geolocation
- * workflow is active.
+     * Also initializes observation in:
+     * - [geoLocationCoordinator] — for location-based forecast workflow
+     * - [citySelectionCoordinator] — for handling missing or invalid city input
      *
-     * Observation is scoped to [Lifecycle.State.STARTED] to prevent unnecessary processing
-     * when the UI is not visible.
+     * Observation is scoped to [Lifecycle.State.STARTED] to prevent unnecessary work
+     * while the UI is not visible.
      *
      * @param scope The coroutine scope used to launch observation tasks
      * @param lifecycle The lifecycle to which observation is bound
@@ -80,13 +77,12 @@ class WeatherCoordinator private constructor(
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { collectMessageFlow(forecastViewModel.messageSharedFlow) }
                 launch { collectMessageFlow(hourlyViewModel.messageSharedFlow) }
-                launch { collectChosenCityNotFoundFlow(forecastViewModel.chosenCityNotFoundStateFlow) }
-                launch { collectChosenCityBlankFlow(forecastViewModel.chosenCityBlankStateFlow) }
                 launch { collectForecastState(forecastViewModel.forecastStateFlow) }
             }
         }
 
         geoLocationCoordinator.startObserving(scope, lifecycle)
+        citySelectionCoordinator.startObserving(scope, lifecycle)
     }
 
     /**
@@ -95,42 +91,12 @@ class WeatherCoordinator private constructor(
      * Used by both current and hourly forecast view models to display transient feedback
      * such as loading indicators, errors, or success confirmations.
      *
+     * Delegates actual rendering to [statusRenderer.updateFromMessage].
+     *
      * @param flow A shared flow emitting [Message] instances representing UI feedback
      */
     private suspend fun collectMessageFlow(flow: SharedFlow<Message>) {
         flow.collect { statusRenderer.updateFromMessage(it) }
-    }
-
-    /**
-     * Observes events where the requested city could not be found in the forecast data.
-     *
-     * When triggered, shows a warning status and presents a dialog offering the user
-     * options to retry with geolocation or select a city manually.
-     *
-     * @param flow A shared flow emitting the name of the city that was not found
-     */
-    private suspend fun collectChosenCityNotFoundFlow(flow: SharedFlow<String>) {
-        flow.collect { city ->
-            statusRenderer.showWarning(
-                resourceManager.getString(R.string.no_selected_city_forecast, city)
-            )
-            dialogController.showChosenCityNotFound(city) {
-                geoLocationCoordinator.startGeoLocation()
-            }
-        }
-    }
-
-    /**
-     * Observes events indicating that the user attempted to search with an empty query.
-     *
-     * Triggers automatic fallback to geolocation-based forecast retrieval.
-     *
-     * @param flow A shared flow emitting a unit event when blank input is detected
-     */
-    private suspend fun collectChosenCityBlankFlow(flow: SharedFlow<Unit>) {
-        flow.collect {
-            geoLocationCoordinator.startGeoLocation()
-        }
     }
 
     /**
@@ -151,7 +117,9 @@ class WeatherCoordinator private constructor(
      * Factory class for creating configured instances of [WeatherCoordinator].
      *
      * Encapsulates dependency injection logic and ensures proper wiring of internal components,
-     * especially the creation and configuration of [GeoLocationCoordinator].
+     * including creation of:
+     * - [GeoLocationCoordinator]
+     * - [CitySelectionCoordinator]
      *
      * Promotes loose coupling and testability by allowing full control over dependencies.
      */
@@ -159,8 +127,8 @@ class WeatherCoordinator private constructor(
         /**
          * Creates and returns a fully configured [WeatherCoordinator] instance.
          *
-         * Initializes the [GeoLocationCoordinator] with appropriate callbacks that trigger
-         * forecast loading upon successful location resolution.
+         * Initializes both [GeoLocationCoordinator] and [CitySelectionCoordinator]
+         * with appropriate callbacks and shared dependencies.
          *
          * @param statusRenderer Renderer for displaying status messages
          * @param appBarViewModel ViewModel controlling app bar appearance
@@ -191,28 +159,36 @@ class WeatherCoordinator private constructor(
             onRequestLocationPermission: () -> Unit
         ): WeatherCoordinator {
             val geoLocationCoordinator = GeoLocationCoordinator(
-                statusRenderer = statusRenderer,
-                resourceManager = resourceManager,
-                dialogController = dialogController,
-                permissionResolver = permissionResolver,
-                onGotoCitySelection = onGotoCitySelection,
-                onPermanentlyDenied = onPermanentlyDenied,
                 geoLocationViewModel = geoLocationViewModel,
-                onNegativeNoPermission = onNegativeNoPermission,
+                permissionResolver = permissionResolver,
+                statusRenderer = statusRenderer,
+                dialogController = dialogController,
+                resourceManager = resourceManager,
+                onGotoCitySelection = onGotoCitySelection,
                 onRequestLocationPermission = onRequestLocationPermission,
+                onPermanentlyDenied = onPermanentlyDenied,
+                onNegativeNoPermission = onNegativeNoPermission,
                 onForecastLoadForLocation = { locationModel ->
                     forecastViewModel.loadRemoteForecastForLocation(locationModel)
                 }
+            )
+
+            val citySelectionCoordinator = CitySelectionCoordinator(
+                forecastViewModel = forecastViewModel,
+                geoLocationCoordinator = geoLocationCoordinator,
+                statusRenderer = statusRenderer,
+                dialogController = dialogController,
+                resourceManager = resourceManager,
+                onGotoCitySelection = onGotoCitySelection
             )
 
             return WeatherCoordinator(
                 statusRenderer = statusRenderer,
                 hourlyViewModel = hourlyViewModel,
                 appBarViewModel = appBarViewModel,
-                resourceManager = resourceManager,
-                dialogController = dialogController,
                 forecastViewModel = forecastViewModel,
-                geoLocationCoordinator = geoLocationCoordinator
+                geoLocationCoordinator = geoLocationCoordinator,
+                citySelectionCoordinator = citySelectionCoordinator
             )
         }
     }
