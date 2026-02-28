@@ -197,7 +197,9 @@ class GeoLocationViewModel @Inject constructor(
                 TAG,
                 "City defined successfully by location = $location, city = $city"
             )
-            saveChosenCity(CityLocationModel(city, location))
+            val cityModel = CityLocationModel(city, location)
+            saveChosenCity(cityModel)
+            _geoLocationByCitySuccessFlow.tryEmit(cityModel)
             _geoLocationDefineCitySuccessFlow.tryEmit(city)
         }
     }
