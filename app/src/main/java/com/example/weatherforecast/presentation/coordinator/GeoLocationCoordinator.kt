@@ -106,10 +106,9 @@ class GeoLocationCoordinator(
      *
      * @param flow The shared flow emitting city location data upon successful lookup
      */
-    private suspend fun collectGeoLocationByCitySuccessFlow(flow: SharedFlow<CityLocationModel>) {
-        flow.collect { model ->
+    private suspend fun collectGeoLocationByCitySuccessFlow(flow: SharedFlow<Unit>) {
+        flow.collect {
             statusRenderer.showStatus(resourceManager.getString(R.string.geo_success))
-            onForecastLoadForLocation(model)
         }
     }
 
@@ -186,13 +185,12 @@ class GeoLocationCoordinator(
      *
      * @param flow The shared flow emitting resolved city names
      */
-    private suspend fun collectGeoLocationDefineCitySuccessFlow(flow: SharedFlow<String>) {
-        flow.collect { cityName ->
+    private suspend fun collectGeoLocationDefineCitySuccessFlow(flow: SharedFlow<CityLocationModel>) {
+        flow.collect { model ->
             dialogController.showLocationDefined(
-                message = cityName,
-                onPositiveClick = { selectedCity ->
-                    // Don't do anything here
-                    // Downloading is to begin in geoLocationByCitySuccessFlow
+                message = model.city,
+                onPositiveClick = {
+                    onForecastLoadForLocation(model)
                 },
                 onNegativeClick = {
                     statusRenderer.showCitySelectionStatus()

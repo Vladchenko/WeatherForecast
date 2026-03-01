@@ -54,11 +54,11 @@ class GeoLocationViewModel @Inject constructor(
         get() = _selectCityFlow
     val geoGeoLocationPermissionFlow: SharedFlow<GeoLocationPermission>
         get() = _geoGeoLocationPermissionFlow
-    val geoLocationDefineCitySuccessFlow: SharedFlow<String>
+    val geoLocationDefineCitySuccessFlow: SharedFlow<CityLocationModel>
         get() = _geoLocationDefineCitySuccessFlow
     val geoLocationSuccessFlow: SharedFlow<Location>
         get() = _geoLocationSuccessFlow
-    val geoLocationByCitySuccessFlow: SharedFlow<CityLocationModel>
+    val geoLocationByCitySuccessFlow: SharedFlow<Unit>
         get() = _geoLocationByCitySuccessFlow
 
     private val _selectCityFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -68,10 +68,10 @@ class GeoLocationViewModel @Inject constructor(
     private val _geoLocationSuccessFlow = MutableSharedFlow<Location>(
         extraBufferCapacity = 1
     )
-    private val _geoLocationDefineCitySuccessFlow = MutableSharedFlow<String>(
+    private val _geoLocationDefineCitySuccessFlow = MutableSharedFlow<CityLocationModel>(
         extraBufferCapacity = 1
     )
-    private val _geoLocationByCitySuccessFlow = MutableSharedFlow<CityLocationModel>(
+    private val _geoLocationByCitySuccessFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1
     )
 
@@ -167,7 +167,7 @@ class GeoLocationViewModel @Inject constructor(
                 val cityModel = CityLocationModel(city, location)
                 saveChosenCity(cityModel)
                 loggingService.logInfoEvent(TAG, "City and its location saved successfully.")
-                _geoLocationByCitySuccessFlow.tryEmit(cityModel)
+                _geoLocationByCitySuccessFlow.tryEmit(Unit)
             } catch (ex: Exception) {
                 statusRenderer.showError(ex.message.toString())
             }
@@ -202,8 +202,8 @@ class GeoLocationViewModel @Inject constructor(
             )
             val cityModel = CityLocationModel(city, location)
             saveChosenCity(cityModel)
-            _geoLocationByCitySuccessFlow.tryEmit(cityModel)
-            _geoLocationDefineCitySuccessFlow.tryEmit(city)
+            _geoLocationByCitySuccessFlow.tryEmit(Unit)
+            _geoLocationDefineCitySuccessFlow.tryEmit(cityModel)
         }
     }
 
