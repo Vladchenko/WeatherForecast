@@ -46,7 +46,7 @@ class CitiesNamesFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 CitySelectionLayout(
-                    citySelectionTitle = getString(R.string.city_selection_from_dropdown),
+                    citySelectionTitle = getString(R.string.city_selection_hint),
                     queryLabel = getString(R.string.city_typing_begin),
                     onEvent = { event -> viewModel.onEvent(event) },
                     appBarViewModel = appBarViewModel,

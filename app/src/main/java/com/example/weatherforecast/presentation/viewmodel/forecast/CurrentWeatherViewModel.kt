@@ -201,7 +201,7 @@ class CurrentWeatherViewModel @Inject constructor(
             is LoadResult.Local -> {
                 statusRenderer.showWarning(
                     resourceManager.getString(
-                        R.string.forecast_for_city_outdated, city
+                        R.string.forecast_outdated, city
                     )
                 )
                 showLocalForecast(result.data.copy(city = city))
@@ -211,14 +211,14 @@ class CurrentWeatherViewModel @Inject constructor(
                 when (result.error) {
                     is ForecastError.NoInternet -> statusRenderer.showError(
                         resourceManager.getString(
-                            R.string.disconnected
+                            R.string.network_disconnected
                         )
                     )
 
                     is ForecastError.CityNotFound -> {
                         statusRenderer.showWarning(
                             resourceManager.getString(
-                                R.string.no_selected_city_forecast,
+                                R.string.forecast_no_data_for_city,
                                 city
                             )
                         )
@@ -232,7 +232,7 @@ class CurrentWeatherViewModel @Inject constructor(
                             Exception(result.error.toString())
                         )
                         statusRenderer.showError(
-                            resourceManager.getString(R.string.forecast_for_city_error)
+                            resourceManager.getString(R.string.forecast_load_error)
                         )
                     }
                 }

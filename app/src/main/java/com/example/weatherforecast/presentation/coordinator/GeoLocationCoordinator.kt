@@ -94,7 +94,7 @@ class GeoLocationCoordinator(
      * delegates the actual operation to [GeoLocationViewModel.defineCurrentGeoLocation].
      */
     fun startGeoLocation() {
-        statusRenderer.showStatus(resourceManager.getString(R.string.current_location_triangulating))
+        statusRenderer.showStatus(resourceManager.getString(R.string.geo_detecting))
         geoLocationViewModel.defineCurrentGeoLocation()
     }
 
@@ -108,7 +108,7 @@ class GeoLocationCoordinator(
      */
     private suspend fun collectGeoLocationByCitySuccessFlow(flow: SharedFlow<CityLocationModel>) {
         flow.collect { model ->
-            statusRenderer.showStatus(resourceManager.getString(R.string.current_location_success))
+            statusRenderer.showStatus(resourceManager.getString(R.string.geo_success))
             onForecastLoadForLocation(model)
         }
     }
@@ -123,7 +123,7 @@ class GeoLocationCoordinator(
      */
     private suspend fun collectGeoLocationSuccessFlow(flow: SharedFlow<Location>) {
         flow.collect { location ->
-            statusRenderer.showStatus(resourceManager.getString(R.string.defining_city_from_geo_location))
+            statusRenderer.showStatus(resourceManager.getString(R.string.geo_finding_city))
             geoLocationViewModel.defineCityNameByLocation(location)
         }
     }
@@ -143,12 +143,12 @@ class GeoLocationCoordinator(
         flow.collect { permission ->
             when (permission) {
                 GeoLocationPermission.Requested -> {
-                    statusRenderer.showStatus(resourceManager.getString(R.string.geo_location_permission_required))
+                    statusRenderer.showStatus(resourceManager.getString(R.string.geo_permission_required))
                     onRequestLocationPermission()
                 }
 
                 GeoLocationPermission.Denied -> {
-                    statusRenderer.showWarning(resourceManager.getString(R.string.current_location_denied))
+                    statusRenderer.showWarning(resourceManager.getString(R.string.geo_permission_denied))
                     dialogController.showNoPermission(
                         onPositiveClick = {
                             geoLocationViewModel.resetGeoLocationRequestAttempts()
@@ -159,12 +159,12 @@ class GeoLocationCoordinator(
                 }
 
                 GeoLocationPermission.Granted -> {
-                    statusRenderer.showStatus(resourceManager.getString(R.string.current_location_triangulating))
+                    statusRenderer.showStatus(resourceManager.getString(R.string.geo_detecting))
                     geoLocationViewModel.defineCurrentGeoLocation()
                 }
 
                 GeoLocationPermission.PermanentlyDenied -> {
-                    statusRenderer.showError(resourceManager.getString(R.string.current_location_denied_permanently))
+                    statusRenderer.showError(resourceManager.getString(R.string.geo_permission_denied_permanently))
                     dialogController.showPermissionPermanentlyDenied(
                         onPositiveClick = {
                             geoLocationViewModel.resetGeoLocationRequestAttempts()

@@ -33,9 +33,9 @@ class NetworkStatusCoordinator(
         connectivityObserver.isConnected
             .onEach { isConnected ->
                 if (isConnected) {
-                    statusRenderer.showStatus(resourceManager.getString(R.string.connected))
+                    statusRenderer.showStatus(resourceManager.getString(R.string.network_connected))
                 } else {
-                    statusRenderer.showError(resourceManager.getString(R.string.disconnected))
+                    statusRenderer.showError(resourceManager.getString(R.string.network_disconnected))
                 }
             }
             .launchIn(owner.lifecycle.coroutineScope)

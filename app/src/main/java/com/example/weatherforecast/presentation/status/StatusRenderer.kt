@@ -93,7 +93,7 @@ class StatusRenderer @Inject constructor(
      * Shows a downloading/loading status for a specific city.
      *
      * If [city] is blank, shows generic loading message.
-     * Otherwise, formats message using [R.string.forecast_for_city_loading] with city name.
+     * Otherwise, formats message using [R.string.forecast_loading] with city name.
      *
      * @param city Name of the city being loaded
      */
@@ -109,7 +109,7 @@ class StatusRenderer @Inject constructor(
             currentTarget?.showStatus(
                 StatusDisplay.Status(
                     text = resourceManager.getString(
-                        R.string.forecast_for_city_loading,
+                        R.string.forecast_loading,
                         city
                     ),
                     type = MessageType.INFO

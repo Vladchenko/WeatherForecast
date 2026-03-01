@@ -56,7 +56,7 @@ fun HourlyWeatherLayout(
             .alpha(0.8f)
     ) {
         Text(
-            text = stringResource(R.string.hourly_forecast),
+            text = stringResource(R.string.forecast_hourly),
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .clip(RoundedCornerShape(16.dp))

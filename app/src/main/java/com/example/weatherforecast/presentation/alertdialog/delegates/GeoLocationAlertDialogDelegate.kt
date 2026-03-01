@@ -28,8 +28,8 @@ class GeoLocationAlertDialogDelegate(
      */
     override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(resourceManager.getString(R.string.geo_location_title))
-        builder.setMessage(resourceManager.getString(R.string.geo_location_message, city))
+        builder.setTitle(resourceManager.getString(R.string.geo_title))
+        builder.setMessage(resourceManager.getString(R.string.geo_confirm_message, city))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

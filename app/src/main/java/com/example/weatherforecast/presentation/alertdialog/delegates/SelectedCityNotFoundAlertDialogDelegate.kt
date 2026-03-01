@@ -35,8 +35,8 @@ class SelectedCityNotFoundAlertDialogDelegate(
      */
     override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(resourceManager.getString(R.string.no_selected_city_forecast, city))
-        builder.setMessage(resourceManager.getString(R.string.no_selected_city_forecast_message))
+        builder.setTitle(resourceManager.getString(R.string.forecast_no_data_for_city, city))
+        builder.setMessage(resourceManager.getString(R.string.forecast_no_data_message))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

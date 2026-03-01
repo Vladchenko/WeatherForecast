@@ -113,7 +113,7 @@ class CitiesNamesViewModel @Inject constructor(
         loggingService.logError(TAG, throwable.message.orEmpty(), throwable)
         when (throwable) {
             is NoSuchDatabaseEntryException -> {
-                statusRenderer.showError(resourceManager.getString(R.string.default_city_absent))
+                statusRenderer.showError(resourceManager.getString(R.string.forecast_default_city_absent))
             }
             else -> {
                 statusRenderer.showError(throwable.message.toString())

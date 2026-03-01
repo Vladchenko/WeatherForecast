@@ -33,8 +33,8 @@ class NoLocationPermissionPermanentlyAlertDialogDelegate(
      */
     override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(resourceManager.getString(R.string.current_location_denied))
-        builder.setMessage(resourceManager.getString(R.string.current_location_denied_permanently))
+        builder.setTitle(resourceManager.getString(R.string.geo_permission_denied))
+        builder.setMessage(resourceManager.getString(R.string.geo_permission_denied_permanently))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

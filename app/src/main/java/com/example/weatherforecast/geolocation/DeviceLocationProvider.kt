@@ -61,7 +61,7 @@ class DeviceLocationProvider @Inject constructor(
                 }
                 .addOnCanceledListener {
                     loggingService.logError(TAG, "Geo location cancelled")
-                    locationListener.onCurrentGeoLocationFail(context.getString(R.string.current_location_cancelled))
+                    locationListener.onCurrentGeoLocationFail(context.getString(R.string.geo_cancelled))
                 }
         } catch (sec: SecurityException) {
             loggingService.logError(TAG, "SecurityException in location request: ", sec)
@@ -90,7 +90,7 @@ class DeviceLocationProvider @Inject constructor(
         loggingService.logDebugEvent(TAG, "Location retrieved: $location")
         if (location == null) {
             loggingService.logError(TAG, "Location is null after successful callback")
-            locationListener.onCurrentGeoLocationFail(appContext.getString(R.string.geo_location_fail_error_text))
+            locationListener.onCurrentGeoLocationFail(appContext.getString(R.string.geo_resolution_failed))
         } else {
             locationListener.onCurrentGeoLocationSuccess(location)
         }

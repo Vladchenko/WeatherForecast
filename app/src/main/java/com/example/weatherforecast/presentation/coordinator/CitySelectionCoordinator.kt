@@ -64,7 +64,7 @@ class CitySelectionCoordinator(
     private suspend fun collectChosenCityNotFoundFlow(flow: SharedFlow<String>) {
         flow.collect { city ->
             statusRenderer.showWarning(
-                resourceManager.getString(R.string.no_selected_city_forecast, city)
+                resourceManager.getString(R.string.forecast_no_data_for_city, city)
             )
             dialogController.showChosenCityNotFound(city) {
                 onGotoCitySelection()

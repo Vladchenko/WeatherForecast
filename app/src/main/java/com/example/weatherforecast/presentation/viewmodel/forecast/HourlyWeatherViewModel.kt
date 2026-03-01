@@ -107,7 +107,7 @@ class HourlyWeatherViewModel @Inject constructor(
                 _hourlyWeatherStateFlow.value = result.data
                 statusRenderer.showStatus(
                     resourceManager.getString(
-                        R.string.forecast_for_city_success,
+                        R.string.forecast_loaded_success,
                         result.data.city
                     )
                 )
@@ -117,7 +117,7 @@ class HourlyWeatherViewModel @Inject constructor(
                 _hourlyWeatherStateFlow.value = result.data
                 statusRenderer.showWarning(
                     resourceManager.getString(
-                        R.string.forecast_for_city_outdated, city
+                        R.string.forecast_outdated, city
                     )
                 )
             }
@@ -126,7 +126,7 @@ class HourlyWeatherViewModel @Inject constructor(
                 statusRenderer.showError(
                     when (result.error) {
                         is ForecastError.NoInternet ->
-                            resourceManager.getString(R.string.disconnected)
+                            resourceManager.getString(R.string.network_disconnected)
 
                         else -> {
                             loggingService.logError(
@@ -134,7 +134,7 @@ class HourlyWeatherViewModel @Inject constructor(
                                 "Error loading hourly forecast for city: $city",
                                 Exception(result.error.toString())
                             )
-                            resourceManager.getString(R.string.forecast_for_city_error)
+                            resourceManager.getString(R.string.forecast_load_error)
                         }
                     }
                 )
