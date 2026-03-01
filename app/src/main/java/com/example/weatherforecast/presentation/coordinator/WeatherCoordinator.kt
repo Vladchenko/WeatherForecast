@@ -3,17 +3,14 @@ package com.example.weatherforecast.presentation.coordinator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.weatherforecast.geolocation.PermissionResolver
-import com.example.weatherforecast.models.presentation.Message
 import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.WeatherDialogController
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
-import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyWeatherViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import com.example.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
 import com.example.weatherforecast.utils.ResourceManager
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -39,17 +36,13 @@ import kotlinx.coroutines.launch
  * All coroutine collections occur on the main thread via [lifecycle.repeatOnLifecycle],
  * ensuring safe access to UI components.
  *
- * @property statusRenderer Displays transient statuses (loading, success, error)
  * @property appBarViewModel Controls top app bar appearance based on weather state
- * @property hourlyViewModel Source of hourly forecast data and related messages
  * @property forecastViewModel Main source of current weather data and user actions
  * @property geoLocationCoordinator Handles geolocation-specific workflow and user interactions
  * @property citySelectionCoordinator Manages responses to blank or invalid city input
  */
 class WeatherCoordinator private constructor(
-    private val statusRenderer: StatusRenderer,
     private val appBarViewModel: AppBarViewModel,
-    private val hourlyViewModel: HourlyWeatherViewModel,
     private val forecastViewModel: CurrentWeatherViewModel,
     private val geoLocationCoordinator: GeoLocationCoordinator,
     private val citySelectionCoordinator: CitySelectionCoordinator
@@ -75,28 +68,12 @@ class WeatherCoordinator private constructor(
     fun startObserving(scope: CoroutineScope, lifecycle: Lifecycle) {
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { collectMessageFlow(forecastViewModel.messageSharedFlow) }
-                launch { collectMessageFlow(hourlyViewModel.messageSharedFlow) }
                 launch { collectForecastState(forecastViewModel.forecastStateFlow) }
             }
         }
 
         geoLocationCoordinator.startObserving(scope, lifecycle)
         citySelectionCoordinator.startObserving(scope, lifecycle)
-    }
-
-    /**
-     * Collects messages emitted from shared flows and updates the UI status accordingly.
-     *
-     * Used by both current and hourly forecast view models to display transient feedback
-     * such as loading indicators, errors, or success confirmations.
-     *
-     * Delegates actual rendering to [statusRenderer.updateFromMessage].
-     *
-     * @param flow A shared flow emitting [Message] instances representing UI feedback
-     */
-    private suspend fun collectMessageFlow(flow: SharedFlow<Message>) {
-        flow.collect { statusRenderer.updateFromMessage(it) }
     }
 
     /**
@@ -134,7 +111,6 @@ class WeatherCoordinator private constructor(
          * @param appBarViewModel ViewModel controlling app bar appearance
          * @param resourceManager Accessor for localized string resources
          * @param permissionResolver Handles runtime location permission requests
-         * @param hourlyViewModel Provides hourly forecast data and messages
          * @param dialogController Manages presentation of alert dialogs
          * @param forecastViewModel Main source of current weather data and user actions
          * @param geoLocationViewModel Provides geolocation state and operations
@@ -149,7 +125,6 @@ class WeatherCoordinator private constructor(
             appBarViewModel: AppBarViewModel,
             resourceManager: ResourceManager,
             permissionResolver: PermissionResolver,
-            hourlyViewModel: HourlyWeatherViewModel,
             dialogController: WeatherDialogController,
             forecastViewModel: CurrentWeatherViewModel,
             geoLocationViewModel: GeoLocationViewModel,
@@ -183,8 +158,6 @@ class WeatherCoordinator private constructor(
             )
 
             return WeatherCoordinator(
-                statusRenderer = statusRenderer,
-                hourlyViewModel = hourlyViewModel,
                 appBarViewModel = appBarViewModel,
                 forecastViewModel = forecastViewModel,
                 geoLocationCoordinator = geoLocationCoordinator,

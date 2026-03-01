@@ -24,9 +24,6 @@ import javax.inject.Singleton
  *
  * These factories allow ViewModels to create presenters or coordinators without tight coupling
  * to concrete implementations, supporting testability and separation of concerns.
- *
- * @see StatusRenderer.Factory
- * @see WeatherCoordinator.Factory
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,8 +31,8 @@ object PresentationModule {
 
     @Singleton
     @Provides
-    fun provideStatusNotifierFactory(resourceManager: ResourceManager): StatusRenderer.Factory {
-        return StatusRenderer.Factory(resourceManager)
+    fun provideStatusNotifierFactory(resourceManager: ResourceManager): StatusRenderer {
+        return StatusRenderer(resourceManager)
     }
 
     @Singleton

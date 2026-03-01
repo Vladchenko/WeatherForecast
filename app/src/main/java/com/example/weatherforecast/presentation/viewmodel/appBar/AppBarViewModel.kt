@@ -7,6 +7,7 @@ import com.example.weatherforecast.models.presentation.AppBarState
 import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.presentation.converter.appbar.AppBarStateConverter
 import com.example.weatherforecast.presentation.status.StatusDisplay
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,11 +26,13 @@ import javax.inject.Inject
  * This ViewModel implements [StatusDisplay] to handle display of info, warning,
  * and error messages in the app bar's subtitle area.
  *
+ * @property statusRenderer Displays loading, success, warning, or error statuses
  * @property resourceManager Provides access to string resources
  * @property appBarStateConverter Converts [WeatherUiState] into [AppBarState] for UI rendering
  */
 @HiltViewModel
 class AppBarViewModel @Inject constructor(
+    private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
     private val appBarStateConverter: AppBarStateConverter
 ) : ViewModel(), StatusDisplay {
@@ -43,6 +46,15 @@ class AppBarViewModel @Inject constructor(
         get() = _appBarStateFlow.asStateFlow()
 
     private val _appBarStateFlow = MutableStateFlow(AppBarState())
+
+    init {
+        statusRenderer.setTarget(this)
+    }
+
+    override fun onCleared() {
+        statusRenderer.clearTarget()
+        super.onCleared()
+    }
 
     override fun showStatus(status: StatusDisplay.Status) {
         when (status.type) {

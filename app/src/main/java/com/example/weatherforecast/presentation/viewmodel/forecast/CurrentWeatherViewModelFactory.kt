@@ -9,6 +9,7 @@ import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.utils.ResourceManager
 import kotlinx.serialization.InternalSerializationApi
 
@@ -16,6 +17,7 @@ import kotlinx.serialization.InternalSerializationApi
  * WeatherForecastViewModel factory
  *
  * @property loggingService centralized service for application logging
+ * @property statusRenderer displays loading, success, warning, or error statuses
  * @property resourceManager resource manager
  * @property preferencesManager to provide preferences for application
  * @property connectivityObserver internet connectivity observer
@@ -25,6 +27,7 @@ import kotlinx.serialization.InternalSerializationApi
  */
 class CurrentWeatherViewModelFactory(
     private val loggingService: LoggingService,
+    private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val connectivityObserver: ConnectivityObserver,
@@ -40,6 +43,7 @@ class CurrentWeatherViewModelFactory(
         if (modelClass.isAssignableFrom(CurrentWeatherViewModel::class.java)) {
             return CurrentWeatherViewModel(
                 connectivityObserver,
+                statusRenderer,
                 loggingService,
                 resourceManager,
                 preferencesManager,

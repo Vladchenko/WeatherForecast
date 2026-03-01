@@ -12,6 +12,7 @@ import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.HourlyWeatherDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,11 +33,12 @@ import javax.inject.Inject
  * - Displaying success, warning, and error messages
  * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
  *
- * @property connectivityObserver observes internet connectivity state
+ * @param connectivityObserver observes internet connectivity state
+ * @param coroutineDispatchers configures dispatchers for coroutines
+ * @property statusRenderer displays status messages to the user
  * @property loggingService centralized service for application logging
  * @property resourceManager provides access to Android resources (strings, etc.)
  * @property preferencesManager manages user preferences (e.g. temperature unit)
- * @property coroutineDispatchers configures dispatchers for coroutines
  * @property chosenCityInteractor handles retrieval of the selected city
  * @property hourlyWeatherInteractor loads hourly weather data
  */
@@ -44,12 +46,13 @@ import javax.inject.Inject
 class HourlyWeatherViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
     coroutineDispatchers: CoroutineDispatchers,
+    private val statusRenderer: StatusRenderer,
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
-) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
+) : AbstractViewModel(connectivityObserver) {
 
     val hourlyWeatherStateFlow: StateFlow<HourlyWeatherDomainModel?>
         get() = _hourlyWeatherStateFlow
@@ -57,7 +60,7 @@ class HourlyWeatherViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in hourly weather loading", throwable)
-        showError(throwable.message.toString())
+        statusRenderer.showError(throwable.message.toString())
         showProgressBarState.value = false
     }
 
@@ -102,15 +105,17 @@ class HourlyWeatherViewModel @Inject constructor(
         when (result) {
             is LoadResult.Remote -> {
                 _hourlyWeatherStateFlow.value = result.data
-                showMessage(
-                    R.string.forecast_for_city_success,
-                    result.data.city
+                statusRenderer.showStatus(
+                    resourceManager.getString(
+                        R.string.forecast_for_city_success,
+                        result.data.city
+                    )
                 )
             }
 
             is LoadResult.Local -> {
                 _hourlyWeatherStateFlow.value = result.data
-                showWarning(
+                statusRenderer.showWarning(
                     resourceManager.getString(
                         R.string.forecast_for_city_outdated, city
                     )
@@ -118,7 +123,7 @@ class HourlyWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                showError(
+                statusRenderer.showError(
                     when (result.error) {
                         is ForecastError.NoInternet ->
                             resourceManager.getString(R.string.disconnected)

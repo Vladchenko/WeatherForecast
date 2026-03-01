@@ -12,6 +12,7 @@ import com.example.weatherforecast.geolocation.DeviceLocationProvider
 import com.example.weatherforecast.geolocation.GeoLocationListener
 import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -25,9 +26,10 @@ import javax.inject.Inject
  * View model for geo location or city name of a device.
  *
  * @constructor
+ * @param connectivityObserver provides connectivity state
  * @property geoLocationHelper provides geo location service
  * @property loggingService centralized service for application logging
- * @param connectivityObserver provides connectivity state
+ * @property statusRenderer Displays loading, success, warning, or error statuses
  * @property geoLocator provides geo location service
  * @property permissionChecker to check if needed permission is provided
  * @property chosenCityInteractor saves/loads chosen city
@@ -35,14 +37,15 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(
+    connectivityObserver: ConnectivityObserver,
     private val geoLocationHelper: Geolocator,
     private val loggingService: LoggingService,
-    connectivityObserver: ConnectivityObserver,
+    private val statusRenderer: StatusRenderer,
     private val geoLocator: DeviceLocationProvider,
     private val permissionChecker: PermissionChecker,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
-) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
+) : AbstractViewModel(connectivityObserver) {
 
     private var permissionRequests = 0
     private var geoLocatingAttempts = 0
@@ -78,10 +81,10 @@ class GeoLocationViewModel @Inject constructor(
         loggingService.logError(TAG, throwable.stackTraceToString())
 
         if (throwable is GeoLocationException) {
-            showError(throwable.message.toString())
+            statusRenderer.showError(throwable.message.toString())
             retryGeoLocationOrGotoCitySelectionScreen()
         } else {
-            showError(throwable.message.toString())
+            statusRenderer.showError(throwable.message.toString())
         }
     }
 
@@ -129,7 +132,7 @@ class GeoLocationViewModel @Inject constructor(
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {
                 loggingService.logError(TAG, errorMessage)
-                showError(errorMessage)
+                statusRenderer.showError(errorMessage)
             }
 
             override fun onNoGeoLocationPermission() {
@@ -166,7 +169,7 @@ class GeoLocationViewModel @Inject constructor(
                 loggingService.logInfoEvent(TAG, "City and its location saved successfully.")
                 _geoLocationByCitySuccessFlow.tryEmit(cityModel)
             } catch (ex: Exception) {
-                showError(ex.message.toString())
+                statusRenderer.showError(ex.message.toString())
             }
         }
     }

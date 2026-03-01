@@ -34,21 +34,18 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
 
-    @Inject lateinit var statusRendererFactory: StatusRenderer.Factory
+    @Inject lateinit var statusRenderer: StatusRenderer
     @Inject lateinit var weatherCoordinatorFactory: WeatherCoordinator.Factory
     @Inject lateinit var permissionResolver: PermissionResolver
     @Inject lateinit var resourceManager: ResourceManager
     @Inject lateinit var alertDialogFactory: AlertDialogFactory
 
-    private var mainView: View? = null
     private val args: WeatherFragmentArgs by navArgs()
+    private val forecastViewModel: CurrentWeatherViewModel by activityViewModels()
+    private val appBarViewModel: AppBarViewModel by activityViewModels()
+    private val geoLocationViewModel: GeoLocationViewModel by activityViewModels()
+    private val hourlyWeatherViewModel: HourlyWeatherViewModel by activityViewModels()
 
-    private val forecastViewModel by activityViewModels<CurrentWeatherViewModel>()
-    private val appBarViewModel by activityViewModels<AppBarViewModel>()
-    private val geoLocationViewModel by activityViewModels<GeoLocationViewModel>()
-    private val hourlyWeatherViewModel by activityViewModels<HourlyWeatherViewModel>()
-
-    private lateinit var statusRenderer: StatusRenderer
     private lateinit var coordinator: WeatherCoordinator
 
     private val requestPermissionLauncher =
@@ -57,12 +54,22 @@ class WeatherFragment : Fragment() {
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return ComposeView(requireContext())
+        return ComposeView(requireContext()).apply {
+            setContent {
+                CurrentWeatherLayout(
+                    mainContentTextColor = Color.Black,
+                    onCityClick = { gotoCitySelectionScreen() },
+                    onBackClick = { activity?.finish() },
+                    appBarViewModel = appBarViewModel,
+                    viewModel = forecastViewModel,
+                    hourlyViewModel = hourlyWeatherViewModel
+                )
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainView = view
 
         permissionResolver.connect(
             launcher = requestPermissionLauncher,
@@ -71,16 +78,15 @@ class WeatherFragment : Fragment() {
             }
         )
 
-        val alertDialogHelper = AlertDialogHelper(requireActivity())
-        val dialogController = WeatherDialogControllerFactory(alertDialogFactory, alertDialogHelper)
+        val dialogController = WeatherDialogControllerFactory(
+            alertDialogFactory,
+            AlertDialogHelper(requireActivity())
+        )
             .create()
-
-        statusRenderer = statusRendererFactory.create(appBarViewModel)
 
         coordinator = weatherCoordinatorFactory.create(
             forecastViewModel = forecastViewModel,
             appBarViewModel = appBarViewModel,
-            hourlyViewModel = hourlyWeatherViewModel,
             geoLocationViewModel = geoLocationViewModel,
             statusRenderer = statusRenderer,
             dialogController = dialogController,
@@ -96,25 +102,9 @@ class WeatherFragment : Fragment() {
 
         statusRenderer.showLoadingStatusFor(args.chosenCity)
         forecastViewModel.launchWeatherForecast(args.chosenCity)
-
-        (view as ComposeView).setContent {
-            CurrentWeatherLayout(
-                mainContentTextColor = Color.Black,
-                onCityClick = { gotoCitySelectionScreen() },
-                onBackClick = { activity?.finish() },
-                appBarViewModel = appBarViewModel,
-                viewModel = forecastViewModel,
-                hourlyViewModel = hourlyWeatherViewModel
-            )
-        }
     }
 
     private fun gotoCitySelectionScreen() {
         findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
-    }
-
-    override fun onDestroyView() {
-        mainView = null
-        super.onDestroyView()
     }
 }

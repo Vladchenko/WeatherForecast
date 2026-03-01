@@ -4,6 +4,7 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.models.presentation.Message
 import com.example.weatherforecast.models.presentation.MessageType
 import com.example.weatherforecast.utils.ResourceManager
+import javax.inject.Inject
 
 /**
  * A utility class responsible for rendering application status messages in the UI.
@@ -16,64 +17,35 @@ import com.example.weatherforecast.utils.ResourceManager
  *
  * This class is typically used in ViewModels to communicate transient UI states.
  *
- * @property statusDisplay The target component that will display the status (e.g., AppBarViewModel)
+ * @property currentTarget The target component that will display the status (e.g., AppBarViewModel)
  * @property resourceManager Helper for resolving Android string resources
  */
-class StatusRenderer(
-    private val statusDisplay: StatusDisplay,
+class StatusRenderer @Inject constructor(
     private val resourceManager: ResourceManager
 ) {
 
+    private var currentTarget: StatusDisplay? = null
+
     /**
-     * Updates the displayed status based on a [Message] object.
+     * Sets the current component that will display status messages.
      *
-     * Translates message content (text or resource ID) into a visible UI status
-     * with appropriate type (info, warning, error). Uses [resourceManager] to resolve string resources.
+     * Should be called when a UI component (e.g., AppBarViewModel) becomes active
+     * and ready to receive status updates.
      *
-     * @param message The message containing status text/content and type
+     * @param target The status display implementation to use
      */
-    fun updateFromMessage(message: Message) {
-        val status = when (message) {
-            is Message.Success -> {
-                when (val content = message.content) {
-                    is Message.Content.Text ->
-                        StatusDisplay.Status(text = content.message, type = MessageType.INFO)
+    fun setTarget(target: StatusDisplay) {
+        this.currentTarget = target
+    }
 
-                    is Message.Content.Resource ->
-                        StatusDisplay.Status(
-                            text = resourceManager.getString(content.resId, *content.args),
-                            type = MessageType.INFO
-                        )
-                }
-            }
-
-            is Message.Error -> {
-                when (val content = message.content) {
-                    is Message.Content.Text ->
-                        StatusDisplay.Status(text = content.message, type = MessageType.ERROR)
-
-                    is Message.Content.Resource ->
-                        StatusDisplay.Status(
-                            text = resourceManager.getString(content.resId, *content.args),
-                            type = MessageType.ERROR
-                        )
-                }
-            }
-
-            is Message.Warning -> {
-                when (val content = message.content) {
-                    is Message.Content.Text ->
-                        StatusDisplay.Status(text = content.message, type = MessageType.WARNING)
-
-                    is Message.Content.Resource ->
-                        StatusDisplay.Status(
-                            text = resourceManager.getString(content.resId, *content.args),
-                            type = MessageType.WARNING
-                        )
-                }
-            }
-        }
-        statusDisplay.showStatus(status)
+    /**
+     * Clears the current status display target.
+     *
+     * Must be called when the previous target is being destroyed (e.g., in onCleared())
+     * to prevent memory leaks and stale references.
+     */
+    fun clearTarget() {
+        this.currentTarget = null
     }
 
     /**
@@ -82,7 +54,7 @@ class StatusRenderer(
      * @param text Message text to show in the UI
      */
     fun showStatus(text: String) {
-        statusDisplay.showStatus(StatusDisplay.Status(text = text, type = MessageType.INFO))
+        currentTarget?.showStatus(StatusDisplay.Status(text = text, type = MessageType.INFO))
     }
 
     /**
@@ -91,7 +63,7 @@ class StatusRenderer(
      * @param text Error message text to show in the UI
      */
     fun showError(text: String) {
-        statusDisplay.showStatus(StatusDisplay.Status(text = text, type = MessageType.ERROR))
+        currentTarget?.showStatus(StatusDisplay.Status(text = text, type = MessageType.ERROR))
     }
 
     /**
@@ -100,7 +72,7 @@ class StatusRenderer(
      * @param text Warning message text to show in the UI
      */
     fun showWarning(text: String) {
-        statusDisplay.showStatus(StatusDisplay.Status(text = text, type = MessageType.WARNING))
+        currentTarget?.showStatus(StatusDisplay.Status(text = text, type = MessageType.WARNING))
     }
 
     /**
@@ -109,7 +81,7 @@ class StatusRenderer(
      * Loads the message from [R.string.city_selection_title].
      */
     fun showCitySelectionStatus() {
-        statusDisplay.showStatus(
+        currentTarget?.showStatus(
             StatusDisplay.Status(
                 text = resourceManager.getString(R.string.city_selection_title),
                 type = MessageType.INFO
@@ -127,14 +99,14 @@ class StatusRenderer(
      */
     fun showLoadingStatusFor(city: String) {
         if (city.isBlank()) {
-            statusDisplay.showStatus(
+            currentTarget?.showStatus(
                 StatusDisplay.Status(
                     text = resourceManager.getString(R.string.forecast_downloading),
                     type = MessageType.INFO
                 )
             )
         } else {
-            statusDisplay.showStatus(
+            currentTarget?.showStatus(
                 StatusDisplay.Status(
                     text = resourceManager.getString(
                         R.string.forecast_for_city_loading,
@@ -144,14 +116,5 @@ class StatusRenderer(
                 )
             )
         }
-    }
-
-    /**
-     * Factory for creating [StatusRenderer] with ViewModel (not available in DI graph).
-     * Provided via [com.example.weatherforecast.di.PresentationModule].
-     */
-    class Factory(private val resourceManager: ResourceManager) {
-        fun create(statusTarget: StatusDisplay): StatusRenderer =
-            StatusRenderer(statusTarget, resourceManager)
     }
 }

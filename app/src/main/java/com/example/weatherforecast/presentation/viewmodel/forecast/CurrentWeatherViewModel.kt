@@ -17,6 +17,7 @@ import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,12 +36,12 @@ import javax.inject.Inject
  * This ViewModel handles:
  * - Loading current weather data from remote or local sources
  * - Managing UI state via [forecastStateFlow]
- * - Responding to city selection and location-based requests
  * - Persisting chosen city and its coordinates
  * - Handling errors and showing appropriate messages
  * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
  *
  * @property connectivityObserver observes internet connectivity state
+ * @property statusRenderer Displays loading, success, warning, or error statuses
  * @property loggingService centralized service for application logging
  * @property resourceManager provides access to Android resources (strings, etc.)
  * @property preferencesManager manages user preferences (e.g. temperature unit)
@@ -52,6 +53,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
+    private val statusRenderer: StatusRenderer,
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
@@ -59,7 +61,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastRemoteInteractor: CurrentWeatherInteractor,
     private val weatherDomainToUiConverter: WeatherDomainToUiConverter,
-) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
+) : AbstractViewModel(connectivityObserver) {
 
     //region flows
     val forecastStateFlow: StateFlow<WeatherUiState>
@@ -70,8 +72,6 @@ class CurrentWeatherViewModel @Inject constructor(
         get() = _chosenCityBlankSharedFlow
     val chosenCityNotFoundStateFlow: SharedFlow<String>
         get() = _chosenCityNotFoundSharedFlow
-    val gotoCitySelectionStateFlow: SharedFlow<Unit>
-        get() = _gotoCitySelectionSharedFlow
 
     private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1
@@ -79,7 +79,6 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _forecastStateFlow = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow("")
     private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
-    private val _gotoCitySelectionSharedFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
 
     //endregion flows
 
@@ -90,7 +89,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in weather forecast loading", throwable)
-        showError(throwable.message.toString())
+        statusRenderer.showError(throwable.message.toString())
         showProgressBarState.value = false
     }
 
@@ -101,13 +100,6 @@ class CurrentWeatherViewModel @Inject constructor(
                 temperatureType = tempType
             }
         }
-    }
-
-    /**
-     * Navigates to the city selection screen by emitting an event.
-     */
-    fun gotoCitySelection() {
-        _gotoCitySelectionSharedFlow.tryEmit(Unit)
     }
 
     /**
@@ -130,15 +122,6 @@ class CurrentWeatherViewModel @Inject constructor(
             }
             loadWeatherForecast(city)
         }
-    }
-
-    /**
-     * Updates the UI state with the selected city name.
-     *
-     * @param city the name of the city to display
-     */
-    fun updateChosenCityState(city: String) {
-        _chosenCityStateFlow.value = city
     }
 
     /**
@@ -216,7 +199,7 @@ class CurrentWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Local -> {
-                showWarning(
+                statusRenderer.showWarning(
                     resourceManager.getString(
                         R.string.forecast_for_city_outdated, city
                     )
@@ -226,9 +209,14 @@ class CurrentWeatherViewModel @Inject constructor(
 
             is LoadResult.Error -> {
                 when (result.error) {
-                    is ForecastError.NoInternet -> showError(R.string.disconnected)
+                    is ForecastError.NoInternet -> statusRenderer.showError(
+                        resourceManager.getString(
+                            R.string.disconnected
+                        )
+                    )
+
                     is ForecastError.CityNotFound -> {
-                        showWarning(
+                        statusRenderer.showWarning(
                             resourceManager.getString(
                                 R.string.no_selected_city_forecast,
                                 city
@@ -236,9 +224,16 @@ class CurrentWeatherViewModel @Inject constructor(
                         )
                         _chosenCityNotFoundSharedFlow.tryEmit(city)
                     }
+
                     else -> {
-                        loggingService.logError(TAG, "Error loading forecast for city: $city", Exception(result.error.toString()))
-                        showError(resourceManager.getString(R.string.forecast_for_city_error))
+                        loggingService.logError(
+                            TAG,
+                            "Error loading forecast for city: $city",
+                            Exception(result.error.toString())
+                        )
+                        statusRenderer.showError(
+                            resourceManager.getString(R.string.forecast_for_city_error)
+                        )
                     }
                 }
             }

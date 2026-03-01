@@ -22,7 +22,9 @@ import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.city.ChosenCityRepository
 import com.example.weatherforecast.presentation.PresentationUtils
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
+import com.example.weatherforecast.utils.ResourceManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -135,14 +137,16 @@ class CityManagementModule {
     @Provides
     fun provideCitiesNamesViewModelFactory(
         loggingService: LoggingService,
+        statusRenderer: StatusRenderer,
+        resourceManager: ResourceManager,
         connectivityObserver: ConnectivityObserver,
-        coroutineDispatchers: CoroutineDispatchers,
         citiesNamesInteractor: CitiesNamesInteractor
     ): CitiesNamesViewModelFactory {
         return CitiesNamesViewModelFactory(
             loggingService,
+            statusRenderer,
+            resourceManager,
             connectivityObserver,
-            coroutineDispatchers,
             citiesNamesInteractor
         )
     }

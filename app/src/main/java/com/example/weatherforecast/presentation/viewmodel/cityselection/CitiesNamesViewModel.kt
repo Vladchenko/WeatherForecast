@@ -5,17 +5,18 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.data.util.LoggingService
-import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNames
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
+import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -23,97 +24,121 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel for managing the city name search and selection UI state.
+ * ViewModel responsible for managing UI state and business logic in the city selection screen.
  *
- * This ViewModel handles:
- * - Observing user input (city name mask)
- * - Fetching matching city names from the domain layer
- * - Managing UI state for city suggestions
- * - Error handling during data retrieval
- * - Clearing cached data on demand
+ * ## Responsibilities
+ * - Manages user input for city name search with debounced query processing
+ * - Loads and filters available city names based on user input
+ * - Handles navigation events (back, select city)
+ * - Displays status messages (errors, loading states) via [StatusRenderer]
+ * - Responds to network connectivity changes inherited from [AbstractViewModel]
  *
- * It uses [CitiesNamesInteractor] to retrieve data and respects internet connectivity
- * via [ConnectivityObserver]. All coroutines are launched in [viewModelScope]
- * with proper exception handling. Logging is performed using [LoggingService] instead of direct
- * calls to [android.util.Log], ensuring consistent and testable logging behavior across the app.
+ * ## State Flows
+ * - [_cityMaskStateFlow]: Tracks current text input in the search field
+ * - [_citiesNamesStateFlow]: Holds filtered list of cities matching the query
+ * - [_navigationEventFlow]: Emits navigation commands to the UI layer
  *
- * @property connectivityObserver Observes network connectivity state
- * @property loggingService Service for structured logging across the application
- * @property coroutineDispatchers Provides dispatchers for coroutine execution
- * @property citiesNamesInteractor Business logic handler for city name operations
+ * ## Event Handling
+ * Uses a sealed class [CitySelectionEvent] to handle all user interactions in a unidirectional data flow manner.
+ * This ensures predictable state changes and simplifies testing.
+ *
+ * ## Search Behavior
+ * Implements debounce (1 second) on user input to avoid excessive database or API calls.
+ * Only triggers search when:
+ * - Input is not blank
+ * - Value has changed since last emission
+ *
+ * ## Error Handling
+ * Uses [CoroutineExceptionHandler] to catch and process exceptions during city lookup:
+ * - [NoSuchDatabaseEntryException]: Shows localized error about missing default city
+ * - Other exceptions: Display raw message via [StatusRenderer]
+ *
+ * ## Thread Safety
+ * All coroutines are launched in [viewModelScope], ensuring automatic cancellation on ViewModel destruction.
+ * State updates occur on the main thread, safe for UI observation.
+ *
+ * @param connectivityObserver Monitors network state; inherited base functionality from [AbstractViewModel]
+ * @property loggingService Logs errors and debug information
+ * @property statusRenderer Displays status messages to the user
+ * @property resourceManager Provides access to string resources for dynamic UI content
+ * @property citiesNamesInteractor Business logic layer for loading and filtering city names
  */
-@FlowPreview
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
     private val loggingService: LoggingService,
-    private val coroutineDispatchers: CoroutineDispatchers,
-    private val citiesNamesInteractor: CitiesNamesInteractor,
-) : AbstractViewModel(connectivityObserver, coroutineDispatchers) {
-
-    /**
-     * A [SharedFlow] that emits navigation events based on user actions.
-     *
-     * Emits values such as:
-     * - [CityNavigationEvent.NavigateUp] — when the user requests to go back
-     * - [CityNavigationEvent.OpenWeatherFor] — when a city is selected
-     *
-     * The UI layer should collect this flow to perform navigation actions.
-     * Events are emitted one-off and should be consumed immediately.
-     */
-    val navigationEventFlow: SharedFlow<CityNavigationEvent?>
-        get() = _navigationEventFlow
-
-    /**
-     * A [StateFlow] that emits the current user input for city name search.
-     *
-     * This value is updated via [onEvent] with [CitySelectionEvent.UpdateQuery].
-     * Used internally to trigger debounced city name lookups.
-     */
-    val cityMaskStateFlow: StateFlow<String>
-        get() = _cityMaskStateFlow
-
-    /**
-     * A [StateFlow] that holds the latest list of cities matching the current search query.
-     *
-     * Value is `null` if no search has been performed or results were cleared.
-     * Updated automatically after a successful call to [fetchCities].
-     */
-    val citiesNamesStateFlow: StateFlow<CitiesNames?>
-        get() = _citiesNamesStateFlow
+    private val statusRenderer: StatusRenderer,
+    private val resourceManager: ResourceManager,
+    private val citiesNamesInteractor: CitiesNamesInteractor
+) : AbstractViewModel(connectivityObserver) {
 
     private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent?>()
-    private val _cityMaskStateFlow: MutableStateFlow<String> = MutableStateFlow("")
-    private val _citiesNamesStateFlow: MutableStateFlow<CitiesNames?> = MutableStateFlow(null)
 
-    init {
-        startDebouncedSearch()
-        showMessage(R.string.city_selection_title)
-    }
+    /**
+     * Flow of navigation events triggered by user actions.
+     *
+     * Emits one-time events such as:
+     * - Navigating back up
+     * - Selecting a specific city to view its weather
+     *
+     * Consumers should collect this flow and trigger corresponding navigation actions.
+     * Events are nullable to allow resetting state if needed.
+     */
+    val navigationEventFlow: SharedFlow<CityNavigationEvent?> = _navigationEventFlow
+
+    private val _cityMaskStateFlow = MutableStateFlow("")
+
+    /**
+     * State flow representing the current user input in the city search field.
+     *
+     * Updated via [onEvent] with [CitySelectionEvent.UpdateQuery].
+     * Used to trigger debounced city name lookups.
+     */
+    val cityMaskStateFlow: StateFlow<String> = _cityMaskStateFlow.asStateFlow()
+
+    private val _citiesNamesStateFlow = MutableStateFlow<CitiesNames?>(null)
+
+    /**
+     * State flow holding the result of the latest city name search.
+     *
+     * Contains a [CitiesNames] object with:
+     * - List of cities matching the current query
+     * - Optional error message from data layer
+     *
+     * Null until first successful search.
+     */
+    val citiesNamesStateFlow: StateFlow<CitiesNames?> = _citiesNamesStateFlow.asStateFlow()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, throwable.message.orEmpty(), throwable)
         when (throwable) {
             is NoSuchDatabaseEntryException -> {
-                showError(R.string.default_city_absent)
-                loggingService.logError(TAG, "Default city not found in database", throwable)
+                statusRenderer.showError(resourceManager.getString(R.string.default_city_absent))
             }
-            is Exception -> {
-                showError(throwable.message.toString())
-                loggingService.logError(TAG, "Unexpected error in city name loading", throwable)
+            else -> {
+                statusRenderer.showError(throwable.message.toString())
             }
         }
     }
 
+    init {
+        startDebouncedSearch()
+        statusRenderer.showCitySelectionStatus()
+    }
+
     /**
-     * Starts observing the city mask input with debounce, filtering, and distinct emission.
+     * Starts observing user input with debounce and filtering.
      *
-     * Waits 1 second after user stops typing, ignores empty queries, and avoids duplicate work.
-     * Triggers a city name lookup via [fetchCities] upon valid input.
+     * Launches a coroutine that:
+     * - Waits 1 second after each input change
+     * - Ignores blank inputs
+     * - Skips duplicate values
+     * - Triggers city fetch for valid queries
+     *
+     * Ensures efficient use of resources by minimizing unnecessary lookups.
      */
-    @FlowPreview
     private fun startDebouncedSearch() {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             _cityMaskStateFlow
                 .debounce(1000)
                 .filter { it.isNotBlank() }
@@ -125,39 +150,35 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     /**
-     * Handles incoming UI events related to city selection.
+     * Processes incoming UI events and updates state accordingly.
      *
-     * Supported events:
-     * - [CitySelectionEvent.UpdateQuery]: Updates the search query and triggers a debounced search.
-     * - [CitySelectionEvent.ClearQuery]: Clears the current query and removes suggestion results.
-     * - [CitySelectionEvent.SelectCity]: Navigates to the weather screen for the selected city.
-     * - [CitySelectionEvent.NavigateUp]: Requests navigation back to the previous screen.
+     * Dispatches behavior based on event type:
+     * - [CitySelectionEvent.NavigateUp]: Sends navigation up command
+     * - [CitySelectionEvent.SelectCity]: Navigates to weather screen for selected city
+     * - [CitySelectionEvent.ClearQuery]: Resets search query and clears results
+     * - [CitySelectionEvent.UpdateQuery]: Updates search mask and triggers debounced search
      *
-     * @param event the user action to process
+     * @param event The user action to process
      */
     fun onEvent(event: CitySelectionEvent) {
         when (event) {
             is CitySelectionEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.NavigateUp)
-
             is CitySelectionEvent.SelectCity -> sendNavigationEvent(CityNavigationEvent.OpenWeatherFor(event.city))
-
             is CitySelectionEvent.ClearQuery -> {
                 _cityMaskStateFlow.value = ""
                 _citiesNamesStateFlow.value = null
             }
-
-            is CitySelectionEvent.UpdateQuery -> {
-                _cityMaskStateFlow.value = event.mask
-            }
+            is CitySelectionEvent.UpdateQuery -> _cityMaskStateFlow.value = event.mask
         }
     }
 
     /**
-     * Sends a navigation event through the shared flow.
+     * Emits a navigation event to the [navigationEventFlow].
      *
-     * Launched in [viewModelScope] to ensure lifecycle-safe emission.
+     * Used to communicate one-shot navigation commands to the UI controller.
+     * Launches in [viewModelScope] to ensure lifecycle safety.
      *
-     * @param event The navigation event to emit
+     * @param event The navigation command to emit
      */
     private fun sendNavigationEvent(event: CityNavigationEvent) {
         viewModelScope.launch {
@@ -166,37 +187,24 @@ class CitiesNamesViewModel @Inject constructor(
     }
 
     /**
-     * Fetches city names matching the given query from the domain layer.
+     * Fetches cities matching the given query from the interactor layer.
      *
-     * On success, updates [citiesNamesStateFlow] with the result.
-     * If an error is returned by the interactor, shows it via [showError].
-     * Any exceptions are caught and logged via [loggingService].
+     * Executes suspended call to [citiesNamesInteractor.loadCitiesNames].
+     * Updates [_citiesNamesStateFlow] with result.
+     * Shows error via [statusRenderer] if response contains an error message.
      *
-     * @param query The city name mask entered by the user
+     * @param query The city name substring to search for
      */
     private suspend fun fetchCities(query: String) {
         try {
             val response = citiesNamesInteractor.loadCitiesNames(query)
             _citiesNamesStateFlow.value = response
             if (response.error.isNotBlank()) {
-                showError(response.error)
+                statusRenderer.showError(response.error)
             }
         } catch (e: Exception) {
             loggingService.logError(TAG, "Error loading cities for query: $query", e)
-            showError(e.message.toString())
-        }
-    }
-
-    /**
-     * Deletes all cached city names from the database.
-     *
-     * Logs the operation at debug level and runs on IO dispatcher with error handling.
-     * Useful for clearing outdated or corrupted data.
-     */
-    private fun deleteAllCitiesNames() {
-        loggingService.logInfoEvent(TAG, "Deleting all city names from database")
-        viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
-            citiesNamesInteractor.deleteAllCitiesNames()
+            statusRenderer.showError(e.message.toString())
         }
     }
 

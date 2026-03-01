@@ -9,12 +9,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
-import com.example.weatherforecast.presentation.coordinator.CitiesNamesCoordinator
 import com.example.weatherforecast.presentation.navigation.WeatherNavigator
-import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import com.example.weatherforecast.utils.ResourceManager
@@ -34,16 +31,10 @@ import javax.inject.Inject
 class CitiesNamesFragment : Fragment() {
 
     @Inject
-    lateinit var statusRendererFactory: StatusRenderer.Factory
-
-    @Inject
     lateinit var resourceManager: ResourceManager
 
     private val viewModel by viewModels<CitiesNamesViewModel>()
     private val appBarViewModel by activityViewModels<AppBarViewModel>()
-
-    private lateinit var statusRenderer: StatusRenderer
-    private lateinit var coordinator: CitiesNamesCoordinator
     private val navigator by lazy { WeatherNavigator(findNavController()) }
 
     @FlowPreview
@@ -67,13 +58,6 @@ class CitiesNamesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         navigator.start(viewLifecycleOwner, viewModel.navigationEventFlow)
-
-        statusRenderer = statusRendererFactory.create(appBarViewModel)
-        coordinator = CitiesNamesCoordinator(viewModel, statusRenderer)
-        coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
-
-        statusRenderer.showCitySelectionStatus()
     }
 }

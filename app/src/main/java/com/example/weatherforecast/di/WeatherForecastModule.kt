@@ -36,6 +36,7 @@ import com.example.weatherforecast.models.data.DataErrorToForecastErrorMapper
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverterImpl
 import com.example.weatherforecast.presentation.converter.appbar.AppBarStateConverter
+import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModelFactory
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyWeatherViewModelFactory
@@ -258,6 +259,7 @@ class WeatherForecastModule {
     @Provides
     fun provideForecastViewModelFactory(
         loggingService: LoggingService,
+        statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
         preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
@@ -268,6 +270,7 @@ class WeatherForecastModule {
     ): CurrentWeatherViewModelFactory {
         return CurrentWeatherViewModelFactory(
             loggingService,
+            statusRenderer,
             resourceManager,
             preferencesManager,
             connectivityObserver,
@@ -282,6 +285,7 @@ class WeatherForecastModule {
     @Provides
     fun provideHourlyForecastViewModelFactory(
         loggingService: LoggingService,
+        statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
         preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
@@ -291,6 +295,7 @@ class WeatherForecastModule {
     ): HourlyWeatherViewModelFactory {
         return HourlyWeatherViewModelFactory(
             loggingService,
+            statusRenderer,
             resourceManager,
             preferencesManager,
             connectivityObserver,
@@ -305,6 +310,7 @@ class WeatherForecastModule {
     fun provideGeoLocationViewModelFactory(
         geoLocationHelper: Geolocator,
         loggingService: LoggingService,
+        statusRenderer: StatusRenderer,
         geoLocator: DeviceLocationProvider,
         permissionChecker: PermissionChecker,
         connectivityObserver: ConnectivityObserver,
@@ -312,8 +318,9 @@ class WeatherForecastModule {
         coroutineDispatchers: CoroutineDispatchers,
     ): GeoLocationViewModelFactory {
         return GeoLocationViewModelFactory(
-            loggingService,
             geoLocationHelper,
+            loggingService,
+            statusRenderer,
             geoLocator,
             permissionChecker,
             connectivityObserver,
@@ -331,10 +338,12 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideAppBarViewModelFactory(
+        statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
         appBarStateConverter: AppBarStateConverter
     ): AppBarViewModelFactory {
         return AppBarViewModelFactory(
+            statusRenderer,
             resourceManager,
             appBarStateConverter
         )
