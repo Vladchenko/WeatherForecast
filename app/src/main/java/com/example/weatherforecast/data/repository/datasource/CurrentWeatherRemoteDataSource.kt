@@ -10,12 +10,6 @@ import kotlinx.serialization.InternalSerializationApi
 interface CurrentWeatherRemoteDataSource {
 
     /**
-     * Receive weather forecast for [city].
-     */
-    @InternalSerializationApi
-    suspend fun loadWeatherForCity(city: String): DataResult<CurrentWeatherDto>
-
-    /**
      * Receive weather forecast for a location defined by [latitude] and [longitude].
      */
     @InternalSerializationApi

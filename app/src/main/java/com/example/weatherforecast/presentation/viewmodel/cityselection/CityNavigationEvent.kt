@@ -1,5 +1,7 @@
 package com.example.weatherforecast.presentation.viewmodel.cityselection
 
+import com.example.weatherforecast.models.domain.CityLocationModel
+
 /**
  * Sealed interface representing navigation commands emitted by [CitiesNamesViewModel].
  *
@@ -19,5 +21,5 @@ sealed interface CityNavigationEvent {
      *
      * @property city Full display name of the city (e.g., "Kazan, Tatarstan, RU")
      */
-    data class OpenWeatherFor(val city: String) : CityNavigationEvent
+    data class OpenWeatherFor(val city: CityLocationModel) : CityNavigationEvent
 }

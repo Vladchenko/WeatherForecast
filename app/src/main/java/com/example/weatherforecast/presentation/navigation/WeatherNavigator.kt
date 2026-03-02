@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.view.fragments.cityselection.CitiesNamesFragmentDirections
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,7 +31,7 @@ class WeatherNavigator(private val navController: NavController) {
      */
     fun start(
         lifecycleOwner: LifecycleOwner,
-        navigationFlow: SharedFlow<CityNavigationEvent?>
+        navigationFlow: SharedFlow<CityNavigationEvent>
     ) {
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -49,9 +50,12 @@ class WeatherNavigator(private val navController: NavController) {
         }
     }
 
-    private fun openCurrentWeatherFragment(city: String) {
+    private fun openCurrentWeatherFragment(city: CityLocationModel) {
         val action =
-            CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(city)
+            CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(
+                city.city,
+                city.location.latitude.toString(),
+                city.location.longitude.toString())
         navController.navigate(action)
     }
 }

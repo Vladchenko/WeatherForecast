@@ -1,5 +1,7 @@
 package com.example.weatherforecast.presentation.viewmodel.cityselection
 
+import com.example.weatherforecast.models.domain.CityLocationModel
+
 /**
  * Sealed interface representing user actions in the city selection screen.
  *
@@ -45,5 +47,5 @@ sealed interface CitySelectionEvent {
      *
      * @property city Full name of the selected city (e.g., "Kazan, Tatarstan, RU")
      */
-    data class SelectCity(val city: String) : CitySelectionEvent
+    data class SelectCity(val city: CityLocationModel) : CitySelectionEvent
 }

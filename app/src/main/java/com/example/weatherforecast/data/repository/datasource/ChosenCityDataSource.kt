@@ -1,6 +1,5 @@
 package com.example.weatherforecast.data.repository.datasource
 
-import android.location.Location
 import com.example.weatherforecast.models.domain.CityLocationModel
 
 /**
@@ -13,9 +12,9 @@ interface ChosenCityDataSource {
     suspend fun loadCity(): CityLocationModel
 
     /**
-     * Save [city] and its [location] to some storage.
+     * Save [CityLocationModel] to some storage.
      */
-    suspend fun saveCity(city: String, location: Location)
+    suspend fun saveCity(cityModel: CityLocationModel)
 
     /**
      * Remove city model from storage.

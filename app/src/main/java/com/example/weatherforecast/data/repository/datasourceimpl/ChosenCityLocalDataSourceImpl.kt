@@ -20,11 +20,11 @@ class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPrefere
         )
     }
 
-    override suspend fun saveCity(city: String, location: Location) {
+    override suspend fun saveCity(cityModel: CityLocationModel) {
         sharedPreferences.edit().apply {
-            putString(SAVED_CITY_ARGUMENT_KEY, city)
-            putString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, location.latitude.toString())
-            putString(SAVED_CITY_LONGITUDE_ARGUMENT_KEY, location.longitude.toString())
+            putString(SAVED_CITY_ARGUMENT_KEY, cityModel.city)
+            putString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, cityModel.location.latitude.toString())
+            putString(SAVED_CITY_LONGITUDE_ARGUMENT_KEY, cityModel.location.longitude.toString())
         }.apply()
     }
 

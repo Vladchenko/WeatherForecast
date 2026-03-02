@@ -1,5 +1,7 @@
 package com.example.weatherforecast.presentation.view.fragments.cityselection
 
+import android.location.Location
+import android.location.LocationManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityDomainModel
+import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
 import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
@@ -369,9 +372,19 @@ private fun AddressEdit(
                 keyboardController?.hide()
             },
             onItemClick = { selectedCity ->
+                val location = Location(LocationManager.NETWORK_PROVIDER)
+                location.latitude = selectedCity.lat
+                location.longitude = selectedCity.lon
                 onEvent(
                     CitySelectionEvent.SelectCity(
-                        getFullCityName(selectedCity.name, selectedCity.state, selectedCity.country)
+                        CityLocationModel(
+                            getFullCityName(
+                                selectedCity.name,
+                                selectedCity.state,
+                                selectedCity.country
+                            ),
+                            location
+                        )
                     )
                 )
                 onEvent(CitySelectionEvent.ClearQuery)

@@ -11,16 +11,6 @@ import com.example.weatherforecast.models.domain.LoadResult
 interface CurrentWeatherRepository {
 
     /**
-     * Retrieve weather forecast model for [temperatureType] and [city] and save it to database
-     *
-     * @return result with data model
-     */
-    suspend fun refreshWeatherForCity(
-        temperatureType: TemperatureType,
-        city: String
-    ): LoadResult<CurrentWeather>
-
-    /**
      * Retrieve remote weather model for [temperatureType] and [latitude], [longitude]
      *
      * @return result with data model

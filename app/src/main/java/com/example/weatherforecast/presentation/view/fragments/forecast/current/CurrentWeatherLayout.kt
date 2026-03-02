@@ -97,8 +97,13 @@ fun CurrentWeatherLayout(
         viewModel.internetConnectedStateFlow
             .drop(1)    // First entry is dropped, since redundant
             .collect { isConnected ->
-                if (isConnected) {
-                    viewModel.launchWeatherForecast(viewModel.chosenCityStateFlow.value)
+                val cityModel = viewModel.chosenCityStateFlow.value
+                if (isConnected && cityModel != null) {
+                    viewModel.launchWeatherForecast(
+                        chosenCity = cityModel.city,
+                        latitude = cityModel.location.latitude.toString(),
+                        longitude = cityModel.location.longitude.toString()
+                    )
                 }
             }
     }

@@ -1,6 +1,5 @@
 package com.example.weatherforecast.data.repository
 
-import android.location.Location
 import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSource
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityRepository
@@ -23,9 +22,9 @@ class ChosenCityRepositoryImpl(
             chosenCityNameDataSource.loadCity()
         }
 
-    override suspend fun saveChosenCity(city: String, location: Location) =
+    override suspend fun saveChosenCity(cityModel: CityLocationModel) =
         withContext(coroutineDispatchers.io) {
-            chosenCityNameDataSource.saveCity(city, location)
+            chosenCityNameDataSource.saveCity(cityModel)
         }
 
     override suspend fun removeCity() =

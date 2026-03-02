@@ -20,10 +20,10 @@ class ChosenCityInteractor(private val chosenCityRepository: ChosenCityRepositor
     }
 
     /**
-     * Save model of city chosen by user, consisting its name, i.e.[city] and [Location]
+     * Save model of city chosen by user, consisting its name, i.e.[cityModel]
      */
-    suspend fun saveChosenCity(city: String, location: Location) {
-        chosenCityRepository.saveChosenCity(city, location)
+    suspend fun saveChosenCity(cityModel: CityLocationModel) {
+        chosenCityRepository.saveChosenCity(cityModel)
     }
 
     /**

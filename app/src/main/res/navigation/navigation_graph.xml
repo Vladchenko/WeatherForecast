@@ -17,9 +17,6 @@
             app:popExitAnim="@anim/nav_default_pop_exit_anim"
             app:popUpTo="@id/currentTimeForecastFragment"
             app:popUpToInclusive="true">
-            <argument
-                android:name="chosenCity"
-                app:argType="string" />
         </action>
     </fragment>
 
@@ -37,6 +34,14 @@
         </action>
         <argument
             android:name="chosenCity"
+            app:argType="string"
+            android:defaultValue = ""/>
+        <argument
+            android:name="latitude"
+            app:argType="string"
+            android:defaultValue = ""/>
+        <argument
+            android:name="longitude"
             app:argType="string"
             android:defaultValue = ""/>
     </fragment>

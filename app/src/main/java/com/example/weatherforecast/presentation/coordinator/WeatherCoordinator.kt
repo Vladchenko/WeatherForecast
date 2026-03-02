@@ -144,7 +144,11 @@ class WeatherCoordinator private constructor(
                 onPermanentlyDenied = onPermanentlyDenied,
                 onNegativeNoPermission = onNegativeNoPermission,
                 onForecastLoadForLocation = { locationModel ->
-                    forecastViewModel.loadRemoteForecastForLocation(locationModel)
+                    forecastViewModel.loadRemoteForecastForLocation(
+                        locationModel.city,
+                        locationModel.location.latitude.toString(),
+                        locationModel.location.longitude.toString()
+                    )
                 }
             )
 

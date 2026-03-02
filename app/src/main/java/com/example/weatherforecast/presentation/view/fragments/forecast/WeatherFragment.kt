@@ -81,8 +81,7 @@ class WeatherFragment : Fragment() {
         val dialogController = WeatherDialogControllerFactory(
             alertDialogFactory,
             AlertDialogHelper(requireActivity())
-        )
-            .create()
+        ).create()
 
         coordinator = weatherCoordinatorFactory.create(
             forecastViewModel = forecastViewModel,
@@ -101,7 +100,7 @@ class WeatherFragment : Fragment() {
         coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
 
         statusRenderer.showLoadingStatusFor(args.chosenCity)
-        forecastViewModel.launchWeatherForecast(args.chosenCity)
+        forecastViewModel.launchWeatherForecast(args.chosenCity, args.latitude, args.longitude)
     }
 
     private fun gotoCitySelectionScreen() {

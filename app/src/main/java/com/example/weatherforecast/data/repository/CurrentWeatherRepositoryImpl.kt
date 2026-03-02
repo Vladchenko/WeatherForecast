@@ -78,25 +78,6 @@ class CurrentWeatherRepositoryImpl(
 ) : CurrentWeatherRepository {
 
     @InternalSerializationApi
-    override suspend fun refreshWeatherForCity(
-        temperatureType: TemperatureType,
-        city: String
-    ): LoadResult<CurrentWeather> =
-        withContext(coroutineDispatchers.io) {
-            when (val result = currentWeatherRemoteDataSource.loadWeatherForCity(city)) {
-                is DataResult.Success -> {
-                    val dto = result.data
-                    fetchAndSave(dto, temperatureType)
-                        ?: LoadResult.Error(ForecastError.NoDataAvailable("Mapped DTO is null"))
-                }
-                is DataResult.Error -> {
-                    val forecastError = errorMapper.map(result.error)
-                    loadCachedWeatherForCityOrError(city, temperatureType, forecastError)
-                }
-            }
-        }
-
-    @InternalSerializationApi
     override suspend fun refreshWeatherForLocation(
         temperatureType: TemperatureType,
         latitude: Double,

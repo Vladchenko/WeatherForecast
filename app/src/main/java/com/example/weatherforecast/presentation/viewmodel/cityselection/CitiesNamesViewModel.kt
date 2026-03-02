@@ -72,7 +72,7 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor
 ) : AbstractViewModel(connectivityObserver) {
 
-    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent?>()
+    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
 
     /**
      * Flow of navigation events triggered by user actions.
@@ -84,7 +84,7 @@ class CitiesNamesViewModel @Inject constructor(
      * Consumers should collect this flow and trigger corresponding navigation actions.
      * Events are nullable to allow resetting state if needed.
      */
-    val navigationEventFlow: SharedFlow<CityNavigationEvent?> = _navigationEventFlow
+    val navigationEventFlow: SharedFlow<CityNavigationEvent> = _navigationEventFlow
 
     private val _cityMaskStateFlow = MutableStateFlow("")
 

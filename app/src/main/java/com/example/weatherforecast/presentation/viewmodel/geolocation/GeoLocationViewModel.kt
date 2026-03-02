@@ -154,35 +154,11 @@ class GeoLocationViewModel @Inject constructor(
     }
 
     /**
-     * Define geo location by [city]
-     */
-    fun defineLocationByCity(city: String) {
-        viewModelScope.launch(coroutineDispatchers.io) {
-            try {
-                val location = geoLocationHelper.defineLocationByCity(city)
-                loggingService.logInfoEvent(
-                    TAG,
-                    "Geo location defined successfully for city = $city, location = $location"
-                )
-                val cityModel = CityLocationModel(city, location)
-                saveChosenCity(cityModel)
-                loggingService.logInfoEvent(TAG, "City and its location saved successfully.")
-                _geoLocationByCitySuccessFlow.tryEmit(Unit)
-            } catch (ex: Exception) {
-                statusRenderer.showError(ex.message.toString())
-            }
-        }
-    }
-
-    /**
      * Save chosen city with data from [locationModel]
      */
     private fun saveChosenCity(locationModel: CityLocationModel) {
         viewModelScope.launch(exceptionHandler) {
-            chosenCityInteractor.saveChosenCity(
-                locationModel.city,
-                locationModel.location
-            )
+            chosenCityInteractor.saveChosenCity(locationModel)
             loggingService.logDebugEvent(
                 TAG,
                 "Chosen city saved to database: ${locationModel.city}"

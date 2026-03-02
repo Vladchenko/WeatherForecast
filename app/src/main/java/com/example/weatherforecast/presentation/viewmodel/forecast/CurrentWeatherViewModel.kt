@@ -66,7 +66,7 @@ class CurrentWeatherViewModel @Inject constructor(
     //region flows
     val forecastStateFlow: StateFlow<WeatherUiState>
         get() = _forecastStateFlow
-    val chosenCityStateFlow: StateFlow<String>
+    val chosenCityStateFlow: StateFlow<CityLocationModel?>
         get() = _chosenCityStateFlow
     val chosenCityBlankStateFlow: SharedFlow<Unit>
         get() = _chosenCityBlankSharedFlow
@@ -77,12 +77,11 @@ class CurrentWeatherViewModel @Inject constructor(
         extraBufferCapacity = 1
     )
     private val _forecastStateFlow = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
-    private val _chosenCityStateFlow = MutableStateFlow("")
+    private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
     private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
     //endregion flows
 
-    private var chosenCity: String? = null
     private var currentJob: Job? = null
 
     private lateinit var temperatureType: TemperatureType
@@ -107,70 +106,43 @@ class CurrentWeatherViewModel @Inject constructor(
      * If blank, attempts to load the last saved city from [chosenCityInteractor].
      *
      * @param chosenCity the city name selected by the user
+     * @param latitude latitude of the chosen city
+     * @param longitude longitude of the chosen city
      */
-    fun launchWeatherForecast(chosenCity: String) {
+    fun launchWeatherForecast(chosenCity: String, latitude: String, longitude: String) {
         viewModelScope.launch(exceptionHandler) {
-            val city = chosenCity.ifBlank {
-                val cityModel = chosenCityInteractor.loadChosenCity()
-                loggingService.logDebugEvent(
-                    TAG,
-                    "No chosen city from picker fragment. Loaded from database: " +
-                            "city = ${cityModel.city}, lat = ${cityModel.location.latitude}, " +
-                            "lon = ${cityModel.location.longitude}"
-                )
-                cityModel.city
+            val (cityName, latitude, longitude) = if (chosenCity.isBlank()) {
+                val savedModel = chosenCityInteractor.loadChosenCity()
+                Triple(savedModel.city, savedModel.location.latitude, savedModel.location.longitude)
+            } else {
+                val latValue = latitude.toDoubleOrNull() ?: run {
+                    statusRenderer.showError("Invalid latitude")
+                    return@launch
+                }
+                val lonValue = longitude.toDoubleOrNull() ?: run {
+                    statusRenderer.showError("Invalid longitude")
+                    return@launch
+                }
+                Triple(chosenCity, latValue, lonValue)
             }
-            loadWeatherForecast(city)
+
+            loadRemoteForecastForLocation(cityName, latitude.toString(), longitude.toString())
         }
     }
 
     /**
-     * Loads weather forecast for the given [city], or emits a blank city event if empty.
-     *
-     * @param city the city name to load forecast for
+     * Initiates remote forecast loading based [chosenCity] and its location - [latitude] and [longitude].
      */
-    private fun loadWeatherForecast(city: String) {
-        if (city.isBlank()) {
-            _chosenCityBlankSharedFlow.tryEmit(Unit)
-        } else {
-            chosenCity = city
-            loadRemoteForecastForCity(city)
-        }
-    }
-
-    /**
-     * Initiates remote forecast loading for a specific [city].
-     * Cancels any ongoing request to avoid multiple concurrent jobs.
-     *
-     * @param city the city name to fetch weather for
-     */
-    fun loadRemoteForecastForCity(city: String) {
-        showProgressBarState.value = true
-        if (currentJob?.isActive == true) return
-        currentJob = viewModelScope.launch(exceptionHandler) {
-            val result = forecastRemoteInteractor.loadWeatherForCity(
-                temperatureType,
-                city
-            )
-            processServerResponse(city, result)
-        }
-    }
-
-    /**
-     * Initiates remote forecast loading based on geographic [cityModel] location.
-     *
-     * @param cityModel contains city name and coordinates
-     */
-    fun loadRemoteForecastForLocation(cityModel: CityLocationModel) {
+    fun loadRemoteForecastForLocation(chosenCity: String, latitude: String, longitude: String) {
         showProgressBarState.value = true
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadWeatherForLocation(
                 temperatureType,
-                cityModel.location.latitude,
-                cityModel.location.longitude
+                latitude.toDouble(),
+                longitude.toDouble()
             )
-            processServerResponse(cityModel.city, result)
+            processServerResponse(chosenCity, result)
         }
     }
 
@@ -192,8 +164,7 @@ class CurrentWeatherViewModel @Inject constructor(
                     showRemoteForecast(result.data.copy(city = city))
                     val location = getLocation(result)
                     chosenCityInteractor.saveChosenCity(
-                        city = result.data.city,
-                        location = location
+                        CityLocationModel(city, location)
                     )
                 }
             }

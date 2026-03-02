@@ -23,11 +23,6 @@ class CurrentWeatherRemoteDataSourceImpl(
     private val responseProcessor: ResponseProcessor
 ) : CurrentWeatherRemoteDataSource {
 
-    override suspend fun loadWeatherForCity(city: String): DataResult<CurrentWeatherDto> {
-        val response = apiService.getCurrentWeatherForCity(city)
-        return handleResponse(response, "city = $city")
-    }
-
     override suspend fun loadWeatherForLocation(
         latitude: Double,
         longitude: Double

@@ -42,11 +42,11 @@ class WeatherWorker @AssistedInject constructor(
     override suspend fun doWork(): Result =
         try {
             val tempType = preferencesManager.temperatureTypeStateFlow.first()
-            val city = chosenCityRepository.loadChosenCity().city
+            val location = chosenCityRepository.loadChosenCity().location
             val weatherResponse =
-                currentWeatherRepository.refreshWeatherForCity(
+                currentWeatherRepository.refreshWeatherForLocation(
                     tempType,
-                    city
+                    location.latitude, location.longitude
                 )
 
             val timestamp = SimpleDateFormat(TIMESTAMP_PATTERN, Locale.getDefault()).format(
