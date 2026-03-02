@@ -6,7 +6,11 @@ import androidx.work.WorkManager
 import com.example.weatherforecast.BuildConfig
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.connectivity.ConnectivityObserverImpl
+import com.example.weatherforecast.data.api.ApiConstants.DEVELOPER_EMAIL
+import com.example.weatherforecast.data.api.ApiConstants.NOMINATIM_BASE_URL
+import com.example.weatherforecast.data.api.ApiConstants.USER_AGENT
 import com.example.weatherforecast.data.api.CityApiService
+import com.example.weatherforecast.data.api.NominatimApi
 import com.example.weatherforecast.data.api.WeatherApiService
 import dagger.Module
 import dagger.Provides
@@ -17,6 +21,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -49,29 +54,57 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    fun provideRetrofit(): Retrofit {
+    @Named(WEATHER)
+    fun provideDefaultRetrofit(): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
         }
-        val client = OkHttpClient.Builder().apply {
-            addInterceptor(loggingInterceptor)
-        }.build()
+        val client = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
         return Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
             .baseUrl(BuildConfig.API_BASE_URL)
             .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
     @Singleton
     @Provides
-    fun provideWeatherForecastApiService(retrofit: Retrofit): WeatherApiService {
+    @Named(NOMINATIM)
+    fun provideNominatimRetrofit(): Retrofit {
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("User-Agent", USER_AGENT)
+                    .addHeader("From", DEVELOPER_EMAIL)
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+        return Retrofit.Builder()
+            .baseUrl(NOMINATIM_BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideNominatimApi(@Named(NOMINATIM) retrofit: Retrofit): NominatimApi {
+        return retrofit.create(NominatimApi::class.java)
+    }
+
+
+    @Singleton
+    @Provides
+    fun provideWeatherForecastApiService(@Named(WEATHER) retrofit: Retrofit): WeatherApiService {
         return retrofit.create(WeatherApiService::class.java)
     }
 
     @Singleton
     @Provides
-    fun provideCityApiService(retrofit: Retrofit): CityApiService {
+    fun provideCityApiService(@Named(WEATHER) retrofit: Retrofit): CityApiService {
         return retrofit.create(CityApiService::class.java)
     }
 
@@ -79,5 +112,21 @@ class NetworkModule {
     @Provides
     fun provideConnectivityObserver(@ApplicationContext context: Context): ConnectivityObserver {
         return ConnectivityObserverImpl(context)
+    }
+    
+    companion object {
+        /**
+         * Named binding for the Retrofit instance used with OpenWeatherMap API.
+         *
+         * Used to provide [WeatherApiService] and [CityApiService].
+         */
+        const val WEATHER = "WeatherRetrofit"
+
+        /**
+         * Named binding for the Retrofit instance used with Nominatim (OpenStreetMap) API.
+         *
+         * Ensures correct injection of [NominatimApi] with proper headers and base URL.
+         */
+        const val NOMINATIM = "NominatimRetrofit"
     }
 }

@@ -1,6 +1,7 @@
 package com.example.weatherforecast.di
 
 import android.content.Context
+import com.example.weatherforecast.data.api.NominatimApi
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.geolocation.DeviceLocationProvider
@@ -46,9 +47,9 @@ class GeoLocationModule {
     @Singleton
     @Provides
     fun provideGeolocator(
-        @ApplicationContext context: Context,
+        nominatimApi: NominatimApi,
         coroutineDispatchers: CoroutineDispatchers
     ): Geolocator {
-        return GeolocatorImpl(context, coroutineDispatchers)
+        return GeolocatorImpl(nominatimApi, coroutineDispatchers)
     }
 }

@@ -27,7 +27,7 @@ import javax.inject.Inject
  */
 class DeviceLocationProvider @Inject constructor(
     private val loggingService: LoggingService,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
 
     /**

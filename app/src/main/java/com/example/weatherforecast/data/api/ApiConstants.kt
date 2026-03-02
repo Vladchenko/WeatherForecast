@@ -1,20 +1,12 @@
 package com.example.weatherforecast.data.api
 
-import com.example.weatherforecast.data.api.ApiConstants.CURRENT_WEATHER
-import com.example.weatherforecast.data.api.ApiConstants.GEO_DIRECT
-import com.example.weatherforecast.data.api.ApiConstants.HOURLY_WEATHER
-
-
 /**
- * Object containing constant API endpoints used throughout the application.
+ * Object containing constant API endpoints and configuration values used throughout the application.
  *
- * These paths are appended to the base URL (defined in [com.example.weatherforecast.BuildConfig.API_BASE_URL])
- * when making network requests via Retrofit.
- *
- * All constants represent relative paths for different OpenWeatherMap API services:
- * - [GEO_DIRECT]: Geocoding API for converting city names to coordinates
- * - [CURRENT_WEATHER]: Current weather data for a specific location
- * - [HOURLY_WEATHER]: 5-day / 3-hour forecast data (used for hourly forecast display)
+ * These constants are used for:
+ * - Retrofit service interface base URLs and paths
+ * - HTTP request headers (e.g., User-Agent)
+ * - External API integration (OpenWeatherMap, Nominatim)
  */
 object ApiConstants {
     /**
@@ -46,4 +38,38 @@ object ApiConstants {
      * Example: `data/2.5/forecast?q=London&appid={API key}`
      */
     const val HOURLY_WEATHER = "data/2.5/forecast"
+
+    /**
+     * Name of the application for use in identification headers.
+     */
+    const val APP_NAME = "WeatherForecastApp"
+
+    /**
+     * Current version of the application.
+     */
+    const val APP_VERSION = "1.0"
+
+    /**
+     * Developer contact email used for API identification.
+     * Required by external services like Nominatim for rate limiting and contact purposes.
+     */
+    const val DEVELOPER_EMAIL = "vladdasaev@gmail.com"
+
+    /**
+     * User-Agent string used in HTTP requests to identify the application.
+     * Format follows RFC 7231 and complies with Nominatim's usage policy.
+     *
+     * Example: "WeatherForecastApp/1.0 (vladdasaev@gmail.com)"
+     */
+    const val USER_AGENT = "$APP_NAME/$APP_VERSION ($DEVELOPER_EMAIL)"
+
+    /**
+     * Base URL for the Nominatim OpenStreetMap API.
+     *
+     * Used for reverse geocoding (coordinates → address) and forward geocoding (address → coordinates).
+     * Requires proper User-Agent and From headers to avoid HTTP 403 errors.
+     *
+     * Documentation: https://nominatim.org/release-docs/latest/api/Search/
+     */
+    const val NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org/"
 }
