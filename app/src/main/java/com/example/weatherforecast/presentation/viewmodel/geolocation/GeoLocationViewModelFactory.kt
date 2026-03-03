@@ -10,6 +10,7 @@ import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.geolocation.DeviceLocationProvider
 import com.example.weatherforecast.geolocation.Geolocator
 import com.example.weatherforecast.presentation.status.StatusRenderer
+import com.example.weatherforecast.utils.ResourceManager
 
 /**
  * GeoLocationViewModel factory
@@ -18,6 +19,7 @@ import com.example.weatherforecast.presentation.status.StatusRenderer
  * @property loggingService centralized service for application logging
  * @property permissionChecker to check if needed permission is provided
  * @property statusRenderer displays status messages to the user
+ * @property resourceManager helper to retrieve localized strings from resources
  * @property geoLocator provides geo location service
  * @property connectivityObserver internet connectivity observer
  * @property chosenCityInteractor downloads a previously chosen city
@@ -28,6 +30,7 @@ class GeoLocationViewModelFactory(
     private val geoLocationHelper: Geolocator,
     private val loggingService: LoggingService,
     private val statusRenderer: StatusRenderer,
+    private val resourceManager: ResourceManager,
     private val geoLocator: DeviceLocationProvider,
     private val permissionChecker: PermissionChecker,
     private val connectivityObserver: ConnectivityObserver,
@@ -40,6 +43,7 @@ class GeoLocationViewModelFactory(
             geoLocationHelper,
             loggingService,
             statusRenderer,
+            resourceManager,
             geoLocator,
             permissionChecker,
             chosenCityInteractor,

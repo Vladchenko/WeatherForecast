@@ -65,4 +65,14 @@ class WeatherDialogControllerImpl(
             )
         ).show()
     }
+
+    override fun showGeoLocationError(onPositiveClick: () -> Unit,
+                                      onNegativeClick: () -> Unit) {
+        dialogHelper.createDialog(
+            alertDialogFactory.createGeoLocationErrorDelegate(
+                onPositive = onPositiveClick,
+                onNegative = onNegativeClick
+            )
+        ).show()
+    }
 }

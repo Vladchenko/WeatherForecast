@@ -42,4 +42,16 @@ interface WeatherDialogController {
      */
     fun showPermissionPermanentlyDenied(onPositiveClick: () -> Unit,
                                         onNegativeClick: () -> Unit)
+
+    /**
+     * Shows an error dialog when geolocation fails after multiple attempts or due to a critical issue.
+     *
+     * This dialog informs the user that the app could not determine their location,
+     * and offers options to either select a city manually or retry the geolocation process.
+     *
+     * @param onPositiveClick Called when the user chooses to proceed (e.g., open city selection)
+     * @param onNegativeClick Called when the user chooses to retry geolocation or dismiss the error
+     */
+    fun showGeoLocationError(onPositiveClick: () -> Unit,
+                             onNegativeClick: () -> Unit)
 }

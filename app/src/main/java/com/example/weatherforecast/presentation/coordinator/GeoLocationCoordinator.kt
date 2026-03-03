@@ -83,6 +83,7 @@ class GeoLocationCoordinator(
                 launch { collectGeoLocationPermissionFlow(geoLocationViewModel.geoGeoLocationPermissionFlow) }
                 launch { collectGeoLocationDefineCitySuccessFlow(geoLocationViewModel.geoLocationDefineCitySuccessFlow) }
                 launch { geoLocationViewModel.selectCityFlow.collect { onGotoCitySelection() } }
+                launch { collectGeoLocationErrorFlow(geoLocationViewModel.geoLocationFailFlow) }
             }
         }
     }
@@ -195,6 +196,19 @@ class GeoLocationCoordinator(
                 onNegativeClick = {
                     statusRenderer.showCitySelectionStatus()
                     onGotoCitySelection()
+                }
+            )
+        }
+    }
+
+    private suspend fun collectGeoLocationErrorFlow(flow: SharedFlow<Unit>) {
+        flow.collect {
+            dialogController.showGeoLocationError(
+                onPositiveClick = {
+                    onGotoCitySelection()
+                },
+                onNegativeClick = {
+                    startGeoLocation()
                 }
             )
         }
