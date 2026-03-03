@@ -164,11 +164,15 @@ class CurrentWeatherViewModel @Inject constructor(
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
-                viewModelScope.launch {
+                viewModelScope.launch(exceptionHandler) {
                     showRemoteForecast(result.data.copy(city = city))
                     val location = getLocation(result)
                     chosenCityInteractor.saveChosenCity(
                         CityLocationModel(city, location)
+                    )
+                    loggingService.logDebugEvent(
+                        TAG,
+                        "Chosen city saved to database: $city"
                     )
                 }
             }

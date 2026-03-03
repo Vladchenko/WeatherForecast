@@ -215,19 +215,6 @@ class GeoLocationViewModel @Inject constructor(
     }
 
     /**
-     * Save chosen city with data from [locationModel]
-     */
-    private fun saveChosenCity(locationModel: CityLocationModel) {
-        viewModelScope.launch(exceptionHandler) {
-            chosenCityInteractor.saveChosenCity(locationModel)
-            loggingService.logDebugEvent(
-                TAG,
-                "Chosen city saved to database: ${locationModel.city}"
-            )
-        }
-    }
-
-    /**
      * Defines a city name that matches given [location]
      */
     fun defineCityNameByLocation(location: Location) {
@@ -238,7 +225,6 @@ class GeoLocationViewModel @Inject constructor(
                 "City defined successfully by location = $location, city = $city"
             )
             val cityModel = CityLocationModel(city, location)
-            saveChosenCity(cityModel)
             _geoLocationByCitySuccessFlow.tryEmit(Unit)
             _geoLocationDefineCitySuccessFlow.tryEmit(cityModel)
         }
