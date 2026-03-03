@@ -113,6 +113,10 @@ class CurrentWeatherViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             val (cityName, latitude, longitude) = if (chosenCity.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
+                if (savedModel.city.isBlank()) {
+                    _chosenCityBlankSharedFlow.tryEmit(Unit)
+                    return@launch
+                }
                 Triple(savedModel.city, savedModel.location.latitude, savedModel.location.longitude)
             } else {
                 val latValue = latitude.toDoubleOrNull() ?: run {
