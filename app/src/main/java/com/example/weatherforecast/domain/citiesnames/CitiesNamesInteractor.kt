@@ -1,6 +1,7 @@
 package com.example.weatherforecast.domain.citiesnames
 
 import com.example.weatherforecast.models.domain.CitiesNames
+import com.example.weatherforecast.models.domain.LoadResult
 
 /**
  * Cities names interactor.
@@ -12,7 +13,7 @@ class CitiesNamesInteractor(private val citiesNamesRepository: CitiesNamesReposi
     /**
      * Retrieve remote cities names matching [token].
      */
-    suspend fun loadCitiesNames(token: String): CitiesNames {
+    suspend fun loadCitiesNames(token: String): LoadResult<CitiesNames> {
         return citiesNamesRepository.loadCitiesNames(token)
     }
 

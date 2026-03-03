@@ -8,6 +8,8 @@ import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.models.domain.CitiesNames
+import com.example.weatherforecast.models.domain.ForecastError
+import com.example.weatherforecast.models.domain.LoadResult
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.InternalSerializationApi
 
@@ -31,16 +33,15 @@ class CitiesNamesRepositoryImpl(
     private val remoteDataSource: CitiesNamesRemoteDataSource,
 ) : CitiesNamesRepository {
 
-    override suspend fun loadCitiesNames(token: String): CitiesNames =
+    override suspend fun loadCitiesNames(token: String): LoadResult<CitiesNames> =
         withContext(coroutineDispatchers.io) {
             try {
                 val response = remoteDataSource.loadCitiesNames(token)
                 if (response.isSuccessful && response.body() != null) {
                     val dtos = response.body()!!
                     val entities = dtoMapper.toEntities(dtos)
-                    // TODO: Check if it is needed, and implement if positive
-                    // localDataSource.saveCities(entities)
-                    return@withContext entityMapper.toDomain(entities)
+                    localDataSource.saveCitiesNames(entities)
+                    return@withContext LoadResult.Remote(entityMapper.toDomain(entities))
                 } else {
                     loadFromCacheOrThrow(token)
                 }
@@ -50,16 +51,17 @@ class CitiesNamesRepositoryImpl(
             }
         }
 
-    private suspend fun loadFromCacheOrThrow(token: String): CitiesNames {
-        return try {
-            val cachedEntities = localDataSource.loadCitiesNames(token)
-            if (cachedEntities.isEmpty()) {
-                throw IllegalStateException("No cities found in cache and remote failed")
-            }
-            entityMapper.toDomain(cachedEntities)
-        } catch (e: Exception) {
-            throw e
+    private suspend fun loadFromCacheOrThrow(token: String): LoadResult<CitiesNames> {
+        val cachedEntities = localDataSource.loadCitiesNames(token)
+        if (cachedEntities.isEmpty()) {
+            return LoadResult.Error(
+                ForecastError.NoDataAvailable("No cities match '$token' and no internet")
+            )
         }
+        return LoadResult.Local(
+            entityMapper.toDomain(cachedEntities),
+            ForecastError.NoDataAvailable("Remote request failed")
+        )
     }
 
     override suspend fun deleteAllCitiesNames() =

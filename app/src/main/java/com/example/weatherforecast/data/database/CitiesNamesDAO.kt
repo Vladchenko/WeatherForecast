@@ -17,7 +17,7 @@ interface CitiesNamesDAO {
 
     @InternalSerializationApi
     @Insert(onConflict = OnConflictStrategy.REPLACE)    // Replaces an old entity with a new one, when a conflict arises
-    suspend fun insertCityName(cityName: CitySearchEntity): Long
+    suspend fun insertCitiesNames(citiesNames: List<CitySearchEntity>): LongArray
 
     @InternalSerializationApi
     @Update
@@ -31,7 +31,7 @@ interface CitiesNamesDAO {
     suspend fun deleteAll(): Int
 
     @InternalSerializationApi
-    @Query("SELECT * FROM citiesNames WHERE city MATCH " + ":token")
+    @Query("SELECT * FROM citiesNames WHERE city LIKE '%' || :token || '%'")
     fun getCitiesNames(token: String): List<CitySearchEntity>
 
     @InternalSerializationApi

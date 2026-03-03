@@ -13,16 +13,21 @@ import javax.inject.Inject
  * @property dao Room library data model to access data locally.
  * @property loggingService centralized service for structured logging
  */
+@InternalSerializationApi
 class CitiesNamesLocalDataSourceImpl @Inject constructor(
     private val dao: CitiesNamesDAO,
     private val loggingService: LoggingService
 ) : CitiesNamesLocalDataSource {
 
-    @InternalSerializationApi
+
     override suspend fun loadCitiesNames(token: String): List<CitySearchEntity> {
         val model = dao.getCitiesNames(token)
         loggingService.logDebugEvent(TAG, "Loaded ${model.size} cities for token '$token': $model")
         return model
+    }
+
+    override suspend fun saveCitiesNames(citiesNames: List<CitySearchEntity>) {
+        dao.insertCitiesNames(citiesNames)
     }
 
     @InternalSerializationApi

@@ -100,7 +100,7 @@ fun CitySelectionLayout(
 ) {
     val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
-    val citiesNamesUiState by viewModel.citiesNamesStateFlow.collectAsStateWithLifecycle()
+    val cityPredictions by viewModel.cityPredictions.collectAsStateWithLifecycle()
     val fontSize by remember {
         derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appbarUiState.subtitleSize) }
     }
@@ -158,8 +158,7 @@ fun CitySelectionLayout(
                         cityName = cityUiState,
                         queryLabel = queryLabel,
                         modifier = Modifier,
-                        cityMaskPredictions = citiesNamesUiState?.cities.orEmpty()
-                            .toPersistentList(),
+                        cityMaskPredictions = cityPredictions.toPersistentList(),
                         onEvent
                     )
                 }

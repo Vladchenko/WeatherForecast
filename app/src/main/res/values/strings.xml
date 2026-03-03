@@ -6,6 +6,8 @@
     <string name="city_selection_title">Select city to provide weather for</string>
     <string name="city_selection_hint">Type a city and select from the list</string>
     <string name="city_typing_begin">Start typing a city name…</string>
+    <string name="city_predictions_provided">City suggestions ready</string>
+    <string name="city_predictions_from_cache">No connection — showing saved cities</string>
 
     <!-- Database & Loading -->
     <string name="forecast_not_found_in_database">Forecast for %1$s not found in database</string>

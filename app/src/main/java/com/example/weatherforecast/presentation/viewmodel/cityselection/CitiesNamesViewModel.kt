@@ -7,6 +7,8 @@ import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntry
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.models.domain.CitiesNames
+import com.example.weatherforecast.models.domain.CityDomainModel
+import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.utils.ResourceManager
@@ -16,7 +18,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -72,8 +73,6 @@ class CitiesNamesViewModel @Inject constructor(
     private val citiesNamesInteractor: CitiesNamesInteractor
 ) : AbstractViewModel(connectivityObserver) {
 
-    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
-
     /**
      * Flow of navigation events triggered by user actions.
      *
@@ -84,9 +83,8 @@ class CitiesNamesViewModel @Inject constructor(
      * Consumers should collect this flow and trigger corresponding navigation actions.
      * Events are nullable to allow resetting state if needed.
      */
-    val navigationEventFlow: SharedFlow<CityNavigationEvent> = _navigationEventFlow
-
-    private val _cityMaskStateFlow = MutableStateFlow("")
+    val navigationEventFlow: SharedFlow<CityNavigationEvent>
+        get() = _navigationEventFlow
 
     /**
      * State flow representing the current user input in the city search field.
@@ -94,9 +92,8 @@ class CitiesNamesViewModel @Inject constructor(
      * Updated via [onEvent] with [CitySelectionEvent.UpdateQuery].
      * Used to trigger debounced city name lookups.
      */
-    val cityMaskStateFlow: StateFlow<String> = _cityMaskStateFlow.asStateFlow()
-
-    private val _citiesNamesStateFlow = MutableStateFlow<CitiesNames?>(null)
+    val cityMaskStateFlow: StateFlow<String>
+        get() = _cityMaskStateFlow
 
     /**
      * State flow holding the result of the latest city name search.
@@ -107,7 +104,12 @@ class CitiesNamesViewModel @Inject constructor(
      *
      * Null until first successful search.
      */
-    val citiesNamesStateFlow: StateFlow<CitiesNames?> = _citiesNamesStateFlow.asStateFlow()
+    val cityPredictions: StateFlow<List<CityDomainModel>>
+        get() = _cityPredictions
+
+    private val _cityMaskStateFlow = MutableStateFlow("")
+    private val _cityPredictions = MutableStateFlow<List<CityDomainModel>>(emptyList())
+    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, throwable.message.orEmpty(), throwable)
@@ -115,6 +117,7 @@ class CitiesNamesViewModel @Inject constructor(
             is NoSuchDatabaseEntryException -> {
                 statusRenderer.showError(resourceManager.getString(R.string.forecast_default_city_absent))
             }
+
             else -> {
                 statusRenderer.showError(throwable.message.toString())
             }
@@ -163,11 +166,17 @@ class CitiesNamesViewModel @Inject constructor(
     fun onEvent(event: CitySelectionEvent) {
         when (event) {
             is CitySelectionEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.NavigateUp)
-            is CitySelectionEvent.SelectCity -> sendNavigationEvent(CityNavigationEvent.OpenWeatherFor(event.city))
+            is CitySelectionEvent.SelectCity -> sendNavigationEvent(
+                CityNavigationEvent.OpenWeatherFor(
+                    event.city
+                )
+            )
+
             is CitySelectionEvent.ClearQuery -> {
                 _cityMaskStateFlow.value = ""
-                _citiesNamesStateFlow.value = null
+                _cityPredictions.value = emptyList()
             }
+
             is CitySelectionEvent.UpdateQuery -> _cityMaskStateFlow.value = event.mask
         }
     }
@@ -190,7 +199,7 @@ class CitiesNamesViewModel @Inject constructor(
      * Fetches cities matching the given query from the interactor layer.
      *
      * Executes suspended call to [citiesNamesInteractor.loadCitiesNames].
-     * Updates [_citiesNamesStateFlow] with result.
+     * Updates [_cityPredictions] with result.
      * Shows error via [statusRenderer] if response contains an error message.
      *
      * @param query The city name substring to search for
@@ -198,14 +207,28 @@ class CitiesNamesViewModel @Inject constructor(
     private suspend fun fetchCities(query: String) {
         try {
             val response = citiesNamesInteractor.loadCitiesNames(query)
-            _citiesNamesStateFlow.value = response
-            if (response.error.isNotBlank()) {
-                statusRenderer.showError(response.error)
-            }
+            updateCityPredictions(response)
         } catch (e: Exception) {
             loggingService.logError(TAG, "Error loading cities for query: $query", e)
             statusRenderer.showError(e.message.toString())
         }
+    }
+
+    private fun updateCityPredictions(result: LoadResult<CitiesNames>?) {
+        val cities = when (result) {
+            is LoadResult.Remote -> {
+                statusRenderer.showStatus(resourceManager.getString(R.string.city_predictions_provided))
+                result.data.cities
+            }
+
+            is LoadResult.Local -> {
+                statusRenderer.showWarning(resourceManager.getString(R.string.city_predictions_from_cache))
+                result.data.cities
+            }
+
+            is LoadResult.Error, null -> emptyList()
+        }
+        _cityPredictions.value = cities
     }
 
     companion object {
