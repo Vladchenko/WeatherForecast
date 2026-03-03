@@ -1,5 +1,7 @@
 package com.example.weatherforecast.presentation.view.fragments.forecast.current
 
+import android.location.Location
+import android.location.LocationManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
+import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.themeColor
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyWeatherLayout
@@ -95,7 +98,8 @@ fun CurrentWeatherLayout(
 
     LaunchedEffect(Unit) {
         viewModel.internetConnectedStateFlow
-            .drop(1)    // First entry is dropped, since redundant
+            .drop(1)    // Drop initial value as it's emitted immediately on collection start
+            // and doesn't represent an actual connectivity change.// First entry is dropped, since redundant
             .collect { isConnected ->
                 val cityModel = viewModel.chosenCityStateFlow.value
                 if (isConnected && cityModel != null) {
@@ -109,10 +113,14 @@ fun CurrentWeatherLayout(
     }
     LaunchedEffect(showHourlyForecast) {
         if (showHourlyForecast) {
-            val city = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city
-            if (city != null && hourlyForecastUiState.value == null) {
-                hourlyViewModel.getHourlyWeatherForCity(city)
+            val city = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city.orEmpty()
+            val coordinate = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.coordinate
+            val location = coordinate?.let { Location(LocationManager.NETWORK_PROVIDER).apply{
+                it.latitude
+                it.longitude}
             }
+            val cityModel = CityLocationModel(city, location!!)
+            hourlyViewModel.getHourlyWeatherForLocation(cityModel)
         }
     }
 
