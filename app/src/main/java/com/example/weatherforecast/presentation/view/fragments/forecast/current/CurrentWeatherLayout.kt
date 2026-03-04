@@ -114,10 +114,13 @@ fun CurrentWeatherLayout(
     LaunchedEffect(showHourlyForecast) {
         if (showHourlyForecast) {
             val city = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city.orEmpty()
-            val coordinate = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.coordinate
-            val location = coordinate?.let { Location(LocationManager.NETWORK_PROVIDER).apply{
-                it.latitude
-                it.longitude}
+            val coordinate =
+                (forecastUiState.value as? WeatherUiState.Success)?.forecast?.coordinate
+            val location = coordinate?.let { coordinate ->
+                Location(LocationManager.NETWORK_PROVIDER).apply {
+                    latitude = coordinate.latitude
+                    longitude = coordinate.longitude
+                }
             }
             val cityModel = CityLocationModel(city, location!!)
             hourlyViewModel.getHourlyWeatherForLocation(cityModel)

@@ -92,6 +92,7 @@ class CityManagementModule {
         return ChosenCityInteractor(chosenCityRepository)
     }
 
+    @InternalSerializationApi
     @Singleton
     @Provides
     fun provideCitiesNamesLocalDataSource(loggingService: LoggingService,

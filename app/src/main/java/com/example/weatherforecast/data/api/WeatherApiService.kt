@@ -62,8 +62,7 @@ interface WeatherApiService {
     suspend fun getHourlyForecastByLocation(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
-        @Query("appid") apiKey: String = BuildConfig.API_KEY,
-        @Query("units") units: String = "metric"
+        @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<HourlyWeatherDto>
 }
 
