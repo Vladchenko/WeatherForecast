@@ -135,6 +135,7 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun launchWeatherForecast(chosenCity: String, latitude: String, longitude: String) {
         viewModelScope.launch(exceptionHandler) {
+            statusRenderer.showLoadingStatusFor(chosenCity)
             isRefreshingStateFlow.emit(true)
             val (cityName, latitude, longitude) = if (chosenCity.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
@@ -197,6 +198,7 @@ class CurrentWeatherViewModel @Inject constructor(
         when (result) {
             is LoadResult.Remote -> {
                 viewModelScope.launch(exceptionHandler) {
+                    statusRenderer.showSuccessStatusFor(city)
                     showRemoteForecast(result.data.copy(city = city))
                     val cityLocationModel = CityLocationModel(city, getLocation(result))
                     chosenCityInteractor.saveChosenCity(cityLocationModel)

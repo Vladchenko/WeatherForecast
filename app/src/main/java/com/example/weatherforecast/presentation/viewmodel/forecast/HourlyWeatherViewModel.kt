@@ -105,11 +105,8 @@ class HourlyWeatherViewModel @Inject constructor(
         when (result) {
             is LoadResult.Remote -> {
                 _hourlyWeatherStateFlow.value = result.data
-                statusRenderer.showStatus(
-                    resourceManager.getString(
-                        R.string.forecast_loaded_success,
+                statusRenderer.showSuccessStatusFor(
                         result.data.city
-                    )
                 )
             }
 

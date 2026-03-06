@@ -117,4 +117,16 @@ class StatusRenderer @Inject constructor(
             )
         }
     }
+
+    fun showSuccessStatusFor(city: String) {
+        currentTarget?.showStatus(
+            StatusDisplay.Status(
+                text = resourceManager.getString(
+                    R.string.forecast_loaded_success,
+                    city
+                ),
+                type = MessageType.INFO
+            )
+        )
+    }
 }
