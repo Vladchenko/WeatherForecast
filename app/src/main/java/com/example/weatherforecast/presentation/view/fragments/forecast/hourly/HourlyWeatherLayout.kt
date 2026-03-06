@@ -59,8 +59,9 @@ fun HourlyWeatherLayout(
             text = stringResource(R.string.forecast_hourly),
             modifier = Modifier
                 .padding(horizontal = 8.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(Color.White)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
