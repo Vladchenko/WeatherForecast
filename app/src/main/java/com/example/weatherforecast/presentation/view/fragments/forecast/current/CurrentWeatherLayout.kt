@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Timeline
@@ -28,9 +31,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonSkippableComposable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,11 +102,13 @@ fun CurrentWeatherLayout(
         derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitleSize) }
     }
     var showHourlyForecast by remember { mutableStateOf(false) }
+    val isRefreshing by viewModel.isRefreshingStateFlow.collectAsState()
+    val refreshState = rememberPullToRefreshState()
 
     LaunchedEffect(Unit) {
         viewModel.internetConnectedStateFlow
             .drop(1)    // Drop initial value as it's emitted immediately on collection start
-            // and doesn't represent an actual connectivity change.// First entry is dropped, since redundant
+            // and doesn't represent an actual connectivity change.
             .collect { isConnected ->
                 val cityModel = viewModel.chosenCityStateFlow.value
                 if (isConnected && cityModel != null) {
@@ -111,6 +120,7 @@ fun CurrentWeatherLayout(
                 }
             }
     }
+
     LaunchedEffect(showHourlyForecast) {
         if (showHourlyForecast) {
             val city = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city.orEmpty()
@@ -161,56 +171,84 @@ fun CurrentWeatherLayout(
                             showHourlyForecast = !showHourlyForecast
                         }
                     ) {
-                        Icon(Icons.Default.Timeline, "hourlyForecast")
+                        Icon(Icons.Filled.Timeline, "hourlyForecast")
                     }
                 },
             )
         },
         content = { innerPadding ->
-            BackgroundImage(innerPadding)
-            when (val state = forecastUiState.value) {
-                is WeatherUiState.Loading -> {
-                    AnimatedVisibility(
-                        visible = viewModel.showProgressBarState.value,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        ShowProgressBar()
-                    }
-                }
-
-                is WeatherUiState.Error -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error: ${state.message}",
-                            color = Color.Red,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
-                is WeatherUiState.Success -> {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        MainContent(
-                            innerPadding = innerPadding,
-                            mainContentTextColor = mainContentTextColor,
-                            onCityClick = onCityClick,
-                            uiState = state
-                        )
-                        AnimatedVisibility(visible = showHourlyForecast) {
-                            HourlyWeatherLayout(
-                                hourlyWeather = hourlyForecastUiState.value,
+            Box(modifier = Modifier.fillMaxSize()) {
+                BackgroundImage(innerPadding)
+                PullToRefreshBox(
+                    state = refreshState,
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        val cityModel = viewModel.chosenCityStateFlow.value
+                        if (cityModel != null) {
+                            viewModel.launchWeatherForecast(
+                                cityModel.city,
+                                cityModel.location.latitude.toString(),
+                                cityModel.location.longitude.toString()
                             )
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    indicator = {
+                        PullToRefreshDefaults.Indicator(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .offset(y = 56.dp),
+                            isRefreshing = isRefreshing,
+                            state = refreshState
+                        )
+                    }
+                ) {
+                    when (val state = forecastUiState.value) {
+                        is WeatherUiState.Loading -> {
+                            AnimatedVisibility(
+                                visible = viewModel.showProgressBarState.value,
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                            ) {
+                                ShowProgressBar()
+                            }
+                        }
+
+                        is WeatherUiState.Error -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Error: ${state.message}",
+                                    color = Color.Red,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        is WeatherUiState.Success -> {
+                            Column(
+                                modifier = Modifier
+                                    .padding(innerPadding)
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                MainContent(
+                                    innerPadding = PaddingValues(),
+                                    mainContentTextColor = mainContentTextColor,
+                                    onCityClick = onCityClick,
+                                    uiState = state
+                                )
+                                AnimatedVisibility(visible = showHourlyForecast) {
+                                    HourlyWeatherLayout(
+                                        hourlyWeather = hourlyForecastUiState.value,
+                                    )
+                                }
+                            }
                         }
                     }
                 }

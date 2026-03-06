@@ -64,22 +64,46 @@ class CurrentWeatherViewModel @Inject constructor(
 ) : AbstractViewModel(connectivityObserver) {
 
     //region flows
+    /**
+     * Emits true when a refresh operation is in progress, false otherwise.
+     * Can be observed to show/hide swipe-to-refresh indicators.
+     */
+    val isRefreshingStateFlow = MutableStateFlow(false)
+
+    /**
+     * Public read-only flow that emits the current UI state of the weather forecast.
+     * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
+     */
     val forecastStateFlow: StateFlow<WeatherUiState>
         get() = _forecastStateFlow
+
+    /**
+     * Public read-only flow that emits the currently selected city with its coordinates.
+     * Returns null if no city has been selected yet.
+     */
     val chosenCityStateFlow: StateFlow<CityLocationModel?>
         get() = _chosenCityStateFlow
+
+    /**
+     * SharedFlow that emits a unit event when the user attempts to load forecast
+     * with an empty city name and no saved city exists.
+     * Used to trigger UI actions like showing a dialog or navigating to city selection.
+     */
     val chosenCityBlankStateFlow: SharedFlow<Unit>
         get() = _chosenCityBlankSharedFlow
+
+    /**
+     * SharedFlow that emits the name of the city when it was not found during forecast loading.
+     * Used to display a warning message or prompt the user to check the city name.
+     */
     val chosenCityNotFoundStateFlow: SharedFlow<String>
         get() = _chosenCityNotFoundSharedFlow
-
     private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1
     )
     private val _forecastStateFlow = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
     private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
-
     //endregion flows
 
     private var currentJob: Job? = null
@@ -111,20 +135,28 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun launchWeatherForecast(chosenCity: String, latitude: String, longitude: String) {
         viewModelScope.launch(exceptionHandler) {
+            isRefreshingStateFlow.emit(true)
             val (cityName, latitude, longitude) = if (chosenCity.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
                     _chosenCityBlankSharedFlow.tryEmit(Unit)
+                    isRefreshingStateFlow.emit(false)
                     return@launch
                 }
-                Triple(savedModel.city, savedModel.location.latitude, savedModel.location.longitude)
+                Triple(
+                    savedModel.city,
+                    savedModel.location.latitude,
+                    savedModel.location.longitude
+                )
             } else {
                 val latValue = latitude.toDoubleOrNull() ?: run {
                     statusRenderer.showError("Invalid latitude")
+                    isRefreshingStateFlow.emit(false)
                     return@launch
                 }
                 val lonValue = longitude.toDoubleOrNull() ?: run {
                     statusRenderer.showError("Invalid longitude")
+                    isRefreshingStateFlow.emit(false)
                     return@launch
                 }
                 Triple(chosenCity, latValue, lonValue)
@@ -166,14 +198,14 @@ class CurrentWeatherViewModel @Inject constructor(
             is LoadResult.Remote -> {
                 viewModelScope.launch(exceptionHandler) {
                     showRemoteForecast(result.data.copy(city = city))
-                    val location = getLocation(result)
-                    chosenCityInteractor.saveChosenCity(
-                        CityLocationModel(city, location)
-                    )
+                    val cityLocationModel = CityLocationModel(city, getLocation(result))
+                    chosenCityInteractor.saveChosenCity(cityLocationModel)
+                    _chosenCityStateFlow.tryEmit(cityLocationModel)
                     loggingService.logDebugEvent(
                         TAG,
                         "Chosen city saved to database: $city"
                     )
+                    isRefreshingStateFlow.emit(false)
                 }
             }
 

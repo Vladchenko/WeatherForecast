@@ -35,7 +35,7 @@ android {
             useSupportLibrary true
         }
 
-        // ✅ Убедитесь, что в local.properties используются эти ключи:
+        // Чтение API_KEY и BASE_URL из local.properties
         def apiKey = localProperties['API_KEY'] ?: localProperties['WEATHER_API_KEY']
         def baseUrl = localProperties['API_BASE_URL'] ?: localProperties['WEATHER_API_BASE_URL']
 
@@ -48,8 +48,8 @@ android {
 
         buildConfigField("String", "API_KEY", apiKey)
         buildConfigField("String", "API_BASE_URL", baseUrl)
-        
-        // Room schema export directory
+
+        // Настройка Room
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += [
@@ -59,12 +59,15 @@ android {
             }
         }
     }
+
     buildFeatures {
         compose true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.kotlinComposeCompiler.get()
     }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -76,65 +79,83 @@ android {
             shrinkResources false
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = '17'
         freeCompilerArgs += [
-                "-Xjvm-default=all",    // To remove a build error "Inheritance from an interface with '@JvmDefault' members is only allowed with -Xjvm-default option"
+            "-Xjvm-default=all",
         ]
     }
+
     namespace 'com.example.weatherforecast'
 }
 
 dependencies {
 
+    // --- Compose: Управление версиями через BOM ---
+    implementation platform(libs.androidx.compose.bom)
+
+    // Основные Compose-библиотеки
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.material3
+    implementation libs.androidx.compose.foundation
+    implementation libs.androidx.compose.material.icons.extended
+    debugImplementation libs.androidx.compose.ui.tooling
+    implementation libs.androidx.compose.ui.tooling.preview
+    androidTestImplementation libs.androidx.compose.ui.test.junit4
+
+    // --- AndroidX ---
     implementation libs.androidx.activity.ktx
     implementation libs.androidx.appcompat
-    implementation libs.androidx.compose.material
-    implementation libs.androidx.compose.material.icons.extended
-    implementation libs.androidx.compose.material3
-    implementation libs.androidx.compose.ui
-    implementation libs.androidx.compose.ui.tooling.preview
-    implementation libs.androidx.constraintlayout
     implementation libs.androidx.core.ktx
-    implementation libs.androidx.datastore.preferences
     implementation libs.androidx.fragment.ktx
-    implementation libs.androidx.hilt.common
-    implementation libs.androidx.hilt.work
-    implementation libs.androidx.legacy.support.v4
-    implementation libs.androidx.lifecycle.livedata.ktx
-    implementation libs.androidx.lifecycle.process
-    implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.livedata.ktx
+    implementation libs.androidx.lifecycle.runtime.compose
+    implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.navigation.fragment.ktx
     implementation libs.androidx.navigation.ui.ktx
-    implementation libs.androidx.room.ktx
+    implementation libs.androidx.datastore.preferences
     implementation libs.androidx.work.runtime.ktx
-    implementation libs.hilt.android
+    implementation libs.androidx.hilt.work
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.legacy.support.v4
 
-    implementation libs.kotlin.immutableCollections
+    // --- Room ---
+    implementation libs.androidx.room.ktx
+    ksp libs.room
+
+    // --- Hilt (DI) ---
+    implementation libs.hilt.android
+    ksp libs.hilt.android.compiler
+    ksp libs.androidx.hilt.compiler
+
+    // --- Kotlin ---
     implementation libs.kotlin.stdlib.jdk8
+    implementation libs.kotlin.immutableCollections
     implementation libs.kotlinx.coroutines.android
     implementation libs.kotlinx.coroutines.core
     implementation libs.kotlinx.serialization.json
+
+    // --- UI / Design ---
     implementation libs.material
-    implementation libs.okhttp
-    implementation libs.okhttp.logging.interceptor
-    implementation libs.play.services.location
+
+    // --- Network ---
     implementation libs.retrofit
     implementation libs.retrofit.converter.gson
+    implementation libs.okhttp
+    implementation libs.okhttp.logging.interceptor
 
-    ksp libs.hilt.compiler
+    // --- Location ---
+    implementation libs.play.services.location
 
-    ksp libs.room
-
+    // --- Testing ---
     testImplementation libs.junit
-
-    androidTestImplementation libs.androidx.compose.ui.test.junit4
-    androidTestImplementation libs.androidx.espresso.core
     androidTestImplementation libs.androidx.junit
-    debugImplementation libs.androidx.compose.ui.tooling
+    androidTestImplementation libs.androidx.espresso.core
 }
