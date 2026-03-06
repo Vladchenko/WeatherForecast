@@ -237,12 +237,18 @@ fun CurrentWeatherLayout(
                                     .verticalScroll(rememberScrollState()),
                                 verticalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                MainContent(
-                                    innerPadding = PaddingValues(),
-                                    mainContentTextColor = mainContentTextColor,
-                                    onCityClick = onCityClick,
-                                    uiState = state
-                                )
+                                AnimatedVisibility(
+                                    visible = !viewModel.showProgressBarState.value,
+                                    enter = fadeIn(),
+                                    exit = fadeOut()
+                                ) {
+                                    MainContent(
+                                        innerPadding = PaddingValues(),
+                                        mainContentTextColor = mainContentTextColor,
+                                        onCityClick = onCityClick,
+                                        uiState = state
+                                    )
+                                }
                                 AnimatedVisibility(visible = showHourlyForecast) {
                                     HourlyWeatherLayout(
                                         hourlyWeather = hourlyForecastUiState.value,
