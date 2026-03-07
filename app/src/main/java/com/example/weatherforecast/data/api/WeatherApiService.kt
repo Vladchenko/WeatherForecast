@@ -82,7 +82,7 @@ interface CityApiService {
     @GET(GEO_DIRECT)
     suspend fun searchCities(
         @Query("q") cityName: String,
-        @Query("limit") limit: Int = 5,
+        @Query("limit") limit: Int = 10,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<List<CitiesSearchResultDto>>
 }
