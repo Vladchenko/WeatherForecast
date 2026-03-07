@@ -114,7 +114,7 @@ private fun HourlyForecastItem(forecast: HourlyItemDomainModel) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${forecast.temperature}°",
+                text = forecast.temperature,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp
