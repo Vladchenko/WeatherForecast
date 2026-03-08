@@ -26,7 +26,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -58,7 +57,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.PresentationUtils
-import com.example.weatherforecast.presentation.themeColor
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyWeatherLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
@@ -138,22 +136,20 @@ fun CurrentWeatherLayout(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary,
-                ),
                 title = {
                     Column {
                         Text(
-                            modifier = Modifier
-                                .padding(top = 4.dp),
-                            text = appBarUiState.value.title
+                            modifier = Modifier.padding(top = 4.dp),
+                            text = appBarUiState.value.title,
+                            color = mainContentTextColor,
                         )
                         Text(
                             modifier = Modifier,
                             text = appBarUiState.value.subtitle,
-                            color = themeColor(appBarUiState.value.subtitleColorAttr),
+                            color = mainContentTextColor,
                             fontSize = fontSize,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -162,23 +158,23 @@ fun CurrentWeatherLayout(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon", tint = mainContentTextColor)
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            showHourlyForecast = !showHourlyForecast
-                        }
-                    ) {
-                        Icon(Icons.Filled.Timeline, "hourlyForecast")
+                    IconButton(onClick = { showHourlyForecast = !showHourlyForecast }) {
+                        Icon(Icons.Filled.Timeline, "hourlyForecast", tint = mainContentTextColor)
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
+
         },
         content = { innerPadding ->
             Box(modifier = Modifier.fillMaxSize()) {
-                BackgroundImage(innerPadding)
+                BackgroundImage()
                 PullToRefreshBox(
                     state = refreshState,
                     isRefreshing = isRefreshing,
@@ -267,20 +263,15 @@ fun CurrentWeatherLayout(
  * Displays the full-screen background image.
  *
  * The image covers the entire screen and respects scaffold padding.
- *
- * @param innerPadding Padding provided by [Scaffold] to account for system bars
  */
 @Composable
-private fun BackgroundImage(
-    innerPadding: PaddingValues
-) {
+private fun BackgroundImage() {
     Image(
-        painter = painterResource(id = R.drawable.background),
+        painter = painterResource(id = R.drawable.background2),
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
         modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
+            .fillMaxSize(),
     )
 }
 

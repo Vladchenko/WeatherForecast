@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,6 +18,7 @@ import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
 import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.WeatherDialogControllerFactory
 import com.example.weatherforecast.presentation.coordinator.WeatherCoordinator
 import com.example.weatherforecast.presentation.status.StatusRenderer
+import com.example.weatherforecast.presentation.themeColor
 import com.example.weatherforecast.presentation.view.fragments.forecast.current.CurrentWeatherLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
@@ -57,7 +57,7 @@ class WeatherFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 CurrentWeatherLayout(
-                    mainContentTextColor = Color.Black,
+                    mainContentTextColor = themeColor(R.attr.colorMainText),
                     onCityClick = { gotoCitySelectionScreen() },
                     onBackClick = { activity?.finish() },
                     appBarViewModel = appBarViewModel,
@@ -99,7 +99,6 @@ class WeatherFragment : Fragment() {
 
         coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
 
-        statusRenderer.showLoadingStatusFor(args.chosenCity)
         forecastViewModel.launchWeatherForecast(args.chosenCity, args.latitude, args.longitude)
     }
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -45,7 +46,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -62,7 +62,7 @@ import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
-import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
+import com.example.weatherforecast.presentation.themeColor
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
@@ -92,6 +92,7 @@ import kotlinx.coroutines.FlowPreview
 @NonSkippableComposable
 @ExperimentalMaterial3Api
 fun CitySelectionLayout(
+    mainContentColor: Color = themeColor(R.attr.colorMainText),
     citySelectionTitle: String,
     queryLabel: String,
     onEvent: (CitySelectionEvent) -> Unit,
@@ -106,21 +107,20 @@ fun CitySelectionLayout(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary,
-                ),
                 title = {
                     Column {
                         Text(
                             modifier = Modifier
                                 .padding(top = 4.dp),
-                            text = appbarUiState.title
+                            text = appbarUiState.title,
+                            color = mainContentColor,
                         )
                         Text(
                             text = appbarUiState.subtitle,
-                            color = LocalContext.current.resolveColorAttr(appbarUiState.subtitleColorAttr),
+                            color = mainContentColor,
                             fontSize = fontSize,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -129,35 +129,43 @@ fun CitySelectionLayout(
                 },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(CitySelectionEvent.NavigateUp) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            "backIcon",
+                            tint = mainContentColor
+                        )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
         },
         content = { innerPadding ->
             Image(
-                painter = painterResource(id = R.drawable.background),
+                painter = painterResource(id = R.drawable.background2),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
+                    .fillMaxSize(),
             )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     Text(
                         text = citySelectionTitle,
                         modifier = Modifier.padding(top = 16.dp),
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color = mainContentColor
                     )
                     AddressEdit(
                         cityName = cityUiState,
                         queryLabel = queryLabel,
                         modifier = Modifier,
+                        mainContentColor = mainContentColor,
                         cityMaskPredictions = cityPredictions.toPersistentList(),
                         onEvent
                     )
@@ -188,6 +196,7 @@ private fun QuerySearch(
     label: String,
     useOutlined: Boolean = false,
     colors: TextFieldColors? = null,
+    mainContentColor: Color,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
     onQueryChanged: (String) -> Unit
@@ -222,7 +231,51 @@ private fun QuerySearch(
                 imeAction = ImeAction.Done,
                 keyboardType = KeyboardType.Text
             ),
-            colors = colors ?: TextFieldDefaults.colors()
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = mainContentColor,
+                unfocusedTextColor = mainContentColor,
+                disabledTextColor = mainContentColor.copy(alpha = 0.38f),
+                errorTextColor = Color.Red,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                errorContainerColor = Color.Transparent,
+                cursorColor = mainContentColor,
+                errorCursorColor = Color.Red,
+                selectionColors = LocalTextSelectionColors.current,
+                focusedIndicatorColor = mainContentColor,
+                unfocusedIndicatorColor = mainContentColor.copy(alpha = 0.6f),
+                disabledIndicatorColor = mainContentColor.copy(alpha = 0.38f),
+                errorIndicatorColor = Color.Red,
+                focusedLeadingIconColor = mainContentColor.copy(alpha = 0.6f),
+                unfocusedLeadingIconColor = mainContentColor.copy(alpha = 0.6f),
+                disabledLeadingIconColor = mainContentColor.copy(alpha = 0.38f),
+                errorLeadingIconColor = Color.Red,
+                focusedTrailingIconColor = mainContentColor.copy(alpha = 0.6f),
+                unfocusedTrailingIconColor = mainContentColor.copy(alpha = 0.6f),
+                disabledTrailingIconColor = mainContentColor.copy(alpha = 0.38f),
+                errorTrailingIconColor = Color.Red,
+                focusedLabelColor = mainContentColor,
+                unfocusedLabelColor = mainContentColor.copy(alpha = 0.6f),
+                disabledLabelColor = mainContentColor.copy(alpha = 0.38f),
+                errorLabelColor = Color.Red,
+                focusedPlaceholderColor = mainContentColor.copy(alpha = 0.5f),
+                unfocusedPlaceholderColor = mainContentColor.copy(alpha = 0.5f),
+                disabledPlaceholderColor = mainContentColor.copy(alpha = 0.38f),
+                errorPlaceholderColor = Color.Red,
+                focusedSupportingTextColor = mainContentColor.copy(alpha = 0.6f),
+                unfocusedSupportingTextColor = mainContentColor.copy(alpha = 0.6f),
+                disabledSupportingTextColor = mainContentColor.copy(alpha = 0.38f),
+                errorSupportingTextColor = Color.Red,
+                focusedPrefixColor = mainContentColor,
+                unfocusedPrefixColor = mainContentColor.copy(alpha = 0.6f),
+                disabledPrefixColor = mainContentColor.copy(alpha = 0.38f),
+                errorPrefixColor = Color.Red,
+                focusedSuffixColor = mainContentColor,
+                unfocusedSuffixColor = mainContentColor.copy(alpha = 0.6f),
+                disabledSuffixColor = mainContentColor.copy(alpha = 0.38f),
+                errorSuffixColor = Color.Red
+            )
         )
     } else {
         TextField(
@@ -280,6 +333,7 @@ private fun <T> AutoCompleteUI(
     queryLabel: String,
     useOutlined: Boolean = false,
     colors: TextFieldColors? = null,
+    mainContentColor: Color,
     onQueryChanged: (String) -> Unit = {},
     predictions: ImmutableList<T>,
     onDoneActionClick: () -> Unit = {},
@@ -301,6 +355,7 @@ private fun <T> AutoCompleteUI(
                 label = queryLabel,
                 useOutlined = useOutlined,
                 colors = colors,
+                mainContentColor = mainContentColor,
                 onQueryChanged = onQueryChanged,
                 onDoneActionClick = {
                     view.clearFocus()
@@ -345,6 +400,7 @@ private fun AddressEdit(
     cityName: String,
     queryLabel: String,
     modifier: Modifier,
+    mainContentColor: Color,
     cityMaskPredictions: ImmutableList<CityDomainModel>,
     onEvent: (CitySelectionEvent) -> Unit,
     keyboardController: SoftwareKeyboardController? = LocalSoftwareKeyboardController.current
@@ -358,6 +414,7 @@ private fun AddressEdit(
             query = cityName,
             queryLabel = queryLabel,
             useOutlined = true,
+            mainContentColor = mainContentColor,
             onQueryChanged = { updatedCityMask ->
                 if (updatedCityMask.isNotBlank()) {
                     onEvent(CitySelectionEvent.UpdateQuery(updatedCityMask))
@@ -392,10 +449,10 @@ private fun AddressEdit(
         ) { city ->
             Text(
                 modifier = Modifier
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.onPrimary)
-                    .padding(8.dp),
-                color = Color.Black,
+                    .clip(shape = RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f))
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                color = mainContentColor,
                 text = getFullCityName(city.name, city.state, city.country),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold

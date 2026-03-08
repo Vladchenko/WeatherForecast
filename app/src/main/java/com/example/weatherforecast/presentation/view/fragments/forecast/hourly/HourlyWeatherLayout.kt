@@ -2,13 +2,12 @@ package com.example.weatherforecast.presentation.view.fragments.forecast.hourly
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,7 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,11 +72,28 @@ fun HourlyWeatherLayout(
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
         )
-        LazyRow(
-            contentPadding = PaddingValues(8.dp)
+        Box(
+            modifier = Modifier
+                .height(140.dp)
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
         ) {
-            items(hourlyWeather.hourlyForecasts) { forecast ->
-                HourlyForecastItem(forecast)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .mask(brush = horizontalFadeGradient(
+                        startFadeDp = 16,   // 80.dp слева — пустое пространство
+                        endFadeDp = 16,     // 80.dp справа — пустое пространство
+                        fadeWidthDp = 100    // 40.dp — ширина самого затухания
+                    ))
+            ) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    items(hourlyWeather.hourlyForecasts) { forecast ->
+                        HourlyForecastItem(forecast)
+                    }
+                }
             }
         }
     }
@@ -94,8 +117,7 @@ private fun HourlyForecastItem(forecast: HourlyItemDomainModel) {
         modifier = Modifier
             .width(130.dp)
             .height(110.dp)
-            .padding(8.dp)
-            .offset((-16).dp),
+            .padding(8.dp),
         color = Color.White,
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -141,4 +163,49 @@ private fun HourlyForecastItem(forecast: HourlyItemDomainModel) {
 private fun formatTime(timestamp: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp * 1000))
+}
+
+fun Modifier.mask(brush: Brush) = this.then(
+    Modifier
+        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+        .drawWithCache {
+            onDrawWithContent {
+                drawContent()
+                drawRect(brush = brush, blendMode = BlendMode.DstIn)
+            }
+        }
+)
+
+@Composable
+fun horizontalFadeGradient(
+    startFadeDp: Int = 60,   // отступ слева до начала fade
+    endFadeDp: Int = 60,     // отступ справа до конца fade
+    fadeWidthDp: Int = 40     // ширина самой зоны затухания
+): Brush {
+    val density = LocalDensity.current
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp
+    val screenWidthPx = with(density) { screenWidthDp.dp.toPx() }
+    val startFadePx = with(density) { startFadeDp.dp.toPx() }
+    val endFadePx = with(density) { endFadeDp.dp.toPx() }
+    val fadeWidthPx = with(density) { fadeWidthDp.dp.toPx() }
+
+    // Начало левого градиента
+    val leftStart = startFadePx / screenWidthPx
+    // Конец левого градиента (где контент становится полностью видимым)
+    val leftEnd = (startFadePx + fadeWidthPx) / screenWidthPx
+
+    // Начало правого градиента (где контент начинает исчезать)
+    val rightStart = (screenWidthPx - endFadePx - fadeWidthPx) / screenWidthPx
+    // Конец правого градиента
+    val rightEnd = (screenWidthPx - endFadePx) / screenWidthPx
+
+    return Brush.horizontalGradient(
+        0f to Color.Transparent,
+        leftStart to Color.Transparent,
+        leftEnd to Color.Black,
+        rightStart to Color.Black,
+        rightEnd to Color.Transparent,
+        1f to Color.Transparent
+    )
 }

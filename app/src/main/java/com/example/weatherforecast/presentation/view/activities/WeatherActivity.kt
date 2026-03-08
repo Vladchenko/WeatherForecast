@@ -2,11 +2,12 @@ package com.example.weatherforecast.presentation.view.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.work.WorkManager
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
+import com.example.weatherforecast.data.workmanager.WorkerStarter
 import com.example.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import com.example.weatherforecast.presentation.status.StatusRenderer
+import com.example.weatherforecast.presentation.util.SystemBarAppearanceManager
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -27,17 +28,36 @@ class WeatherActivity : AppCompatActivity() {
     @Inject lateinit var connectivityObserver: ConnectivityObserver
     @Inject lateinit var statusRenderer: StatusRenderer
     @Inject lateinit var resourceManager: ResourceManager
+
     private lateinit var networkCoordinator: NetworkStatusCoordinator
+    private lateinit var systemBarManager: SystemBarAppearanceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        systemBarManager = SystemBarAppearanceManager(this)
+        setContentView(R.layout.weather_forecast_activity)
+
+        initNetworkCoordinator()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        systemBarManager.setTransparentSystemBars()
+        systemBarManager.setLightStatusBars(isLight = isLightTheme())
+    }
+
+    private fun initNetworkCoordinator() {
         networkCoordinator = NetworkStatusCoordinator(
             connectivityObserver = connectivityObserver,
             statusRenderer = statusRenderer,
             resourceManager = resourceManager
         )
-
         lifecycle.addObserver(networkCoordinator)
-        setContentView(R.layout.weather_forecast_activity)
+    }
+
+    private fun isLightTheme(): Boolean {
+        val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        return currentNightMode != android.content.res.Configuration.UI_MODE_NIGHT_YES
     }
 }

@@ -9,7 +9,7 @@
     <color name="colorWhite">#FFFFFFFF</color>
     <color name="colorGray">#AAA</color>
 
-    <color name="colorPrimary">#3F51B5</color>
+<!--    <color name="colorPrimary">#3F51B5</color>-->
     <color name="colorPrimaryDark">#303f9f</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorGreen">#3ACF45</color>

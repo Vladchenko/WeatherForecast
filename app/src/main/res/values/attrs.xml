@@ -3,5 +3,6 @@
     <attr name="colorInfo" format="color" />
     <attr name="colorError" format="color" />
     <attr name="colorWarning" format="color" />
+    <attr name="colorMainText" format="color" />
     <attr name="colorDarkYellow" format="color" />
 </resources>

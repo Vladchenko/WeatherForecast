@@ -1,19 +1,23 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Theme.WeatherForecast" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/colorPurple500</item>
-        <item name="colorPrimaryVariant">@color/colorPurple700</item>
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/colorBlack</item>
+        <item name="colorPrimaryVariant">@color/colorBlack</item>
         <item name="colorOnPrimary">@color/colorWhite</item>
-        <!-- Secondary brand color. -->
+
+        <!-- Secondary brand color -->
         <item name="colorSecondary">@color/colorTeal200</item>
         <item name="colorSecondaryVariant">@color/colorTeal700</item>
         <item name="colorOnSecondary">@color/colorBlack</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+        <!-- Custom colors -->
+        <item name="colorMainText">@color/colorWhite</item>
         <item name="colorInfo">@color/colorBlack</item>
         <item name="colorWarning">@color/colorDarkYellow</item>
         <item name="colorError">@color/colorRed</item>
+
         <!-- Customize your theme here. -->
+        <item name="colorMainText">@color/colorWhite</item>
     </style>
 </resources>
