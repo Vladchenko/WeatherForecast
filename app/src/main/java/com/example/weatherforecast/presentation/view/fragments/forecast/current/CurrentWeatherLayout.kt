@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -192,8 +191,7 @@ fun CurrentWeatherLayout(
                     indicator = {
                         PullToRefreshDefaults.Indicator(
                             modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .offset(y = 56.dp),
+                                .align(Alignment.TopCenter),
                             isRefreshing = isRefreshing,
                             state = refreshState
                         )
