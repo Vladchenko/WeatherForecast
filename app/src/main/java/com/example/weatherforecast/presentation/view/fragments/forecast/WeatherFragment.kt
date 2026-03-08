@@ -17,6 +17,7 @@ import com.example.weatherforecast.presentation.alertdialog.AlertDialogFactory
 import com.example.weatherforecast.presentation.alertdialog.AlertDialogHelper
 import com.example.weatherforecast.presentation.alertdialog.dialogcontroller.WeatherDialogControllerFactory
 import com.example.weatherforecast.presentation.coordinator.WeatherCoordinator
+import com.example.weatherforecast.presentation.navigation.WeatherNavigator
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.themeColor
 import com.example.weatherforecast.presentation.view.fragments.forecast.current.CurrentWeatherLayout
@@ -47,6 +48,7 @@ class WeatherFragment : Fragment() {
     private val hourlyWeatherViewModel: HourlyWeatherViewModel by activityViewModels()
 
     private lateinit var coordinator: WeatherCoordinator
+    private val navigator by lazy { WeatherNavigator(findNavController()) }
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -103,6 +105,6 @@ class WeatherFragment : Fragment() {
     }
 
     private fun gotoCitySelectionScreen() {
-        findNavController().navigate(R.id.action_currentTimeForecastFragment_to_citiesNamesFragment)
+        navigator.navigateToCitySelection()
     }
 }

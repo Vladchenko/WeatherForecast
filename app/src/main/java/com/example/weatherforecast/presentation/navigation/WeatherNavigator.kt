@@ -7,6 +7,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.view.fragments.cityselection.CitiesNamesFragmentDirections
+import com.example.weatherforecast.presentation.view.fragments.forecast.WeatherFragmentDirections
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -40,6 +41,15 @@ class WeatherNavigator(private val navController: NavController) {
                 }
             }
         }
+    }
+
+    fun navigateToCitySelection() {
+        val action = WeatherFragmentDirections.actionCurrentTimeForecastFragmentToCitiesNamesFragment()
+        navController.navigate(action)
+    }
+
+    fun navigateUp() {
+        navController.popBackStack()
     }
 
     private fun handleEvent(event: CityNavigationEvent?) {
