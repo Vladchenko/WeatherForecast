@@ -2,7 +2,10 @@ package com.example.weatherforecast.presentation.view.fragments.forecast.current
 
 import android.location.Location
 import android.location.LocationManager
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
@@ -157,7 +160,11 @@ fun CurrentWeatherLayout(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon", tint = mainContentTextColor)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            "backIcon",
+                            tint = mainContentTextColor
+                        )
                     }
                 },
                 actions = {
@@ -223,6 +230,7 @@ fun CurrentWeatherLayout(
                             }
                         }
 
+
                         is WeatherUiState.Success -> {
                             Column(
                                 modifier = Modifier
@@ -231,16 +239,31 @@ fun CurrentWeatherLayout(
                                     .verticalScroll(rememberScrollState()),
                                 verticalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                AnimatedVisibility(
-                                    visible = !viewModel.showProgressBarState.value,
-                                    enter = fadeIn(),
-                                    exit = fadeOut()
-                                ) {
+                                AnimatedContent(
+                                    targetState = state,
+                                    transitionSpec = {
+                                        // Сначала старый исчезает, потом новый появляется
+                                        ContentTransform(
+                                            targetContentEnter = fadeIn(
+                                                animationSpec = tween(
+                                                    durationMillis = 500,
+                                                    delayMillis = 500
+                                                )
+                                            ),
+                                            initialContentExit = fadeOut(
+                                                animationSpec = tween(
+                                                    durationMillis = 500
+                                                )
+                                            )
+                                        )
+                                    },
+                                    label = "WeatherContent"
+                                ) { weatherState ->
                                     MainContent(
                                         innerPadding = PaddingValues(),
                                         mainContentTextColor = mainContentTextColor,
                                         onCityClick = onCityClick,
-                                        uiState = state
+                                        uiState = weatherState
                                     )
                                 }
                                 AnimatedVisibility(visible = showHourlyForecast) {
