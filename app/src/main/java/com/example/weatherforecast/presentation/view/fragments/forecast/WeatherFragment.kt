@@ -101,7 +101,11 @@ class WeatherFragment : Fragment() {
 
         coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)
 
-        forecastViewModel.launchWeatherForecast(args.chosenCity, args.latitude, args.longitude)
+        // Delay to ensure fragment's enter animation completes before updating weather.
+        // Prevents overlap between screen fade-in and content refresh animation.
+        view.postDelayed({
+            forecastViewModel.launchWeatherForecast(args.chosenCity, args.latitude, args.longitude)
+        }, 1000)
     }
 
     private fun gotoCitySelectionScreen() {

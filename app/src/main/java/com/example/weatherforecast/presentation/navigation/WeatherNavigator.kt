@@ -5,6 +5,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
+import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.view.fragments.cityselection.CitiesNamesFragmentDirections
 import com.example.weatherforecast.presentation.view.fragments.forecast.WeatherFragmentDirections
@@ -45,7 +48,7 @@ class WeatherNavigator(private val navController: NavController) {
 
     fun navigateToCitySelection() {
         val action = WeatherFragmentDirections.actionCurrentTimeForecastFragmentToCitiesNamesFragment()
-        navController.navigate(action)
+        navController.navigate(action, fadeNavOptions())
     }
 
     fun navigateUp() {
@@ -66,6 +69,17 @@ class WeatherNavigator(private val navController: NavController) {
                 city.city,
                 city.location.latitude.toString(),
                 city.location.longitude.toString())
-        navController.navigate(action)
+        navController.navigate(action, fadeNavOptions())
+    }
+
+    private fun fadeNavOptions(): NavOptions = navOptions {
+        anim {
+            enter = R.anim.fade_in
+            exit = R.anim.fade_out
+            popEnter = R.anim.fade_in
+            popExit = R.anim.fade_out
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
