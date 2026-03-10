@@ -30,22 +30,26 @@ class AppBarStateConverter @Inject constructor(
             )
         }
 
+        val subtitleColorAttr = when (forecastState) {
+            is WeatherUiState.Loading -> R.attr.colorInfo
+            is WeatherUiState.Error -> R.attr.colorError
+            is WeatherUiState.Success -> {
+               getToolbarSubtitleColor(forecastState)
+            }
+        }
+
         return AppBarState(
             title = resourceManager.getString(R.string.app_name),
             subtitle = subtitle,
-            subtitleColorAttr = when (forecastState) {
-                is WeatherUiState.Loading -> resourceManager.getThemeColorRes(R.attr.colorInfo)
-                is WeatherUiState.Error -> resourceManager.getThemeColorRes(R.attr.colorError)
-                is WeatherUiState.Success -> getToolbarSubtitleColor(forecastState)
-            },
+            subtitleColorAttr = subtitleColorAttr,
             subtitleSize = SubtitleSize.fromSubtitle(subtitle)
         )
     }
 
-    private fun getToolbarSubtitleColor(forecast: WeatherUiState.Success) =
+    fun getToolbarSubtitleColor(forecast: WeatherUiState.Success) =
         if (forecast.source == DataSource.REMOTE) {
-            resourceManager.getThemeColorRes(R.attr.colorInfo)
+            R.attr.colorInfo
         } else {
-            resourceManager.getThemeColorRes(R.attr.colorWarning)
+            R.attr.colorWarning
         }
 }

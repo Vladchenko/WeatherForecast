@@ -14,9 +14,9 @@
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor" >@color/colorBlack</item>
-        <item name="colorInfo">@color/colorBlack</item>
-        <item name="colorWarning">@color/colorDarkYellow</item>
-        <item name="colorError">@color/colorRed</item>
+        <item name="colorInfo">@color/colorWhite</item>
+        <item name="colorWarning">@color/colorYellow</item>
+        <item name="colorError">@color/colorLightRed</item>
 
         <!-- Customize your theme here. -->
         <item name="colorMainText">@color/colorWhite</item>

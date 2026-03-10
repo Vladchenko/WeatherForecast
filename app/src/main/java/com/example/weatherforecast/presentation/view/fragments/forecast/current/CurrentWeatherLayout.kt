@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.PresentationUtils
+import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyWeatherLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
@@ -95,6 +97,7 @@ fun CurrentWeatherLayout(
     viewModel: CurrentWeatherViewModel,
     hourlyViewModel: HourlyWeatherViewModel,
 ) {
+    val context = LocalContext.current
     val forecastUiState = viewModel.forecastStateFlow.collectAsStateWithLifecycle()
     val appBarUiState = appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val hourlyForecastUiState = hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
@@ -104,6 +107,15 @@ fun CurrentWeatherLayout(
     var showHourlyForecast by remember { mutableStateOf(false) }
     val isRefreshing by viewModel.isRefreshingStateFlow.collectAsState()
     val refreshState = rememberPullToRefreshState()
+
+    // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
+    val subtitleColor = remember(appBarUiState.value) {
+        context.resolveColorAttr(appBarUiState.value.subtitleColorAttr) // ← Теперь это R.attr.colorInfo, а не цвет!
+    }
+
+    LaunchedEffect(appBarUiState.value.subtitle) {
+        println("CurrentWeatherLayout: subtitle = '${appBarUiState.value.subtitle}'")
+    }
 
     LaunchedEffect(Unit) {
         viewModel.internetConnectedStateFlow
@@ -149,9 +161,8 @@ fun CurrentWeatherLayout(
                             color = mainContentTextColor,
                         )
                         Text(
-                            modifier = Modifier,
                             text = appBarUiState.value.subtitle,
-                            color = mainContentTextColor,
+                            color = subtitleColor,
                             fontSize = fontSize,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -176,7 +187,6 @@ fun CurrentWeatherLayout(
                     containerColor = Color.Transparent
                 )
             )
-
         },
         content = { innerPadding ->
             Box(modifier = Modifier.fillMaxSize()) {
@@ -230,7 +240,6 @@ fun CurrentWeatherLayout(
                             }
                         }
 
-
                         is WeatherUiState.Success -> {
                             Column(
                                 modifier = Modifier
@@ -251,9 +260,7 @@ fun CurrentWeatherLayout(
                                                 )
                                             ),
                                             initialContentExit = fadeOut(
-                                                animationSpec = tween(
-                                                    durationMillis = 500
-                                                )
+                                                animationSpec = tween(durationMillis = 500)
                                             )
                                         )
                                     },

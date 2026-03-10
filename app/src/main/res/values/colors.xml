@@ -14,7 +14,9 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorGreen">#3ACF45</color>
     <color name="colorDarkYellow">#808000</color>
+    <color name="colorYellow">#FFFF70</color>
     <color name="colorRed">#FF0000</color>
+    <color name="colorLightRed">#FF7070</color>
     <color name="commonBorderColor">#000000</color>
     <color name="colorBackground">#FFFF5500</color>
     <color name="colorPaint">#FFFFEB3B</color>
