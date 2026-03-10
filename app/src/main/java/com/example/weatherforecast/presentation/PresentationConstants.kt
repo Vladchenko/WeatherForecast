@@ -19,5 +19,5 @@ object PresentationConstants {
     /**
      * Date format displayed to user
      */
-    const val UI_DATE_FORMAT = "dd/MM/yyyy HH:mm:ss"
+    const val UI_DATE_FORMAT = "yyyy/MM/dd HH:mm:ss"
 }
