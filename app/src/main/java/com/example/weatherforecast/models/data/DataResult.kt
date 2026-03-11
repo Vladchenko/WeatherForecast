@@ -28,9 +28,10 @@ sealed interface DataResult<out T> {
     /**
      * Represents a failed data operation with an associated error.
      *
+     * @property city that weather forecast is being provided for
      * @property error the description of what went wrong in data-layer terms
      */
-    data class Error(val error: DataError) : DataResult<Nothing>
+    data class Error(val city: String, val error: DataError) : DataResult<Nothing>
 }
 
 /**

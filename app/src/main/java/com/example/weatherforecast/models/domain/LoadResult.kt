@@ -38,9 +38,11 @@ sealed interface LoadResult<out T> {
      *
      * Indicates a serious issue (e.g., no internet, corrupted cache) where no data is available.
      *
+     * @param city to provide weather forecast for
      * @param error the domain-level error describing the failure
      */
     data class Error(
+        val city: String? = null,
         val error: ForecastError
     ) : LoadResult<Nothing>
 }

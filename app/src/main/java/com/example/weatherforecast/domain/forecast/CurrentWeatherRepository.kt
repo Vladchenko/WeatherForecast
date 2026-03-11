@@ -16,6 +16,7 @@ interface CurrentWeatherRepository {
      * @return result with data model
      */
     suspend fun refreshWeatherForLocation(
+        city: String,
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double

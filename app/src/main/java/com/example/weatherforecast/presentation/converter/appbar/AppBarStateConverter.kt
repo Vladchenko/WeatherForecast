@@ -23,7 +23,10 @@ class AppBarStateConverter @Inject constructor(
     fun convert(forecastState: WeatherUiState): AppBarState {
         val subtitle = when (forecastState) {
             is WeatherUiState.Loading -> resourceManager.getString(R.string.forecast_loading)
-            is WeatherUiState.Error -> resourceManager.getString(R.string.forecast_load_error)
+            is WeatherUiState.Error -> resourceManager.getString(
+                R.string.forecast_load_error,
+                forecastState.city.orEmpty()
+            )
             is WeatherUiState.Success -> resourceManager.getString(
                 R.string.forecast_loaded_success,
                 forecastState.forecast.city
@@ -34,7 +37,7 @@ class AppBarStateConverter @Inject constructor(
             is WeatherUiState.Loading -> R.attr.colorInfo
             is WeatherUiState.Error -> R.attr.colorError
             is WeatherUiState.Success -> {
-               getToolbarSubtitleColor(forecastState)
+                getToolbarSubtitleColor(forecastState)
             }
         }
 

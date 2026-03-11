@@ -15,10 +15,34 @@ import com.example.weatherforecast.models.presentation.CurrentWeatherUi
  * This sealed class ensures exhaustive handling of UI states in the UI layer (e.g., using `when` expressions).
  */
 sealed class WeatherUiState {
-    object Loading: WeatherUiState()
-    data class Success(val forecast: CurrentWeatherUi,
-                       val source: DataSource): WeatherUiState()
-    data class Error(val message: String): WeatherUiState()
+    /**
+     * Represents the state when the weather data is being loaded.
+     *
+     * The UI should display a loading indicator while in this state.
+     */
+    object Loading : WeatherUiState()
+
+    /**
+     * Represents the successful retrieval of weather forecast data.
+     *
+     * @property forecast The retrieved weather data model for display.
+     * @property source Indicates whether the data came from the network or local cache.
+     */
+    data class Success(
+        val forecast: CurrentWeatherUi,
+        val source: DataSource
+    ) : WeatherUiState()
+
+    /**
+     * Represents an error state during weather data retrieval.
+     *
+     * @property city The name of the city for which the request failed (may be null).
+     * @property message A user-friendly error message suitable for display in the UI.
+     */
+    data class Error(
+        val city: String?,
+        val message: String
+    ) : WeatherUiState()
 }
 
 /**
@@ -30,11 +54,15 @@ sealed class WeatherUiState {
 enum class DataSource {
     /**
      * Data was fetched from the remote server (API).
+     *
+     * Indicates fresh data retrieved over the network.
      */
     REMOTE,
 
     /**
      * Data was retrieved from local cache/storage.
+     *
+     * Used when offline or when showing cached data while refreshing in the background.
      */
     LOCAL
 }

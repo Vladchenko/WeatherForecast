@@ -79,21 +79,30 @@ class CurrentWeatherRepositoryImpl(
 
     @InternalSerializationApi
     override suspend fun refreshWeatherForLocation(
+        city: String,
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
-            when (val result = currentWeatherRemoteDataSource.loadWeatherForLocation(latitude, longitude)) {
+            when (val result = currentWeatherRemoteDataSource.loadWeatherForLocation(
+                city,
+                latitude,
+                longitude
+            )) {
                 is DataResult.Success -> {
                     val dto = result.data
                     fetchAndSave(dto, temperatureType)
-                        ?: LoadResult.Error(ForecastError.NoDataAvailable("Mapped DTO is null"))
+                        ?: LoadResult.Error(
+                            city,
+                            ForecastError.NoDataAvailable("Mapped DTO is null")
+                        )
                 }
+
                 is DataResult.Error -> {
                     val forecastError = errorMapper.map(result.error)
                     // TODO Consider fallback to local data by location
-                    LoadResult.Error(forecastError)
+                    LoadResult.Error(city, forecastError)
                 }
             }
         }
@@ -110,7 +119,7 @@ class CurrentWeatherRepositoryImpl(
             LoadResult.Remote(domainModel)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to map or save weather data: $ex")
-            LoadResult.Error(ForecastError.UncategorizedError(ex.message.toString()))
+            LoadResult.Error(dto.name, ForecastError.UncategorizedError(ex.message.toString()))
         }
     }
 
@@ -124,7 +133,7 @@ class CurrentWeatherRepositoryImpl(
             loadCachedWeatherForCity(city, temperatureType, remoteError)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex")
-            LoadResult.Error(ForecastError.NetworkError(ex))
+            LoadResult.Error(city, ForecastError.NetworkError(ex))
         }
     }
 
@@ -142,7 +151,7 @@ class CurrentWeatherRepositoryImpl(
             } catch (ex: Exception) {
                 loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex")
                 LoadResult.Error(
-                    ForecastError.LocalDataCorrupted(
+                    city, ForecastError.LocalDataCorrupted(
                         message = "Local database query failed: $ex"
                     )
                 )

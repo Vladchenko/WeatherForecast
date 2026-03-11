@@ -86,10 +86,12 @@ class HourlyWeatherRepositoryImpl(
         longitude: Double
     ): LoadResult<HourlyWeatherDomainModel> =
         withContext(dispatchers.io) {
-            when (val result = remoteDataSource.loadHourlyWeatherForLocation(latitude, longitude)) {
+            when (val result =
+                remoteDataSource.loadHourlyWeatherForLocation(city, latitude, longitude)) {
                 is DataResult.Success -> {
                     handleSuccessResponse(result.data, city, temperatureType)
                 }
+
                 is DataResult.Error -> {
                     val forecastError = errorMapper.map(result.error)
                     loadCachedWeather(city, temperatureType, forecastError)
@@ -106,14 +108,20 @@ class HourlyWeatherRepositoryImpl(
             try {
                 val entity = localDataSource.getHourlyWeather(city)
                     ?: return@withContext LoadResult.Error(
-                        ForecastError.NoDataAvailable("No cached data found for city: $city")
+                        city, ForecastError.NoDataAvailable("No cached data found for city: $city")
                     )
                 val domainModel = entityMapper.toDomain(entity, temperatureType)
-                loggingService.logDebugEvent(TAG, "Loaded hourly weather from cache for city: $city")
+                loggingService.logDebugEvent(
+                    TAG,
+                    "Loaded hourly weather from cache for city: $city"
+                )
                 LoadResult.Local(domainModel, remoteError)
             } catch (e: Exception) {
                 loggingService.logError(TAG, "Failed to load cached hourly weather for $city", e)
-                LoadResult.Error(ForecastError.LocalDataCorrupted("Cache read failed: ${e.message}"))
+                LoadResult.Error(
+                    city,
+                    ForecastError.LocalDataCorrupted("Cache read failed: ${e.message}")
+                )
             }
         }
 
@@ -130,7 +138,10 @@ class HourlyWeatherRepositoryImpl(
             LoadResult.Remote(domainModel)
         } catch (e: Exception) {
             loggingService.logError(TAG, "Failed to map or save hourly weather for city: $city", e)
-            LoadResult.Error(ForecastError.LocalDataCorrupted("Mapping or saving failed: ${e.message}"))
+            LoadResult.Error(
+                city,
+                ForecastError.LocalDataCorrupted("Mapping or saving failed: ${e.message}")
+            )
         }
     }
 

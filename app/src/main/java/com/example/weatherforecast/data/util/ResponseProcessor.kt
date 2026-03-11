@@ -39,6 +39,7 @@ class ResponseProcessor @Inject constructor() {
      * 3. If status code is not 200, maps to specific [DataError] (e.g. 404 → RequestFailError)
      * 4. Otherwise, wraps the body in [DataResult.Success]
      *
+     * @param city to inform user in case of error which city weather forecast failed for
      * @param response the Retrofit [Response] to process; must not be null
      * @return [DataResult.Success] with body if successful and non-null, [DataResult.Error] otherwise
      *
@@ -46,21 +47,21 @@ class ResponseProcessor @Inject constructor() {
      * @see Response.body
      * @see Response.code
      */
-    fun <T> processResponse(response: Response<T>): DataResult<T> {
+    fun <T> processResponse(city: String, response: Response<T>): DataResult<T> {
         return try {
             val code = response.code()
             val message = readErrorBodySafely(response)
 
             if (!response.isSuccessful) {
                 return DataResult.Error(
-                    DataError.ServerError(
+                    city, DataError.ServerError(
                         response.code(),
                         "API call failed with code"
                     )
                 )
             }
             if (response.body() == null) {
-                return DataResult.Error(DataError.ResponseNoBodyError)
+                return DataResult.Error(city, DataError.ResponseNoBodyError)
             }
 
             return if (code != 200) {
@@ -73,23 +74,23 @@ class ResponseProcessor @Inject constructor() {
                     in 500..599 -> DataError.ServerError(code, message)
                     else -> DataError.NetworkError(Exception("HTTP $code: $message"))
                 }
-                DataResult.Error(error)
+                DataResult.Error(city, error)
             } else {
                 DataResult.Success(response.body()!!)
             }
         } catch (e: java.net.SocketTimeoutException) {
-            DataResult.Error(DataError.NetworkError(e))
+            DataResult.Error(city, DataError.NetworkError(e))
         } catch (e: java.net.ConnectException) {
-            DataResult.Error(DataError.NetworkError(e))
+            DataResult.Error(city, DataError.NetworkError(e))
         } catch (e: java.net.UnknownHostException) {
-            DataResult.Error(DataError.NetworkError(e))
+            DataResult.Error(city, DataError.NetworkError(e))
         } catch (e: javax.net.ssl.SSLException) {
-            DataResult.Error(DataError.NetworkError(e))
+            DataResult.Error(city, DataError.NetworkError(e))
         } catch (e: java.io.IOException) {
-            DataResult.Error(DataError.NetworkError(e))
+            DataResult.Error(city, DataError.NetworkError(e))
         } catch (e: Exception) {
             // Остальные редкие случаи (OutOfMemory, parsing, etc.)
-            DataResult.Error(DataError.UncategorizedError(e))
+            DataResult.Error(city, DataError.UncategorizedError(e))
         }
     }
 

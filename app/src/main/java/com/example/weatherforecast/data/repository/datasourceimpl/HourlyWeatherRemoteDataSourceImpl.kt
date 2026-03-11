@@ -29,11 +29,12 @@ class HourlyWeatherRemoteDataSourceImpl(
             "Hourly forecast response for city = $city",
             response.body()
         )
-        return responseProcessor.processResponse(response)
+        return responseProcessor.processResponse(city, response)
     }
 
     @InternalSerializationApi
     override suspend fun loadHourlyWeatherForLocation(
+        city: String,
         latitude: Double,
         longitude: Double
     ): DataResult<HourlyWeatherDto> {
@@ -43,7 +44,7 @@ class HourlyWeatherRemoteDataSourceImpl(
             "Hourly forecast response for location (lat=$latitude, lon=$longitude)",
             response.body()
         )
-        return responseProcessor.processResponse(response)
+        return responseProcessor.processResponse(city, response)
     }
 
     companion object {

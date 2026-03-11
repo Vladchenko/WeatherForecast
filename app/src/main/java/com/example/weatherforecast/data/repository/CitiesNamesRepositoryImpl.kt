@@ -55,7 +55,7 @@ class CitiesNamesRepositoryImpl(
         val cachedEntities = localDataSource.loadCitiesNames(token)
         if (cachedEntities.isEmpty()) {
             return LoadResult.Error(
-                ForecastError.NoDataAvailable("No cities match '$token' and no internet")
+                token, ForecastError.NoDataAvailable("No cities match '$token' and no internet")
             )
         }
         return LoadResult.Local(

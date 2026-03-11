@@ -45,8 +45,10 @@ class WeatherWorker @AssistedInject constructor(
             val location = chosenCityRepository.loadChosenCity().location
             val weatherResponse =
                 currentWeatherRepository.refreshWeatherForLocation(
-                    tempType,
-                    location.latitude, location.longitude
+                    city = chosenCityRepository.loadChosenCity().city,
+                    temperatureType = tempType,
+                    latitude = location.latitude,
+                    longitude = location.longitude
                 )
 
             val timestamp = SimpleDateFormat(TIMESTAMP_PATTERN, Locale.getDefault()).format(

@@ -126,18 +126,18 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Launches weather forecast download using the provided [chosenCity].
+     * Launches weather forecast download using the provided [city].
      * If blank, attempts to load the last saved city from [chosenCityInteractor].
      *
-     * @param chosenCity the city name selected by the user
+     * @param city the city name selected by the user
      * @param latitude latitude of the chosen city
      * @param longitude longitude of the chosen city
      */
-    fun launchWeatherForecast(chosenCity: String, latitude: String, longitude: String) {
+    fun launchWeatherForecast(city: String, latitude: String, longitude: String) {
         viewModelScope.launch(exceptionHandler) {
-            statusRenderer.showLoadingStatusFor(chosenCity)
+            statusRenderer.showLoadingStatusFor(city)
             isRefreshingStateFlow.emit(true)
-            val (cityName, latitude, longitude) = if (chosenCity.isBlank()) {
+            val (cityName, latitude, longitude) = if (city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
                     _chosenCityBlankSharedFlow.tryEmit(Unit)
@@ -160,7 +160,7 @@ class CurrentWeatherViewModel @Inject constructor(
                     isRefreshingStateFlow.emit(false)
                     return@launch
                 }
-                Triple(chosenCity, latValue, lonValue)
+                Triple(city, latValue, lonValue)
             }
 
             loadRemoteForecastForLocation(cityName, latitude.toString(), longitude.toString())
@@ -168,18 +168,19 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Initiates remote forecast loading based [chosenCity] and its location - [latitude] and [longitude].
+     * Loads remote forecast for location - [latitude] and [longitude] of [city].
      */
-    fun loadRemoteForecastForLocation(chosenCity: String, latitude: String, longitude: String) {
+    fun loadRemoteForecastForLocation(city: String, latitude: String, longitude: String) {
         showProgressBarState.value = true
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadWeatherForLocation(
+                city,
                 temperatureType,
                 latitude.toDouble(),
                 longitude.toDouble()
             )
-            processServerResponse(chosenCity, result)
+            processServerResponse(city, result)
         }
     }
 
@@ -223,7 +224,7 @@ class CurrentWeatherViewModel @Inject constructor(
             is LoadResult.Error -> {
                 when (val error = result.error) {
                     is ForecastError.ApiKeyInvalid -> {
-                        statusRenderer.showError(resourceManager.getString(R.string.api_key_invalid))
+                        showError(city, resourceManager.getString(R.string.api_key_invalid))
                     }
 
                     is ForecastError.CityNotFound -> {
@@ -234,28 +235,28 @@ class CurrentWeatherViewModel @Inject constructor(
                     }
 
                     is ForecastError.LocalDataCorrupted -> {
-                        statusRenderer.showError(resourceManager.getString(R.string.local_data_corrupted))
+                        showError(city, resourceManager.getString(R.string.local_data_corrupted))
                     }
 
                     is ForecastError.NetworkError -> when (error.type) {
                         ForecastError.NetworkError.Type.ConnectionFailed ->
-                            resourceManager.getString(R.string.connection_refused)
+                            showError(city, resourceManager.getString(R.string.connection_refused))
 
                         ForecastError.NetworkError.Type.NoInternet ->
-                            statusRenderer.showError(resourceManager.getString(R.string.network_disconnected))
+                            showError(city, resourceManager.getString(R.string.network_disconnected))
 
                         ForecastError.NetworkError.Type.Timeout ->
-                            statusRenderer.showError(resourceManager.getString(R.string.request_timeout))
+                            showError(city, resourceManager.getString(R.string.request_timeout))
 
                         ForecastError.NetworkError.Type.SecurityError ->
-                            statusRenderer.showError(resourceManager.getString(R.string.ssl_error))
+                            showError(city, resourceManager.getString(R.string.ssl_error))
 
                         else ->
-                            statusRenderer.showError(resourceManager.getString(R.string.network_error_generic))
+                            showError(city, resourceManager.getString(R.string.network_error_generic))
                     }
 
                     is ForecastError.NoDataAvailable -> {
-                        statusRenderer.showError(resourceManager.getString(R.string.no_data_from_server))
+                        showError(city, resourceManager.getString(R.string.no_data_from_server))
                     }
 
                     is ForecastError.UncategorizedError -> {
@@ -264,11 +265,16 @@ class CurrentWeatherViewModel @Inject constructor(
                         } else {
                             loggingService.logError(TAG, "Unexpected error: ${error.message}")
                         }
-                        statusRenderer.showError(resourceManager.getString(R.string.unexpected_error))
+                        showError(city, resourceManager.getString(R.string.unexpected_error))
                     }
                 }
             }
         }
+    }
+
+    private fun showError(city: String, errorMessage: String) {
+        statusRenderer.showError(errorMessage)
+        _forecastStateFlow.value = WeatherUiState.Error(city, errorMessage)
     }
 
     private fun getLocation(result: LoadResult.Remote<CurrentWeather>): Location {

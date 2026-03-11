@@ -121,7 +121,7 @@ fun CurrentWeatherLayout(
                 val cityModel = viewModel.chosenCityStateFlow.value
                 if (isConnected && cityModel != null) {
                     viewModel.launchWeatherForecast(
-                        chosenCity = cityModel.city,
+                        city = cityModel.city,
                         latitude = cityModel.location.latitude.toString(),
                         longitude = cityModel.location.longitude.toString()
                     )

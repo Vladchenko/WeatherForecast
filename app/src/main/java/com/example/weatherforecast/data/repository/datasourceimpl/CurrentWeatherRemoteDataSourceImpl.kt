@@ -24,23 +24,25 @@ class CurrentWeatherRemoteDataSourceImpl(
 ) : CurrentWeatherRemoteDataSource {
 
     override suspend fun loadWeatherForLocation(
+        city: String,
         latitude: Double,
         longitude: Double
     ): DataResult<CurrentWeatherDto> {
         val response = apiService.getCurrentWeatherForLocation(latitude, longitude)
-        return handleResponse(response, "lat=$latitude, lon=$longitude")
+        return handleResponse(response, "lat=$latitude, lon=$longitude", city)
     }
 
     private fun handleResponse(
         response: Response<CurrentWeatherDto>,
-        context: String
+        context: String,
+        city: String,
     ): DataResult<CurrentWeatherDto> {
         loggingService.logApiResponse(
             TAG,
             "Weather forecast response for $context",
             response.body()
         )
-        return responseProcessor.processResponse(response)
+        return responseProcessor.processResponse(city, response)
     }
 
     companion object {
