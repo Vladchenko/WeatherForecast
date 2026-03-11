@@ -140,7 +140,8 @@ fun CurrentWeatherLayout(
                     longitude = coordinate.longitude
                 }
             }
-            val cityModel = CityLocationModel(city, location!!)
+            if (location == null) return@LaunchedEffect 
+            val cityModel = CityLocationModel(city, location)
             hourlyViewModel.getHourlyWeatherForLocation(cityModel)
         }
     }
