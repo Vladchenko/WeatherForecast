@@ -193,7 +193,7 @@ fun CurrentWeatherLayout(
                     onRefresh = {
                         val cityModel = viewModel.chosenCityStateFlow.value
                         if (cityModel != null) {
-                            viewModel.launchWeatherForecast(
+                            viewModel.launchWeatherForecastFromPullToRefresh(
                                 cityModel.city,
                                 cityModel.location.latitude.toString(),
                                 cityModel.location.longitude.toString()

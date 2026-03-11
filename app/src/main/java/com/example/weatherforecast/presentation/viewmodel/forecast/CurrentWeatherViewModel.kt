@@ -193,7 +193,7 @@ class CurrentWeatherViewModel @Inject constructor(
     /**
      * Loads remote forecast for location - [latitude] and [longitude] of [city].
      */
-    fun loadRemoteForecastForLocation(city: String, latitude: String, longitude: String) {
+    private fun loadRemoteForecastForLocation(city: String, latitude: String, longitude: String) {
         showProgressBarState.value = true
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
