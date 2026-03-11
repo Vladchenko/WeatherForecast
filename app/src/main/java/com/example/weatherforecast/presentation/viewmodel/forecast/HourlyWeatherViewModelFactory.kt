@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.LoggingService
-import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
 import com.example.weatherforecast.presentation.status.StatusRenderer
@@ -19,7 +18,6 @@ import com.example.weatherforecast.utils.ResourceManager
  * @property resourceManager resource manager
  * @property preferencesManager preferences manager
  * @property connectivityObserver internet connectivity observer
- * @property coroutineDispatchers coroutines dispatchers
  * @property chosenCityInteractor downloads a previously chosen city
  * @property forecastRemoteInteractor downloads weather forecast through network
  */
@@ -31,13 +29,11 @@ class HourlyWeatherViewModelFactory(
     private val preferencesManager: PreferencesManager,
     private val connectivityObserver: ConnectivityObserver,
     private val chosenCityInteractor: ChosenCityInteractor,
-    private val coroutineDispatchers: CoroutineDispatchers,
     private val forecastRemoteInteractor: HourlyWeatherInteractor
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return HourlyWeatherViewModel(
             connectivityObserver,
-            coroutineDispatchers,
             statusRenderer,
             loggingService,
             resourceManager,

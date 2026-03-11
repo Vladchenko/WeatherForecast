@@ -290,7 +290,6 @@ class WeatherForecastModule {
         preferencesManager: PreferencesManager,
         connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
-        coroutineDispatchers: CoroutineDispatchers,
         forecastRemoteInteractor: HourlyWeatherInteractor
     ): HourlyWeatherViewModelFactory {
         return HourlyWeatherViewModelFactory(
@@ -300,7 +299,6 @@ class WeatherForecastModule {
             preferencesManager,
             connectivityObserver,
             chosenCityInteractor,
-            coroutineDispatchers,
             forecastRemoteInteractor
         )
     }

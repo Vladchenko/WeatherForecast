@@ -34,7 +34,6 @@ import javax.inject.Inject
  * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
  *
  * @param connectivityObserver observes internet connectivity state
- * @param coroutineDispatchers configures dispatchers for coroutines
  * @property statusRenderer displays status messages to the user
  * @property loggingService centralized service for application logging
  * @property resourceManager provides access to Android resources (strings, etc.)
@@ -45,7 +44,6 @@ import javax.inject.Inject
 @HiltViewModel
 class HourlyWeatherViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
-    coroutineDispatchers: CoroutineDispatchers,
     private val statusRenderer: StatusRenderer,
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,

@@ -113,10 +113,6 @@ fun CurrentWeatherLayout(
         context.resolveColorAttr(appBarUiState.value.subtitleColorAttr) // ← Теперь это R.attr.colorInfo, а не цвет!
     }
 
-    LaunchedEffect(appBarUiState.value.subtitle) {
-        println("CurrentWeatherLayout: subtitle = '${appBarUiState.value.subtitle}'")
-    }
-
     LaunchedEffect(Unit) {
         viewModel.internetConnectedStateFlow
             .drop(1)    // Drop initial value as it's emitted immediately on collection start
