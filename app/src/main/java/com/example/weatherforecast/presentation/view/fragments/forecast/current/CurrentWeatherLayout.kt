@@ -109,7 +109,7 @@ fun CurrentWeatherLayout(
     val refreshState = rememberPullToRefreshState()
 
     // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
-    val subtitleColor = remember(appBarUiState.value) {
+    val statusColor = remember(appBarUiState.value) {
         context.resolveColorAttr(appBarUiState.value.subtitleColorAttr) // ← Теперь это R.attr.colorInfo, а не цвет!
     }
 
@@ -159,7 +159,7 @@ fun CurrentWeatherLayout(
                         )
                         Text(
                             text = appBarUiState.value.subtitle,
-                            color = subtitleColor,
+                            color = statusColor,
                             fontSize = fontSize,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -230,8 +230,9 @@ fun CurrentWeatherLayout(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Error: ${state.message}",
-                                    color = Color.Red,
+                                    text = state.message,
+                                    fontSize = 32.sp,
+                                    color = statusColor,
                                     textAlign = TextAlign.Center
                                 )
                             }
