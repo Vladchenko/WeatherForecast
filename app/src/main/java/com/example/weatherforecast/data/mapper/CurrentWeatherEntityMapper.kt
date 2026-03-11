@@ -48,6 +48,7 @@ class CurrentWeatherEntityMapper {
             city = entity.city,
             coordinate = Coordinate(entity.latitude, entity.longitude),
             dateTime = entity.dateTime.toString(),
+            timezone = entity.timezoneOffset.toString(),
             temperature = formattedTemp,
             iconCode = entity.weatherIcon,
             weatherType = entity.weatherDescription,

@@ -8,6 +8,7 @@ import androidx.compose.runtime.Immutable
  * @property city a name of city to provide a weather forecast on
  * @property coordinate of longitude and latitude
  * @property dateTime on which a forecast is provided
+ * @property timezone of the city
  * @property temperature for the city
  * @property iconCode weather icon code
  * @property weatherType like rain, snow, etc
@@ -18,6 +19,7 @@ data class CurrentWeather(
     val city: String,
     val coordinate: Coordinate,
     val dateTime: String,
+    val timezone: String,
     val temperature: String,
     val iconCode: String,
     val weatherType: String,

@@ -4,8 +4,9 @@ import com.example.weatherforecast.models.domain.CurrentWeather
 import com.example.weatherforecast.models.presentation.Coordinate
 import com.example.weatherforecast.models.presentation.CurrentWeatherUi
 import com.example.weatherforecast.presentation.PresentationConstants.UI_DATE_FORMAT
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -13,14 +14,22 @@ import java.util.Locale
  */
 class WeatherDomainToUiConverterImpl: WeatherDomainToUiConverter {
 
+    private val formatter: DateTimeFormatter = DateTimeFormatter
+        .ofPattern(UI_DATE_FORMAT)
+        .withLocale(Locale.getDefault())
+
     override fun convert(model: CurrentWeather,
                          defaultErrorMessage: String,
                          getWeatherIconId: (String) -> Int
     ): CurrentWeatherUi {
-        val displayDate = getCurrentDateOrError(
-            dateTime = model.dateTime,
-            errorMessage = defaultErrorMessage
-        )
+        val displayDate = try {
+            val instant = Instant.ofEpochSecond(model.dateTime.toLong())
+            val zone = ZoneOffset.ofTotalSeconds(model.timezone.toInt())
+            val localDateTime = instant.atOffset(zone)
+            formatter.format(localDateTime)
+        } catch (e: Exception) {
+            defaultErrorMessage
+        }
         val iconId = getWeatherIconId(model.iconCode)
         return CurrentWeatherUi(
             city = model.city,
@@ -32,14 +41,5 @@ class WeatherDomainToUiConverterImpl: WeatherDomainToUiConverter {
             temperatureType = model.temperatureType,
             serverError = model.serverError,
         )
-    }
-
-    private fun getCurrentDateOrError(dateTime: String, errorMessage: String, ): String {
-        return try {
-            SimpleDateFormat(UI_DATE_FORMAT, Locale.getDefault())
-                .format(Date(dateTime.toLong() * 1000))
-        } catch (ex: Exception) {
-            errorMessage
-        }
     }
 }
