@@ -136,7 +136,6 @@ class CurrentWeatherViewModel @Inject constructor(
     fun launchWeatherForecast(city: String, latitude: String, longitude: String) {
         viewModelScope.launch(exceptionHandler) {
             statusRenderer.showLoadingStatusFor(city)
-            isRefreshingStateFlow.emit(true)
             val (cityName, latitude, longitude) = if (city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
@@ -164,6 +163,30 @@ class CurrentWeatherViewModel @Inject constructor(
             }
 
             loadRemoteForecastForLocation(cityName, latitude.toString(), longitude.toString())
+        }
+    }
+
+    /**
+     * Starts weather forecast loading triggered by pull-to-refresh.
+     * Sets the refreshing state before launching the actual forecast load.
+     */
+    fun launchWeatherForecastFromPullToRefresh(city: String, latitude: String, longitude: String) =
+        viewModelScope.launch(exceptionHandler) {
+            setRefreshing(true)
+            try {
+                launchWeatherForecast(city, latitude, longitude)
+            } finally {
+                // Ensure refreshing state is reset even if an error occurs
+                setRefreshing(false)
+            }
+        }
+
+    /**
+     * Updates the refreshing state flow to show or hide the pull-to-refresh indicator.
+     */
+    private fun setRefreshing(refreshing: Boolean) {
+        viewModelScope.launch {
+            isRefreshingStateFlow.emit(refreshing)
         }
     }
 
