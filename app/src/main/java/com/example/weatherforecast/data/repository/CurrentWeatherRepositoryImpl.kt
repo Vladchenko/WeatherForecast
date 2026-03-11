@@ -92,6 +92,7 @@ class CurrentWeatherRepositoryImpl(
                 }
                 is DataResult.Error -> {
                     val forecastError = errorMapper.map(result.error)
+                    // TODO Consider fallback to local data by location
                     LoadResult.Error(forecastError)
                 }
             }
@@ -109,7 +110,7 @@ class CurrentWeatherRepositoryImpl(
             LoadResult.Remote(domainModel)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to map or save weather data: $ex")
-            null
+            LoadResult.Error(ForecastError.UncategorizedError(ex.message.toString()))
         }
     }
 
@@ -123,7 +124,7 @@ class CurrentWeatherRepositoryImpl(
             loadCachedWeatherForCity(city, temperatureType, remoteError)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex")
-            LoadResult.Error(ForecastError.NoInternet)
+            LoadResult.Error(ForecastError.NetworkError(ex))
         }
     }
 

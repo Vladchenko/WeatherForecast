@@ -221,32 +221,50 @@ class CurrentWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                when (result.error) {
-                    is ForecastError.NoInternet -> statusRenderer.showError(
-                        resourceManager.getString(
-                            R.string.network_disconnected
-                        )
-                    )
+                when (val error = result.error) {
+                    is ForecastError.ApiKeyInvalid -> {
+                        statusRenderer.showError(resourceManager.getString(R.string.api_key_invalid))
+                    }
 
                     is ForecastError.CityNotFound -> {
                         statusRenderer.showWarning(
-                            resourceManager.getString(
-                                R.string.forecast_no_data_for_city,
-                                city
-                            )
+                            resourceManager.getString(R.string.city_not_found, error.city)
                         )
-                        _chosenCityNotFoundSharedFlow.tryEmit(city)
+                        _chosenCityNotFoundSharedFlow.tryEmit(error.city)
                     }
 
-                    else -> {
-                        loggingService.logError(
-                            TAG,
-                            "Error loading forecast for city: $city",
-                            Exception(result.error.toString())
-                        )
-                        statusRenderer.showError(
-                            resourceManager.getString(R.string.forecast_load_error)
-                        )
+                    is ForecastError.LocalDataCorrupted -> {
+                        statusRenderer.showError(resourceManager.getString(R.string.local_data_corrupted))
+                    }
+
+                    is ForecastError.NetworkError -> when (error.type) {
+                        ForecastError.NetworkError.Type.ConnectionFailed ->
+                            resourceManager.getString(R.string.connection_refused)
+
+                        ForecastError.NetworkError.Type.NoInternet ->
+                            statusRenderer.showError(resourceManager.getString(R.string.network_disconnected))
+
+                        ForecastError.NetworkError.Type.Timeout ->
+                            statusRenderer.showError(resourceManager.getString(R.string.request_timeout))
+
+                        ForecastError.NetworkError.Type.SecurityError ->
+                            statusRenderer.showError(resourceManager.getString(R.string.ssl_error))
+
+                        else ->
+                            statusRenderer.showError(resourceManager.getString(R.string.network_error_generic))
+                    }
+
+                    is ForecastError.NoDataAvailable -> {
+                        statusRenderer.showError(resourceManager.getString(R.string.no_data_from_server))
+                    }
+
+                    is ForecastError.UncategorizedError -> {
+                        if (error.cause != null) {
+                            loggingService.logError(TAG, "Unexpected error", error.cause)
+                        } else {
+                            loggingService.logError(TAG, "Unexpected error: ${error.message}")
+                        }
+                        statusRenderer.showError(resourceManager.getString(R.string.unexpected_error))
                     }
                 }
             }

@@ -47,35 +47,49 @@ class ResponseProcessor @Inject constructor() {
      * @see Response.code
      */
     fun <T> processResponse(response: Response<T>): DataResult<T> {
-        val code = response.code()
-        val message = readErrorBodySafely(response)
+        return try {
+            val code = response.code()
+            val message = readErrorBodySafely(response)
 
-        if (!response.isSuccessful) {
-            return DataResult.Error(
-                DataError.ServerError(
-                    response.code(),
-                    "API call failed with code"
+            if (!response.isSuccessful) {
+                return DataResult.Error(
+                    DataError.ServerError(
+                        response.code(),
+                        "API call failed with code"
+                    )
                 )
-            )
-        }
-        if (response.body() == null) {
-            return DataResult.Error(DataError.ResponseNoBodyError)
-        }
-
-        return if (code != 200) {
-            val error = when (code) {
-                404 -> DataError.RequestFailError(
-                    requestBody = extractCityFromUrl(response),
-                    message = message
-                )
-
-                401 -> DataError.ApiKeyInvalid(message)
-                in 500..599 -> DataError.ServerError(code, message)
-                else -> DataError.NetworkError(Exception("HTTP $code: $message"))
             }
-            DataResult.Error(error)
-        } else {
-            DataResult.Success(response.body()!!)
+            if (response.body() == null) {
+                return DataResult.Error(DataError.ResponseNoBodyError)
+            }
+
+            return if (code != 200) {
+                val error = when (code) {
+                    404 -> DataError.RequestFailError(
+                        query = extractCityFromUrl(response),
+                        message = message
+                    )
+                    401 -> DataError.ApiKeyInvalid(message)
+                    in 500..599 -> DataError.ServerError(code, message)
+                    else -> DataError.NetworkError(Exception("HTTP $code: $message"))
+                }
+                DataResult.Error(error)
+            } else {
+                DataResult.Success(response.body()!!)
+            }
+        } catch (e: java.net.SocketTimeoutException) {
+            DataResult.Error(DataError.NetworkError(e))
+        } catch (e: java.net.ConnectException) {
+            DataResult.Error(DataError.NetworkError(e))
+        } catch (e: java.net.UnknownHostException) {
+            DataResult.Error(DataError.NetworkError(e))
+        } catch (e: javax.net.ssl.SSLException) {
+            DataResult.Error(DataError.NetworkError(e))
+        } catch (e: java.io.IOException) {
+            DataResult.Error(DataError.NetworkError(e))
+        } catch (e: Exception) {
+            // Остальные редкие случаи (OutOfMemory, parsing, etc.)
+            DataResult.Error(DataError.UncategorizedError(e))
         }
     }
 

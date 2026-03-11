@@ -51,34 +51,6 @@ sealed interface DataResult<out T> {
  */
 sealed interface DataError {
     /**
-     * Network-related error occurred (e.g., timeout, connection lost).
-     *
-     * @param cause underlying exception
-     */
-    data class NetworkError(val cause: Throwable) : DataError
-
-    /**
-     * Server returned an error response (e.g., 500 Internal Server Error).
-     *
-     * @param code HTTP status code
-     * @param message server-provided message
-     */
-    data class ServerError(val code: Int, val message: String) : DataError
-
-    /**
-     * The API response was successful (2xx), but the body was null.
-     */
-    object ResponseNoBodyError : DataError
-
-    /**
-     * Request failed due to invalid parameters (e.g., city not found).
-     *
-     * @param requestBody the value used in the request (e.g., city name)
-     * @param message server-provided error message
-     */
-    data class RequestFailError(val requestBody: String, val message: String) : DataError
-
-    /**
      * API key is invalid or missing.
      *
      * @param message error description from server
@@ -89,4 +61,40 @@ sealed interface DataError {
      * Local database operation failed (e.g., query, insert, delete).
      */
     object DatabaseError : DataError
+
+    /**
+     * Network-related error occurred (e.g., timeout, connection lost).
+     *
+     * @param cause underlying exception
+     */
+    data class NetworkError(val cause: Throwable) : DataError
+
+    /**
+     * The API response was successful (2xx), but the body was null.
+     */
+    object ResponseNoBodyError : DataError
+
+    /**
+     * Request failed due to invalid input (e.g., city not found).
+     *
+     * @param query the value used in the request (e.g., city name)
+     * @param message server-provided error message
+     */
+    data class RequestFailError(val query: String,
+                                val message: String) : DataError
+
+    /**
+     * Server returned an error response (e.g., 500 Internal Server Error).
+     *
+     * @param code HTTP status code
+     * @param message server-provided message
+     */
+    data class ServerError(val code: Int, val message: String) : DataError
+
+    /**
+     * An unexpected or unknown error occurred (e.g., parsing, memory, runtime).
+     *
+     * @param cause original exception
+     */
+    data class UncategorizedError(val cause: Throwable) : DataError
 }

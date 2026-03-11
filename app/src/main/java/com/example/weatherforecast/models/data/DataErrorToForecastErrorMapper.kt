@@ -18,15 +18,19 @@ class DataErrorToForecastErrorMapper {
      */
     fun map(dataError: DataError): ForecastError {
         return when (dataError) {
-            is DataError.NetworkError -> ForecastError.NoInternet
-            is DataError.ServerError -> ForecastError.NoDataAvailable("Server error: ${dataError.code}")
+            is DataError.ApiKeyInvalid -> ForecastError.ApiKeyInvalid(dataError.message)
+            is DataError.DatabaseError -> ForecastError.LocalDataCorrupted("Database error")
+            is DataError.NetworkError -> ForecastError.NetworkError.fromThrowable(dataError.cause)
             is DataError.RequestFailError -> ForecastError.CityNotFound(
-                city = dataError.requestBody,
+                city = dataError.query,
                 message = dataError.message
             )
-            is DataError.ApiKeyInvalid -> ForecastError.NoDataAvailable(dataError.message)
-            DataError.ResponseNoBodyError -> ForecastError.NoDataAvailable("Empty response body")
-            DataError.DatabaseError -> ForecastError.LocalDataCorrupted("Database error")
+            is DataError.ResponseNoBodyError -> ForecastError.NoDataAvailable("Empty response body")
+            is DataError.ServerError -> ForecastError.NoDataAvailable("Server error: ${dataError.code}")
+            is DataError.UncategorizedError -> ForecastError.UncategorizedError(
+                message = dataError.cause.message ?: "An unexpected error occurred",
+                cause = dataError.cause
+            )
         }
     }
 }

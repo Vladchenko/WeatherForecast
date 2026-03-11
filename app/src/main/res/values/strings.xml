@@ -3,13 +3,16 @@
     <string name="bad_date_format">Invalid date format</string>
 
     <!-- City Selection -->
-    <string name="city_selection_title">Select city to provide weather for</string>
-    <string name="city_selection_hint">Type a city and select from the list</string>
-    <string name="city_typing_begin">Start typing a city name…</string>
+    <string name="city_not_found">City "%s" not found. Please check the name.</string>
     <string name="city_predictions_provided">City suggestions ready</string>
     <string name="city_predictions_from_cache">No connection — showing saved cities</string>
+    <string name="city_typing_begin">Start typing a city name…</string>
+    <string name="city_selection_title">Select city to provide weather for</string>
+    <string name="city_selection_hint">Type a city and select from the list</string>
 
     <!-- Database & Loading -->
+    <string name="local_data_corrupted">Cached data is corrupted. Refresh required.</string>
+
     <string name="forecast_not_found_in_database">Forecast for %1$s not found in database</string>
     <string name="forecast_default_city_absent">No city selected. Cannot load forecast.</string>
 
@@ -26,8 +29,14 @@
     <string name="forecast_no_data_message">Forecast for %1$s is unavailable. Please choose another city.</string>
 
     <!-- Network -->
+    <string name="api_key_invalid">Invalid API key. Please check configuration.</string>
+    <string name="connection_refused">Server connection refused. Check server status or try again later.</string>
     <string name="network_connected">Connected to internet</string>
     <string name="network_disconnected">No internet connection</string>
+    <string name="network_error_generic">Network error occurred. Please try again.</string>
+    <string name="no_data_from_server">No data received from server.</string>
+    <string name="request_timeout">Request timed out. Please try again.</string>
+    <string name="ssl_error">Secure connection failed. Check system date or network.</string>
 
     <!-- Geolocation -->
     <string name="geo_title">Geo location</string>
@@ -47,4 +56,6 @@
     <string name="geo_resolution_failed">Unable to get get location. Check your connection.</string>
     <string name="geo_permission_required">Location permission required</string>
     <string name="geo_permission_request_message">This app needs location access to detect your area. Allow permission or exit.</string>
+
+    <string name="unexpected_error">An unexpected error occurred.</string>
 </resources>

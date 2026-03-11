@@ -5,7 +5,6 @@ import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.preferences.PreferencesManager
 import com.example.weatherforecast.data.util.LoggingService
-import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.forecast.HourlyWeatherInteractor
 import com.example.weatherforecast.models.domain.CityLocationModel
@@ -119,18 +118,29 @@ class HourlyWeatherViewModel @Inject constructor(
 
             is LoadResult.Error -> {
                 statusRenderer.showError(
-                    when (result.error) {
-                        is ForecastError.NoInternet ->
-                            resourceManager.getString(R.string.network_disconnected)
-
-                        else -> {
-                            loggingService.logError(
-                                TAG,
-                                "Error loading hourly forecast for city: $city",
-                                Exception(result.error.toString())
-                            )
-                            resourceManager.getString(R.string.forecast_load_error)
+                    when (val error = result.error) {
+                        is ForecastError.NetworkError -> when (error.type) {
+                            ForecastError.NetworkError.Type.ConnectionFailed ->
+                                resourceManager.getString(R.string.connection_refused)
+                            ForecastError.NetworkError.Type.NoInternet ->
+                                resourceManager.getString(R.string.network_disconnected)
+                            ForecastError.NetworkError.Type.Timeout ->
+                                resourceManager.getString(R.string.request_timeout)
+                            ForecastError.NetworkError.Type.SecurityError ->
+                                resourceManager.getString(R.string.ssl_error)
+                            else ->
+                                resourceManager.getString(R.string.network_error_generic)
                         }
+                        is ForecastError.ApiKeyInvalid ->
+                            resourceManager.getString(R.string.api_key_invalid)
+                        is ForecastError.CityNotFound ->
+                            resourceManager.getString(R.string.city_not_found, error.city)
+                        is ForecastError.NoDataAvailable ->
+                            resourceManager.getString(R.string.no_data_from_server)
+                        is ForecastError.LocalDataCorrupted ->
+                            resourceManager.getString(R.string.local_data_corrupted)
+                        is ForecastError.UncategorizedError ->
+                            resourceManager.getString(R.string.unexpected_error)
                     }
                 )
             }
