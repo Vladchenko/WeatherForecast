@@ -69,7 +69,8 @@ class CurrentWeatherViewModel @Inject constructor(
      * Emits true when a refresh operation is in progress, false otherwise.
      * Can be observed to show/hide swipe-to-refresh indicators.
      */
-    val isRefreshingStateFlow = MutableStateFlow(false)
+    val refreshingStateFlow: StateFlow<Boolean>
+        get() = _refreshingStateFlow
 
     /**
      * Public read-only flow that emits the current UI state of the weather forecast.
@@ -106,6 +107,7 @@ class CurrentWeatherViewModel @Inject constructor(
         MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
     private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    private val _refreshingStateFlow = MutableStateFlow(false)
     //endregion flows
 
     private var currentJob: Job? = null
@@ -142,7 +144,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
                     _chosenCityBlankSharedFlow.tryEmit(Unit)
-                    isRefreshingStateFlow.emit(false)
+                    _refreshingStateFlow.value = false
                     return@launch
                 }
                 Triple(
@@ -153,12 +155,12 @@ class CurrentWeatherViewModel @Inject constructor(
             } else {
                 val latValue = latitude.toDoubleOrNull() ?: run {
                     statusRenderer.showError("Invalid latitude")
-                    isRefreshingStateFlow.emit(false)
+                    _refreshingStateFlow.value = false
                     return@launch
                 }
                 val lonValue = longitude.toDoubleOrNull() ?: run {
                     statusRenderer.showError("Invalid longitude")
-                    isRefreshingStateFlow.emit(false)
+                    _refreshingStateFlow.value = false
                     return@launch
                 }
                 Triple(city, latValue, lonValue)
@@ -172,23 +174,10 @@ class CurrentWeatherViewModel @Inject constructor(
      * Starts weather forecast loading triggered by pull-to-refresh.
      * Sets the refreshing state before launching the actual forecast load.
      */
-    fun launchWeatherForecastFromPullToRefresh(city: String, latitude: String, longitude: String) =
+    fun launchWeatherForecastFromPullToRefresh(city: String, latitude: String, longitude: String) {
+        _refreshingStateFlow.value = true
         viewModelScope.launch(exceptionHandler) {
-            setRefreshing(true)
-            try {
-                launchWeatherForecast(city, latitude, longitude)
-            } finally {
-                // Ensure refreshing state is reset even if an error occurs
-                setRefreshing(false)
-            }
-        }
-
-    /**
-     * Updates the refreshing state flow to show or hide the pull-to-refresh indicator.
-     */
-    private fun setRefreshing(refreshing: Boolean) {
-        viewModelScope.launch {
-            isRefreshingStateFlow.emit(refreshing)
+            launchWeatherForecast(city, latitude, longitude)
         }
     }
 
@@ -233,7 +222,7 @@ class CurrentWeatherViewModel @Inject constructor(
                         TAG,
                         "Chosen city saved to database: $city"
                     )
-                    isRefreshingStateFlow.emit(false)
+                    _refreshingStateFlow.value = false
                 }
             }
 
@@ -244,9 +233,11 @@ class CurrentWeatherViewModel @Inject constructor(
                     )
                 )
                 showLocalForecast(result.data.copy(city = city))
+                _refreshingStateFlow.value = false
             }
 
             is LoadResult.Error -> {
+                _refreshingStateFlow.value = false
                 when (val error = result.error) {
                     is ForecastError.ApiKeyInvalid -> {
                         showError(city, resourceManager.getString(R.string.api_key_invalid))

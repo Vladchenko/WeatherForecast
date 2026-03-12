@@ -39,7 +39,6 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonSkippableComposable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -108,7 +107,7 @@ fun CurrentWeatherLayout(
         derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitleSize) }
     }
     var showHourlyForecast by remember { mutableStateOf(false) }
-    val isRefreshing by viewModel.isRefreshingStateFlow.collectAsState()
+    val refreshingState by viewModel.refreshingStateFlow.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
 
     // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
@@ -193,7 +192,7 @@ fun CurrentWeatherLayout(
                 BackgroundImage()
                 PullToRefreshBox(
                     state = refreshState,
-                    isRefreshing = isRefreshing,
+                    isRefreshing = refreshingState,
                     onRefresh = {
                         val cityModel = viewModel.chosenCityStateFlow.value
                         if (cityModel != null) {
@@ -209,7 +208,7 @@ fun CurrentWeatherLayout(
                         PullToRefreshDefaults.Indicator(
                             modifier = Modifier
                                 .align(Alignment.TopCenter),
-                            isRefreshing = isRefreshing,
+                            isRefreshing = refreshingState,
                             state = refreshState
                         )
                     }
