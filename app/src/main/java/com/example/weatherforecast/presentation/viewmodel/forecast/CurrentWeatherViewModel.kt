@@ -15,6 +15,7 @@ import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.domain.CurrentWeather
 import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.LoadResult
+import com.example.weatherforecast.models.presentation.CurrentWeatherUi
 import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import com.example.weatherforecast.presentation.status.StatusRenderer
@@ -74,7 +75,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * Public read-only flow that emits the current UI state of the weather forecast.
      * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
      */
-    val forecastStateFlow: StateFlow<WeatherUiState>
+    val forecastStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>>
         get() = _forecastStateFlow
 
     /**
@@ -101,7 +102,8 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1
     )
-    private val _forecastStateFlow = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
+    private val _forecastStateFlow =
+        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
     private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     //endregion flows
@@ -266,7 +268,10 @@ class CurrentWeatherViewModel @Inject constructor(
                             showError(city, resourceManager.getString(R.string.connection_refused))
 
                         ForecastError.NetworkError.Type.NoInternet ->
-                            showError(city, resourceManager.getString(R.string.network_disconnected))
+                            showError(
+                                city,
+                                resourceManager.getString(R.string.network_disconnected)
+                            )
 
                         ForecastError.NetworkError.Type.Timeout ->
                             showError(city, resourceManager.getString(R.string.request_timeout))
@@ -275,7 +280,10 @@ class CurrentWeatherViewModel @Inject constructor(
                             showError(city, resourceManager.getString(R.string.ssl_error))
 
                         else ->
-                            showError(city, resourceManager.getString(R.string.network_error_generic))
+                            showError(
+                                city,
+                                resourceManager.getString(R.string.network_error_generic)
+                            )
                     }
 
                     is ForecastError.NoDataAvailable -> {

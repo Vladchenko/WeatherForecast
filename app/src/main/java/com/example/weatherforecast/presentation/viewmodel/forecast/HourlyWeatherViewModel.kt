@@ -51,9 +51,26 @@ class HourlyWeatherViewModel @Inject constructor(
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
 ) : AbstractViewModel(connectivityObserver) {
 
-    val hourlyWeatherStateFlow: StateFlow<HourlyWeatherDomainModel?>
+    /**
+     * StateFlow that emits the current UI state for the hourly weather forecast.
+     *
+     * This flow is updated in response to data loading (success or failure) triggered by calls to
+     * [getHourlyWeatherForCity] or [getHourlyWeatherForLocation]. It can hold the following states:
+     *
+     * - `null` — initial state, before any data has been loaded.
+     * - [WeatherUiState.Loading] — displayed during data loading (set only when location-based request
+     *   is made, as city name lookup does not explicitly show loading).
+     * - [WeatherUiState.Success] — successfully loaded weather data, containing the domain model and
+     *   the data source ([DataSource.LOCAL] or [DataSource.REMOTE]).
+     * - [WeatherUiState.Error] — indicates a failure in loading, containing the city name and error message.
+     *
+     * This flow is observed in the UI layer to reactively update the interface based on the current
+     * state of the hourly weather data loading process.
+     */
+    val hourlyWeatherStateFlow: StateFlow<WeatherUiState<HourlyWeatherDomainModel>?>
         get() = _hourlyWeatherStateFlow
-    private val _hourlyWeatherStateFlow = MutableStateFlow<HourlyWeatherDomainModel?>(null)
+    private val _hourlyWeatherStateFlow =
+        MutableStateFlow<WeatherUiState<HourlyWeatherDomainModel>?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in hourly weather loading", throwable)
@@ -85,6 +102,7 @@ class HourlyWeatherViewModel @Inject constructor(
      */
     fun getHourlyWeatherForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
+        _hourlyWeatherStateFlow.value = WeatherUiState.Loading
         viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureTypeStateFlow.first()
             val result = hourlyWeatherInteractor.loadHourlyWeatherForLocation(
@@ -101,14 +119,16 @@ class HourlyWeatherViewModel @Inject constructor(
         showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
-                _hourlyWeatherStateFlow.value = result.data
+                _hourlyWeatherStateFlow.value =
+                    WeatherUiState.Success(result.data, DataSource.REMOTE)
                 statusRenderer.showSuccessStatusFor(
-                        result.data.city
+                    result.data.city
                 )
             }
 
             is LoadResult.Local -> {
-                _hourlyWeatherStateFlow.value = result.data
+                _hourlyWeatherStateFlow.value =
+                    WeatherUiState.Success(result.data, DataSource.LOCAL)
                 statusRenderer.showWarning(
                     resourceManager.getString(
                         R.string.forecast_outdated, city
@@ -117,35 +137,46 @@ class HourlyWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                statusRenderer.showError(
-                    when (val error = result.error) {
-                        is ForecastError.NetworkError -> when (error.type) {
-                            ForecastError.NetworkError.Type.ConnectionFailed ->
-                                resourceManager.getString(R.string.connection_refused)
-                            ForecastError.NetworkError.Type.NoInternet ->
-                                resourceManager.getString(R.string.network_disconnected)
-                            ForecastError.NetworkError.Type.Timeout ->
-                                resourceManager.getString(R.string.request_timeout)
-                            ForecastError.NetworkError.Type.SecurityError ->
-                                resourceManager.getString(R.string.ssl_error)
-                            else ->
-                                resourceManager.getString(R.string.network_error_generic)
-                        }
-                        is ForecastError.ApiKeyInvalid ->
-                            resourceManager.getString(R.string.api_key_invalid)
-                        is ForecastError.CityNotFound ->
-                            resourceManager.getString(R.string.city_not_found, error.city)
-                        is ForecastError.NoDataAvailable ->
-                            resourceManager.getString(R.string.no_data_from_server)
-                        is ForecastError.LocalDataCorrupted ->
-                            resourceManager.getString(R.string.local_data_corrupted)
-                        is ForecastError.UncategorizedError ->
-                            resourceManager.getString(R.string.unexpected_error)
-                    }
-                )
+                statusRenderer.showError(getErrorMessage(result))
+                _hourlyWeatherStateFlow.value = WeatherUiState.Error(city, result.error.toString())
             }
         }
     }
+
+    private fun getErrorMessage(result: LoadResult.Error): String =
+        when (val error = result.error) {
+            is ForecastError.NetworkError -> when (error.type) {
+                ForecastError.NetworkError.Type.ConnectionFailed ->
+                    resourceManager.getString(R.string.connection_refused)
+
+                ForecastError.NetworkError.Type.NoInternet ->
+                    resourceManager.getString(R.string.network_disconnected)
+
+                ForecastError.NetworkError.Type.Timeout ->
+                    resourceManager.getString(R.string.request_timeout)
+
+                ForecastError.NetworkError.Type.SecurityError ->
+                    resourceManager.getString(R.string.ssl_error)
+
+                else ->
+                    resourceManager.getString(R.string.network_error_generic)
+            }
+
+            is ForecastError.ApiKeyInvalid ->
+                resourceManager.getString(R.string.api_key_invalid)
+
+            is ForecastError.CityNotFound ->
+                resourceManager.getString(R.string.city_not_found, error.city)
+
+            is ForecastError.NoDataAvailable ->
+                resourceManager.getString(R.string.no_data_from_server)
+
+            is ForecastError.LocalDataCorrupted ->
+                resourceManager.getString(R.string.local_data_corrupted)
+
+            is ForecastError.UncategorizedError ->
+                resourceManager.getString(R.string.unexpected_error)
+        }
 
     companion object {
         private const val TAG = "HourlyWeatherViewModel"

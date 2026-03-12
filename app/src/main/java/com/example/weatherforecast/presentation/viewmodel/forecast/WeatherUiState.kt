@@ -3,66 +3,70 @@ package com.example.weatherforecast.presentation.viewmodel.forecast
 import com.example.weatherforecast.models.presentation.CurrentWeatherUi
 
 /**
- * Sealed class representing the different UI states for the weather forecast screen.
+ * Sealed interface representing the different UI states for weather data loading.
  *
- * Used in the ViewModel to communicate the state of data loading to the UI.
- * Possible states include:
- * - [Loading]: Indicates that data is being fetched.
- * - [Success]: Emitted when data is successfully loaded, containing the [CurrentWeatherUi] data
- *   and the source it came from ([DataSource.REMOTE] or [DataSource.LOCAL]).
- * - [Error]: Emitted when an error occurs during data fetching, with a user-readable error message.
+ * Used by ViewModels to expose the state of asynchronous operations (e.g., fetching hourly or current weather)
+ * to the UI in a unidirectional and reactive way via [StateFlow]. Ensures that all possible states are handled
+ * exhaustively in the UI layer using `when` expressions.
  *
- * This sealed class ensures exhaustive handling of UI states in the UI layer (e.g., using `when` expressions).
+ * @param T The type of data held in the [Success] state (e.g., [CurrentWeatherUi], [HourlyWeatherDomainModel]).
+ *
+ * Possible states:
+ * - [Loading]: Data is currently being fetched from a data source.
+ * - [Success]: Data has been successfully retrieved, along with the origin ([DataSource]).
+ * - [Error]: An error occurred during the request; contains debug-friendly info and a displayable message.
  */
-sealed class WeatherUiState {
+sealed interface WeatherUiState<out T> {
     /**
-     * Represents the state when the weather data is being loaded.
+     * Represents the state when weather data is actively being loaded from a repository.
      *
-     * The UI should display a loading indicator while in this state.
+     * This state is typically used to trigger a loading spinner or placeholder content in the UI.
+     * It carries no data since nothing has been loaded yet.
      */
-    object Loading : WeatherUiState()
+    object Loading : WeatherUiState<Nothing>
 
     /**
-     * Represents the successful retrieval of weather forecast data.
+     * Represents a successful result from a weather data request.
      *
-     * @property forecast The retrieved weather data model for display.
-     * @property source Indicates whether the data came from the network or local cache.
+     * @property data The resulting weather data model intended for UI rendering.
+     * @property source Indicates whether the data was obtained from the network ([DataSource.REMOTE])
+     *                  or local storage ([DataSource.LOCAL]). Can be used to show freshness indicators.
      */
-    data class Success(
-        val forecast: CurrentWeatherUi,
+    data class Success<T>(
+        val data: T,
         val source: DataSource
-    ) : WeatherUiState()
+    ) : WeatherUiState<T>
 
     /**
-     * Represents an error state during weather data retrieval.
+     * Represents a failure during weather data retrieval.
      *
-     * @property city The name of the city for which the request failed (may be null).
-     * @property message A user-friendly error message suitable for display in the UI.
+     * @property city The name of the city associated with the failed request (can be `null`, e.g., for location-based requests).
+     * @property message A human-readable error message suitable for display in the UI (e.g., "City not found", "No internet connection").
      */
     data class Error(
         val city: String?,
         val message: String
-    ) : WeatherUiState()
+    ) : WeatherUiState<Nothing>
 }
 
 /**
- * Enum indicating the data source from which the weather forecast was retrieved.
+ * Enumerates the possible origins of weather forecast data.
  *
- * Used to distinguish between remote (network) and local (cached) data,
- * allowing the UI or business logic to react accordingly (e.g., show a "fresh data" hint).
+ * Helps distinguish between fresh data from the network and cached data,
+ * allowing the app to make decisions about UI hints, background sync, etc.
  */
 enum class DataSource {
     /**
-     * Data was fetched from the remote server (API).
+     * Data was retrieved from a remote API over the network.
      *
-     * Indicates fresh data retrieved over the network.
+     * Indicates up-to-date information, possibly triggering cache updates.
      */
     REMOTE,
 
     /**
-     * Data was retrieved from local cache/storage.
+     * Data was served from local persistence (e.g., Room database, SharedPreferences).
      *
-     * Used when offline or when showing cached data while refreshing in the background.
+     * Used when there's no network connection or to show immediate results while refreshing in the background.
      */
     LOCAL
 }

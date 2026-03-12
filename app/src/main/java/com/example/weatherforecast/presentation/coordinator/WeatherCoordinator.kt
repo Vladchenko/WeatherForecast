@@ -84,7 +84,7 @@ class WeatherCoordinator private constructor(
      *
      * @param flow A state flow representing the current [WeatherUiState]
      */
-    private suspend fun collectForecastState(flow: StateFlow<WeatherUiState>) {
+    private suspend fun collectForecastState(flow: StateFlow<WeatherUiState<*>>) {
         flow.collect { state ->
             appBarViewModel.updateAppBarState(state)
         }

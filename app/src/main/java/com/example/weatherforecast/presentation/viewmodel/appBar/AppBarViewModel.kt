@@ -72,7 +72,7 @@ class AppBarViewModel @Inject constructor(
      *
      * @param weatherUiState The current state of the forecast screen
      */
-    fun updateAppBarState(weatherUiState: WeatherUiState) {
+    fun updateAppBarState(weatherUiState: WeatherUiState<*>) {
         val appBarState = appBarStateConverter.convert(forecastState = weatherUiState)
         _appBarStateFlow.update { appBarState }
     }

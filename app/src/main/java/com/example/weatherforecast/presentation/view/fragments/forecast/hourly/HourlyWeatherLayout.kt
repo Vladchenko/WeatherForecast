@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.HourlyItemDomainModel
 import com.example.weatherforecast.models.domain.HourlyWeatherDomainModel
+import com.example.weatherforecast.presentation.view.fragments.forecast.current.ShowProgressBar
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,11 +48,13 @@ import java.util.Locale
  * Shows a horizontal scrollable list of hourly weather data including time, temperature,
  * and weather condition. If the provided [hourlyWeather] is null, nothing is rendered.
  *
+ * @param statusColor to display status messages with proper color
  * @param hourlyWeather Data model containing a list of hourly forecasts
  */
 @Composable
 fun HourlyWeatherLayout(
-    hourlyWeather: HourlyWeatherDomainModel?,
+    statusColor: Color,
+    hourlyWeather: WeatherUiState<HourlyWeatherDomainModel>?,
 ) {
     if (hourlyWeather == null) {
         return
@@ -78,25 +82,43 @@ fun HourlyWeatherLayout(
                 .padding(vertical = 8.dp)
                 .fillMaxWidth()
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .mask(brush = horizontalFadeGradient(
-                        startFadeDp = 16,   // 80.dp слева — пустое пространство
-                        endFadeDp = 16,     // 80.dp справа — пустое пространство
-                        fadeWidthDp = 100    // 40.dp — ширина самого затухания
-                    ))
-            ) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    items(hourlyWeather.hourlyForecasts) { forecast ->
-                        HourlyForecastItem(forecast)
+            when (hourlyWeather) {
+                is WeatherUiState.Error -> {
+                    Text(
+                        text = hourlyWeather.message,
+                        fontSize = 32.sp,
+                        color = statusColor,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                is WeatherUiState.Loading -> {
+                    ShowProgressBar()
+                }
+                is WeatherUiState.Success -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .mask(
+                                brush = horizontalFadeGradient(
+                                    startFadeDp = 16,   // 80.dp слева — пустое пространство
+                                    endFadeDp = 16,     // 80.dp справа — пустое пространство
+                                    fadeWidthDp = 100    // 40.dp — ширина самого затухания
+                                )
+                            )
+                    ) {
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            items(hourlyWeather.data.hourlyForecasts) { forecast ->
+                                HourlyForecastItem(forecast)
+                            }
+                        }
                     }
                 }
             }
         }
     }
+
 }
 
 /**

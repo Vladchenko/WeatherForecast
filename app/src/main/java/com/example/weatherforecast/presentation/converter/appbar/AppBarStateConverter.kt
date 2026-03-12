@@ -1,7 +1,9 @@
 package com.example.weatherforecast.presentation.converter.appbar
 
 import com.example.weatherforecast.R
+import com.example.weatherforecast.models.domain.HourlyWeatherDomainModel
 import com.example.weatherforecast.models.presentation.AppBarState
+import com.example.weatherforecast.models.presentation.CurrentWeatherUi
 import com.example.weatherforecast.presentation.SubtitleSize
 import com.example.weatherforecast.presentation.viewmodel.forecast.DataSource
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
@@ -20,17 +22,24 @@ class AppBarStateConverter @Inject constructor(
     /**
      * Convert [forecastState] to [AppBarState]
      */
-    fun convert(forecastState: WeatherUiState): AppBarState {
+    fun convert(forecastState: WeatherUiState<*>): AppBarState {
         val subtitle = when (forecastState) {
             is WeatherUiState.Loading -> resourceManager.getString(R.string.forecast_loading)
             is WeatherUiState.Error -> resourceManager.getString(
                 R.string.forecast_load_error,
                 forecastState.city.orEmpty()
             )
-            is WeatherUiState.Success -> resourceManager.getString(
-                R.string.forecast_loaded_success,
-                forecastState.forecast.city
-            )
+            is WeatherUiState.Success -> {
+                val city = when (val data = forecastState.data) {
+                    is CurrentWeatherUi -> data.city
+                    is HourlyWeatherDomainModel -> data.city
+                    else -> ""
+                }
+                resourceManager.getString(
+                    R.string.forecast_loaded_success,
+                    city
+                )
+            }
         }
 
         val subtitleColorAttr = when (forecastState) {
@@ -49,7 +58,7 @@ class AppBarStateConverter @Inject constructor(
         )
     }
 
-    fun getToolbarSubtitleColor(forecast: WeatherUiState.Success) =
+    fun getToolbarSubtitleColor(forecast: WeatherUiState.Success<*>) =
         if (forecast.source == DataSource.REMOTE) {
             R.attr.colorInfo
         } else {

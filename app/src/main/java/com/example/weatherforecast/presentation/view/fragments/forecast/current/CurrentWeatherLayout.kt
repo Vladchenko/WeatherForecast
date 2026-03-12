@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.presentation.CurrentWeatherUi
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyWeatherLayout
@@ -133,9 +134,9 @@ fun CurrentWeatherLayout(
 
     LaunchedEffect(showHourlyForecast) {
         if (showHourlyForecast) {
-            val city = (forecastUiState.value as? WeatherUiState.Success)?.forecast?.city.orEmpty()
+            val city = (forecastUiState.value as? WeatherUiState.Success)?.data?.city.orEmpty()
             val coordinate =
-                (forecastUiState.value as? WeatherUiState.Success)?.forecast?.coordinate
+                (forecastUiState.value as? WeatherUiState.Success)?.data?.coordinate
             val location = coordinate?.let { coordinate ->
                 Location(LocationManager.NETWORK_PROVIDER).apply {
                     latitude = coordinate.latitude
@@ -275,6 +276,7 @@ fun CurrentWeatherLayout(
                                 }
                                 AnimatedVisibility(visible = showHourlyForecast) {
                                     HourlyWeatherLayout(
+                                        statusColor,
                                         hourlyWeather = hourlyForecastUiState.value,
                                     )
                                 }
@@ -318,7 +320,7 @@ private fun MainContent(
     innerPadding: PaddingValues,
     mainContentTextColor: Color,
     onCityClick: () -> Unit,
-    uiState: WeatherUiState.Success,
+    uiState: WeatherUiState.Success<CurrentWeatherUi>,
 ) {
     Column(
         modifier = Modifier
@@ -328,7 +330,7 @@ private fun MainContent(
     ) {
         Text(
             modifier = Modifier.padding(top = 50.dp),
-            text = uiState.forecast.dateTime,
+            text = uiState.data.dateTime,
             fontSize = 18.sp,
             color = mainContentTextColor
         )
@@ -338,7 +340,7 @@ private fun MainContent(
                 .clickable {
                     onCityClick()
                 },
-            text = uiState.forecast.city,
+            text = uiState.data.city,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
             color = mainContentTextColor,
@@ -350,25 +352,25 @@ private fun MainContent(
                 .align(Alignment.CenterHorizontally)
         ) {
             Text(
-                text = uiState.forecast.temperature,
+                text = uiState.data.temperature,
                 fontSize = 60.sp,
                 color = mainContentTextColor,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = uiState.forecast.temperatureType,
+                text = uiState.data.temperatureType,
                 color = mainContentTextColor,
                 fontSize = 30.sp,
             )
             Image(
                 modifier = Modifier.padding(start = 8.dp),
-                painter = painterResource(id = uiState.forecast.weatherIconId),
-                contentDescription = uiState.forecast.weatherType
+                painter = painterResource(id = uiState.data.weatherIconId),
+                contentDescription = uiState.data.weatherType
             )
         }
         Text(
             modifier = Modifier.padding(top = 16.dp),
-            text = uiState.forecast.weatherType,
+            text = uiState.data.weatherType,
             color = mainContentTextColor,
             fontSize = 18.sp
         )
