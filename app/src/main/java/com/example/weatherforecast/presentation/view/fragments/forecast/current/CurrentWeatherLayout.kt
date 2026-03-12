@@ -277,6 +277,7 @@ fun CurrentWeatherLayout(
                                 AnimatedVisibility(visible = showHourlyForecast) {
                                     HourlyWeatherLayout(
                                         statusColor,
+                                        mainContentTextColor,
                                         hourlyWeather = hourlyForecastUiState.value,
                                     )
                                 }

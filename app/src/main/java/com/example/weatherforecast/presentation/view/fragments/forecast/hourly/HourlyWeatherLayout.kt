@@ -49,11 +49,13 @@ import java.util.Locale
  * and weather condition. If the provided [hourlyWeather] is null, nothing is rendered.
  *
  * @param statusColor to display status messages with proper color
+ * @param mainContentTextColor to display main content with proper color
  * @param hourlyWeather Data model containing a list of hourly forecasts
  */
 @Composable
 fun HourlyWeatherLayout(
     statusColor: Color,
+    mainContentTextColor: Color,
     hourlyWeather: WeatherUiState<HourlyWeatherDomainModel>?,
 ) {
     if (hourlyWeather == null) {
@@ -63,37 +65,48 @@ fun HourlyWeatherLayout(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(0.8f)
     ) {
         Text(
             text = stringResource(R.string.forecast_hourly),
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color.White)
+                .background(color = mainContentTextColor.copy(alpha = 0.4f))
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
+            color = Color.White,
             style = MaterialTheme.typography.titleLarge
         )
         Box(
             modifier = Modifier
                 .height(140.dp)
                 .padding(vertical = 8.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             when (hourlyWeather) {
                 is WeatherUiState.Error -> {
-                    Text(
-                        text = hourlyWeather.message,
-                        fontSize = 32.sp,
-                        color = statusColor,
-                        textAlign = TextAlign.Center
-                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .clip(shape = RoundedCornerShape(16.dp))
+                            .fillMaxSize()
+                            .background(color = mainContentTextColor.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = hourlyWeather.message,
+                            fontSize = 32.sp,
+                            color = statusColor,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
+
                 is WeatherUiState.Loading -> {
                     ShowProgressBar()
                 }
+
                 is WeatherUiState.Success -> {
                     Box(
                         modifier = Modifier
@@ -110,7 +123,7 @@ fun HourlyWeatherLayout(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             items(hourlyWeather.data.hourlyForecasts) { forecast ->
-                                HourlyForecastItem(forecast)
+                                HourlyForecastItem(mainContentTextColor, forecast)
                             }
                         }
                     }
@@ -134,13 +147,13 @@ fun HourlyWeatherLayout(
  * @param forecast Domain model containing data for one hour
  */
 @Composable
-private fun HourlyForecastItem(forecast: HourlyItemDomainModel) {
+private fun HourlyForecastItem(textColor: Color, forecast: HourlyItemDomainModel) {
     Surface(
         modifier = Modifier
             .width(130.dp)
             .height(110.dp)
             .padding(8.dp),
-        color = Color.White,
+        color = Color.White.copy(alpha = 0.4f),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -154,21 +167,24 @@ private fun HourlyForecastItem(forecast: HourlyItemDomainModel) {
                 text = formatTime(forecast.timestamp),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                fontSize = 18.sp
+                fontSize = 18.sp,
+                color = textColor
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = forecast.temperature,
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
-                fontSize = 18.sp
+                fontSize = 18.sp,
+                color = textColor
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = forecast.weatherDescription,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = textColor
             )
         }
     }
