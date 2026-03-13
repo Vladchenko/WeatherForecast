@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -55,6 +57,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,6 +66,7 @@ import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.presentation.CurrentWeatherUi
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
+import com.example.weatherforecast.presentation.view.composables.ProgressBar
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyWeatherLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
@@ -188,8 +192,12 @@ fun CurrentWeatherLayout(
             )
         },
         content = { innerPadding ->
-            Box(modifier = Modifier.fillMaxSize()) {
-                BackgroundImage()
+            BackgroundImage()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
                 PullToRefreshBox(
                     state = refreshState,
                     isRefreshing = refreshingState,
@@ -220,7 +228,7 @@ fun CurrentWeatherLayout(
                                 enter = fadeIn(),
                                 exit = fadeOut()
                             ) {
-                                ShowProgressBar()
+                                ProgressBar()
                             }
                         }
 
@@ -275,6 +283,8 @@ fun CurrentWeatherLayout(
                                 }
                                 AnimatedVisibility(visible = showHourlyForecast) {
                                     HourlyWeatherLayout(
+                                        itemWidth = 130.dp,
+                                        itemHeight = 100.dp,
                                         statusColor,
                                         mainContentTextColor,
                                         hourlyWeather = hourlyForecastUiState.value,

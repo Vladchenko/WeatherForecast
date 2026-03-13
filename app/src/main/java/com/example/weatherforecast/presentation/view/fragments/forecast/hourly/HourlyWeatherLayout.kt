@@ -31,12 +31,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.HourlyItemDomainModel
 import com.example.weatherforecast.models.domain.HourlyWeatherDomainModel
-import com.example.weatherforecast.presentation.view.fragments.forecast.current.ShowProgressBar
+import com.example.weatherforecast.presentation.view.composables.ProgressBar
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -48,12 +49,16 @@ import java.util.Locale
  * Shows a horizontal scrollable list of hourly weather data including time, temperature,
  * and weather condition. If the provided [hourlyWeather] is null, nothing is rendered.
  *
+ * @param itemWidth width of each hourly forecast item
+ * @param itemHeight height of each hourly forecast item
  * @param statusColor to display status messages with proper color
  * @param mainContentTextColor to display main content with proper color
  * @param hourlyWeather Data model containing a list of hourly forecasts
  */
 @Composable
 fun HourlyWeatherLayout(
+    itemWidth: Dp,
+    itemHeight: Dp,
     statusColor: Color,
     mainContentTextColor: Color,
     hourlyWeather: WeatherUiState<HourlyWeatherDomainModel>?,
@@ -69,7 +74,7 @@ fun HourlyWeatherLayout(
         Text(
             text = stringResource(R.string.forecast_hourly),
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(bottom = 4.dp)
                 .clip(RoundedCornerShape(24.dp))
                 .background(color = mainContentTextColor.copy(alpha = 0.4f))
                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -80,7 +85,7 @@ fun HourlyWeatherLayout(
         )
         Box(
             modifier = Modifier
-                .height(140.dp)
+                .height(itemHeight)
                 .padding(vertical = 8.dp)
                 .fillMaxWidth(),
         ) {
@@ -88,7 +93,6 @@ fun HourlyWeatherLayout(
                 is WeatherUiState.Error -> {
                     Box(
                         modifier = Modifier
-                            .padding(16.dp)
                             .clip(shape = RoundedCornerShape(16.dp))
                             .fillMaxSize()
                             .background(color = mainContentTextColor.copy(alpha = 0.4f)),
@@ -104,7 +108,7 @@ fun HourlyWeatherLayout(
                 }
 
                 is WeatherUiState.Loading -> {
-                    ShowProgressBar()
+                    ProgressBar()
                 }
 
                 is WeatherUiState.Success -> {
@@ -120,10 +124,10 @@ fun HourlyWeatherLayout(
                             )
                     ) {
                         LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             items(hourlyWeather.data.hourlyForecasts) { forecast ->
-                                HourlyForecastItem(mainContentTextColor, forecast)
+                                HourlyForecastItem(itemWidth, itemHeight, mainContentTextColor, forecast)
                             }
                         }
                     }
@@ -144,17 +148,25 @@ fun HourlyWeatherLayout(
  *
  * Styled with rounded corners, fixed size, and centered content.
  *
- * @param forecast Domain model containing data for one hour
+ * @param width of item to display weather forecast for one hour
+ * @param height of item to display weather forecast for one hour
+ * @param textColor for all text present in view
+ * @param forecast Domain model containing weather forecast data for one hour
  */
 @Composable
-private fun HourlyForecastItem(textColor: Color, forecast: HourlyItemDomainModel) {
+private fun HourlyForecastItem(
+    width: Dp,
+    height: Dp,
+    textColor: Color,
+    forecast: HourlyItemDomainModel
+) {
     Surface(
         modifier = Modifier
-            .width(130.dp)
-            .height(110.dp)
-            .padding(8.dp),
+            .width(width)
+            .height(height)
+            .padding(start = 12.dp),
         color = Color.White.copy(alpha = 0.4f),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
     ) {
         Column(
             modifier = Modifier
