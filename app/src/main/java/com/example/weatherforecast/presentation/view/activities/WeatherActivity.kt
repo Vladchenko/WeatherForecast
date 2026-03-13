@@ -1,17 +1,15 @@
 package com.example.weatherforecast.presentation.view.activities
 
-import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.WorkManager
 import com.example.weatherforecast.R
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import com.example.weatherforecast.presentation.status.StatusRenderer
-import com.example.weatherforecast.presentation.util.SystemBarAppearanceManager
+import com.example.weatherforecast.presentation.util.hideBottomNavigationBar
+import com.example.weatherforecast.presentation.util.setLightStatusBars
+import com.example.weatherforecast.presentation.util.setTransparentSystemBars
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -34,7 +32,6 @@ class WeatherActivity : AppCompatActivity() {
     @Inject lateinit var resourceManager: ResourceManager
 
     private lateinit var networkCoordinator: NetworkStatusCoordinator
-    private lateinit var systemBarManager: SystemBarAppearanceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,39 +42,16 @@ class WeatherActivity : AppCompatActivity() {
         )
 
         lifecycle.addObserver(networkCoordinator)
-
-        systemBarManager = SystemBarAppearanceManager(this)
         setContentView(R.layout.weather_forecast_activity)
 
         initNetworkCoordinator()
-        hideBottomNavigationBar()
-    }
-
-    private fun hideBottomNavigationBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // (Android 11+)
-            val controller = window.insetsController
-            controller?.let { insetsController ->
-                // Скрываем навигационную панель
-                insetsController.hide(WindowInsets.Type.navigationBars())
-                // Поведение: показать временно свайпом
-                insetsController.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        } else {
-            // (до Android 11)
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                            View.SYSTEM_UI_FLAG_FULLSCREEN or
-                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    )
-        }
     }
 
     override fun onResume() {
         super.onResume()
-        systemBarManager.setTransparentSystemBars()
-        systemBarManager.setLightStatusBars(isLight = isLightTheme())
+        setTransparentSystemBars()
+        setLightStatusBars(isLight = isLightTheme())
+        hideBottomNavigationBar()
     }
 
     private fun initNetworkCoordinator() {
