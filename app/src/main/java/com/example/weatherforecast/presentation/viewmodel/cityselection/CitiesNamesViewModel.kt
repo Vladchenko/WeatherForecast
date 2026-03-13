@@ -11,9 +11,12 @@ import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
+import com.example.weatherforecast.presentation.viewmodel.forecast.DataSource
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -36,7 +39,7 @@ import javax.inject.Inject
  *
  * ## State Flows
  * - [_cityMaskStateFlow]: Tracks current text input in the search field
- * - [_citiesNamesStateFlow]: Holds filtered list of cities matching the query
+ * - [_cityPredictions]: Holds filtered list of cities matching the query
  * - [_navigationEventFlow]: Emits navigation commands to the UI layer
  *
  * ## Event Handling
@@ -64,6 +67,7 @@ import javax.inject.Inject
  * @property resourceManager Provides access to string resources for dynamic UI content
  * @property citiesNamesInteractor Business logic layer for loading and filtering city names
  */
+@FlowPreview
 @HiltViewModel
 class CitiesNamesViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
@@ -104,11 +108,11 @@ class CitiesNamesViewModel @Inject constructor(
      *
      * Null until first successful search.
      */
-    val cityPredictions: StateFlow<List<CityDomainModel>>
+    val cityPredictions: StateFlow<WeatherUiState<List<CityDomainModel>>?>
         get() = _cityPredictions
 
     private val _cityMaskStateFlow = MutableStateFlow("")
-    private val _cityPredictions = MutableStateFlow<List<CityDomainModel>>(emptyList())
+    private val _cityPredictions = MutableStateFlow<WeatherUiState<List<CityDomainModel>>?>(null)
     private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -147,6 +151,7 @@ class CitiesNamesViewModel @Inject constructor(
                 .filter { it.isNotBlank() }
                 .distinctUntilChanged()
                 .collect { query ->
+                    _cityPredictions.value = WeatherUiState.Loading
                     fetchCities(query)
                 }
         }
@@ -174,7 +179,7 @@ class CitiesNamesViewModel @Inject constructor(
 
             is CitySelectionEvent.ClearQuery -> {
                 _cityMaskStateFlow.value = ""
-                _cityPredictions.value = emptyList()
+                _cityPredictions.value = null
             }
 
             is CitySelectionEvent.UpdateQuery -> _cityMaskStateFlow.value = event.mask
@@ -207,28 +212,43 @@ class CitiesNamesViewModel @Inject constructor(
     private suspend fun fetchCities(query: String) {
         try {
             val response = citiesNamesInteractor.loadCitiesNames(query)
-            updateCityPredictions(response)
+            updateCityPredictions(query, response)
         } catch (e: Exception) {
             loggingService.logError(TAG, "Error loading cities for query: $query", e)
             statusRenderer.showError(e.message.toString())
         }
     }
 
-    private fun updateCityPredictions(result: LoadResult<CitiesNames>?) {
-        val cities = when (result) {
+    private fun updateCityPredictions(city: String, result: LoadResult<CitiesNames>?) {
+        when (result) {
             is LoadResult.Remote -> {
                 statusRenderer.showStatus(resourceManager.getString(R.string.city_predictions_provided))
-                result.data.cities
+                _cityPredictions.value =
+                    WeatherUiState.Success(data = result.data.cities, DataSource.REMOTE)
             }
 
             is LoadResult.Local -> {
                 statusRenderer.showWarning(resourceManager.getString(R.string.city_predictions_from_cache))
-                result.data.cities
+                _cityPredictions.value =
+                    WeatherUiState.Success(data = result.data.cities, DataSource.LOCAL)
             }
 
-            is LoadResult.Error, null -> emptyList()
+            is LoadResult.Error -> {
+                val errorMessage = result.error.toString()
+                statusRenderer.showError(errorMessage)
+                WeatherUiState.Error(
+                    city = city,
+                    errorMessage
+                )
+            }
+
+            null -> {
+                WeatherUiState.Error(
+                    city = city,
+                    ""
+                )
+            }
         }
-        _cityPredictions.value = cities
     }
 
     companion object {

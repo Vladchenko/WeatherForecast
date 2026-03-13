@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -63,11 +65,11 @@ import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
 import com.example.weatherforecast.presentation.themeColor
+import com.example.weatherforecast.presentation.view.composables.ProgressBar
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toPersistentList
+import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import kotlinx.coroutines.FlowPreview
 
 /**
@@ -166,7 +168,7 @@ fun CitySelectionLayout(
                         queryLabel = queryLabel,
                         modifier = Modifier,
                         mainContentColor = mainContentColor,
-                        cityMaskPredictions = cityPredictions.toPersistentList(),
+                        cityMaskPredictions = cityPredictions,
                         onEvent
                     )
                 }
@@ -306,6 +308,7 @@ private fun QuerySearch(
             colors = colors ?: TextFieldDefaults.colors()
         )
     }
+    Spacer(modifier = Modifier.height(8.dp))
 }
 
 /**
@@ -335,7 +338,7 @@ private fun <T> AutoCompleteUI(
     colors: TextFieldColors? = null,
     mainContentColor: Color,
     onQueryChanged: (String) -> Unit = {},
-    predictions: ImmutableList<T>,
+    predictions: WeatherUiState<List<CityDomainModel>>?,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
     onItemClick: (T) -> Unit = {},
@@ -343,13 +346,8 @@ private fun <T> AutoCompleteUI(
 ) {
     val view = LocalView.current
     val lazyListState = rememberLazyListState()
-
-    LazyColumn(
-        state = lazyListState,
-        modifier = modifier.heightIn(max = TextFieldDefaults.MinHeight * 6)
-    ) {
-
-        item {
+    when (predictions) {
+        null -> {
             QuerySearch(
                 query = query,
                 label = queryLabel,
@@ -367,18 +365,62 @@ private fun <T> AutoCompleteUI(
             )
         }
 
-        if (predictions.isNotEmpty()) {
-            items(predictions.size, null, { null }) { prediction ->
-                Row(
-                    Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                        .clickable {
+        is WeatherUiState.Error -> {}
+        is WeatherUiState.Loading -> {
+            QuerySearch(
+                query = query,
+                label = queryLabel,
+                useOutlined = useOutlined,
+                colors = colors,
+                mainContentColor = mainContentColor,
+                onQueryChanged = onQueryChanged,
+                onDoneActionClick = {
+                    view.clearFocus()
+                    onDoneActionClick()
+                },
+                onClearClick = {
+                    onClearClick()
+                }
+            )
+            ProgressBar()
+        }
+
+        is WeatherUiState.Success -> {
+            LazyColumn(
+                state = lazyListState,
+                modifier = modifier.heightIn(max = TextFieldDefaults.MinHeight * 6)
+            ) {
+                item {
+                    QuerySearch(
+                        query = query,
+                        label = queryLabel,
+                        useOutlined = useOutlined,
+                        colors = colors,
+                        mainContentColor = mainContentColor,
+                        onQueryChanged = onQueryChanged,
+                        onDoneActionClick = {
                             view.clearFocus()
-                            onItemClick(predictions[prediction])
+                            onDoneActionClick()
+                        },
+                        onClearClick = {
+                            onClearClick()
                         }
-                ) {
-                    itemContent(predictions[prediction])
+                    )
+                }
+                if (predictions.data.isNotEmpty()) {
+                    items(predictions.data.size, null, { null }) { prediction ->
+                        Row(
+                            Modifier
+                                .padding(4.dp)
+                                .fillMaxWidth()
+                                .clickable {
+                                    view.clearFocus()
+                                    onItemClick(predictions.data[prediction] as T)
+                                }
+                        ) {
+                            itemContent(predictions.data[prediction] as T)
+                        }
+                    }
                 }
             }
         }
@@ -401,7 +443,7 @@ private fun AddressEdit(
     queryLabel: String,
     modifier: Modifier,
     mainContentColor: Color,
-    cityMaskPredictions: ImmutableList<CityDomainModel>,
+    cityMaskPredictions: WeatherUiState<List<CityDomainModel>>?,
     onEvent: (CitySelectionEvent) -> Unit,
     keyboardController: SoftwareKeyboardController? = LocalSoftwareKeyboardController.current
 ) {
@@ -409,7 +451,7 @@ private fun AddressEdit(
         modifier = modifier.padding(top = 8.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        AutoCompleteUI(
+        AutoCompleteUI<CityDomainModel>(
             modifier = Modifier.fillMaxWidth(),
             query = cityName,
             queryLabel = queryLabel,
