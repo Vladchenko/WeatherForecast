@@ -3,7 +3,7 @@
     <style name="Theme.WeatherForecast" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/colorBlack</item>
+        <item name="colorPrimary">@color/colorWhite</item>
         <item name="colorPrimaryVariant">@color/colorBlack</item>
         <item name="colorOnPrimary">@color/colorBlack</item>
 
@@ -20,5 +20,6 @@
 
         <!-- Customize your theme here. -->
         <item name="colorMainText">@color/colorWhite</item>
+        <item name="android:background">@color/skyColor</item>
     </style>
 </resources>

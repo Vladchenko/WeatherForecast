@@ -17,5 +17,7 @@
         <item name="colorInfo">@color/colorWhite</item>
         <item name="colorWarning">@color/colorYellow</item>
         <item name="colorError">@color/colorLightRed</item>
+
+        <item name="android:background">@color/skyColor</item>
     </style>
 </resources>
