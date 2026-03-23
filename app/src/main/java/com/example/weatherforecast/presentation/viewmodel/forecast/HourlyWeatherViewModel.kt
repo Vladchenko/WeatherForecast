@@ -16,6 +16,7 @@ import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.utils.ResourceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -50,6 +51,8 @@ class HourlyWeatherViewModel @Inject constructor(
     private val chosenCityInteractor: ChosenCityInteractor,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
 ) : AbstractViewModel(connectivityObserver) {
+
+    private var currentJob: Job? = null
 
     /**
      * StateFlow that emits the current UI state for the hourly weather forecast.
@@ -103,7 +106,8 @@ class HourlyWeatherViewModel @Inject constructor(
     fun getHourlyWeatherForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         _hourlyWeatherStateFlow.value = WeatherUiState.Loading
-        viewModelScope.launch(exceptionHandler) {
+        currentJob?.cancel()
+        currentJob = viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureTypeStateFlow.first()
             val result = hourlyWeatherInteractor.loadHourlyWeatherForLocation(
                 cityModel.city,
