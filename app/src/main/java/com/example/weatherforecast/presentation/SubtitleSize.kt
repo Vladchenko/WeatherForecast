@@ -5,7 +5,6 @@ import com.example.weatherforecast.presentation.SubtitleSize.Large
 import com.example.weatherforecast.presentation.SubtitleSize.Normal
 import com.example.weatherforecast.presentation.SubtitleSize.Small
 
-
 /**
  * Represents the logical size of a subtitle text, independent of platform-specific units.
  *
@@ -29,13 +28,13 @@ enum class SubtitleSize {
     /** Large font size, suitable for short and prominent subtitles. */
     Large;
 
-    /**
-     * Determines the appropriate [SubtitleSize] based on the length of the given subtitle string.
-     *
-     * @param subtitle the subtitle text to evaluate
-     * @return the corresponding [SubtitleSize]
-     */
     companion object {
+        /**
+         * Determines the appropriate [SubtitleSize] based on the length of the given subtitle string.
+         *
+         * @param subtitle the subtitle text to evaluate
+         * @return the corresponding [SubtitleSize]
+         */
         fun fromSubtitle(subtitle: String): SubtitleSize {
             return when {
                 subtitle.length > 50 -> Small

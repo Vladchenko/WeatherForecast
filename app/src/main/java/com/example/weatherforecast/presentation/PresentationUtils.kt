@@ -17,7 +17,7 @@ object PresentationUtils {
     /**
      * Compose a full name for a city, consisting of [cityName], [stateName] if present and [countryName].
      */
-    fun getFullCityName(cityName: String, stateName: String?, countryName: String) =
+    fun formatFullCityName(cityName: String, stateName: String?, countryName: String) =
         if (stateName.isNullOrBlank()) {
             "$cityName, $countryName"
         } else {
@@ -25,13 +25,14 @@ object PresentationUtils {
         }
 
     /**
-     * Get font size for the toolbar subtitle based on its [SubtitleSize].
+     * Returns the appropriate toolbar subtitle font size for this [SubtitleSize].
      *
-     * @param subtitleSize the logical size of the subtitle (e.g., Small, Normal, Large)
-     * @return the corresponding font size in [TextUnit] (sp)
+     * Maps:
+     * - [Small] -> [APPBAR_SUBTITLE_SMALL_FONT_SIZE]
+     * - [Normal] & [Large] -> [APPBAR_SUBTITLE_DEFAULT_FONT_SIZE]
      */
-    fun getToolbarSubtitleFontSize(subtitleSize: SubtitleSize): TextUnit {
-        return when (subtitleSize) {
+    fun SubtitleSize.toToolbarSubtitleFontSize(): TextUnit {
+        return when (this) {
             SubtitleSize.Small -> APPBAR_SUBTITLE_SMALL_FONT_SIZE
             SubtitleSize.Normal -> APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
             SubtitleSize.Large -> APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
@@ -42,16 +43,10 @@ object PresentationUtils {
      * Defining weather type icon by [weatherIconId].
      * Codes present at https://openweathermap.org/weather-conditions#Icon-list
      */
-    fun getWeatherTypeIcon(weatherIconId: String): Int {
-        val resourceId = weatherIconMap[weatherIconId] ?: 0
-        return if (resourceId > 0) {
-            resourceId
-        } else {
-            R.drawable.ic_0
-        }
-    }
+    fun toWeatherIconRes(weatherIconId: String): Int =
+        weatherIconMap[weatherIconId] ?: R.drawable.ic_0
 
-    private val weatherIconMap by lazy {
+    private val weatherIconMap =
         mapOf(
             "01d" to R.drawable.ic_01d,
             "01n" to R.drawable.ic_01n,
@@ -72,7 +67,6 @@ object PresentationUtils {
             "50d" to R.drawable.ic_50d,
             "50n" to R.drawable.ic_50n,
         )
-    }
 
     fun Context.resolveColorAttr(@AttrRes attr: Int): Color {
         return TypedValue().run {

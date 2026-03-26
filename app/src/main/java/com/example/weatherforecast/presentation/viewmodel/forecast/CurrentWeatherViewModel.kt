@@ -16,7 +16,7 @@ import com.example.weatherforecast.models.domain.CurrentWeather
 import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.LoadResult
 import com.example.weatherforecast.models.presentation.CurrentWeatherUi
-import com.example.weatherforecast.presentation.PresentationUtils.getWeatherTypeIcon
+import com.example.weatherforecast.presentation.PresentationUtils.toWeatherIconRes
 import com.example.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
@@ -325,7 +325,7 @@ class CurrentWeatherViewModel @Inject constructor(
             model = forecastModel,
             defaultErrorMessage = resourceManager.getString(R.string.bad_date_format),
             getWeatherIconId = { weatherIconId ->
-                getWeatherTypeIcon(weatherIconId)
+                toWeatherIconRes(weatherIconId)
             }
         )
 

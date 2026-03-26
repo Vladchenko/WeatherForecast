@@ -38,7 +38,6 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonSkippableComposable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,8 +58,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityLocationModel
 import com.example.weatherforecast.models.presentation.CurrentWeatherUi
-import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.PresentationUtils.resolveColorAttr
+import com.example.weatherforecast.presentation.PresentationUtils.toToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.view.composables.ProgressBar
 import com.example.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyWeatherLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
@@ -102,9 +101,7 @@ fun CurrentWeatherLayout(
     val forecastUiState = viewModel.forecastStateFlow.collectAsStateWithLifecycle()
     val appBarUiState = appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val hourlyForecastUiState = hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
-    val fontSize by remember {
-        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appBarUiState.value.subtitleSize) }
-    }
+    val fontSize = appBarUiState.value.subtitleSize.toToolbarSubtitleFontSize()
     var showHourlyForecast by remember { mutableStateOf(false) }
     val refreshingState by viewModel.refreshingStateFlow.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
@@ -135,10 +132,10 @@ fun CurrentWeatherLayout(
             val city = (forecastUiState.value as? WeatherUiState.Success)?.data?.city.orEmpty()
             val coordinate =
                 (forecastUiState.value as? WeatherUiState.Success)?.data?.coordinate
-            val location = coordinate?.let { coordinate ->
+            val location = coordinate?.let { coord ->
                 Location(LocationManager.NETWORK_PROVIDER).apply {
-                    latitude = coordinate.latitude
-                    longitude = coordinate.longitude
+                    latitude = coord.latitude
+                    longitude = coord.longitude
                 }
             }
             if (location == null) return@LaunchedEffect
@@ -220,8 +217,17 @@ fun CurrentWeatherLayout(
                         is WeatherUiState.Loading -> {
                             AnimatedVisibility(
                                 visible = viewModel.showProgressBarState.value,
-                                enter = fadeIn(),
-                                exit = fadeOut()
+                                enter = fadeIn(
+                                    animationSpec = tween(
+                                        durationMillis = 1000,
+                                        delayMillis = 1000
+                                    )
+                                ),
+                                exit = fadeOut(
+                                    animationSpec = tween(
+                                        durationMillis = 1000,
+                                    )
+                                )
                             ) {
                                 ProgressBar()
                             }
@@ -266,12 +272,12 @@ fun CurrentWeatherLayout(
                                         ContentTransform(
                                             targetContentEnter = fadeIn(
                                                 animationSpec = tween(
-                                                    durationMillis = 500,
-                                                    delayMillis = 500
+                                                    durationMillis = 1000,
+                                                    delayMillis = 1000
                                                 )
                                             ),
                                             initialContentExit = fadeOut(
-                                                animationSpec = tween(durationMillis = 500)
+                                                animationSpec = tween(durationMillis = 1000)
                                             )
                                         )
                                     },

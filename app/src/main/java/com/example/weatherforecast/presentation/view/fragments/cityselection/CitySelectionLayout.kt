@@ -38,7 +38,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonSkippableComposable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,8 +61,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.models.domain.CityLocationModel
-import com.example.weatherforecast.presentation.PresentationUtils
-import com.example.weatherforecast.presentation.PresentationUtils.getFullCityName
+import com.example.weatherforecast.presentation.PresentationUtils.formatFullCityName
+import com.example.weatherforecast.presentation.PresentationUtils.toToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.themeColor
 import com.example.weatherforecast.presentation.view.composables.ProgressBar
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
@@ -103,10 +102,8 @@ fun CitySelectionLayout(
 ) {
     val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
-    val cityPredictions by viewModel.cityPredictions.collectAsStateWithLifecycle()
-    val fontSize by remember {
-        derivedStateOf { PresentationUtils.getToolbarSubtitleFontSize(appbarUiState.subtitleSize) }
-    }
+    val cityPredictionsUiState by viewModel.cityPredictions.collectAsStateWithLifecycle()
+    val fontSize = appbarUiState.subtitleSize.toToolbarSubtitleFontSize()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -168,7 +165,7 @@ fun CitySelectionLayout(
                         queryLabel = queryLabel,
                         modifier = Modifier,
                         mainContentColor = mainContentColor,
-                        cityMaskPredictions = cityPredictions,
+                        cityMaskPredictions = cityPredictionsUiState,
                         onEvent
                     )
                 }
@@ -476,7 +473,7 @@ private fun AddressEdit(
                 onEvent(
                     CitySelectionEvent.SelectCity(
                         CityLocationModel(
-                            getFullCityName(
+                            formatFullCityName(
                                 selectedCity.name,
                                 selectedCity.state,
                                 selectedCity.country
@@ -495,7 +492,7 @@ private fun AddressEdit(
                     .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f))
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 color = mainContentColor,
-                text = getFullCityName(city.name, city.state, city.country),
+                text = formatFullCityName(city.name, city.state, city.country),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
