@@ -51,10 +51,6 @@ class WeatherNavigator(private val navController: NavController) {
         navController.navigate(action, fadeNavOptions())
     }
 
-    fun navigateUp() {
-        navController.popBackStack()
-    }
-
     private fun handleEvent(event: CityNavigationEvent?) {
         when (event) {
             is CityNavigationEvent.NavigateUp -> navController.popBackStack()
