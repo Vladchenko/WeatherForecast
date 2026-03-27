@@ -1,7 +1,5 @@
 package com.example.weatherforecast.presentation.view.fragments.forecast.current
 
-import android.location.Location
-import android.location.LocationManager
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
@@ -66,6 +64,7 @@ import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.HourlyWeatherViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
+import com.example.weatherforecast.presentation.viewmodel.geolocation.createLocation
 import kotlinx.coroutines.flow.drop
 
 /**
@@ -133,10 +132,7 @@ fun CurrentWeatherLayout(
             val coordinate =
                 (forecastUiState.value as? WeatherUiState.Success)?.data?.coordinate
             val location = coordinate?.let { coord ->
-                Location(LocationManager.NETWORK_PROVIDER).apply {
-                    latitude = coord.latitude
-                    longitude = coord.longitude
-                }
+                createLocation(coord.latitude, coord.longitude)
             }
             if (location == null) return@LaunchedEffect
             val cityModel = CityLocationModel(city, location)

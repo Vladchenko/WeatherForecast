@@ -4,11 +4,14 @@ import android.location.Location
 import android.location.LocationManager
 
 /**
- * Detecting [Location] by [latitude] and [longitude]
+ * Creates a new [Location] instance using latitude and longitude.
+ *
+ * @param latitude Latitude in degrees
+ * @param longitude Longitude in degrees
+ * @return A [Location] object with the given coordinates, using [LocationManager.NETWORK_PROVIDER] as provider
  */
-fun getLocationByLatLon(latitude: Double, longitude: Double): Location {
-    val location = Location(LocationManager.NETWORK_PROVIDER)
-    location.latitude = latitude
-    location.longitude = longitude
-    return location
-}
+fun createLocation(latitude: Double, longitude: Double): Location =
+    Location(LocationManager.NETWORK_PROVIDER).apply {
+        this.latitude = latitude
+        this.longitude = longitude
+    }

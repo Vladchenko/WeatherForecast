@@ -1,7 +1,5 @@
 package com.example.weatherforecast.presentation.view.fragments.cityselection
 
-import android.location.Location
-import android.location.LocationManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,6 +67,7 @@ import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
+import com.example.weatherforecast.presentation.viewmodel.geolocation.createLocation
 import kotlinx.coroutines.FlowPreview
 
 /**
@@ -467,9 +466,6 @@ private fun AddressEdit(
                 keyboardController?.hide()
             },
             onItemClick = { selectedCity ->
-                val location = Location(LocationManager.NETWORK_PROVIDER)
-                location.latitude = selectedCity.lat
-                location.longitude = selectedCity.lon
                 onEvent(
                     CitySelectionEvent.SelectCity(
                         CityLocationModel(
@@ -478,7 +474,10 @@ private fun AddressEdit(
                                 selectedCity.state,
                                 selectedCity.country
                             ),
-                            location
+                            createLocation(
+                                selectedCity.lat,
+                                selectedCity.lon
+                            )
                         )
                     )
                 )
