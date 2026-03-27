@@ -22,7 +22,7 @@ interface WeatherApiService {
      */
     @InternalSerializationApi
     @GET(CURRENT_WEATHER)
-    suspend fun getCurrentWeatherForCity(
+    suspend fun loadCurrentWeatherForCity(
         @Query("q") cityName: String,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<CurrentWeatherDto>
@@ -34,7 +34,7 @@ interface WeatherApiService {
      */
     @InternalSerializationApi
     @GET(CURRENT_WEATHER)
-    suspend fun getCurrentWeatherForLocation(
+    suspend fun loadCurrentWeatherForLocation(
         @Query("lat")
         lat: Double,
         @Query("lon")
@@ -52,14 +52,14 @@ interface WeatherApiService {
      */
     @InternalSerializationApi
     @GET(HOURLY_WEATHER)
-    suspend fun getHourlyWeather(
+    suspend fun loadHourlyWeather(
         @Query("q") cityName: String,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<HourlyWeatherDto>
 
     @InternalSerializationApi
     @GET(HOURLY_WEATHER)
-    suspend fun getHourlyForecastByLocation(
+    suspend fun loadHourlyForecastByLocation(
         @Query("lat") latitude: Double,
         @Query("lon") longitude: Double,
         @Query("appid") apiKey: String = BuildConfig.API_KEY

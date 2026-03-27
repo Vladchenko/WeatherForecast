@@ -21,7 +21,7 @@ class CitiesNamesLocalDataSourceImpl @Inject constructor(
 
 
     override suspend fun loadCitiesNames(token: String): List<CitySearchEntity> {
-        val model = dao.getCitiesNames(token)
+        val model = dao.findCitiesNames(token)
         loggingService.logDebugEvent(TAG, "Loaded ${model.size} cities for token '$token': $model")
         return model
     }

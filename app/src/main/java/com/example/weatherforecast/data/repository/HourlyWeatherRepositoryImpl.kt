@@ -106,7 +106,7 @@ class HourlyWeatherRepositoryImpl(
     ): LoadResult<HourlyWeatherDomainModel> =
         withContext(dispatchers.io) {
             try {
-                val entity = localDataSource.getHourlyWeather(city)
+                val entity = localDataSource.loadHourlyWeather(city)
                     ?: return@withContext LoadResult.Error(
                         city, ForecastError.NoDataAvailable("No cached data found for city: $city")
                     )

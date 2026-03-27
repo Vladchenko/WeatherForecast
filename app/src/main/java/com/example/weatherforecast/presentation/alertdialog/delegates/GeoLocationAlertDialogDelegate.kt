@@ -26,7 +26,7 @@ class GeoLocationAlertDialogDelegate(
     /**
      * Get [AlertDialog.Builder] using [Context]
      */
-    override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
+    override fun createAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(resourceManager.getString(R.string.geo_title))
         builder.setMessage(resourceManager.getString(R.string.geo_confirm_message, city))

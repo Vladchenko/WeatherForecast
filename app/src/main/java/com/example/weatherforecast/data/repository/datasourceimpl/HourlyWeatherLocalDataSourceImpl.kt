@@ -21,8 +21,8 @@ class HourlyWeatherLocalDataSourceImpl(
 ) : HourlyWeatherLocalDataSource {
 
     @InternalSerializationApi
-    override suspend fun getHourlyWeather(city: String): HourlyWeatherEntity {
-        val entry = dao.getHourlyForecast(city) ?: throw NoSuchDatabaseEntryException(city)
+    override suspend fun loadHourlyWeather(city: String): HourlyWeatherEntity {
+        val entry = dao.findHourlyForecast(city) ?: throw NoSuchDatabaseEntryException(city)
         loggingService.logDebugEvent(
             "HourlyWeatherLocalDataSourceImpl",
             "$city city forecast loaded successfully"

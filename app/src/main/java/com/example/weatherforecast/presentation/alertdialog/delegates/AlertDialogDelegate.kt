@@ -10,5 +10,5 @@ interface AlertDialogDelegate {
     /**
      * get AlertDialog Builder using [context]
      */
-    fun getAlertDialogBuilder(context: Context): AlertDialog.Builder
+    fun createAlertDialogBuilder(context: Context): AlertDialog.Builder
 }

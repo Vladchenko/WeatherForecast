@@ -215,7 +215,7 @@ class CurrentWeatherViewModel @Inject constructor(
                 viewModelScope.launch(exceptionHandler) {
                     statusRenderer.showSuccessStatusFor(city)
                     showRemoteForecast(result.data.copy(city = city))
-                    val cityLocationModel = CityLocationModel(city, getLocation(result))
+                    val cityLocationModel = CityLocationModel(city, createLocation(result))
                     chosenCityInteractor.saveChosenCity(cityLocationModel)
                     _chosenCityStateFlow.tryEmit(cityLocationModel)
                     loggingService.logDebugEvent(
@@ -299,7 +299,7 @@ class CurrentWeatherViewModel @Inject constructor(
         _forecastStateFlow.value = WeatherUiState.Error(city, errorMessage)
     }
 
-    private fun getLocation(result: LoadResult.Remote<CurrentWeather>): Location {
+    private fun createLocation(result: LoadResult.Remote<CurrentWeather>): Location {
         return Location(LocationManager.NETWORK_PROVIDER).apply {
             latitude = result.data.coordinate.latitude
             longitude = result.data.coordinate.longitude
@@ -324,7 +324,7 @@ class CurrentWeatherViewModel @Inject constructor(
         weatherDomainToUiConverter.convert(
             model = forecastModel,
             defaultErrorMessage = resourceManager.getString(R.string.bad_date_format),
-            getWeatherIconId = { weatherIconId ->
+            toWeatherIconRes = { weatherIconId ->
                 toWeatherIconRes(weatherIconId)
             }
         )

@@ -31,7 +31,7 @@ class NoLocationPermissionPermanentlyAlertDialogDelegate(
      * @param context Android context required to build the dialog
      * @return Fully configured [AlertDialog.Builder] instance
      */
-    override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
+    override fun createAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(resourceManager.getString(R.string.geo_permission_denied))
         builder.setMessage(resourceManager.getString(R.string.geo_permission_denied_permanently))

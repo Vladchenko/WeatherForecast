@@ -33,7 +33,7 @@ class SelectedCityNotFoundAlertDialogDelegate(
      * @param context Android context required to build the dialog
      * @return Configured [AlertDialog.Builder] instance
      */
-    override fun getAlertDialogBuilder(context: Context): AlertDialog.Builder {
+    override fun createAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(resourceManager.getString(R.string.forecast_no_data_for_city, city))
         builder.setMessage(resourceManager.getString(R.string.forecast_no_data_message))

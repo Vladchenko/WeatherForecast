@@ -25,7 +25,7 @@ class AlertDialogHelper(private val context: Context) {
      * @return A ready-to-show [AlertDialog] instance with enforced behavior
      */
     fun createDialog(alertDialogDelegate: AlertDialogDelegate): AlertDialog {
-        val alertDialogBuilder = alertDialogDelegate.getAlertDialogBuilder(context)
+        val alertDialogBuilder = alertDialogDelegate.createAlertDialogBuilder(context)
         val dialog = alertDialogBuilder.create()
         dialog.setCancelable(false)
         dialog.setCanceledOnTouchOutside(false)

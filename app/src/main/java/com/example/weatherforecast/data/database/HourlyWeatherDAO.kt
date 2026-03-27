@@ -30,7 +30,7 @@ interface HourlyWeatherDAO {
      * @return The corresponding [HourlyWeatherEntity], or `null` if not found.
      */
     @Query("SELECT * FROM hourlyForecasts WHERE cityName = :cityName")
-    suspend fun getHourlyForecast(cityName: String): HourlyWeatherEntity?
+    suspend fun findHourlyForecast(cityName: String): HourlyWeatherEntity?
 
     /**
      * Inserts or replaces an hourly forecast in the database.

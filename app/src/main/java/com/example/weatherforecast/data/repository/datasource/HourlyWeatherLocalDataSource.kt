@@ -18,7 +18,7 @@ interface HourlyWeatherLocalDataSource {
      * @param city Name of the city
      * @return [HourlyWeatherEntity] if found, null otherwise
      */
-    suspend fun getHourlyWeather(city: String): HourlyWeatherEntity?
+    suspend fun loadHourlyWeather(city: String): HourlyWeatherEntity?
 
     /**
      * Saves or updates main weather header and associated hourly items.

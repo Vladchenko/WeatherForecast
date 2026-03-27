@@ -32,9 +32,9 @@ interface CitiesNamesDAO {
 
     @InternalSerializationApi
     @Query("SELECT * FROM citiesNames WHERE city LIKE '%' || :token || '%'")
-    fun getCitiesNames(token: String): List<CitySearchEntity>
+    fun findCitiesNames(token: String): List<CitySearchEntity>
 
     @InternalSerializationApi
     @Query("SELECT * FROM citiesNames")
-    fun getAllCitiesNames(): List<CitySearchEntity>
+    fun findAllCitiesNames(): List<CitySearchEntity>
 }

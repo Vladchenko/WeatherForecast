@@ -28,7 +28,7 @@ class CurrentWeatherRemoteDataSourceImpl(
         latitude: Double,
         longitude: Double
     ): DataResult<CurrentWeatherDto> {
-        val response = apiService.getCurrentWeatherForLocation(latitude, longitude)
+        val response = apiService.loadCurrentWeatherForLocation(latitude, longitude)
         return handleResponse(response, "lat=$latitude, lon=$longitude", city)
     }
 

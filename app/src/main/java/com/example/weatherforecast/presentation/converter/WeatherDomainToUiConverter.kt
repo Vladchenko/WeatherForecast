@@ -10,9 +10,9 @@ interface WeatherDomainToUiConverter {
 
     /**
      * Convert domain [model] to ui model, having [defaultErrorMessage] to define a default
-     * message when date is incorrect and [getWeatherIconId] to get weather icon id
+     * message when date is incorrect and [toWeatherIconRes] to get weather icon id
      */
     fun convert(model: CurrentWeather,
                 defaultErrorMessage: String,
-                getWeatherIconId: (String) -> Int): CurrentWeatherUi
+                toWeatherIconRes: (String) -> Int): CurrentWeatherUi
 }

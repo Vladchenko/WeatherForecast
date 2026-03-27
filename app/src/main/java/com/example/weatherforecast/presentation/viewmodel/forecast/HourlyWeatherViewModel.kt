@@ -58,7 +58,7 @@ class HourlyWeatherViewModel @Inject constructor(
      * StateFlow that emits the current UI state for the hourly weather forecast.
      *
      * This flow is updated in response to data loading (success or failure) triggered by calls to
-     * [getHourlyWeatherForCity] or [getHourlyWeatherForLocation]. It can hold the following states:
+     * [loadHourlyWeatherForCity] or [loadHourlyWeatherForLocation]. It can hold the following states:
      *
      * - `null` — initial state, before any data has been loaded.
      * - [WeatherUiState.Loading] — displayed during data loading (set only when location-based request
@@ -86,7 +86,7 @@ class HourlyWeatherViewModel @Inject constructor(
      *
      * @param city the name of the city to fetch weather for
      */
-    fun getHourlyWeatherForCity(city: String) {
+    fun loadHourlyWeatherForCity(city: String) {
         showProgressBarState.value = true
         viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureTypeStateFlow.first()
@@ -103,7 +103,7 @@ class HourlyWeatherViewModel @Inject constructor(
      *
      * @param cityModel contains city name and coordinates
      */
-    fun getHourlyWeatherForLocation(cityModel: CityLocationModel) {
+    fun loadHourlyWeatherForLocation(cityModel: CityLocationModel) {
         showProgressBarState.value = true
         _hourlyWeatherStateFlow.value = WeatherUiState.Loading
         currentJob?.cancel()

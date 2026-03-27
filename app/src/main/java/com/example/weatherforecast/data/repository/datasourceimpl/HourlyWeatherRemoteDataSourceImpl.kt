@@ -23,7 +23,7 @@ class HourlyWeatherRemoteDataSourceImpl(
 
     @InternalSerializationApi
     override suspend fun loadHourlyWeatherForCity(city: String): DataResult<HourlyWeatherDto> {
-        val response = apiService.getHourlyWeather(city)
+        val response = apiService.loadHourlyWeather(city)
         loggingService.logApiResponse(
             TAG,
             "Hourly forecast response for city = $city",
@@ -38,7 +38,7 @@ class HourlyWeatherRemoteDataSourceImpl(
         latitude: Double,
         longitude: Double
     ): DataResult<HourlyWeatherDto> {
-        val response = apiService.getHourlyForecastByLocation(latitude, longitude)
+        val response = apiService.loadHourlyForecastByLocation(latitude, longitude)
         loggingService.logApiResponse(
             TAG,
             "Hourly forecast response for location (lat=$latitude, lon=$longitude)",

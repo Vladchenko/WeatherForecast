@@ -136,7 +136,7 @@ fun CurrentWeatherLayout(
             }
             if (location == null) return@LaunchedEffect
             val cityModel = CityLocationModel(city, location)
-            hourlyViewModel.getHourlyWeatherForLocation(cityModel)
+            hourlyViewModel.loadHourlyWeatherForLocation(cityModel)
         }
     }
 

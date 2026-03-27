@@ -20,7 +20,7 @@ class WeatherDomainToUiConverterImpl: WeatherDomainToUiConverter {
 
     override fun convert(model: CurrentWeather,
                          defaultErrorMessage: String,
-                         getWeatherIconId: (String) -> Int
+                         toWeatherIconRes: (String) -> Int
     ): CurrentWeatherUi {
         val displayDate = try {
             val instant = Instant.ofEpochSecond(model.dateTime.toLong())
@@ -30,7 +30,7 @@ class WeatherDomainToUiConverterImpl: WeatherDomainToUiConverter {
         } catch (e: Exception) {
             defaultErrorMessage
         }
-        val iconId = getWeatherIconId(model.iconCode)
+        val iconId = toWeatherIconRes(model.iconCode)
         return CurrentWeatherUi(
             city = model.city,
             coordinate = Coordinate(model.coordinate.latitude, model.coordinate.longitude),

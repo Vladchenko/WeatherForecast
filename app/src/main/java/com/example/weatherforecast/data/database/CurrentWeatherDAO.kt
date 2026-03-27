@@ -81,7 +81,7 @@ interface CurrentWeatherDAO {
      */
     @InternalSerializationApi
     @Query("SELECT * FROM citiesForecasts WHERE city = :city")
-    fun getCityForecast(city: String): CurrentWeatherEntity?
+    fun findCityForecast(city: String): CurrentWeatherEntity?
 
     /**
      * Retrieves all stored weather forecasts as a cold [Flow].
