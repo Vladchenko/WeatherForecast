@@ -212,16 +212,17 @@ fun CurrentWeatherLayout(
                     when (val state = forecastUiState.value) {
                         is WeatherUiState.Loading -> {
                             AnimatedVisibility(
+                                modifier = Modifier.padding(innerPadding),
                                 visible = viewModel.showProgressBarState.value,
                                 enter = fadeIn(
                                     animationSpec = tween(
-                                        durationMillis = 1000,
-                                        delayMillis = 1000
+                                        durationMillis = 800,
+                                        delayMillis = 800
                                     )
                                 ),
                                 exit = fadeOut(
                                     animationSpec = tween(
-                                        durationMillis = 1000,
+                                        durationMillis = 800,
                                     )
                                 )
                             ) {
@@ -254,7 +255,6 @@ fun CurrentWeatherLayout(
                                                 LayoutDirection.Ltr),
                                             top = innerPadding.calculateTopPadding(),
                                             end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
-                                            // bottom = innerPadding.calculateBottomPadding() — исключили!
                                         )
                                     )
                                     .fillMaxSize()
@@ -268,12 +268,12 @@ fun CurrentWeatherLayout(
                                         ContentTransform(
                                             targetContentEnter = fadeIn(
                                                 animationSpec = tween(
-                                                    durationMillis = 1000,
-                                                    delayMillis = 1000
+                                                    durationMillis = 800,
+                                                    delayMillis = 800
                                                 )
                                             ),
                                             initialContentExit = fadeOut(
-                                                animationSpec = tween(durationMillis = 1000)
+                                                animationSpec = tween(durationMillis = 800)
                                             )
                                         )
                                     },

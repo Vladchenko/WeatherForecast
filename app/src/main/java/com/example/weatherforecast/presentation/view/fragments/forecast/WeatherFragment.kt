@@ -105,7 +105,7 @@ class WeatherFragment : Fragment() {
         // Prevents overlap between screen fade-in and content refresh animation.
         view.postDelayed({
             forecastViewModel.launchWeatherForecast(args.chosenCity, args.latitude, args.longitude)
-        }, 1000)
+        }, 800)
     }
 
     private fun gotoCitySelectionScreen() {
