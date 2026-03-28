@@ -2,7 +2,6 @@ package com.example.weatherforecast.domain.forecast
 
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.models.domain.CurrentWeather
-import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.LoadResult
 
 /**
@@ -20,14 +19,5 @@ interface CurrentWeatherRepository {
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ): LoadResult<CurrentWeather>
-
-    /**
-     * Retrieve cached weather for [city] and provide [remoteError] describing why remote forecast failed
-     */
-    suspend fun loadCachedWeatherForCity(
-        city: String,
-        temperatureType: TemperatureType,
-        remoteError: ForecastError
     ): LoadResult<CurrentWeather>
 }

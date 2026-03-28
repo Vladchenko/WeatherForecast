@@ -18,21 +18,21 @@ import kotlinx.serialization.InternalSerializationApi
 class CurrentWeatherDtoMapper {
 
     /**
-     * Converts a [CurrentWeatherDto] from the network into a [CurrentWeatherEntity] for database storage.
+     * Converts [dto] into a [CurrentWeatherEntity] for database storage.
      *
-     * Extracts core weather metrics such as temperature, wind, pressure, and visibility.
-     * Uses the first item in [dto.weather] to populate condition details like [weatherMain],
-     * [weatherDescription], and [weatherIcon]. If no weather items are present, returns a fallback entity.
+     * Uses the provided [city] instead of [dto.name] to avoid ambiguity between cities with the same name
+     * but in different regions (e.g., "London, UK" vs "London, CA"), as the API returns only the bare city name.
      *
-     * @param dto The network data transfer object received from OpenWeather API.
-     * @return A fully populated [CurrentWeatherEntity], or a fallback with default values if needed.
+     * Extracts core weather data from [dto], using the first weather condition entry. If missing, returns a fallback.
      *
-     * @see fallbackEntity
+     * @param dto The network DTO from OpenWeather API.
+     * @param city The resolved full city name (with state/country context) from user input or geocoding.
+     * @return A fully populated entity, or fallback if weather data is missing.
      */
-    fun toEntity(dto: CurrentWeatherDto): CurrentWeatherEntity {
+    fun toEntity(dto: CurrentWeatherDto, city: String): CurrentWeatherEntity {
         val weather = dto.weather.firstOrNull() ?: return fallbackEntity(dto)
         return CurrentWeatherEntity(
-            city = dto.name,
+            city = city,
             latitude = dto.coord.lat,
             longitude = dto.coord.lon,
             temperature = dto.main.temp,

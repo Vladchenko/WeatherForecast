@@ -9,7 +9,7 @@ import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 
 /**
- * [CurrentWeatherRemoteDataSource] implementation.
+ * [CurrentWeatherLocalDataSource] implementation.
  *
  * @property dao to access weather forecast data from local database
  * @property loggingService centralized service for structured logging

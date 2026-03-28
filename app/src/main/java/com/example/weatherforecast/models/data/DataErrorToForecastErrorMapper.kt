@@ -31,6 +31,7 @@ class DataErrorToForecastErrorMapper {
                 message = dataError.cause.message ?: "An unexpected error occurred",
                 cause = dataError.cause
             )
+            is DataError.ParsingError -> ForecastError.NoDataAvailable("Failed to parse weather data")
         }
     }
 }

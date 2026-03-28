@@ -278,7 +278,7 @@ class CurrentWeatherViewModel @Inject constructor(
                     }
 
                     is ForecastError.NoDataAvailable -> {
-                        showError(city, resourceManager.getString(R.string.no_data_from_server))
+                        showError(city, resourceManager.getString(R.string.no_weather_data_available))
                     }
 
                     is ForecastError.UncategorizedError -> {
@@ -308,19 +308,19 @@ class CurrentWeatherViewModel @Inject constructor(
 
     private fun showRemoteForecast(forecastModel: CurrentWeather) {
         _forecastStateFlow.value = WeatherUiState.Success(
-            getUiModel(forecastModel),
+            toUiModel(forecastModel),
             DataSource.REMOTE
         )
     }
 
     private fun showLocalForecast(forecastModel: CurrentWeather) {
         _forecastStateFlow.value = WeatherUiState.Success(
-            getUiModel(forecastModel),
+            toUiModel(forecastModel),
             DataSource.LOCAL
         )
     }
 
-    private fun getUiModel(forecastModel: CurrentWeather) =
+    private fun toUiModel(forecastModel: CurrentWeather) =
         weatherDomainToUiConverter.convert(
             model = forecastModel,
             defaultErrorMessage = resourceManager.getString(R.string.bad_date_format),

@@ -173,7 +173,7 @@ class HourlyWeatherViewModel @Inject constructor(
                 resourceManager.getString(R.string.city_not_found, error.city)
 
             is ForecastError.NoDataAvailable ->
-                resourceManager.getString(R.string.no_data_from_server)
+                resourceManager.getString(R.string.no_weather_data_available)
 
             is ForecastError.LocalDataCorrupted ->
                 resourceManager.getString(R.string.local_data_corrupted)

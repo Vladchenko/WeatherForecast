@@ -71,6 +71,14 @@ sealed interface DataError {
     data class NetworkError(val cause: Throwable) : DataError
 
     /**
+     * Failed to parse the response (e.g., invalid JSON, missing required fields).
+     *
+     * @param message description of parsing issue
+     * @param cause original exception (e.g., [kotlinx.serialization.SerializationException])
+     */
+    data class ParsingError(val message: String, val cause: Throwable? = null) : DataError
+
+    /**
      * The API response was successful (2xx), but the body was null.
      */
     object ResponseNoBodyError : DataError

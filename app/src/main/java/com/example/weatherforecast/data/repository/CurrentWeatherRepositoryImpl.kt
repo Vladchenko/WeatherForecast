@@ -1,5 +1,6 @@
 package com.example.weatherforecast.data.repository
 
+import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.data.mapper.CurrentWeatherDtoMapper
 import com.example.weatherforecast.data.mapper.CurrentWeatherEntityMapper
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherLocalDataSource
@@ -8,6 +9,7 @@ import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.TemperatureType
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.forecast.CurrentWeatherRepository
+import com.example.weatherforecast.models.data.DataError
 import com.example.weatherforecast.models.data.DataErrorToForecastErrorMapper
 import com.example.weatherforecast.models.data.DataResult
 import com.example.weatherforecast.models.data.database.CurrentWeatherEntity
@@ -23,7 +25,7 @@ import kotlinx.serialization.InternalSerializationApi
  * using a combination of remote and local data sources with fallback mechanisms.
  *
  * ## Responsibilities
- * - Fetches real-time current weather data from the remote API by city name or coordinates.
+ * - Fetches real-time current weather data from the remote API by coordinates.
  * - Saves successfully fetched data to the local database via [CurrentWeatherLocalDataSource].
  * - On remote fetch failure, attempts to load previously cached data as fallback.
  * - Maps data between layers:
@@ -37,7 +39,7 @@ import kotlinx.serialization.InternalSerializationApi
  *    - Return [LoadResult.Remote] with domain model.
  * 3. If request fails:
  *    - Convert [DataResult.Error] to domain-level [ForecastError] using mapper.
- *    - Attempt to load cached data via [loadCachedWeatherForCity], returning [LoadResult.Local] if available.
+ *    - Attempt to load cached data via [loadCachedWeatherForLocation], returning [LoadResult.Local] if available.
  * 4. If no cache exists or reading fails — return [LoadResult.Error].
  *
  * ## Error Handling
@@ -85,24 +87,15 @@ class CurrentWeatherRepositoryImpl(
         longitude: Double
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
-            when (val result = currentWeatherRemoteDataSource.loadWeatherForLocation(
-                city,
-                latitude,
-                longitude
-            )) {
-                is DataResult.Success -> {
-                    val dto = result.data
-                    fetchAndSave(dto, temperatureType)
-                        ?: LoadResult.Error(
-                            city,
-                            ForecastError.NoDataAvailable("Mapped DTO is null")
-                        )
-                }
+            val result = currentWeatherRemoteDataSource.loadWeatherForLocation(city, latitude, longitude)
 
+            when (result) {
+                is DataResult.Success -> {
+                    fetchAndSave(result.data, city, temperatureType)
+                        ?: LoadResult.Error(city, ForecastError.NoDataAvailable("Mapped DTO is null"))
+                }
                 is DataResult.Error -> {
-                    val forecastError = errorMapper.map(result.error)
-                    // TODO Consider fallback to local data by location
-                    LoadResult.Error(city, forecastError)
+                    loadCachedWeatherForLocationOrError(city, temperatureType, errorMapper.map(result.error))
                 }
             }
         }
@@ -110,35 +103,36 @@ class CurrentWeatherRepositoryImpl(
     @InternalSerializationApi
     private suspend fun fetchAndSave(
         dto: CurrentWeatherDto,
+        city: String,
         temperatureType: TemperatureType
     ): LoadResult<CurrentWeather>? {
         return try {
-            val entity = dtoMapper.toEntity(dto)
+            val entity = dtoMapper.toEntity(dto, city)
             saveWeather(entity)
             val domainModel = entityMapper.toDomain(entity, temperatureType)
             LoadResult.Remote(domainModel)
         } catch (ex: Exception) {
-            loggingService.logError(TAG, "Failed to map or save weather data: $ex")
-            LoadResult.Error(dto.name, ForecastError.UncategorizedError(ex.message.toString()))
+            loggingService.logError(TAG, "Failed to map or save weather data: $ex", ex)
+            LoadResult.Error(city, ForecastError.UncategorizedError(ex.message.toString(), ex))
         }
     }
 
     @InternalSerializationApi
-    private suspend fun loadCachedWeatherForCityOrError(
+    private suspend fun loadCachedWeatherForLocationOrError(
         city: String,
         temperatureType: TemperatureType,
         remoteError: ForecastError
     ): LoadResult<CurrentWeather> {
         return try {
-            loadCachedWeatherForCity(city, temperatureType, remoteError)
+            loadCachedWeatherForLocation(city, temperatureType, remoteError)
         } catch (ex: Exception) {
-            loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex")
-            LoadResult.Error(city, ForecastError.NetworkError(ex))
+            loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex", ex)
+            LoadResult.Error(city, ForecastError.LocalDataCorrupted("Failed to read from cache: ${ex.message}"))
         }
     }
 
     @InternalSerializationApi
-    override suspend fun loadCachedWeatherForCity(
+    private suspend fun loadCachedWeatherForLocation(
         city: String,
         temperatureType: TemperatureType,
         remoteError: ForecastError
@@ -148,12 +142,14 @@ class CurrentWeatherRepositoryImpl(
                 val localModel = currentWeatherLocalDataSource.loadWeather(city)
                 val domainModel = entityMapper.toDomain(localModel, temperatureType)
                 LoadResult.Local(domainModel, remoteError)
+            } catch (_: NoSuchDatabaseEntryException) {
+                loggingService.logDebugEvent(TAG, "No cached weather data found for city: $city")
+                LoadResult.Error(city, ForecastError.NoDataAvailable("No cached data for $city"))
             } catch (ex: Exception) {
-                loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex")
+                loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex", ex)
                 LoadResult.Error(
-                    city, ForecastError.LocalDataCorrupted(
-                        message = "Local database query failed: $ex"
-                    )
+                    city,
+                    ForecastError.LocalDataCorrupted("Local database query failed: ${ex.message}")
                 )
             }
         }
