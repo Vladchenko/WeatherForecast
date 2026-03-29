@@ -63,22 +63,6 @@ class HourlyWeatherRepositoryImpl(
     private val remoteDataSource: HourlyWeatherRemoteDataSource,
 ) : HourlyWeatherRepository {
 
-    override suspend fun refreshWeatherForCity(
-        city: String,
-        temperatureType: TemperatureType
-    ): LoadResult<HourlyWeatherDomainModel> =
-        withContext(dispatchers.io) {
-            when (val result = remoteDataSource.loadHourlyWeatherForCity(city)) {
-                is DataResult.Success -> {
-                    handleSuccessResponse(result.data, city, temperatureType)
-                }
-                is DataResult.Error -> {
-                    val forecastError = errorMapper.map(result.error)
-                    loadCachedWeather(city, temperatureType, forecastError)
-                }
-            }
-        }
-
     override suspend fun refreshWeatherForLocation(
         city: String,
         temperatureType: TemperatureType,

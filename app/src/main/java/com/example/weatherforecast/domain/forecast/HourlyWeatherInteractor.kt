@@ -11,13 +11,6 @@ import com.example.weatherforecast.models.domain.LoadResult
  */
 class HourlyWeatherInteractor(private val weatherForecastRepository: HourlyWeatherRepository) {
 
-    suspend fun loadHourlyForecastForCity(
-        temperatureType: TemperatureType,
-        city: String
-    ): LoadResult<HourlyWeatherDomainModel> {
-        return weatherForecastRepository.refreshWeatherForCity(city, temperatureType)
-    }
-
     suspend fun loadHourlyWeatherForLocation(
         city: String,
         temperatureType: TemperatureType,

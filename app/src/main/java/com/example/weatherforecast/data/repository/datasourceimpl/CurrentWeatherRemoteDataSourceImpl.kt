@@ -2,17 +2,14 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import com.example.weatherforecast.data.api.WeatherApiService
 import com.example.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
+import com.example.weatherforecast.data.repository.util.toDataError
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.models.data.DataError
 import com.example.weatherforecast.models.data.DataResult
 import com.example.weatherforecast.models.data.network.CurrentWeatherDto
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.SerializationException
 import retrofit2.Response
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 
 /**
  * Implementation of [CurrentWeatherRemoteDataSource] that fetches weather forecast data from the remote API.
@@ -43,7 +40,7 @@ class CurrentWeatherRemoteDataSourceImpl(
             handleResponse(response, "lat=$latitude, lon=$longitude", city)
         }.getOrElse { throwable ->
             loggingService.logError(TAG, "Unexpected error during API call for $city", throwable)
-            DataResult.Error(city, mapExceptionToDataError(throwable))
+            DataResult.Error(city, throwable.toDataError())
         }
     }
 
@@ -58,16 +55,6 @@ class CurrentWeatherRemoteDataSourceImpl(
             response.body()
         )
         return responseProcessor.processResponse(city, response)
-    }
-
-    private fun mapExceptionToDataError(throwable: Throwable): DataError {
-        return when (throwable) {
-            is SocketTimeoutException -> DataError.NetworkError(throwable)
-            is UnknownHostException,
-            is IOException -> DataError.NetworkError(throwable)
-            is SerializationException -> DataError.ParsingError("JSON parsing failed", throwable)
-            else -> DataError.UncategorizedError(throwable)
-        }
     }
 
     companion object {

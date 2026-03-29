@@ -20,14 +20,6 @@ interface HourlyWeatherRepository {
     ): LoadResult<HourlyWeatherDomainModel>
 
     /**
-     * Retrieve hourly weather forecast for [city], providing [temperatureType]
-     */
-    suspend fun refreshWeatherForCity(
-        city: String,
-        temperatureType: TemperatureType
-    ): LoadResult<HourlyWeatherDomainModel>
-
-    /**
      * Retrieve hourly weather forecast for location defined by [latitude] and [longitude]
      */
     suspend fun refreshWeatherForLocation(

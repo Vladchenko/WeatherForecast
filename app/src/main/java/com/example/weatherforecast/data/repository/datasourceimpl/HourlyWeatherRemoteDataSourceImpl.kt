@@ -2,6 +2,7 @@ package com.example.weatherforecast.data.repository.datasourceimpl
 
 import com.example.weatherforecast.data.api.WeatherApiService
 import com.example.weatherforecast.data.repository.datasource.HourlyWeatherRemoteDataSource
+import com.example.weatherforecast.data.repository.util.toDataError
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.models.data.DataResult
@@ -23,13 +24,18 @@ class HourlyWeatherRemoteDataSourceImpl(
 
     @InternalSerializationApi
     override suspend fun loadHourlyWeatherForCity(city: String): DataResult<HourlyWeatherDto> {
-        val response = apiService.loadHourlyWeather(city)
-        loggingService.logApiResponse(
-            TAG,
-            "Hourly forecast response for city = $city",
-            response.body()
-        )
-        return responseProcessor.processResponse(city, response)
+        return runCatching {
+            val response = apiService.loadHourlyWeather(city)
+            loggingService.logApiResponse(
+                TAG,
+                "Hourly forecast response for city = $city",
+                response.body()
+            )
+            return responseProcessor.processResponse(city, response)
+        }.getOrElse { throwable ->
+            loggingService.logError(TAG, "Unexpected error during API call for $city", throwable)
+            DataResult.Error(city,throwable.toDataError())
+        }
     }
 
     @InternalSerializationApi
