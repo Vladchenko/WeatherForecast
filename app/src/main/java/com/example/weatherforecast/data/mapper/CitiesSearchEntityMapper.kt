@@ -35,7 +35,6 @@ class CitiesSearchEntityMapper {
             lat = entity.latitude,
             lon = entity.longitude,
             country = entity.country,
-            state = entity.state,
-            serverError = null
+            state = entity.state
         )
 }

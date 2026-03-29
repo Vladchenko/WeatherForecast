@@ -23,7 +23,6 @@ data class CitiesNames(
  * @property lon longitude for city
  * @property country that city located in
  * @property state that city located in
- * @property serverError message if data retrieval failed
  */
 data class CityDomainModel(
     val name: String,
@@ -31,5 +30,4 @@ data class CityDomainModel(
     val lon: Double,
     val country: String,
     val state: String? = null,
-    val serverError: String? = null,    // TODO Remove
 )
