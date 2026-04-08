@@ -121,6 +121,9 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     init {
+        viewModelScope.launch(exceptionHandler) {
+            loadSavedCity()
+        }
         viewModelScope.launch {
             preferencesManager.temperatureTypeStateFlow.collect { tempType ->
                 loggingService.logDebugEvent(TAG, "Temperature unit changed: $tempType")
@@ -328,6 +331,16 @@ class CurrentWeatherViewModel @Inject constructor(
                 toWeatherIconRes(weatherIconId)
             }
         )
+
+    private suspend fun loadSavedCity() {
+        val savedModel = chosenCityInteractor.loadChosenCity()
+        if (savedModel.city.isNotBlank()) {
+            _chosenCityStateFlow.value = savedModel
+            loggingService.logDebugEvent(TAG, "Loaded saved city from interactor: ${savedModel.city}")
+        } else {
+            loggingService.logDebugEvent(TAG, "No saved city found in interactor")
+        }
+    }
 
     companion object {
         private const val TAG = "WeatherForecastViewModel"
