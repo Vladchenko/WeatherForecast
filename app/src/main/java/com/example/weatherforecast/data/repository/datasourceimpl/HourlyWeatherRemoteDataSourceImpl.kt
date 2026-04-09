@@ -44,13 +44,18 @@ class HourlyWeatherRemoteDataSourceImpl(
         latitude: Double,
         longitude: Double
     ): DataResult<HourlyWeatherDto> {
-        val response = apiService.loadHourlyForecastByLocation(latitude, longitude)
-        loggingService.logApiResponse(
-            TAG,
-            "Hourly forecast response for location (lat=$latitude, lon=$longitude)",
-            response.body()
-        )
-        return responseProcessor.processResponse(city, response)
+        return runCatching {
+            val response = apiService.loadHourlyForecastByLocation(latitude, longitude)
+            loggingService.logApiResponse(
+                TAG,
+                "Hourly forecast response for location (lat=$latitude, lon=$longitude)",
+                response.body()
+            )
+            return responseProcessor.processResponse(city, response)
+        }.getOrElse { throwable ->
+            loggingService.logError(TAG, "Unexpected error during API call for $city", throwable)
+            DataResult.Error(city,throwable.toDataError())
+        }
     }
 
     companion object {
