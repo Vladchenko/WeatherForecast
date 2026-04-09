@@ -16,6 +16,7 @@ import com.example.weatherforecast.data.repository.datasourceimpl.ChosenCityLoca
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
 import com.example.weatherforecast.data.util.LoggingService
+import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
@@ -103,8 +104,9 @@ class CityManagementModule {
     @Singleton
     @Provides
     fun provideCitiesNamesRemoteDataSource(cityApiService: CityApiService,
+                                           responseProcessor: ResponseProcessor,
                                            loggingService: LoggingService): CitiesNamesRemoteDataSource {
-        return CitiesNamesRemoteDataSourceImpl(cityApiService, loggingService)
+        return CitiesNamesRemoteDataSourceImpl(cityApiService, loggingService, responseProcessor)
     }
 
     @Singleton

@@ -7,6 +7,7 @@ import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteD
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
+import com.example.weatherforecast.models.data.DataResult
 import com.example.weatherforecast.models.domain.CitiesNames
 import com.example.weatherforecast.models.domain.ForecastError
 import com.example.weatherforecast.models.domain.LoadResult
@@ -35,23 +36,20 @@ class CitiesNamesRepositoryImpl(
 
     override suspend fun loadCitiesNames(token: String): LoadResult<CitiesNames> =
         withContext(coroutineDispatchers.io) {
-            try {
-                val response = remoteDataSource.loadCitiesNames(token)
-                if (response.isSuccessful && response.body() != null) {
-                    val dtos = response.body()!!
+            when (val response = remoteDataSource.loadCitiesNames(token)) {
+                is DataResult.Success -> {
+                    val dtos = response.data
                     val entities = dtoMapper.toEntities(dtos)
                     localDataSource.saveCitiesNames(entities)
                     return@withContext LoadResult.Remote(entityMapper.toDomain(entities))
-                } else {
-                    loadFromCacheOrThrow(token)
                 }
-            } catch (ex: Exception) {
-                loggingService.logError(TAG, "Error loading cities names", ex)
-                loadFromCacheOrThrow(token)
+                is DataResult.Error -> {
+                    loadFromCacheOrError(token)
+                }
             }
         }
 
-    private suspend fun loadFromCacheOrThrow(token: String): LoadResult<CitiesNames> {
+    private suspend fun loadFromCacheOrError(token: String): LoadResult<CitiesNames> {
         val cachedEntities = localDataSource.loadCitiesNames(token)
         if (cachedEntities.isEmpty()) {
             return LoadResult.Error(
