@@ -209,91 +209,75 @@ fun CurrentWeatherLayout(
                         )
                     }
                 ) {
-                    when (val state = forecastUiState.value) {
-                        is WeatherUiState.Loading -> {
-                            AnimatedVisibility(
-                                modifier = Modifier.padding(innerPadding),
-                                visible = viewModel.showProgressBarState.value,
-                                enter = fadeIn(
-                                    animationSpec = tween(
-                                        durationMillis = 800,
-                                        delayMillis = 800
-                                    )
-                                ),
-                                exit = fadeOut(
-                                    animationSpec = tween(
-                                        durationMillis = 800,
+                    Column(
+                        modifier = Modifier
+                            .padding(
+                                PaddingValues(
+                                    start = innerPadding.calculateStartPadding(
+                                        LayoutDirection.Ltr
+                                    ),
+                                    top = innerPadding.calculateTopPadding(),
+                                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                                )
+                            )
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        AnimatedContent(
+                            targetState = forecastUiState.value,
+                            transitionSpec = {
+                                // Сначала старый исчезает, потом новый появляется
+                                ContentTransform(
+                                    targetContentEnter = fadeIn(
+                                        animationSpec = tween(
+                                            durationMillis = 800,
+                                            delayMillis = 800
+                                        )
+                                    ),
+                                    initialContentExit = fadeOut(
+                                        animationSpec = tween(durationMillis = 800)
                                     )
                                 )
-                            ) {
-                                ProgressBar()
-                            }
-                        }
+                            },
+                            label = "WeatherContent",
+                            modifier = Modifier.weight(1f) // Добавить вес
+                        ) { state ->
+                            when (state) {
+                                is WeatherUiState.Loading -> {
+                                    ProgressBar()
+                                }
 
-                        is WeatherUiState.Error -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(innerPadding),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = state.message,
-                                    fontSize = 32.sp,
-                                    color = statusColor,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-
-                        is WeatherUiState.Success -> {
-                            Column(
-                                modifier = Modifier
-                                    .padding(
-                                        PaddingValues(
-                                            start = innerPadding.calculateStartPadding(
-                                                LayoutDirection.Ltr),
-                                            top = innerPadding.calculateTopPadding(),
-                                            end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
-                                        )
-                                    )
-                                    .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                AnimatedContent(
-                                    targetState = state,
-                                    transitionSpec = {
-                                        // Сначала старый исчезает, потом новый появляется
-                                        ContentTransform(
-                                            targetContentEnter = fadeIn(
-                                                animationSpec = tween(
-                                                    durationMillis = 800,
-                                                    delayMillis = 800
-                                                )
-                                            ),
-                                            initialContentExit = fadeOut(
-                                                animationSpec = tween(durationMillis = 800)
-                                            )
-                                        )
-                                    },
-                                    label = "WeatherContent"
-                                ) { weatherState ->
-                                    MainContent(
-                                        innerPadding = PaddingValues(),
-                                        mainContentTextColor = mainContentTextColor,
-                                        onCityClick = onCityClick,
-                                        uiState = weatherState
+                                is WeatherUiState.Error -> {
+                                    Text(
+                                        text = state.message,
+                                        fontSize = 32.sp,
+                                        color = statusColor,
+                                        textAlign = TextAlign.Center
                                     )
                                 }
-                                AnimatedVisibility(visible = showHourlyForecast) {
-                                    HourlyWeatherLayout(
-                                        itemWidth = 130.dp,
-                                        itemHeight = 100.dp,
-                                        statusColor,
-                                        mainContentTextColor,
-                                        hourlyWeather = hourlyForecastUiState.value,
-                                    )
+
+                                is WeatherUiState.Success -> {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(), // Только ширина, высоту контролирует AnimatedContent
+                                        verticalArrangement = Arrangement.SpaceBetween,
+                                    ) {
+                                        MainContent(
+                                            innerPadding = PaddingValues(),
+                                            mainContentTextColor = mainContentTextColor,
+                                            onCityClick = onCityClick,
+                                            uiState = state
+                                        )
+                                        AnimatedVisibility(visible = showHourlyForecast) {
+                                            HourlyWeatherLayout(
+                                                itemWidth = 130.dp,
+                                                itemHeight = 100.dp,
+                                                statusColor,
+                                                mainContentTextColor,
+                                                hourlyWeather = hourlyForecastUiState.value,
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
