@@ -250,6 +250,7 @@ fun CurrentWeatherLayout(
 
                                 is WeatherUiState.Error -> {
                                     Text(
+                                        modifier = Modifier.padding(top = 80.dp),
                                         text = state.message,
                                         fontSize = 32.sp,
                                         color = statusColor,

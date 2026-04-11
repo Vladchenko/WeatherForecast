@@ -24,7 +24,7 @@ class HourlyWeatherLocalDataSourceImpl(
     override suspend fun loadHourlyWeather(city: String): HourlyWeatherEntity {
         val entry = dao.findHourlyForecast(city) ?: throw NoSuchDatabaseEntryException(city)
         loggingService.logDebugEvent(
-            "HourlyWeatherLocalDataSourceImpl",
+            TAG,
             "$city city forecast loaded successfully"
         )
         return entry
@@ -34,8 +34,12 @@ class HourlyWeatherLocalDataSourceImpl(
     override suspend fun saveHourlyWeather(entity: HourlyWeatherEntity) {
         dao.insertHourlyForecast(entity)
         loggingService.logDebugEvent(
-            "HourlyForecastLocalDataSourceImpl",
+            TAG,
             "${entity.cityName} hourly weather saved successfully"
         )
+    }
+
+    companion object {
+        const val TAG = "HourlyWeatherLocalDataSourceImpl"
     }
 }
