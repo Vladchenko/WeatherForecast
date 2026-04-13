@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.models.domain.CityDomainModel
@@ -41,4 +42,21 @@ fun CitySuggestionItem(
             fontWeight = FontWeight.Bold
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CitySuggestionItemPreview() {
+    val city = CityDomainModel(
+        name = "San Francisco",
+        state = "CA",
+        country = "US",
+        lat = 37.7749,
+        lon = -122.4194
+    )
+    CitySuggestionItem(
+        city = city,
+        mainContentColor = Color.White,
+        onItemClick = {}
+    )
 }

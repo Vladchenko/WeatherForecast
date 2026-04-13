@@ -19,10 +19,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.models.domain.RecentCities
+import com.example.weatherforecast.presentation.viewmodel.forecast.DataSource
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 
 @Composable
@@ -111,4 +113,55 @@ fun AutoCompleteUI(
             }
         }
     }
+}
+
+@Preview(showBackground = true, name = "AutoCompleteUI - Recent Cities")
+@Composable
+private fun AutoCompleteUIRecentPreview() {
+    val recentCities = RecentCities(
+        cities = listOf(
+            CityDomainModel(name = "Berlin", state = "BE", country = "DE", lat = 52.5200, lon = 13.4050),
+            CityDomainModel(name = "Madrid", state = "MD", country = "ES", lat = 40.4168, lon = -3.7038)
+        )
+    )
+    AutoCompleteUI(
+        modifier = Modifier.fillMaxWidth(),
+        query = "",
+        queryLabel = "Enter city",
+        useOutlined = true,
+        mainContentColor = Color.White,
+        onQueryChanged = {},
+        predictions = null,
+        recentCities = WeatherUiState.Success(data = recentCities, source = DataSource.LOCAL),
+        onDoneActionClick = {},
+        onClearClick = {},
+        onItemClick = {},
+        onFirstFocus = {}
+    )
+}
+
+@Preview(showBackground = true, name = "AutoCompleteUI - Search Results")
+@Composable
+private fun AutoCompleteUISearchPreview() {
+    val predictions = WeatherUiState.Success(
+        listOf(
+            CityDomainModel(name = "Chicago", state = "IL", country = "US", lat = 41.8781, lon = -87.6298),
+            CityDomainModel( name = "Chisinau", state = "MC", country = "MD", lat = 47.0167, lon = 28.8489)
+        ),
+        source = DataSource.LOCAL
+    )
+    AutoCompleteUI(
+        modifier = Modifier.fillMaxWidth(),
+        query = "Chi",
+        queryLabel = "Enter city",
+        useOutlined = true,
+        mainContentColor = Color.White,
+        onQueryChanged = {},
+        predictions = predictions,
+        recentCities = null,
+        onDoneActionClick = {},
+        onClearClick = {},
+        onItemClick = {},
+        onFirstFocus = {}
+    )
 }

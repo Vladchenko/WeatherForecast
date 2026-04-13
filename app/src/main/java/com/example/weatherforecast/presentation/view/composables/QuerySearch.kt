@@ -24,6 +24,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.themeColor
@@ -123,4 +124,18 @@ fun QuerySearch(
         )
     }
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun QuerySearchPreview() {
+    QuerySearch(
+        query = "New York",
+        label = "Enter city name",
+        useOutlined = true,
+        mainContentColor = Color.White,
+        onQueryChanged = {},
+        onClearClick = {},
+        onDoneActionClick = {}
+    )
 }
