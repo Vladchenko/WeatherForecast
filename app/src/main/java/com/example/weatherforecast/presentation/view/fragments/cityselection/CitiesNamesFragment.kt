@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.weatherforecast.R
 import com.example.weatherforecast.presentation.navigation.WeatherNavigator
+import com.example.weatherforecast.presentation.view.composables.CitySelectionLayout
 import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import com.example.weatherforecast.utils.ResourceManager
@@ -36,6 +37,7 @@ class CitiesNamesFragment : Fragment() {
     @Inject
     lateinit var resourceManager: ResourceManager
 
+    @FlowPreview
     private val viewModel by viewModels<CitiesNamesViewModel>()
     private val appBarViewModel by activityViewModels<AppBarViewModel>()
     private val navigator by lazy { WeatherNavigator(findNavController()) }
@@ -72,6 +74,7 @@ class CitiesNamesFragment : Fragment() {
         }
     }
 
+    @FlowPreview
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navigator.start(viewLifecycleOwner, viewModel.navigationEventFlow)
