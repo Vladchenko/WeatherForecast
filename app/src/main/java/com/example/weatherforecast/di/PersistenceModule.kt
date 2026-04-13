@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.example.weatherforecast.data.database.CitiesNamesDAO
 import com.example.weatherforecast.data.database.CurrentWeatherDAO
 import com.example.weatherforecast.data.database.HourlyWeatherDAO
+import com.example.weatherforecast.data.database.RecentCitiesDAO
 import com.example.weatherforecast.data.database.WeatherForecastDatabase
 import dagger.Module
 import dagger.Provides
@@ -77,6 +78,13 @@ object PersistenceModule {
     @InternalSerializationApi
     fun provideCitiesNamesDAO(database: WeatherForecastDatabase): CitiesNamesDAO {
         return database.getCitiesNamesInstance()
+    }
+
+    @Provides
+    @Singleton
+    @InternalSerializationApi
+    fun provideRecentCitiesNamesDAO(database: WeatherForecastDatabase): RecentCitiesDAO {
+        return database.getRecentCitiesDao()
     }
 
     @Provides

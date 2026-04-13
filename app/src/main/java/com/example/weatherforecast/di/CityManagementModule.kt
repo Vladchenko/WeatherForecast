@@ -5,16 +5,21 @@ import android.content.Context
 import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.CityApiService
 import com.example.weatherforecast.data.database.CitiesNamesDAO
+import com.example.weatherforecast.data.database.RecentCitiesDAO
 import com.example.weatherforecast.data.mapper.CitiesSearchDtoMapper
 import com.example.weatherforecast.data.mapper.CitiesSearchEntityMapper
+import com.example.weatherforecast.data.mapper.RecentCitiesMapper
 import com.example.weatherforecast.data.repository.ChosenCityRepositoryImpl
 import com.example.weatherforecast.data.repository.CitiesNamesRepositoryImpl
+import com.example.weatherforecast.data.repository.RecentCitiesRepositoryImpl
 import com.example.weatherforecast.data.repository.datasource.ChosenCityDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import com.example.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
+import com.example.weatherforecast.data.repository.datasource.RecentCitiesDataSource
 import com.example.weatherforecast.data.repository.datasourceimpl.ChosenCityLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
 import com.example.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
+import com.example.weatherforecast.data.repository.datasourceimpl.RecentCitiesDataSourceImpl
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.data.util.ResponseProcessor
 import com.example.weatherforecast.dispatchers.CoroutineDispatchers
@@ -22,6 +27,8 @@ import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import com.example.weatherforecast.domain.city.ChosenCityInteractor
 import com.example.weatherforecast.domain.city.ChosenCityRepository
+import com.example.weatherforecast.domain.recentcities.RecentCitiesInteractor
+import com.example.weatherforecast.domain.recentcities.RecentCitiesRepository
 import com.example.weatherforecast.presentation.PresentationUtils
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
@@ -96,16 +103,20 @@ class CityManagementModule {
     @InternalSerializationApi
     @Singleton
     @Provides
-    fun provideCitiesNamesLocalDataSource(loggingService: LoggingService,
-                                          dao: CitiesNamesDAO): CitiesNamesLocalDataSource {
+    fun provideCitiesNamesLocalDataSource(
+        loggingService: LoggingService,
+        dao: CitiesNamesDAO
+    ): CitiesNamesLocalDataSource {
         return CitiesNamesLocalDataSourceImpl(dao, loggingService)
     }
 
     @Singleton
     @Provides
-    fun provideCitiesNamesRemoteDataSource(cityApiService: CityApiService,
-                                           responseProcessor: ResponseProcessor,
-                                           loggingService: LoggingService): CitiesNamesRemoteDataSource {
+    fun provideCitiesNamesRemoteDataSource(
+        cityApiService: CityApiService,
+        responseProcessor: ResponseProcessor,
+        loggingService: LoggingService
+    ): CitiesNamesRemoteDataSource {
         return CitiesNamesRemoteDataSourceImpl(cityApiService, loggingService, responseProcessor)
     }
 
@@ -138,19 +149,61 @@ class CityManagementModule {
 
     @Singleton
     @Provides
+    @InternalSerializationApi
+    fun provideRecentCitiesMapper(): RecentCitiesMapper {
+        return RecentCitiesMapper()
+    }
+
+    @Singleton
+    @Provides
+    fun provideRecentCitiesDataSource(
+        dao: RecentCitiesDAO,
+        loggingService: LoggingService
+    ): RecentCitiesDataSource {
+        return RecentCitiesDataSourceImpl(
+            dao,
+            loggingService
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideRecentCitiesRepository(
+        recentCitiesMapper: RecentCitiesMapper,
+        coroutineDispatchers: CoroutineDispatchers,
+        recentCitiesDataSource: RecentCitiesDataSource
+    ): RecentCitiesRepository {
+        return RecentCitiesRepositoryImpl(
+            recentCitiesMapper,
+            coroutineDispatchers,
+            recentCitiesDataSource
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideRecentCitiesInteractor(repository: RecentCitiesRepository): RecentCitiesInteractor {
+        return RecentCitiesInteractor(repository)
+    }
+
+    @Singleton
+    @Provides
     fun provideCitiesNamesViewModelFactory(
         loggingService: LoggingService,
         statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
         connectivityObserver: ConnectivityObserver,
-        citiesNamesInteractor: CitiesNamesInteractor
+        citiesNamesInteractor: CitiesNamesInteractor,
+        recentCitiesInteractor: RecentCitiesInteractor
     ): CitiesNamesViewModelFactory {
         return CitiesNamesViewModelFactory(
             loggingService,
             statusRenderer,
             resourceManager,
             connectivityObserver,
-            citiesNamesInteractor
+            citiesNamesInteractor,
+            recentCitiesInteractor
         )
     }
+
 }

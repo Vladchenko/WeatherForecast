@@ -8,7 +8,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.navOptions
 import com.example.weatherforecast.R
-import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.domain.CityDomainModel
+import com.example.weatherforecast.presentation.PresentationUtils.formatFullCityName
 import com.example.weatherforecast.presentation.view.fragments.cityselection.CitiesNamesFragmentDirections
 import com.example.weatherforecast.presentation.view.fragments.forecast.WeatherFragmentDirections
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
@@ -46,8 +47,24 @@ class WeatherNavigator(private val navController: NavController) {
         }
     }
 
+    /**
+     * Navigates from the current weather screen to the city selection screen.
+     *
+     * Uses a navigation action defined in [WeatherFragmentDirections] to transition
+     * to [CitiesNamesFragment] with a fade animation. The destination is added to the back stack,
+     * allowing users to return via "Up" or back button.
+     *
+     * Navigation options include:
+     * - Fade-in/fade-out animations for smooth transitions
+     * - `launchSingleTop = true` to avoid multiple instances of the same destination
+     * - `restoreState = true` to preserve fragment state across navigation
+     *
+     * This method is typically called when the user taps a location selector or edit button
+     * in the forecast UI.
+     */
     fun navigateToCitySelection() {
-        val action = WeatherFragmentDirections.actionCurrentTimeForecastFragmentToCitiesNamesFragment()
+        val action =
+            WeatherFragmentDirections.actionCurrentTimeForecastFragmentToCitiesNamesFragment()
         navController.navigate(action, fadeNavOptions())
     }
 
@@ -59,12 +76,13 @@ class WeatherNavigator(private val navController: NavController) {
         }
     }
 
-    private fun openCurrentWeatherFragment(city: CityLocationModel) {
+    private fun openCurrentWeatherFragment(city: CityDomainModel) {
         val action =
             CitiesNamesFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(
-                city.city,
-                city.location.latitude.toString(),
-                city.location.longitude.toString())
+                chosenCity = formatFullCityName(city.name, city.state, city.country),
+                latitude = city.lat.toString(),
+                longitude = city.lon.toString()
+            )
         navController.navigate(action, fadeNavOptions())
     }
 

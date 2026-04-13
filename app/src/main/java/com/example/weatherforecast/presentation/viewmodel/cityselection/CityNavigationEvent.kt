@@ -1,6 +1,6 @@
 package com.example.weatherforecast.presentation.viewmodel.cityselection
 
-import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.domain.CityDomainModel
 
 /**
  * Sealed interface representing navigation commands emitted by [CitiesNamesViewModel].
@@ -17,9 +17,12 @@ sealed interface CityNavigationEvent {
     data object NavigateUp : CityNavigationEvent
 
     /**
-     * Request to open weather forecast screen for a specific city.
+     * Request to open the weather forecast screen for a specific city.
      *
-     * @property city Full display name of the city (e.g., "Kazan, Tatarstan, RU")
+     * Carries the selected [CityDomainModel] containing name, coordinates, and location details.
+     * The UI layer should use this data to update the current city and trigger a weather forecast load.
+     *
+     * @property city the selected city domain model to display weather for
      */
-    data class OpenWeatherFor(val city: CityLocationModel) : CityNavigationEvent
+    data class OpenWeatherFor(val city: CityDomainModel) : CityNavigationEvent
 }

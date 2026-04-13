@@ -6,9 +6,11 @@ import com.example.weatherforecast.connectivity.ConnectivityObserver
 import com.example.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import com.example.weatherforecast.data.util.LoggingService
 import com.example.weatherforecast.domain.citiesnames.CitiesNamesInteractor
+import com.example.weatherforecast.domain.recentcities.RecentCitiesInteractor
 import com.example.weatherforecast.models.domain.CitiesNames
 import com.example.weatherforecast.models.domain.CityDomainModel
 import com.example.weatherforecast.models.domain.LoadResult
+import com.example.weatherforecast.models.domain.RecentCities
 import com.example.weatherforecast.presentation.status.StatusRenderer
 import com.example.weatherforecast.presentation.viewmodel.AbstractViewModel
 import com.example.weatherforecast.presentation.viewmodel.forecast.DataSource
@@ -66,6 +68,7 @@ import javax.inject.Inject
  * @property statusRenderer Displays status messages to the user
  * @property resourceManager Provides access to string resources for dynamic UI content
  * @property citiesNamesInteractor Business logic layer for loading and filtering city names
+ * @property recentCitiesInteractor Operates recently used cities
  */
 @FlowPreview
 @HiltViewModel
@@ -74,7 +77,8 @@ class CitiesNamesViewModel @Inject constructor(
     private val loggingService: LoggingService,
     private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
-    private val citiesNamesInteractor: CitiesNamesInteractor
+    private val citiesNamesInteractor: CitiesNamesInteractor,
+    private val recentCitiesInteractor: RecentCitiesInteractor
 ) : AbstractViewModel(connectivityObserver) {
 
     /**
@@ -111,9 +115,27 @@ class CitiesNamesViewModel @Inject constructor(
     val cityPredictions: StateFlow<WeatherUiState<List<CityDomainModel>>?>
         get() = _cityPredictions
 
+    /**
+     * State flow that emits the current state of recently used cities.
+     *
+     * Holds a [WeatherUiState] object wrapping the result of loading recent cities, which can be:
+     * - [WeatherUiState.Success] with a [LoadResult<RecentCities>] containing the list of recent cities
+     * - [WeatherUiState.Loading] during data retrieval (not actively set here, but conceptually possible)
+     * - [WeatherUiState.Error] if an exception occurs during loading
+     *
+     * The data is loaded from the local database via [RecentCitiesInteractor] when [CitySelectionEvent.LoadRecentCities]
+     * is triggered (e.g., on screen start or refresh).
+     *
+     * Consumers should observe this flow to display the list of recently searched cities in the UI,
+     * typically shown when the search query is empty.
+     */
+    val recentCitiesNamesFlow: StateFlow<WeatherUiState<RecentCities>?>
+        get() = _recentCitiesNamesFlow
+
     private val _cityMaskStateFlow = MutableStateFlow("")
     private val _cityPredictions = MutableStateFlow<WeatherUiState<List<CityDomainModel>>?>(null)
     private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
+    private val _recentCitiesNamesFlow = MutableStateFlow<WeatherUiState<RecentCities>?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, throwable.message.orEmpty(), throwable)
@@ -162,7 +184,7 @@ class CitiesNamesViewModel @Inject constructor(
      *
      * Dispatches behavior based on event type:
      * - [CitySelectionEvent.NavigateUp]: Sends navigation up command
-     * - [CitySelectionEvent.SelectCity]: Navigates to weather screen for selected city
+     * - [CitySelectionEvent.SelectCity]: Navigates to weather screen for selected city and adds it to recents
      * - [CitySelectionEvent.ClearQuery]: Resets search query and clears results
      * - [CitySelectionEvent.UpdateQuery]: Updates search mask and triggers debounced search
      *
@@ -171,11 +193,16 @@ class CitiesNamesViewModel @Inject constructor(
     fun onEvent(event: CitySelectionEvent) {
         when (event) {
             is CitySelectionEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.NavigateUp)
-            is CitySelectionEvent.SelectCity -> sendNavigationEvent(
-                CityNavigationEvent.OpenWeatherFor(
-                    event.city
+            is CitySelectionEvent.SelectCity -> {
+                sendNavigationEvent(
+                    CityNavigationEvent.OpenWeatherFor(
+                        event.city
+                    )
                 )
-            )
+                viewModelScope.launch {
+                    recentCitiesInteractor.addCityToRecents(event.city)
+                }
+            }
 
             is CitySelectionEvent.ClearQuery -> {
                 _cityMaskStateFlow.value = ""
@@ -183,6 +210,12 @@ class CitiesNamesViewModel @Inject constructor(
             }
 
             is CitySelectionEvent.UpdateQuery -> _cityMaskStateFlow.value = event.mask
+
+            is CitySelectionEvent.LoadRecentCities -> {
+                viewModelScope.launch {
+                    fetchRecentCities()
+                }
+            }
         }
     }
 
@@ -248,6 +281,38 @@ class CitiesNamesViewModel @Inject constructor(
                     ""
                 )
             }
+        }
+    }
+
+    private suspend fun fetchRecentCities() {
+        try {
+            when (val response = recentCitiesInteractor.loadRecentCities()) {
+                is LoadResult.Error -> {
+                    loggingService.logError(TAG, response.error.toString())
+                }
+                is LoadResult.Local -> {
+                    loggingService.logInfoEvent(TAG, response.data.cities.toString())
+                    _recentCitiesNamesFlow.emit(
+                        WeatherUiState.Success(
+                            response.data,
+                            DataSource.LOCAL
+                        )
+                    )
+                }
+
+                is LoadResult.Remote -> {
+                    loggingService.logInfoEvent(TAG, response.data.cities.toString())
+                    _recentCitiesNamesFlow.emit(
+                        WeatherUiState.Success(
+                            response.data,
+                            DataSource.REMOTE
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            loggingService.logError(TAG, "Error loading recent cities", e)
+            statusRenderer.showError(e.message.toString())
         }
     }
 

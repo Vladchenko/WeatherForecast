@@ -1,6 +1,6 @@
 package com.example.weatherforecast.presentation.viewmodel.cityselection
 
-import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.domain.CityDomainModel
 
 /**
  * Sealed interface representing user actions in the city selection screen.
@@ -24,6 +24,11 @@ sealed interface CitySelectionEvent {
     data object ClearQuery : CitySelectionEvent
 
     /**
+     * Loads set of cities searched recently
+     */
+    data object LoadRecentCities : CitySelectionEvent
+
+    /**
      * User requested to navigate back (e.g. clicked "Up" button in toolbar).
      * Should trigger screen dismissal or navigation up in the back stack.
      */
@@ -40,12 +45,15 @@ sealed interface CitySelectionEvent {
     data class UpdateQuery(val mask: String) : CitySelectionEvent
 
     /**
-     * A city has been selected from the suggestions list.
+     * A city has been selected from the suggestions list or recent cities.
      *
-     * This event is triggered when the user taps on a predicted city name.
-     * Should result in navigation to the weather forecast screen for the selected city.
+     * This event is triggered when the user taps on a predicted city name or selects one from the recent list.
+     * It carries the full domain model of the selected city, including coordinates and location details,
+     * which should be used to update the current city in the app and load its weather forecast.
      *
-     * @property city Full name of the selected city (e.g., "Kazan, Tatarstan, RU")
+     * After processing, the query should typically be cleared and the keyboard dismissed.
+     *
+     * @property city The selected [CityDomainModel] containing name, latitude, longitude, country, and state
      */
-    data class SelectCity(val city: CityLocationModel) : CitySelectionEvent
+    data class SelectCity(val city: CityDomainModel) : CitySelectionEvent
 }

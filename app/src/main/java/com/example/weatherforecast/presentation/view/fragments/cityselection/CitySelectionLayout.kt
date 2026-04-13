@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -58,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherforecast.R
 import com.example.weatherforecast.models.domain.CityDomainModel
-import com.example.weatherforecast.models.domain.CityLocationModel
+import com.example.weatherforecast.models.domain.RecentCities
 import com.example.weatherforecast.presentation.PresentationUtils.formatFullCityName
 import com.example.weatherforecast.presentation.PresentationUtils.toToolbarSubtitleFontSize
 import com.example.weatherforecast.presentation.themeColor
@@ -67,25 +68,27 @@ import com.example.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import com.example.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
 import com.example.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
-import com.example.weatherforecast.presentation.viewmodel.geolocation.createLocation
 import kotlinx.coroutines.FlowPreview
 
 /**
- * Layout for a city selection screen.
+ * Composable layout for the city selection screen.
  *
- * Displays:
- * - A top app bar with title and subtitle from [AppBarViewModel]
- * - An auto-complete text field for entering a city name
- * - A list of predicted city names based on user input
- * - Background image for visual appeal
+ * Provides a full UI for searching and selecting cities, featuring:
+ * - A top app bar with dynamic title and subtitle from [AppBarViewModel]
+ * - An auto-complete search field with real-time predictions
+ * - A drop-down list of suggested cities based on user input
+ * - "Recent" cities section shown when the query is empty
+ * - Visual background for improved aesthetics
  *
- * The screen supports keyboard hiding, clearing input, and handling city selection.
+ * The component supports keyboard dismissal, input clearing, and both manual and recent city selection.
+ * It integrates with ViewModel(s) to observe state changes and emit user events via [onEvent].
  *
- * @param citySelectionTitle Title shown above the search field
- * @param queryLabel Hint text for the city search input field
- * @param onEvent Callback for handling user interactions
- * @param appBarViewModel ViewModel providing UI state for the app bar (title, subtitle, colors)
- * @param viewModel ViewModel managing city name search and suggestions
+ * @param mainContentColor Color applied to text and icons (defaults to theme-based color)
+ * @param citySelectionTitle Title displayed above the search input
+ * @param queryLabel Hint text shown inside the search field
+ * @param onEvent Callback to handle user interactions like city selection or navigation
+ * @param appBarViewModel ViewModel providing title/subtitle and styling info for the top app bar
+ * @param viewModel ViewModel managing city name suggestions, recent cities, and input state
  */
 @Composable
 @FlowPreview
@@ -102,6 +105,7 @@ fun CitySelectionLayout(
     val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val cityPredictionsUiState by viewModel.cityPredictions.collectAsStateWithLifecycle()
+    val recentCitiesNamesUiState by viewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
     val fontSize = appbarUiState.subtitleSize.toToolbarSubtitleFontSize()
 
     Scaffold(
@@ -165,6 +169,7 @@ fun CitySelectionLayout(
                         modifier = Modifier,
                         mainContentColor = mainContentColor,
                         cityMaskPredictions = cityPredictionsUiState,
+                        recentCities = recentCitiesNamesUiState,
                         onEvent
                     )
                 }
@@ -174,18 +179,20 @@ fun CitySelectionLayout(
 }
 
 /**
- * A reusable text field with a clear button and "Done" action support.
+ * A customizable text input field with a clear ("X") button and keyboard action handling.
  *
- * Can be rendered as outlined or filled style.
+ * Supports two styles: outlined (default) and filled. Emits events on text change, clear, and "Done" press.
  *
- * @param modifier Modifier to apply to the text field
- * @param query Current input text
- * @param label Label/hint displayed inside the text field
- * @param useOutlined If true, uses [OutlinedTextField]; otherwise, uses [TextField]
- * @param colors Custom colors for the text field (optional)
+ * @param modifier Modifier to apply to the TextField
+ * @param query Current text value in the field
+ * @param label Placeholder/hint label displayed inside the field
+ * @param useOutlined If true, renders as [OutlinedTextField]; otherwise as [TextField]
+ * @param colors Optional custom [TextFieldColors] to override default theming
+ * @param mainContentColor Base color for text, icons, and indicators
  * @param onDoneActionClick Called when the "Done" action is triggered on the keyboard
- * @param onClearClick Called when the clear ("X") icon is clicked
- * @param onQueryChanged Called whenever the text input changes
+ * @param onClearClick Called when the user taps the clear icon
+ * @param onQueryChanged Called whenever the input text changes
+ * @param onFocusChanged Called when focus state changes (focused/unfocused)
  */
 @Composable
 private fun QuerySearch(
@@ -197,7 +204,8 @@ private fun QuerySearch(
     mainContentColor: Color,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
-    onQueryChanged: (String) -> Unit
+    onQueryChanged: (String) -> Unit,
+    onFocusChanged: (Boolean) -> Unit = {}
 ) {
     var showClearButton by remember { mutableStateOf(false) }
     if (useOutlined) {
@@ -206,6 +214,7 @@ private fun QuerySearch(
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
                     showClearButton = (focusState.isFocused)
+                    onFocusChanged(focusState.isFocused)
                 },
             value = query,
             onValueChange = onQueryChanged,
@@ -308,22 +317,29 @@ private fun QuerySearch(
 }
 
 /**
- * Generic auto-complete UI component with drop-down suggestions.
+ * Generic auto-complete UI with dynamic suggestion list.
  *
- * Displays a text field and a scrollable list of predictions below it.
+ * Displays a text field followed by a scrollable list of suggestions. Behavior changes based on input:
+ * - When query is not blank: shows city predictions from [predictions]
+ * - When query is blank: shows "Recent" cities from [recentCities]
+ *
+ * Handles loading and error states for both data sources.
  *
  * @param T Type of prediction items (e.g., [CityDomainModel])
- * @param modifier Modifier for the container
- * @param query Current user input
+ * @param modifier Modifier for the outer container
+ * @param query Current user input text
  * @param queryLabel Hint text for the input field
- * @param useOutlined Whether to use outlined or filled text field style
- * @param colors Optional custom colors for the text field
- * @param onQueryChanged Called when input changes
- * @param predictions List of available suggestions
- * @param onDoneActionClick Triggered when "Done" is pressed
- * @param onClearClick Triggered when the clear button is clicked
- * @param onItemClick Called when a suggestion is clicked
- * @param itemContent Composable lambda defining how each suggestion is rendered
+ * @param useOutlined Whether to use outlined style for the text field
+ * @param colors Optional custom colors for styling the text field
+ * @param mainContentColor Base color for text and icons
+ * @param onQueryChanged Called when the user types into the field
+ * @param predictions Current state (Loading/Success/Error) of city predictions
+ * @param recentCities Current state (Loading/Success/Error) of recently used cities
+ * @param onDoneActionClick Triggered when "Done" is pressed on the keyboard
+ * @param onClearClick Triggered when the clear ("X") button is clicked
+ * @param onItemClick Called when a suggestion is tapped
+ * @param onFocusChanged Called when focus enters or leaves the input field
+ * @param itemContent Composable lambda defining how each suggestion item is rendered
  */
 @Composable
 private fun <T> AutoCompleteUI(
@@ -335,103 +351,177 @@ private fun <T> AutoCompleteUI(
     mainContentColor: Color,
     onQueryChanged: (String) -> Unit = {},
     predictions: WeatherUiState<List<CityDomainModel>>?,
+    recentCities: WeatherUiState<RecentCities>?,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
-    onItemClick: (T) -> Unit = {},
-    itemContent: @Composable (T) -> Unit = {}
+    onItemClick: (CityDomainModel) -> Unit = {},
+    onFocusChanged: (Boolean) -> Unit = {},
+    itemContent: @Composable (CityDomainModel) -> Unit = {},
 ) {
     val view = LocalView.current
     val lazyListState = rememberLazyListState()
-    when (predictions) {
-        null -> {
-            QuerySearch(
-                query = query,
-                label = queryLabel,
-                useOutlined = useOutlined,
-                colors = colors,
-                mainContentColor = mainContentColor,
-                onQueryChanged = onQueryChanged,
-                onDoneActionClick = {
-                    view.clearFocus()
-                    onDoneActionClick()
-                },
-                onClearClick = {
-                    onClearClick()
-                }
-            )
-        }
 
-        is WeatherUiState.Error -> {}
-        is WeatherUiState.Loading -> {
-            QuerySearch(
-                query = query,
-                label = queryLabel,
-                useOutlined = useOutlined,
-                colors = colors,
-                mainContentColor = mainContentColor,
-                onQueryChanged = onQueryChanged,
-                onDoneActionClick = {
-                    view.clearFocus()
-                    onDoneActionClick()
-                },
-                onClearClick = {
-                    onClearClick()
-                }
-            )
-            ProgressBar()
-        }
+    QuerySearch(
+        query = query,
+        label = queryLabel,
+        useOutlined = useOutlined,
+        colors = colors,
+        mainContentColor = mainContentColor,
+        onQueryChanged = onQueryChanged,
+        onDoneActionClick = {
+            view.clearFocus()
+            onDoneActionClick()
+        },
+        onClearClick = {
+            onClearClick()
+        },
+        onFocusChanged = onFocusChanged
+    )
 
-        is WeatherUiState.Success -> {
-            LazyColumn(
-                state = lazyListState,
-                modifier = modifier.heightIn(max = TextFieldDefaults.MinHeight * 6)
-            ) {
-                item {
-                    QuerySearch(
-                        query = query,
-                        label = queryLabel,
-                        useOutlined = useOutlined,
-                        colors = colors,
-                        mainContentColor = mainContentColor,
-                        onQueryChanged = onQueryChanged,
-                        onDoneActionClick = {
-                            view.clearFocus()
-                            onDoneActionClick()
-                        },
-                        onClearClick = {
-                            onClearClick()
-                        }
+    if (query.isBlank()) {
+        when (recentCities) {
+            is WeatherUiState.Success -> {
+                if (recentCities.data.cities.isNotEmpty()) {
+                    Text(
+                        text = "Recent",
+                        modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp),
+                        color = mainContentColor.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
-                if (predictions.data.isNotEmpty()) {
-                    items(predictions.data.size, null, { null }) { prediction ->
-                        Row(
-                            Modifier
-                                .padding(4.dp)
-                                .fillMaxWidth()
-                                .clickable {
-                                    view.clearFocus()
-                                    onItemClick(predictions.data[prediction] as T)
-                                }
-                        ) {
-                            itemContent(predictions.data[prediction] as T)
+            }
+            else -> {}
+        }
+    }
+
+    LazyColumn(
+        state = lazyListState,
+        modifier = modifier
+            .heightIn(
+                min = TextFieldDefaults.MinHeight,
+                max = (TextFieldDefaults.MinHeight * 6)
+            )
+    ) {
+        // Show either predictions or recent cities depending on query
+        if (query.isNotBlank()) {
+            // Search mode: display prediction results
+            when (predictions) {
+                is WeatherUiState.Loading -> {
+                    item { ProgressBar() }
+                }
+
+                is WeatherUiState.Error -> {
+                    item {
+                        Text(
+                            text = "Error loading cities",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Red,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                is WeatherUiState.Success -> {
+                    if (predictions.data.isNotEmpty()) {
+                        items(
+                            items = predictions.data,
+                            key = { city -> city.id }
+                        ) { city ->
+                            Row(
+                                Modifier
+                                    .padding(4.dp)
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        view.clearFocus()
+                                        onItemClick(city)
+                                    }
+                            ) {
+                                itemContent(city)
+                            }
+                        }
+                    } else {
+                        item {
+                            Text(
+                                text = "No cities found",
+                                modifier = Modifier.padding(16.dp),
+                                color = mainContentColor.copy(alpha = 0.6f),
+                                fontSize = 14.sp
+                            )
                         }
                     }
                 }
+
+                null -> {} // no-op
+            }
+        } else {
+            // Recent mode: display recently searched cities
+            when (recentCities) {
+                is WeatherUiState.Loading -> {
+                    item { ProgressBar() }
+                }
+
+                is WeatherUiState.Error -> {
+                    item {
+                        Text(
+                            text = "Error loading recent cities",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Red,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                is WeatherUiState.Success -> {
+                    if (recentCities.data.cities.isNotEmpty()) {
+                        items(
+                            items = recentCities.data.cities,
+                            key = { city -> city.id }
+                        ) { city ->
+                            Row(
+                                Modifier
+                                    .padding(4.dp)
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        view.clearFocus()
+                                        onItemClick(city)
+                                    }
+                            ) {
+                                itemContent(city)
+                            }
+                        }
+                    } else {
+                        item {
+                            Text(
+                                text = "No recent cities",
+                                modifier = Modifier.padding(16.dp),
+                                color = mainContentColor.copy(alpha = 0.6f),
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
+
+                null -> {} // no-op
             }
         }
     }
 }
 
 /**
- * Input field for city name with auto-completion and prediction display.
+ * City name input field with integrated auto-completion and recent cities support.
  *
- * Wraps [AutoCompleteUI] with specific logic for city name search.
+ * Combines [QuerySearch] and [AutoCompleteUI] to provide a complete city search experience.
+ * On first focus, triggers loading of recent cities. On selection, formats and emits the chosen city.
  *
- * @param cityName Current city input state
- * @param queryLabel Hint text for the search field
+ * @param cityName Current value of the city input field
+ * @param queryLabel Hint text for the search input
  * @param modifier Modifier for layout customization
- * @param cityMaskPredictions List of matching cities to display as suggestions
+ * @param mainContentColor Color used for text and UI elements
+ * @param cityMaskPredictions Current state of city prediction results
+ * @param recentCities Current state of recently used cities
+ * @param onEvent Callback to emit user actions (e.g., select city, clear query)
+ * @param keyboardController Optional software keyboard controller to hide the keyboard on selection
  */
 @Composable
 private fun AddressEdit(
@@ -440,9 +530,12 @@ private fun AddressEdit(
     modifier: Modifier,
     mainContentColor: Color,
     cityMaskPredictions: WeatherUiState<List<CityDomainModel>>?,
+    recentCities: WeatherUiState<RecentCities>?,
     onEvent: (CitySelectionEvent) -> Unit,
     keyboardController: SoftwareKeyboardController? = LocalSoftwareKeyboardController.current
 ) {
+    var isFirstFocus by remember { mutableStateOf(true) }
+
     Column(
         modifier = modifier.padding(top = 8.dp),
         verticalArrangement = Arrangement.Center
@@ -459,6 +552,7 @@ private fun AddressEdit(
                 }
             },
             predictions = cityMaskPredictions,
+            recentCities = recentCities,
             onClearClick = {
                 onEvent(CitySelectionEvent.ClearQuery)
             },
@@ -467,24 +561,18 @@ private fun AddressEdit(
             },
             onItemClick = { selectedCity ->
                 onEvent(
-                    CitySelectionEvent.SelectCity(
-                        CityLocationModel(
-                            formatFullCityName(
-                                selectedCity.name,
-                                selectedCity.state,
-                                selectedCity.country
-                            ),
-                            createLocation(
-                                selectedCity.lat,
-                                selectedCity.lon
-                            )
-                        )
-                    )
+                    CitySelectionEvent.SelectCity(selectedCity)
                 )
                 onEvent(CitySelectionEvent.ClearQuery)
                 keyboardController?.hide()
+            },
+            onFocusChanged = { hasFocus ->
+                if (hasFocus && isFirstFocus) {
+                    isFirstFocus = false
+                    onEvent(CitySelectionEvent.LoadRecentCities)
+                }
             }
-        ) { city ->
+        ) { city: CityDomainModel ->
             Text(
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(20.dp))

@@ -15,11 +15,15 @@ import com.example.weatherforecast.presentation.PresentationConstants.APPBAR_SUB
 object PresentationUtils {
 
     /**
-     * Compose a full name for a city, consisting of [cityName], [stateName] if present and [countryName].
+     * Compose a full name for a city, consisting of [cityName] and if present [stateName], [countryName].
      */
     fun formatFullCityName(cityName: String, stateName: String?, countryName: String) =
         if (stateName.isNullOrBlank()) {
-            "$cityName, $countryName"
+            if (countryName.isNotBlank()) {
+                "$cityName, $countryName"
+            } else {
+                cityName
+            }
         } else {
             "$cityName, $stateName, $countryName"
         }
