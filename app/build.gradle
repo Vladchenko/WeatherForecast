@@ -20,11 +20,11 @@ ksp {
 }
 
 android {
-    namespace 'com.example.weatherforecast'
+    namespace 'io.github.vladchenko.weatherforecast'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.weatherforecast"
+        applicationId "io.github.vladchenko.weatherforecast"
         minSdk 30
         targetSdk 34
         versionCode 1
@@ -92,7 +92,7 @@ android {
         ]
     }
 
-    namespace 'com.example.weatherforecast'
+    namespace 'io.github.vladchenko.weatherforecast'
 }
 
 dependencies {
