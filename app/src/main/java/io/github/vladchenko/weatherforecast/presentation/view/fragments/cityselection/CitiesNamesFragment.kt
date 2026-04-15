@@ -15,11 +15,11 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherNavigator
+import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.presentation.view.composables.CitySelectionLayout
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
 

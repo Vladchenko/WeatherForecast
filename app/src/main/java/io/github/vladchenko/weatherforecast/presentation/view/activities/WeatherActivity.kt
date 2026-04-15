@@ -5,13 +5,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.util.hideBottomNavigationBar
 import io.github.vladchenko.weatherforecast.presentation.util.setLightStatusBars
 import io.github.vladchenko.weatherforecast.presentation.util.setTransparentSystemBars
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import javax.inject.Inject
 
 /**

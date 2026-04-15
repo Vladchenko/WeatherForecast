@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.data.repository.datasourceimpl
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.data.database.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.data.repository.datasource.CurrentWeatherLocalDataSource
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.models.data.database.CurrentWeatherEntity
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject

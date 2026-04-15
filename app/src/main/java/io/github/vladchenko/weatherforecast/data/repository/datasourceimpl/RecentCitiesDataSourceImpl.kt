@@ -2,7 +2,7 @@ package io.github.vladchenko.weatherforecast.data.repository.datasourceimpl
 
 import io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.data.repository.datasource.RecentCitiesDataSource
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.models.data.database.RecentCitiesEntity
 import kotlinx.serialization.InternalSerializationApi
 

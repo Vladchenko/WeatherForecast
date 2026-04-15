@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.presentation
 import android.app.Application
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
-import io.github.vladchenko.weatherforecast.data.workmanager.WorkerStarter
+import io.github.vladchenko.weatherforecast.core.workmanager.WorkerStarter
 import javax.inject.Inject
 
 /**

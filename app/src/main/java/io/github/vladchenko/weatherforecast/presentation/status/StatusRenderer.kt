@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.presentation.status
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.models.presentation.Message
 import io.github.vladchenko.weatherforecast.models.presentation.MessageType
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import javax.inject.Inject
 
 /**

@@ -4,13 +4,13 @@ import android.location.Location
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.geolocation.PermissionResolver
+import io.github.vladchenko.weatherforecast.core.location.geolocation.PermissionResolver
 import io.github.vladchenko.weatherforecast.models.domain.CityLocationModel
-import io.github.vladchenko.weatherforecast.presentation.alertdialog.dialogcontroller.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -189,7 +189,7 @@ class GeoLocationCoordinator(
     private suspend fun collectGeoLocationDefineCitySuccessFlow(flow: SharedFlow<CityLocationModel>) {
         flow.collect { model ->
             dialogController.showLocationDefined(
-                message = model.city,
+                city = model.city,
                 onPositiveClick = {
                     onForecastLoadForLocation(model)
                 },

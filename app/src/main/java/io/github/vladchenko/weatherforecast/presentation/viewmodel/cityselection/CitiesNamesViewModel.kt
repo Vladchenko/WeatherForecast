@@ -3,9 +3,9 @@ package io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselectio
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import io.github.vladchenko.weatherforecast.domain.recentcities.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.models.domain.CitiesNames
@@ -16,7 +16,7 @@ import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.DataSource
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow

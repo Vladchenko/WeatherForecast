@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.data.repository.datasourceimpl
 import io.github.vladchenko.weatherforecast.data.api.WeatherApiService
 import io.github.vladchenko.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.data.repository.util.toDataError
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.models.data.DataError
 import io.github.vladchenko.weatherforecast.models.data.DataResult

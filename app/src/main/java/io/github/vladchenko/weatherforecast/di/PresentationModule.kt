@@ -4,10 +4,15 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.presentation.alertdialog.AlertDialogFactory
+import io.github.vladchenko.weatherforecast.core.location.dialog.LocationDialogFactory
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
+import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogFactory
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
 import javax.inject.Singleton
 
 /**
@@ -41,9 +46,22 @@ object PresentationModule {
         return WeatherCoordinator.Factory()
     }
 
-    @Singleton
     @Provides
-    fun provideAlertDialogFactory(resourceManager: ResourceManager): AlertDialogFactory {
-        return AlertDialogFactory(resourceManager)
-    }
+    @Singleton
+    fun provideWeatherDialogFactory(
+        baseDialogFactory: AlertDialogFactory,
+        locationDialogFactory: LocationDialogFactory,
+        resourceManager: ResourceManager
+    ): WeatherDialogFactory = WeatherDialogFactory(
+        baseDialogFactory,
+        locationDialogFactory,
+        resourceManager
+    )
+
+    @Provides
+    @Singleton
+    fun provideWeatherDialogController(
+        dialogFactory: WeatherDialogFactory,
+        dialogHelper: AlertDialogHelper
+    ): WeatherDialogController = WeatherDialogControllerImpl(dialogFactory, dialogHelper)
 }

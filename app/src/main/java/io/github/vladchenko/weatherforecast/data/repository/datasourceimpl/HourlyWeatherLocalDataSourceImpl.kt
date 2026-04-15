@@ -4,7 +4,7 @@ import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchData
 import io.github.vladchenko.weatherforecast.data.database.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.data.repository.datasource.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.data.repository.datasource.HourlyWeatherLocalDataSource
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.models.data.database.HourlyWeatherEntity
 import kotlinx.serialization.InternalSerializationApi
 

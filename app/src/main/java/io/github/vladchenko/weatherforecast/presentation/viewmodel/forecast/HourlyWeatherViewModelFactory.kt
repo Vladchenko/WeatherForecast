@@ -2,13 +2,13 @@ package io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.vladchenko.weatherforecast.connectivity.ConnectivityObserver
-import io.github.vladchenko.weatherforecast.data.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.domain.forecast.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 
 /**
  * WeatherForecastViewModel factory

@@ -1,12 +1,19 @@
 package io.github.vladchenko.weatherforecast.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.location.geolocation.DeviceLocationProvider
+import io.github.vladchenko.weatherforecast.core.location.geolocation.Geolocator
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
+import io.github.vladchenko.weatherforecast.core.location.permission.PermissionChecker
+import io.github.vladchenko.weatherforecast.core.location.permission.PermissionCheckerImpl
+import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManagerImpl
 import io.github.vladchenko.weatherforecast.data.api.WeatherApiService
 import io.github.vladchenko.weatherforecast.data.database.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.data.database.HourlyWeatherDAO
@@ -14,7 +21,6 @@ import io.github.vladchenko.weatherforecast.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.data.mapper.HourlyWeatherEntityMapper
-import io.github.vladchenko.weatherforecast.data.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepositoryImpl
 import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepositoryImpl
 import io.github.vladchenko.weatherforecast.data.repository.datasource.CurrentWeatherLocalDataSource
@@ -25,18 +31,12 @@ import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.Curre
 import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.CurrentWeatherRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.HourlyWeatherLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.HourlyWeatherRemoteDataSourceImpl
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
-import io.github.vladchenko.weatherforecast.data.util.permission.PermissionChecker
-import io.github.vladchenko.weatherforecast.data.util.permission.PermissionCheckerImpl
-import io.github.vladchenko.weatherforecast.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.domain.forecast.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.domain.forecast.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.domain.forecast.HourlyWeatherRepository
-import io.github.vladchenko.weatherforecast.geolocation.DeviceLocationProvider
-import io.github.vladchenko.weatherforecast.geolocation.Geolocator
 import io.github.vladchenko.weatherforecast.models.data.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import io.github.vladchenko.weatherforecast.presentation.converter.WeatherDomainToUiConverterImpl
@@ -46,8 +46,6 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModelFactory
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.HourlyWeatherViewModelFactory
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModelFactory
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
-import io.github.vladchenko.weatherforecast.utils.ResourceManagerImpl
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
@@ -97,24 +95,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class WeatherForecastModule {
-
-    @Singleton
-    @Provides
-    fun providePermissionChecker(@ApplicationContext context: Context): PermissionChecker {
-        return PermissionCheckerImpl(context)
-    }
-
-    @Singleton
-    @Provides
-    fun provideResourceManager(@ApplicationContext context: Context): ResourceManager {
-        return ResourceManagerImpl(context)
-    }
-
-    @Singleton
-    @Provides
-    fun provideLoggingService(): LoggingService {
-        return LoggingService()
-    }
 
     @Singleton
     @Provides

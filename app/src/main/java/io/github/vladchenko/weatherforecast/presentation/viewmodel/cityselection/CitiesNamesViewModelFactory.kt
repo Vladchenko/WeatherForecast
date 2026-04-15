@@ -2,12 +2,12 @@ package io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselectio
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.vladchenko.weatherforecast.connectivity.ConnectivityObserver
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import io.github.vladchenko.weatherforecast.domain.recentcities.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.FlowPreview
 
 /**

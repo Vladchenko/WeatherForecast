@@ -7,7 +7,7 @@ import io.github.vladchenko.weatherforecast.models.presentation.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.presentation.SubtitleSize
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.DataSource
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import javax.inject.Inject
 
 /**

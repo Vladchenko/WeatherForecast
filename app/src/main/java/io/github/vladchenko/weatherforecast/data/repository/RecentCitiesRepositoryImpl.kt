@@ -2,7 +2,7 @@ package io.github.vladchenko.weatherforecast.data.repository
 
 import io.github.vladchenko.weatherforecast.data.mapper.RecentCitiesMapper
 import io.github.vladchenko.weatherforecast.data.repository.datasource.RecentCitiesDataSource
-import io.github.vladchenko.weatherforecast.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.domain.recentcities.RecentCitiesRepository
 import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
 import io.github.vladchenko.weatherforecast.models.domain.ForecastError

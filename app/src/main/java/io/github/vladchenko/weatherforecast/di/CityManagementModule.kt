@@ -6,7 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.data.api.CityApiService
 import io.github.vladchenko.weatherforecast.data.database.CitiesNamesDAO
 import io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO
@@ -24,9 +24,9 @@ import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.Chose
 import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.CitiesNamesLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.CitiesNamesRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.data.repository.datasourceimpl.RecentCitiesDataSourceImpl
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
-import io.github.vladchenko.weatherforecast.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.domain.citiesnames.CitiesNamesInteractor
 import io.github.vladchenko.weatherforecast.domain.citiesnames.CitiesNamesRepository
 import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
@@ -36,7 +36,7 @@ import io.github.vladchenko.weatherforecast.domain.recentcities.RecentCitiesRepo
 import io.github.vladchenko.weatherforecast.presentation.PresentationUtils
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModelFactory
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 

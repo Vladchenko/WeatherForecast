@@ -5,11 +5,11 @@ import android.location.LocationManager
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.connectivity.ConnectivityObserver
-import io.github.vladchenko.weatherforecast.data.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.data.util.LoggingService
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.TemperatureType
-import io.github.vladchenko.weatherforecast.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.models.domain.CityLocationModel
@@ -21,7 +21,7 @@ import io.github.vladchenko.weatherforecast.presentation.PresentationUtils.toWea
 import io.github.vladchenko.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
-import io.github.vladchenko.weatherforecast.utils.ResourceManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -143,7 +143,7 @@ class CurrentWeatherViewModel @Inject constructor(
     fun launchWeatherForecast(city: String, latitude: String, longitude: String) {
         viewModelScope.launch(exceptionHandler) {
             statusRenderer.showLoadingStatusFor(city)
-            val (cityName, latitude, longitude) = if (city.isBlank()) {
+            val (cityName, latValue, lonValue) = if (city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
                     _chosenCityBlankSharedFlow.tryEmit(Unit)
@@ -156,20 +156,20 @@ class CurrentWeatherViewModel @Inject constructor(
                     savedModel.location.longitude
                 )
             } else {
-                val latValue = latitude.toDoubleOrNull() ?: run {
+                val lat = latitude.toDoubleOrNull() ?: run {
                     statusRenderer.showError("Invalid latitude")
                     _refreshingStateFlow.value = false
                     return@launch
                 }
-                val lonValue = longitude.toDoubleOrNull() ?: run {
+                val lon = longitude.toDoubleOrNull() ?: run {
                     statusRenderer.showError("Invalid longitude")
                     _refreshingStateFlow.value = false
                     return@launch
                 }
-                Triple(city, latValue, lonValue)
+                Triple(city, lat, lon)
             }
 
-            loadRemoteForecastForLocation(cityName, latitude.toString(), longitude.toString())
+            loadRemoteForecastForLocation(cityName, latValue.toString(), lonValue.toString())
         }
     }
 
@@ -281,7 +281,10 @@ class CurrentWeatherViewModel @Inject constructor(
                     }
 
                     is ForecastError.NoDataAvailable -> {
-                        showError(city, resourceManager.getString(R.string.no_weather_data_available))
+                        showError(
+                            city,
+                            resourceManager.getString(R.string.no_weather_data_available)
+                        )
                     }
 
                     is ForecastError.UncategorizedError -> {
@@ -336,7 +339,10 @@ class CurrentWeatherViewModel @Inject constructor(
         val savedModel = chosenCityInteractor.loadChosenCity()
         if (savedModel.city.isNotBlank()) {
             _chosenCityStateFlow.value = savedModel
-            loggingService.logDebugEvent(TAG, "Loaded saved city from interactor: ${savedModel.city}")
+            loggingService.logDebugEvent(
+                TAG,
+                "Loaded saved city from interactor: ${savedModel.city}"
+            )
         } else {
             loggingService.logDebugEvent(TAG, "No saved city found in interactor")
         }
