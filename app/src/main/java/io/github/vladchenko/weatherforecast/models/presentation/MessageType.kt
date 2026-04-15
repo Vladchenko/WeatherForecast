@@ -7,7 +7,6 @@ package io.github.vladchenko.weatherforecast.models.presentation
  * Used to differentiate between informational, error, and warning states,
  * allowing for appropriate visual styling (e.g., color coding).
  *
- * @see ToolbarSubtitleMessage
  * @see io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
  * @see io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
  */

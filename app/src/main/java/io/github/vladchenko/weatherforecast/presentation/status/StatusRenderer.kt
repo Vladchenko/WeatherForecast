@@ -1,23 +1,21 @@
 package io.github.vladchenko.weatherforecast.presentation.status
 
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.models.presentation.Message
-import io.github.vladchenko.weatherforecast.models.presentation.MessageType
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.models.presentation.MessageType
 import javax.inject.Inject
 
 /**
  * A utility class responsible for rendering application status messages in the UI.
  *
- * Translates various types of [Message] (e.g., success, error, warning) into visible statuses
+ * Translates various status types (e.g., success, error, warning) into visible updates
  * via a [StatusDisplay] implementation, such as updating a subtitle in the app bar.
  *
- * Supports both text-based and resource-based messages, with proper string formatting.
- * Provides convenience methods for common status types like loading, city selection, and errors.
+ * Supports formatted string resources and direct text display. Provides convenience methods
+ * for common status types like loading, city selection, and errors.
  *
  * This class is typically used in ViewModels to communicate transient UI states.
  *
- * @property currentTarget The target component that will display the status (e.g., AppBarViewModel)
  * @property resourceManager Helper for resolving Android string resources
  */
 class StatusRenderer @Inject constructor(
@@ -118,6 +116,13 @@ class StatusRenderer @Inject constructor(
         }
     }
 
+    /**
+     * Shows a success status after weather data has been loaded for a city.
+     *
+     * Formats the message using [R.string.forecast_loaded_success] with the city name.
+     *
+     * @param city Name of the city for which data was successfully loaded
+     */
     fun showSuccessStatusFor(city: String) {
         currentTarget?.showStatus(
             StatusDisplay.Status(
