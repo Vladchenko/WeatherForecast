@@ -6,11 +6,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.location.geolocation.DeviceLocationProvider
-import io.github.vladchenko.weatherforecast.core.location.geolocation.Geolocator
-import io.github.vladchenko.weatherforecast.core.location.geolocation.GeolocatorImpl
 import io.github.vladchenko.weatherforecast.core.location.geolocation.api.NominatimApi
+import io.github.vladchenko.weatherforecast.core.location.geolocation.geolocator.Geolocator
+import io.github.vladchenko.weatherforecast.core.location.geolocation.geolocator.GeolocatorImpl
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import javax.inject.Singleton
 

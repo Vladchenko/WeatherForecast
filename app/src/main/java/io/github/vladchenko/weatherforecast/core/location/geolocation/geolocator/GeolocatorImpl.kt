@@ -1,9 +1,9 @@
-package io.github.vladchenko.weatherforecast.core.location.geolocation
+package io.github.vladchenko.weatherforecast.core.location.geolocation.geolocator
 
 import android.location.Location
 import io.github.vladchenko.weatherforecast.core.location.geolocation.api.NominatimApi
-import io.github.vladchenko.weatherforecast.data.api.customexceptions.GeoLocationException
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.data.api.customexceptions.GeoLocationException
 import kotlinx.coroutines.withContext
 
 /**

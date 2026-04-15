@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.data.repository.datasource
 
-import io.github.vladchenko.weatherforecast.models.data.DataResult
+import io.github.vladchenko.weatherforecast.core.data.models.DataResult
 import io.github.vladchenko.weatherforecast.models.data.network.CitiesSearchResultDto
 import kotlinx.serialization.InternalSerializationApi
 

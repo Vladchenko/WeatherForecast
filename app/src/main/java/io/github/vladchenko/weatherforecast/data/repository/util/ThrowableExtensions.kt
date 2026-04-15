@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.data.repository.util
 
-import io.github.vladchenko.weatherforecast.models.data.DataError
+import io.github.vladchenko.weatherforecast.core.data.models.DataError
 import kotlinx.serialization.SerializationException
 import java.io.IOException
 import java.net.SocketTimeoutException

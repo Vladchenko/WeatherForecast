@@ -1,13 +1,13 @@
 package io.github.vladchenko.weatherforecast.data.repository
 
+import io.github.vladchenko.weatherforecast.core.data.models.DataResult
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.mapper.CitiesSearchDtoMapper
 import io.github.vladchenko.weatherforecast.data.mapper.CitiesSearchEntityMapper
 import io.github.vladchenko.weatherforecast.data.repository.datasource.CitiesNamesLocalDataSource
 import io.github.vladchenko.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
-import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.domain.citiesnames.CitiesNamesRepository
-import io.github.vladchenko.weatherforecast.models.data.DataResult
 import io.github.vladchenko.weatherforecast.models.domain.CitiesNames
 import io.github.vladchenko.weatherforecast.models.domain.ForecastError
 import io.github.vladchenko.weatherforecast.models.domain.LoadResult

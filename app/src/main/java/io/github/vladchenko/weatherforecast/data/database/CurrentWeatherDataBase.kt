@@ -13,7 +13,7 @@ import kotlinx.serialization.InternalSerializationApi
 /**
  * Main Room database for the weather forecast application.
  *
- * This database holds data across three core entities:
+ * This database holds data across these core entities:
  * - [CurrentWeatherEntity]: stores current weather for cities
  * - [CitySearchEntity]: keeps track of previously searched cities
  * - [HourlyWeatherEntity]: contains hourly forecast data

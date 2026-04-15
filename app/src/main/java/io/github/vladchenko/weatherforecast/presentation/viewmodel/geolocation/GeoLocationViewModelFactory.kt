@@ -2,15 +2,15 @@ package io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
-import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.core.location.permission.PermissionChecker
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.core.location.geolocation.DeviceLocationProvider
-import io.github.vladchenko.weatherforecast.core.location.geolocation.Geolocator
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
+import io.github.vladchenko.weatherforecast.core.location.geolocation.geolocator.Geolocator
+import io.github.vladchenko.weatherforecast.core.location.permission.PermissionChecker
+import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
+import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
+import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 
 /**
  * GeoLocationViewModel factory

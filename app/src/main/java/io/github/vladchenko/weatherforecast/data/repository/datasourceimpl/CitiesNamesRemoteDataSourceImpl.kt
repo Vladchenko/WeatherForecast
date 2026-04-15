@@ -1,11 +1,11 @@
 package io.github.vladchenko.weatherforecast.data.repository.datasourceimpl
 
+import io.github.vladchenko.weatherforecast.core.data.models.DataResult
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.CityApiService
 import io.github.vladchenko.weatherforecast.data.repository.datasource.CitiesNamesRemoteDataSource
 import io.github.vladchenko.weatherforecast.data.repository.util.toDataError
-import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
-import io.github.vladchenko.weatherforecast.models.data.DataResult
 import io.github.vladchenko.weatherforecast.models.data.network.CitiesSearchResultDto
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject

@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.models.data.DataErrorToForecastErrorMapper
+import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import javax.inject.Singleton
 
 /**

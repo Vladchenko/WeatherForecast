@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.models.data
+package io.github.vladchenko.weatherforecast.core.data.models
 
 /**
  * Sealed interface representing the result of a data operation in the data layer.

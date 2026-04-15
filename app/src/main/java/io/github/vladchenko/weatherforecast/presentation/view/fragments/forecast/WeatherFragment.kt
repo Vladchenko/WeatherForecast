@@ -13,10 +13,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.location.geolocation.PermissionResolver
-import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
+import io.github.vladchenko.weatherforecast.core.location.permission.PermissionResolver
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
+import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogFactory
+import io.github.vladchenko.weatherforecast.presentation.dialog.dialogcontroller.WeatherDialogControllerFactory
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.themeColor
 import io.github.vladchenko.weatherforecast.presentation.view.fragments.forecast.current.CurrentWeatherLayout
@@ -24,9 +27,6 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogFactory
-import io.github.vladchenko.weatherforecast.presentation.dialog.dialogcontroller.WeatherDialogControllerFactory
 import javax.inject.Inject
 
 /**

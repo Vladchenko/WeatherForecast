@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.core.location.geolocation.api
 
-import io.github.vladchenko.weatherforecast.models.data.network.NominatimLocationDto
-import io.github.vladchenko.weatherforecast.models.data.network.NominatimReverseDto
+import io.github.vladchenko.weatherforecast.core.location.geolocation.dto.NominatimLocationDto
+import io.github.vladchenko.weatherforecast.core.location.geolocation.dto.NominatimReverseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 

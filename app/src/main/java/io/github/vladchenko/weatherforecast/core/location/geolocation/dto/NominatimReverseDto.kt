@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.models.data.network
+package io.github.vladchenko.weatherforecast.core.location.geolocation.dto
 
 import com.google.gson.annotations.SerializedName
 
