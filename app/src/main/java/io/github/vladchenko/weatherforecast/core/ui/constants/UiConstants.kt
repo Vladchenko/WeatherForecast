@@ -1,11 +1,11 @@
-package io.github.vladchenko.weatherforecast.presentation
+package io.github.vladchenko.weatherforecast.core.ui.constants
 
 import androidx.compose.ui.unit.sp
 
 /**
  * Constant values for presentation layer
  */
-object PresentationConstants {
+object UiConstants {
     /**
      * Appbar subtitle's font size for short subtitle length
      */

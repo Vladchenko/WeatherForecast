@@ -8,8 +8,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.navOptions
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
-import io.github.vladchenko.weatherforecast.presentation.PresentationUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.presentation.view.fragments.cityselection.CitiesNamesFragmentDirections
 import io.github.vladchenko.weatherforecast.presentation.view.fragments.forecast.WeatherFragmentDirections
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent

@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation
+package io.github.vladchenko.weatherforecast.core.ui.utils
 
 import android.content.Context
 import android.util.TypedValue
@@ -6,13 +6,13 @@ import androidx.annotation.AttrRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
-import io.github.vladchenko.weatherforecast.presentation.PresentationConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
+import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
+import io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants
 
 /**
  * Presentation layer utility methods.
  */
-object PresentationUtils {
+object UiUtils {
 
     /**
      * Compose a full name for a city, consisting of [cityName] and if present [stateName], [countryName].
@@ -32,14 +32,14 @@ object PresentationUtils {
      * Returns the appropriate toolbar subtitle font size for this [SubtitleSize].
      *
      * Maps:
-     * - [Small] -> [APPBAR_SUBTITLE_SMALL_FONT_SIZE]
-     * - [Normal] & [Large] -> [APPBAR_SUBTITLE_DEFAULT_FONT_SIZE]
+     * - [Small] -> [io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE]
+     * - [Normal] & [Large] -> [io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE]
      */
     fun SubtitleSize.toToolbarSubtitleFontSize(): TextUnit {
         return when (this) {
-            SubtitleSize.Small -> APPBAR_SUBTITLE_SMALL_FONT_SIZE
-            SubtitleSize.Normal -> APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
-            SubtitleSize.Large -> APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
+            SubtitleSize.Small -> UiConstants.APPBAR_SUBTITLE_SMALL_FONT_SIZE
+            SubtitleSize.Normal -> UiConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
+            SubtitleSize.Large -> UiConstants.APPBAR_SUBTITLE_DEFAULT_FONT_SIZE
         }
     }
 
@@ -78,6 +78,4 @@ object PresentationUtils {
             Color(this.data)
         }
     }
-
-    const val SHARED_PREFERENCES_KEY = "Shared preferences key"
 }

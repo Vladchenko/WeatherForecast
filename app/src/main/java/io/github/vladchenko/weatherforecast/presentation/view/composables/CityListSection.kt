@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
 import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
 import io.github.vladchenko.weatherforecast.models.domain.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState

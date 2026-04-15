@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.presentation.PresentationUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.presentation.themeColor
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
+import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent

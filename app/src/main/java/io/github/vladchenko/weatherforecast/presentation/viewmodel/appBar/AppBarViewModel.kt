@@ -4,13 +4,13 @@ import androidx.annotation.AttrRes
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.MessageType
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusDisplay
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
-import io.github.vladchenko.weatherforecast.models.presentation.MessageType
 import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateConverter
-import io.github.vladchenko.weatherforecast.presentation.status.StatusDisplay
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

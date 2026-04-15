@@ -1,9 +1,9 @@
 package io.github.vladchenko.weatherforecast.presentation.converter
 
+import io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants.UI_DATE_FORMAT
 import io.github.vladchenko.weatherforecast.models.domain.CurrentWeather
 import io.github.vladchenko.weatherforecast.models.presentation.Coordinate
 import io.github.vladchenko.weatherforecast.models.presentation.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.presentation.PresentationConstants.UI_DATE_FORMAT
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -27,7 +27,7 @@ class WeatherDomainToUiConverterImpl: WeatherDomainToUiConverter {
             val zone = ZoneOffset.ofTotalSeconds(model.timezone.toInt())
             val localDateTime = instant.atOffset(zone)
             formatter.format(localDateTime)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             defaultErrorMessage
         }
         val iconId = toWeatherIconRes(model.iconCode)

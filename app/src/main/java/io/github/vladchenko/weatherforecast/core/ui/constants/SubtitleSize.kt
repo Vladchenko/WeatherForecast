@@ -1,9 +1,10 @@
-package io.github.vladchenko.weatherforecast.presentation
+package io.github.vladchenko.weatherforecast.core.ui.constants
 
-import io.github.vladchenko.weatherforecast.presentation.SubtitleSize.Companion.fromSubtitle
-import io.github.vladchenko.weatherforecast.presentation.SubtitleSize.Large
-import io.github.vladchenko.weatherforecast.presentation.SubtitleSize.Normal
-import io.github.vladchenko.weatherforecast.presentation.SubtitleSize.Small
+import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Companion.fromSubtitle
+import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Large
+import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Normal
+import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Small
+
 
 /**
  * Represents the logical size of a subtitle text, independent of platform-specific units.

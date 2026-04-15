@@ -2,14 +2,15 @@ package io.github.vladchenko.weatherforecast.presentation.status
 
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.models.presentation.MessageType
+import io.github.vladchenko.weatherforecast.core.ui.status.MessageType
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusDisplay
 import javax.inject.Inject
 
 /**
  * A utility class responsible for rendering application status messages in the UI.
  *
  * Translates various status types (e.g., success, error, warning) into visible updates
- * via a [StatusDisplay] implementation, such as updating a subtitle in the app bar.
+ * via a [io.github.vladchenko.weatherforecast.core.ui.status.StatusDisplay] implementation, such as updating a subtitle in the app bar.
  *
  * Supports formatted string resources and direct text display. Provides convenience methods
  * for common status types like loading, city selection, and errors.

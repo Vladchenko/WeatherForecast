@@ -1,6 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.status
-
-import io.github.vladchenko.weatherforecast.models.presentation.MessageType
+package io.github.vladchenko.weatherforecast.core.ui.status
 
 /**
  * Interface for components that can display status messages to the user.

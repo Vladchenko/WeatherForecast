@@ -2,7 +2,7 @@ package io.github.vladchenko.weatherforecast.models.presentation
 
 import androidx.annotation.AttrRes
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.presentation.SubtitleSize
+import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
 
 /**
  * Model for the app bar state.

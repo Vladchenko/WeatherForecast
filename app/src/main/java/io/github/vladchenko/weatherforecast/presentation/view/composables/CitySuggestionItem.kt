@@ -16,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
-import io.github.vladchenko.weatherforecast.presentation.PresentationUtils.formatFullCityName
 
 @Composable
 fun CitySuggestionItem(

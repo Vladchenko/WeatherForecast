@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation
+package io.github.vladchenko.weatherforecast.core.ui.utils
 
 import android.util.TypedValue
 import androidx.annotation.AttrRes

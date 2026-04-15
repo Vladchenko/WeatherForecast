@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.models.presentation
+package io.github.vladchenko.weatherforecast.core.ui.status
 
 /**
  * Enumerates the types of messages that can be displayed in the application's UI,

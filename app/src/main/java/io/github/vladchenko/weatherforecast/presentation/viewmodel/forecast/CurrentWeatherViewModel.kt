@@ -7,9 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toWeatherIconRes
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.TemperatureType
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.domain.forecast.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.models.domain.CityLocationModel
@@ -17,11 +19,9 @@ import io.github.vladchenko.weatherforecast.models.domain.CurrentWeather
 import io.github.vladchenko.weatherforecast.models.domain.ForecastError
 import io.github.vladchenko.weatherforecast.models.domain.LoadResult
 import io.github.vladchenko.weatherforecast.models.presentation.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.presentation.PresentationUtils.toWeatherIconRes
 import io.github.vladchenko.weatherforecast.presentation.converter.WeatherDomainToUiConverter
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow

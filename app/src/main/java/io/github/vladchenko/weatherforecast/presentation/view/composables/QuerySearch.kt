@@ -27,7 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.presentation.themeColor
+import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 
 @Composable
 fun QuerySearch(

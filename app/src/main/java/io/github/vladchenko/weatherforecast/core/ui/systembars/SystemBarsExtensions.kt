@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.util
+package io.github.vladchenko.weatherforecast.core.ui.systembars
 
 import android.app.Activity
 import android.os.Build
@@ -17,15 +17,16 @@ import androidx.core.view.WindowCompat
  *
  * Supports different Android versions according to Google's current guidelines.
  */
+
 /**
  * Hides the system navigation bar (gesture or button-based) for a fullscreen experience.
  *
- * On Android 11 (API 30+) and higher, this method uses [WindowInsetsController]
+ * On Android 11 (API 30+) and higher, this method uses [android.view.WindowInsetsController]
  * to hide the navigation bar with sticky immersive behavior. The user can temporarily
  * reveal the bar by swiping from the bottom edge of the screen.
  *
- * On older Android versions, it falls back to the deprecated [View.SYSTEM_UI_FLAG_HIDE_NAVIGATION],
- * [View.SYSTEM_UI_FLAG_FULLSCREEN], and [View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY] flags.
+ * On older Android versions, it falls back to the deprecated [android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION],
+ * [android.view.View.SYSTEM_UI_FLAG_FULLSCREEN], and [android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY] flags.
  *
  * This method does not permanently disable navigation — users can always swipe
  * from the bottom to access back, home, and recent apps.
@@ -50,9 +51,9 @@ fun Activity.hideBottomNavigationBar() {
 /**
  * Sets transparent status and navigation bars, allowing content to render behind them.
  *
- * Applies the [WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS] flag,
+ * Applies the [android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS] flag,
  * sets both status bar and navigation bar colors to fully transparent (`0x00000000`),
- * and disables automatic window insets via [WindowCompat.setDecorFitsSystemWindows].
+ * and disables automatic window insets via [androidx.core.view.WindowCompat.setDecorFitsSystemWindows].
  *
  * Supported from API 21 (LOLLIPOP).
  */
