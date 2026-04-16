@@ -7,7 +7,6 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
@@ -58,8 +57,7 @@ import javax.inject.Inject
  *
  * ## Error Handling
  * Uses [CoroutineExceptionHandler] to catch and process exceptions during city lookup:
- * - [NoSuchDatabaseEntryException]: Shows localized error about missing default city
- * - Other exceptions: Display raw message via [StatusRenderer]
+ *    Display raw message via [StatusRenderer]
  *
  * ## Thread Safety
  * All coroutines are launched in [viewModelScope], ensuring automatic cancellation on ViewModel destruction.
@@ -141,15 +139,7 @@ class CitySearchViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, throwable.message.orEmpty(), throwable)
-        when (throwable) {
-            is NoSuchDatabaseEntryException -> {
-                statusRenderer.showError(resourceManager.getString(R.string.forecast_default_city_absent))
-            }
-
-            else -> {
-                statusRenderer.showError(throwable.message.toString())
-            }
-        }
+        statusRenderer.showError(throwable.message.toString())
     }
 
     init {
@@ -292,6 +282,7 @@ class CitySearchViewModel @Inject constructor(
                 is LoadResult.Error -> {
                     loggingService.logError(TAG, response.error.toString())
                 }
+
                 is LoadResult.Local -> {
                     loggingService.logInfoEvent(TAG, response.data.cities.toString())
                     _recentCitiesNamesFlow.emit(
