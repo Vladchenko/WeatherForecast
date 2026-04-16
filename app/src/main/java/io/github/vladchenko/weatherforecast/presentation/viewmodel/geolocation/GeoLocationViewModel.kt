@@ -37,7 +37,7 @@ import javax.inject.Inject
  * @property permissionChecker to check if needed permission is provided
  * @property chosenCityInteractor saves/loads chosen city
  * @property coroutineDispatchers dispatchers for coroutines
- */
+ */ 
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,

@@ -1,7 +1,6 @@
-package io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.remote
+package io.github.vladchenko.weatherforecast.feature.citysearch.data.api
 
 import io.github.vladchenko.weatherforecast.BuildConfig
-import io.github.vladchenko.weatherforecast.data.api.ApiConstants.GEO_DIRECT
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchResultDto
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
@@ -11,7 +10,7 @@ import retrofit2.http.Query
 /**
  * Interface for city-related API operations.
  */
-interface CityApiService {
+interface CitySearchApiService {
     /**
      * Search for cities by name.
      *
@@ -21,7 +20,7 @@ interface CityApiService {
      * @return Response containing list of matching cities
      */
     @InternalSerializationApi
-    @GET(GEO_DIRECT)
+    @GET(ApiConstants.GEO_DIRECT)
     suspend fun searchCities(
         @Query("q") cityName: String,
         @Query("limit") limit: Int = 10,

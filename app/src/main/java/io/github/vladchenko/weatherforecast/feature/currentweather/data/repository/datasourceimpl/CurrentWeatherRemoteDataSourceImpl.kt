@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.data.reposit
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.core.utils.toDataError
-import io.github.vladchenko.weatherforecast.data.api.WeatherApiService
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherRemoteDataSource
@@ -24,7 +24,7 @@ import retrofit2.Response
  */
 @InternalSerializationApi
 class CurrentWeatherRemoteDataSourceImpl(
-    private val apiService: WeatherApiService,
+    private val apiService: CurrentWeatherApiService,
     private val loggingService: LoggingService,
     private val responseProcessor: ResponseProcessor
 ) : CurrentWeatherRemoteDataSource {

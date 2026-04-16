@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection
+package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event
 
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 
@@ -53,7 +53,7 @@ sealed interface CitySelectionEvent {
      *
      * After processing, the query should typically be cleared and the keyboard dismissed.
      *
-     * @property city The selected [CityDomainModel] containing name, latitude, longitude, country, and state
+     * @property city The selected [io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel] containing name, latitude, longitude, country, and state
      */
     data class SelectCity(val city: CityDomainModel) : CitySelectionEvent
 }

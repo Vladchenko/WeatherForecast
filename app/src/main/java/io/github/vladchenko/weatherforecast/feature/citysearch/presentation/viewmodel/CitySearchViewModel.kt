@@ -16,7 +16,7 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.Re
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -47,7 +47,7 @@ import javax.inject.Inject
  * - [_navigationEventFlow]: Emits navigation commands to the UI layer
  *
  * ## Event Handling
- * Uses a sealed class [io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent] to handle all user interactions in a unidirectional data flow manner.
+ * Uses a sealed class [CitySelectionEvent] to handle all user interactions in a unidirectional data flow manner.
  * This ensures predictable state changes and simplifies testing.
  *
  * ## Search Behavior
@@ -99,7 +99,7 @@ class CitySearchViewModel @Inject constructor(
     /**
      * State flow representing the current user input in the city search field.
      *
-     * Updated via [onEvent] with [io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent.UpdateQuery].
+     * Updated via [onEvent] with [CitySelectionEvent.UpdateQuery].
      * Used to trigger debounced city name lookups.
      */
     val cityMaskStateFlow: StateFlow<String>
@@ -125,7 +125,7 @@ class CitySearchViewModel @Inject constructor(
      * - [WeatherUiState.Loading] during data retrieval (not actively set here, but conceptually possible)
      * - [WeatherUiState.Error] if an exception occurs during loading
      *
-     * The data is loaded from the local database via [RecentCitiesInteractor] when [io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent.LoadRecentCities]
+     * The data is loaded from the local database via [RecentCitiesInteractor] when [CitySelectionEvent.LoadRecentCities]
      * is triggered (e.g., on screen start or refresh).
      *
      * Consumers should observe this flow to display the list of recently searched cities in the UI,
@@ -185,10 +185,10 @@ class CitySearchViewModel @Inject constructor(
      * Processes incoming UI events and updates state accordingly.
      *
      * Dispatches behavior based on event type:
-     * - [io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent.NavigateUp]: Sends navigation up command
-     * - [io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent.SelectCity]: Navigates to weather screen for selected city and adds it to recents
-     * - [io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent.ClearQuery]: Resets search query and clears results
-     * - [io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent.UpdateQuery]: Updates search mask and triggers debounced search
+     * - [CitySelectionEvent.NavigateUp]: Sends navigation up command
+     * - [CitySelectionEvent.SelectCity]: Navigates to weather screen for selected city and adds it to recents
+     * - [CitySelectionEvent.ClearQuery]: Resets search query and clears results
+     * - [CitySelectionEvent.UpdateQuery]: Updates search mask and triggers debounced search
      *
      * @param event The user action to process
      */

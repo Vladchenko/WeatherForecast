@@ -141,13 +141,13 @@ fun CurrentWeatherLayout(
     }
 
     Scaffold(
-        containerColor = Color.Companion.Transparent,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {
                     Column {
                         Text(
-                            modifier = Modifier.Companion.padding(top = 4.dp),
+                            modifier = Modifier.padding(top = 4.dp),
                             text = appBarUiState.value.title,
                             color = mainContentTextColor,
                         )
@@ -156,7 +156,7 @@ fun CurrentWeatherLayout(
                             color = statusColor,
                             fontSize = fontSize,
                             maxLines = 1,
-                            overflow = TextOverflow.Companion.Ellipsis
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 },
@@ -175,7 +175,7 @@ fun CurrentWeatherLayout(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Companion.Transparent
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -199,11 +199,11 @@ fun CurrentWeatherLayout(
                             )
                         }
                     },
-                    modifier = Modifier.Companion.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     indicator = {
                         PullToRefreshDefaults.Indicator(
                             modifier = Modifier.Companion
-                                .align(Alignment.Companion.TopCenter),
+                                .align(Alignment.TopCenter),
                             isRefreshing = refreshingState,
                             state = refreshState
                         )
@@ -241,7 +241,7 @@ fun CurrentWeatherLayout(
                                 )
                             },
                             label = "WeatherContent",
-                            modifier = Modifier.Companion.weight(1f) // Добавить вес
+                            modifier = Modifier.weight(1f) // Добавить вес
                         ) { state ->
                             when (state) {
                                 is WeatherUiState.Loading -> {
@@ -250,17 +250,17 @@ fun CurrentWeatherLayout(
 
                                 is WeatherUiState.Error -> {
                                     Text(
-                                        modifier = Modifier.Companion.padding(top = 80.dp),
+                                        modifier = Modifier.padding(top = 80.dp),
                                         text = state.message,
                                         fontSize = 32.sp,
                                         color = statusColor,
-                                        textAlign = TextAlign.Companion.Center
+                                        textAlign = TextAlign.Center
                                     )
                                 }
 
                                 is WeatherUiState.Success -> {
                                     Column(
-                                        modifier = Modifier.Companion.fillMaxWidth(), // Только ширина, высоту контролирует AnimatedContent
+                                        modifier = Modifier.fillMaxWidth(), // Только ширина, высоту контролирует AnimatedContent
                                         verticalArrangement = Arrangement.SpaceBetween,
                                     ) {
                                         MainContent(

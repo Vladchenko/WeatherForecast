@@ -5,7 +5,7 @@ import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.core.utils.toDataError
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchResultDto
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.remote.CityApiService
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.api.CitySearchApiService
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.remote.CitySearchRemoteDataSource
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
@@ -18,7 +18,7 @@ import javax.inject.Inject
  * @property responseProcessor Utility class to process HTTP responses
  */
 class CitySearchRemoteDataSourceImpl @Inject constructor(
-    private val apiService: CityApiService,
+    private val apiService: CitySearchApiService,
     private val loggingService: LoggingService,
     private val responseProcessor: ResponseProcessor
 ) : CitySearchRemoteDataSource {

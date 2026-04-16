@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.location.dialog.LocationDialogFactory
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchersImpl
@@ -73,6 +74,11 @@ class CoreModule {
     fun provideAlertDialogHelper(
         @ApplicationContext context: Context
     ): AlertDialogHelper = AlertDialogHelper(context)
+
+    @Singleton
+    @Provides
+    fun provideDataErrorToForecastErrorMapper(): DataErrorToForecastErrorMapper =
+        DataErrorToForecastErrorMapper()
 
     @Provides
     @Singleton

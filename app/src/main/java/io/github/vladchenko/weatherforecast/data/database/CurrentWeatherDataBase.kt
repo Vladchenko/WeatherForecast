@@ -39,7 +39,7 @@ abstract class WeatherForecastDatabase : RoomDatabase() {
      *
      * @return An implementation of [CitySearchDAO]
      */
-    abstract fun getCitiesNamesInstance(): CitySearchDAO
+    abstract fun getCitySearchInstance(): CitySearchDAO
 
     /**
      * Provides access to current weather forecast data operations.

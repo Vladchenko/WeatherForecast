@@ -29,7 +29,7 @@ import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubti
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import kotlinx.coroutines.FlowPreview
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)

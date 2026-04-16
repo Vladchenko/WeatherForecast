@@ -61,34 +61,6 @@ object PersistenceModule {
 
     @Provides
     @Singleton
-    @InternalSerializationApi
-    fun provideWeatherForecastDAO(database: WeatherForecastDatabase): CurrentWeatherDAO {
-        return database.getWeatherForecastInstance()
-    }
-
-    @Provides
-    @Singleton
-    @InternalSerializationApi
-    fun provideHourlyForecastDAO(database: WeatherForecastDatabase): HourlyWeatherDAO {
-        return database.getHourlyForecastInstance()
-    }
-
-    @Provides
-    @Singleton
-    @InternalSerializationApi
-    fun provideCitiesNamesDAO(database: WeatherForecastDatabase): CitySearchDAO {
-        return database.getCitiesNamesInstance()
-    }
-
-    @Provides
-    @Singleton
-    @InternalSerializationApi
-    fun provideRecentCitiesNamesDAO(database: WeatherForecastDatabase): RecentCitiesDAO {
-        return database.getRecentCitiesDao()
-    }
-
-    @Provides
-    @Singleton
     fun provideSharedPreferences(
         @ApplicationContext context: Context
     ): SharedPreferences {
