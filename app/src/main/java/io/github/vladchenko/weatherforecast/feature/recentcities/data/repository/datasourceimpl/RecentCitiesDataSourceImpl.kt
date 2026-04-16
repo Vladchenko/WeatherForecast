@@ -1,13 +1,13 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasourceimpl
 
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
 import kotlinx.serialization.InternalSerializationApi
 
 /**
- * Concrete implementation of [io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource] using Room database via [io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO].
+ * Concrete implementation of [io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource] using Room database via [RecentCitiesDAO].
  *
  * This class provides persistent storage and retrieval of recently searched cities.
  * Each city is stored with its name and timestamp of last use, enabling recency-based sorting.
@@ -17,7 +17,7 @@ import kotlinx.serialization.InternalSerializationApi
  * The underlying Room DAO ensures thread-safe database access.
  *
  * Dependencies:
- * - [io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO]: For executing database operations
+ * - [RecentCitiesDAO]: For executing database operations
  * - [io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService]: For debugging and monitoring data access events
  */
 class RecentCitiesDataSourceImpl(

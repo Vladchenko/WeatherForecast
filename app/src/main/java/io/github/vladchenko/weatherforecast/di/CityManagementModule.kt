@@ -11,9 +11,6 @@ import io.github.vladchenko.weatherforecast.core.preferences.PreferencesConstant
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.api.CityApiService
-import io.github.vladchenko.weatherforecast.data.database.CitySearchDAO
-import io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.ChosenCityRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasource.ChosenCityDataSource
@@ -23,20 +20,23 @@ import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCity
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchDtoMapper
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchEntityMapper
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.CitySearchRepositoryImpl
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.CitySearchLocalDataSource
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.CitySearchRemoteDataSource
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchLocalDataSource
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.remote.CityApiService
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.remote.CitySearchRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasourceimpl.CitySearchLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasourceimpl.CitySearchRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchRepository
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModelFactory
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper.RecentCitiesMapper
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.RecentCitiesRepositoryImpl
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasourceimpl.RecentCitiesDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesRepository
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySearchViewModelFactory
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 

@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource
 
-import io.github.vladchenko.weatherforecast.core.data.models.DataResult
+import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
 import kotlinx.serialization.InternalSerializationApi
 

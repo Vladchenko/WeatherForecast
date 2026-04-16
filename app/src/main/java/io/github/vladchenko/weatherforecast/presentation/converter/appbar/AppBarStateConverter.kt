@@ -3,11 +3,11 @@ package io.github.vladchenko.weatherforecast.presentation.converter.appbar
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeatherDomainModel
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
-import io.github.vladchenko.weatherforecast.models.presentation.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.DataSource
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
+import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import javax.inject.Inject
 
 /**
@@ -32,7 +32,7 @@ class AppBarStateConverter @Inject constructor(
             is WeatherUiState.Success -> {
                 val city = when (val data = forecastState.data) {
                     is CurrentWeatherUi -> data.city
-                    is HourlyWeatherDomainModel -> data.city
+                    is HourlyWeather -> data.city
                     else -> ""
                 }
                 resourceManager.getString(

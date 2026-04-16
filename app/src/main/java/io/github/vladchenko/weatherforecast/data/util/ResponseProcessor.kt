@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.data.util
 
-import io.github.vladchenko.weatherforecast.core.data.models.DataError
-import io.github.vladchenko.weatherforecast.core.data.models.DataResult
+import io.github.vladchenko.weatherforecast.core.data.model.DataError
+import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import retrofit2.Response
 import javax.inject.Inject
 

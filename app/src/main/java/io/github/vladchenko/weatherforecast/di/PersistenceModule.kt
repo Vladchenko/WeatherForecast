@@ -7,10 +7,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.data.database.CitySearchDAO
-import io.github.vladchenko.weatherforecast.data.database.CurrentWeatherDAO
-import io.github.vladchenko.weatherforecast.data.database.HourlyWeatherDAO
-import io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton

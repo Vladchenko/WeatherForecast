@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasourceimpl
 
-import io.github.vladchenko.weatherforecast.core.data.models.DataResult
+import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.core.utils.toDataError
 import io.github.vladchenko.weatherforecast.data.api.WeatherApiService

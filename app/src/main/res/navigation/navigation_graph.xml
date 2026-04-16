@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/citiesNamesFragment"
-        android:name="io.github.vladchenko.weatherforecast.presentation.view.fragments.cityselection.CitySearchFragment"
+        android:name="io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchFragment"
         android:label="CitiesNamesFragment">
         <action
             android:id="@+id/action_citiesNamesFragment_to_currentTimeForecastFragment"
@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/currentTimeForecastFragment"
-        android:name="io.github.vladchenko.weatherforecast.presentation.view.fragments.forecast.WeatherFragment"
+        android:name="io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.WeatherFragment"
         android:label="CurrentTimeForecastFragment">
         <action
             android:id="@+id/action_currentTimeForecastFragment_to_citiesNamesFragment"

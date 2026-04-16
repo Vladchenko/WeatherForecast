@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.data.repository
 
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
-import io.github.vladchenko.weatherforecast.core.data.models.DataResult
+import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType

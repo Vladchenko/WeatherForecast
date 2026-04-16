@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.data.mapper
 
-import io.github.vladchenko.weatherforecast.core.data.models.DataError
+import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 
 /**

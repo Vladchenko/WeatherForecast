@@ -5,8 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.BuildConfig
-import io.github.vladchenko.weatherforecast.data.api.CityApiService
 import io.github.vladchenko.weatherforecast.data.api.WeatherApiService
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.remote.CityApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

@@ -10,7 +10,7 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusDisplay
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
 import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateConverter
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

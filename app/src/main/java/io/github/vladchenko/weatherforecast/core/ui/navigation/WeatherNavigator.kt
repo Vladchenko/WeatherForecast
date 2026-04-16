@@ -10,8 +10,8 @@ import androidx.navigation.navOptions
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
-import io.github.vladchenko.weatherforecast.presentation.view.fragments.cityselection.CitySearchFragmentDirections
-import io.github.vladchenko.weatherforecast.presentation.view.fragments.forecast.WeatherFragmentDirections
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchFragmentDirections
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.WeatherFragmentDirections
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch

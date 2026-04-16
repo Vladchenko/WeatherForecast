@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeatherDomainModel
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 
 /**
  * Weather hourly forecast repository. Provides domain-layer data.
@@ -17,7 +17,7 @@ interface HourlyWeatherRepository {
         city: String,
         temperatureType: TemperatureType,
         remoteError: ForecastError
-    ): LoadResult<HourlyWeatherDomainModel>
+    ): LoadResult<HourlyWeather>
 
     /**
      * Retrieve hourly weather forecast for location defined by [latitude] and [longitude]
@@ -27,5 +27,5 @@ interface HourlyWeatherRepository {
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ): LoadResult<HourlyWeatherDomainModel>
+    ): LoadResult<HourlyWeather>
 }

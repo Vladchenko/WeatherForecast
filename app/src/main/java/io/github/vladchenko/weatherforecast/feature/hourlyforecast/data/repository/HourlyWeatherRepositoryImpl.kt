@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository
 
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
-import io.github.vladchenko.weatherforecast.core.data.models.DataResult
+import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
@@ -13,7 +13,7 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.Ho
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeatherDomainModel
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.InternalSerializationApi
 
@@ -40,16 +40,16 @@ import kotlinx.serialization.InternalSerializationApi
  * 4. If no cache exists or reading fails — return [LoadResult.Error].
  *
  * ## Error Handling
- * Errors from data layer ([io.github.vladchenko.weatherforecast.core.data.models.DataError]) are mapped to domain-level [ForecastError] using [io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper].
+ * Errors from data layer ([io.github.vladchenko.weatherforecast.core.data.model.DataError]) are mapped to domain-level [ForecastError] using [io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper].
  * This ensures consistent error handling across all repositories without leaking data-layer types.
  *
  * @property loggingService to log events
  * @property dispatchers Dispatcher provider for coroutine context management.
  * @property dtoMapper Mapper for converting [HourlyWeatherDto] to database entity.
- * @property entityMapper Mapper for converting entity to [HourlyWeatherDomainModel].
+ * @property entityMapper Mapper for converting entity to [HourlyWeather].
  * @property localDataSource Data source for persistent storage of hourly weather.
  * @property remoteDataSource Data source for fetching data from the remote API.
- * @property errorMapper Converts [io.github.vladchenko.weatherforecast.core.data.models.DataError] to [ForecastError] for domain consistency.
+ * @property errorMapper Converts [io.github.vladchenko.weatherforecast.core.data.model.DataError] to [ForecastError] for domain consistency.
  */
 @InternalSerializationApi
 class HourlyWeatherRepositoryImpl(
@@ -67,7 +67,7 @@ class HourlyWeatherRepositoryImpl(
         temperatureType: TemperatureType,
         latitude: Double,
         longitude: Double
-    ): LoadResult<HourlyWeatherDomainModel> =
+    ): LoadResult<HourlyWeather> =
         withContext(dispatchers.io) {
             when (val result =
                 remoteDataSource.loadHourlyWeatherForLocation(city, latitude, longitude)) {
@@ -86,7 +86,7 @@ class HourlyWeatherRepositoryImpl(
         city: String,
         temperatureType: TemperatureType,
         remoteError: ForecastError
-    ): LoadResult<HourlyWeatherDomainModel> =
+    ): LoadResult<HourlyWeather> =
         withContext(dispatchers.io) {
             try {
                 val entity = localDataSource.loadHourlyWeather(city)
@@ -112,7 +112,7 @@ class HourlyWeatherRepositoryImpl(
         dto: HourlyWeatherDto,
         city: String,
         temperatureType: TemperatureType
-    ): LoadResult<HourlyWeatherDomainModel> {
+    ): LoadResult<HourlyWeather> {
         return try {
             val entity = dtoMapper.toEntity(dto)
             localDataSource.saveHourlyWeather(entity)

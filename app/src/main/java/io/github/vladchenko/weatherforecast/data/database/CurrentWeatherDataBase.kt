@@ -5,9 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
 import kotlinx.serialization.InternalSerializationApi
 
 /**
@@ -40,21 +44,21 @@ abstract class WeatherForecastDatabase : RoomDatabase() {
     /**
      * Provides access to current weather forecast data operations.
      *
-     * @return An implementation of [CurrentWeatherDAO]
+     * @return An implementation of [io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO]
      */
     abstract fun getWeatherForecastInstance(): CurrentWeatherDAO
 
     /**
      * Provides access to hourly weather forecast data operations.
      *
-     * @return An implementation of [HourlyWeatherDAO]
+     * @return An implementation of [io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO]
      */
     abstract fun getHourlyForecastInstance(): HourlyWeatherDAO
 
     /**
      * Provides a list of cities, recently provided forecast for
      *
-     * @return An implementation of [RecentCitiesDAO]
+     * @return An implementation of [io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO]
      */
     abstract fun getRecentCitiesDao(): RecentCitiesDAO
 

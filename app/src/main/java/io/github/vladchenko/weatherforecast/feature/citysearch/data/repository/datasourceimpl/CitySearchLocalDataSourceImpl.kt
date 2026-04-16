@@ -1,9 +1,9 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasourceimpl
 
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.database.CitySearchDAO
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.CitySearchLocalDataSource
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchLocalDataSource
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 

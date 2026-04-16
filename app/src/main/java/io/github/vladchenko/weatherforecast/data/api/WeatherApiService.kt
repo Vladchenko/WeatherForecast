@@ -65,24 +65,3 @@ interface WeatherApiService {
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<HourlyWeatherDto>
 }
-
-/**
- * Interface for city-related API operations.
- */
-interface CityApiService {
-    /**
-     * Search for cities by name.
-     *
-     * @param cityName Name or partial name of the city to search for
-     * @param limit Maximum number of results to return
-     * @param apiKey API key for authentication
-     * @return Response containing list of matching cities
-     */
-    @InternalSerializationApi
-    @GET(GEO_DIRECT)
-    suspend fun searchCities(
-        @Query("q") cityName: String,
-        @Query("limit") limit: Int = 10,
-        @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<List<CitySearchResultDto>>
-}

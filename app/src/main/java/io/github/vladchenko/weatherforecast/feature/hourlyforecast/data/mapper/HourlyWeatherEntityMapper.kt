@@ -4,14 +4,14 @@ import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.utils.TemperatureConversionUtils
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyItemDomainModel
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeatherDomainModel
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import kotlinx.collections.immutable.persistentListOf
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
- * Mapper class responsible for converting [HourlyWeatherEntity] (database model) into [HourlyWeatherDomainModel] (domain model).
+ * Mapper class responsible for converting [HourlyWeatherEntity] (database model) into [HourlyWeather] (domain model).
  *
  * Transforms stored hourly forecast data into a UI-ready format. Applies temperature unit conversion
  * based on user preference ([TemperatureType]) and formats timestamps for display.
@@ -31,19 +31,19 @@ class HourlyWeatherEntityMapper {
     }
 
     /**
-     * Converts a [HourlyWeatherEntity] into a domain-layer [HourlyWeatherDomainModel].
+     * Converts a [HourlyWeatherEntity] into a domain-layer [HourlyWeather].
      *
      * Maps each [HourlyWeatherEntity.hourlyForecasts] item into a [HourlyItemDomainModel], applying:
      * - Temperature conversion using [convertTemperature]
      * - Timestamp formatting via [timeFormat]
      * - Immutable list creation using [kotlinx.collections.immutable.persistentListOf]
      *
-     * The resulting [HourlyWeatherDomainModel] contains the city name and a list of formatted hourly items,
+     * The resulting [HourlyWeather] contains the city name and a list of formatted hourly items,
      * ready for presentation in the UI.
      *
      * @param entity The database entity containing hourly weather data.
      * @param temperatureType The preferred temperature unit (Celsius, Fahrenheit, Kelvin).
-     * @return A fully populated [HourlyWeatherDomainModel] with formatted temperatures and times.
+     * @return A fully populated [HourlyWeather] with formatted temperatures and times.
      *
      * @see convertTemperature
      * @see getUnitSymbol
@@ -51,7 +51,7 @@ class HourlyWeatherEntityMapper {
     fun toDomain(
         entity: HourlyWeatherEntity,
         temperatureType: TemperatureType
-    ): HourlyWeatherDomainModel {
+    ): HourlyWeather {
         val forecasts = entity.hourlyForecasts.map { item ->
             HourlyItemDomainModel(
                 timestamp = item.timestamp,
@@ -65,7 +65,7 @@ class HourlyWeatherEntityMapper {
             )
         }.let { persistentListOf(*it.toTypedArray()) }
 
-        return HourlyWeatherDomainModel(
+        return HourlyWeather(
             city = entity.cityName,
             hourlyForecasts = forecasts
         )

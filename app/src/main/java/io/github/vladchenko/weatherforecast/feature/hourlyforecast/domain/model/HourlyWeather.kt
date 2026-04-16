@@ -8,7 +8,7 @@ import kotlinx.collections.immutable.ImmutableList
  * @property city Name of the city for which the forecast is provided
  * @property hourlyForecasts List of hourly forecast entries
  */
-data class HourlyWeatherDomainModel(
+data class HourlyWeather(
     val city: String,
     val hourlyForecasts: ImmutableList<HourlyItemDomainModel>
 )

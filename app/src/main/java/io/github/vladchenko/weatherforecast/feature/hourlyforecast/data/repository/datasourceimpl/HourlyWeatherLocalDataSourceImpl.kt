@@ -2,7 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.reposit
 
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
-import io.github.vladchenko.weatherforecast.data.database.HourlyWeatherDAO
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherLocalDataSource
 import kotlinx.serialization.InternalSerializationApi

@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.feature.citysearch.domain
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
-import io.github.vladchenko.weatherforecast.utils.ValidationUtils
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.util.ValidationUtils
 
 /**
  * Cities names interactor.
