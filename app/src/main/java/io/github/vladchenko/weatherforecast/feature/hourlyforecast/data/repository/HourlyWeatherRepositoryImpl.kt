@@ -7,6 +7,8 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
+import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.CurrentWeatherRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
@@ -99,6 +101,9 @@ class HourlyWeatherRepositoryImpl(
                     "Loaded hourly weather from cache for city: $city"
                 )
                 LoadResult.Local(domainModel, remoteError)
+            } catch (_: NoSuchDatabaseEntryException) {
+                loggingService.logDebugEvent(TAG, "No cached hourly forecast data found for city: $city")
+                LoadResult.Error(city, ForecastError.NoDataAvailable("No cached data for $city"))
             } catch (e: Exception) {
                 loggingService.logError(TAG, "Failed to load cached hourly weather for $city", e)
                 LoadResult.Error(
