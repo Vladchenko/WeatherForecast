@@ -19,13 +19,13 @@ import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogFactory
 import io.github.vladchenko.weatherforecast.presentation.dialog.dialogcontroller.WeatherDialogControllerFactory
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
 import javax.inject.Inject
 
 /**

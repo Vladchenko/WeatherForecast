@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation
+package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation
+package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel
 
 import android.location.Location
 import androidx.lifecycle.viewModelScope
@@ -15,6 +15,7 @@ import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDisp
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.GeoLocationException
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -37,7 +38,7 @@ import javax.inject.Inject
  * @property permissionChecker to check if needed permission is provided
  * @property chosenCityInteractor saves/loads chosen city
  * @property coroutineDispatchers dispatchers for coroutines
- */ 
+ */
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
@@ -65,9 +66,9 @@ class GeoLocationViewModel @Inject constructor(
 
     /**
      * Emits the current state of location permission request:
-     * - [GeoLocationPermission.Requested] – permission is being requested
-     * - [GeoLocationPermission.Denied] – user denied permission once
-     * - [GeoLocationPermission.PermanentlyDenied] – user denied multiple times (treated as permanent denial)
+     * - [io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission.Requested] – permission is being requested
+     * - [io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission.Denied] – user denied permission once
+     * - [io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission.PermanentlyDenied] – user denied multiple times (treated as permanent denial)
      *
      * Used by the UI to show appropriate rationale or redirect to settings.
      */
@@ -77,7 +78,7 @@ class GeoLocationViewModel @Inject constructor(
     /**
      * Emitted when a city name has been successfully resolved from the device's location.
      *
-     * Carries a [CityLocationModel] containing the city name and associated coordinates.
+     * Carries a [io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel] containing the city name and associated coordinates.
      *
      * Triggers UI updates such as updating the selected city or refreshing weather data.
      */
@@ -87,7 +88,7 @@ class GeoLocationViewModel @Inject constructor(
     /**
      * Emitted when the device's raw GPS location has been successfully obtained.
      *
-     * Contains a [Location] object with latitude and longitude.
+     * Contains a [android.location.Location] object with latitude and longitude.
      *
      * Used to trigger downstream operations like reverse geocoding to find the city name.
      */

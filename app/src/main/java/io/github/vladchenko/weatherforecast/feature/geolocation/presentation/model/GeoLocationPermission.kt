@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation
+package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model
 
 /**
  * Sealed class representing the possible states of location permission in the app.

@@ -7,10 +7,10 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.location.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
