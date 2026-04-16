@@ -2,10 +2,10 @@ package io.github.vladchenko.weatherforecast.presentation.coordinator
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import io.github.vladchenko.weatherforecast.core.location.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
+import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer

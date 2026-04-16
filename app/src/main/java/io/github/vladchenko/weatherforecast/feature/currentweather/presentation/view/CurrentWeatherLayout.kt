@@ -61,10 +61,10 @@ import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAt
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
+import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocation
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.createLocation
 import kotlinx.coroutines.flow.drop
 
 /**

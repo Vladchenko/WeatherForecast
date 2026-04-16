@@ -5,7 +5,7 @@ import android.location.Location
 import androidx.core.content.edit
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasource.ChosenCityDataSource
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.createLocation
+import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocation
 
 /**
  * [io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasource.ChosenCityDataSource] implementation

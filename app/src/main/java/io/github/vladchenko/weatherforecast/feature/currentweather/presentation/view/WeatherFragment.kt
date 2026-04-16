@@ -13,12 +13,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.location.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
+import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator

@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.core.location.permission
+package io.github.vladchenko.weatherforecast.feature.geolocation.domain
 
 /**
  * Interface for checking geo location permissions.

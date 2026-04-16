@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.core.location.geolocation
+package io.github.vladchenko.weatherforecast.feature.geolocation.domain
 
 import android.location.Location
 

@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.core.location.geolocation
+package io.github.vladchenko.weatherforecast.feature.geolocation.data
 
 import android.content.Context
 import android.location.Location
@@ -10,17 +10,18 @@ import com.google.android.gms.tasks.OnTokenCanceledListener
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationListener
 import javax.inject.Inject
 
 /**
  * Defines geo location of a device using Google Play Services.
  *
  * This class retrieves the device's current location with high accuracy and notifies
- * the caller via [GeoLocationListener]. It handles:
+ * the caller via [io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationListener]. It handles:
  * - Location retrieval using [FusedLocationProviderClient]
  * - Success, failure, and cancellation callbacks
  * - Security exceptions related to permissions
- * - Structured logging via [LoggingService]
+ * - Structured logging via [io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService]
  *
  * @property loggingService Service for consistent and testable logging
  * @property context Application context used to access system services

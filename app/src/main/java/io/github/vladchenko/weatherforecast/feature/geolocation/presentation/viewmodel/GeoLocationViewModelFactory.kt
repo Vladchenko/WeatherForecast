@@ -2,14 +2,14 @@ package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.vi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.vladchenko.weatherforecast.core.location.geolocation.DeviceLocationProvider
-import io.github.vladchenko.weatherforecast.core.location.geolocation.geolocator.Geolocator
-import io.github.vladchenko.weatherforecast.core.location.permission.PermissionChecker
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
+import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.PermissionChecker
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 
 /**

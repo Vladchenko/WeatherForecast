@@ -10,11 +10,6 @@ import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserverImpl
-import io.github.vladchenko.weatherforecast.core.network.api.ApiConstants.DEVELOPER_EMAIL
-import io.github.vladchenko.weatherforecast.core.network.api.ApiConstants.NOMINATIM
-import io.github.vladchenko.weatherforecast.core.network.api.ApiConstants.NOMINATIM_BASE_URL
-import io.github.vladchenko.weatherforecast.core.network.api.ApiConstants.USER_AGENT
-import io.github.vladchenko.weatherforecast.core.location.geolocation.api.NominatimApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -23,7 +18,20 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * TODO
+ * Dagger module for providing network-related dependencies across the application.
+ *
+ * This module defines how core networking components are created and injected,
+ * including:
+ * - [ConnectivityObserver] for monitoring network connectivity state
+ * - Named [Retrofit] instance for weather API calls ([WEATHER_RETROFIT_NAME])
+ *
+ * The Retrofit instance is configured with:
+ * - Base URL from BuildConfig (e.g., "https://api.openweathermap.org/")
+ * - [HttpLoggingInterceptor] enabled only in debug builds
+ * - [GsonConverterFactory] for JSON parsing
+ *
+ * All bindings are scoped to [SingletonComponent] to ensure single instances
+ * throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -37,50 +45,19 @@ class NetworkModule {
 
     @Singleton
     @Provides
-    @Named(NOMINATIM)
-    fun provideNominatimRetrofit(): Retrofit {
+    @Named(WEATHER_RETROFIT_NAME)
+    fun provideWeatherRetrofit(): Retrofit {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+            else HttpLoggingInterceptor.Level.NONE
+        }
         val client = OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                val request = chain.request().newBuilder()
-                    .addHeader("User-Agent", USER_AGENT)
-                    .addHeader("From", DEVELOPER_EMAIL)
-                    .build()
-                chain.proceed(request)
-            }
+            .addInterceptor(loggingInterceptor)
             .build()
         return Retrofit.Builder()
-            .baseUrl(NOMINATIM_BASE_URL)
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
-
-    @Singleton
-    @Provides
-    fun provideNominatimApi(@Named(NOMINATIM) retrofit: Retrofit): NominatimApi {
-        return retrofit.create(NominatimApi::class.java)
-    }
-
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object NetworkModule {
-
-        @Singleton
-        @Provides
-        @Named(WEATHER_RETROFIT_NAME)
-        fun provideWeatherRetrofit(): Retrofit {
-            val loggingInterceptor = HttpLoggingInterceptor().apply {
-                level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
-                else HttpLoggingInterceptor.Level.NONE
-            }
-            val client = OkHttpClient.Builder()
-                .addInterceptor(loggingInterceptor)
-                .build()
-            return Retrofit.Builder()
-                .baseUrl(BuildConfig.API_BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-        }
     }
 }

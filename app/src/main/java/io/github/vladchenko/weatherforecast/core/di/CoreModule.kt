@@ -7,17 +7,17 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
-import io.github.vladchenko.weatherforecast.core.location.dialog.LocationDialogFactory
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchersImpl
-import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.core.location.permission.PermissionChecker
-import io.github.vladchenko.weatherforecast.core.location.permission.PermissionCheckerImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManagerImpl
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchersImpl
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
+import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionCheckerImpl
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.PermissionChecker
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog.LocationDialogFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
@@ -65,6 +65,7 @@ class CoreModule {
     fun provideResourceManager(@ApplicationContext context: Context): ResourceManager {
         return ResourceManagerImpl(context)
     }
+
     @Provides
     @Singleton
     fun provideAlertDialogFactory(): AlertDialogFactory = AlertDialogFactory()

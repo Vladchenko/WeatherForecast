@@ -4,10 +4,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.core.location.dialog.LocationDialogFactory
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog.LocationDialogFactory
 import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl

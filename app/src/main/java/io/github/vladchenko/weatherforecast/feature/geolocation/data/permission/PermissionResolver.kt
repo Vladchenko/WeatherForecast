@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.core.location.permission
+package io.github.vladchenko.weatherforecast.feature.geolocation.data.permission
 
 import android.Manifest
 import androidx.activity.result.ActivityResultLauncher

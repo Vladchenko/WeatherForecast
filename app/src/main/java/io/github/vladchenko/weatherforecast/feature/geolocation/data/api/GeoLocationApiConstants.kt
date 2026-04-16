@@ -1,8 +1,6 @@
-package io.github.vladchenko.weatherforecast.core.network.api
+package io.github.vladchenko.weatherforecast.feature.geolocation.data.api
 
-import io.github.vladchenko.weatherforecast.core.location.geolocation.api.NominatimApi
-
-object ApiConstants {
+object GeoLocationApiConstants {
     /**
      * Named binding for the Retrofit instance used with Nominatim (OpenStreetMap) API.
      *
