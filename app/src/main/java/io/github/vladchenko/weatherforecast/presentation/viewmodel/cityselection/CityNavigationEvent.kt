@@ -1,14 +1,14 @@
 package io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection
 
-import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 
 /**
- * Sealed interface representing navigation commands emitted by [CitiesNamesViewModel].
+ * Sealed interface representing navigation commands emitted by [CitySearchViewModel].
  *
  * These are one-shot events (not state) that instruct the UI layer to perform navigation actions.
  * Should be consumed immediately and not stored.
  *
- * @see CitiesNamesViewModel.navigationEventFlow
+ * @see CitySearchViewModel.navigationEventFlow
  */
 sealed interface CityNavigationEvent {
     /**

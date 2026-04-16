@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/citiesNamesFragment"
-        android:name="io.github.vladchenko.weatherforecast.presentation.view.fragments.cityselection.CitiesNamesFragment"
+        android:name="io.github.vladchenko.weatherforecast.presentation.view.fragments.cityselection.CitySearchFragment"
         android:label="CitiesNamesFragment">
         <action
             android:id="@+id/action_citiesNamesFragment_to_currentTimeForecastFragment"

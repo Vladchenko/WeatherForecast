@@ -6,11 +6,11 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.domain.city.ChosenCityRepository
-import io.github.vladchenko.weatherforecast.domain.forecast.CurrentWeatherRepository
-import io.github.vladchenko.weatherforecast.models.domain.LoadResult
+import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
+import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date

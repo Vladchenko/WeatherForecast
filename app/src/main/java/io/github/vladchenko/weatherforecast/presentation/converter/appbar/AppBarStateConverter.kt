@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.presentation.converter.appbar
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
-import io.github.vladchenko.weatherforecast.models.domain.HourlyWeatherDomainModel
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeatherDomainModel
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
 import io.github.vladchenko.weatherforecast.models.presentation.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.DataSource

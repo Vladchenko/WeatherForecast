@@ -9,7 +9,7 @@ import io.github.vladchenko.weatherforecast.core.network.connectivity.Connectivi
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
+import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 
 /**

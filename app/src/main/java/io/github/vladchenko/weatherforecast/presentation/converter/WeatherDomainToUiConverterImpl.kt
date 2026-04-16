@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.presentation.converter
 
 import io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants.UI_DATE_FORMAT
-import io.github.vladchenko.weatherforecast.models.domain.CurrentWeather
+import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.models.presentation.Coordinate
 import io.github.vladchenko.weatherforecast.models.presentation.CurrentWeatherUi
 import java.time.Instant

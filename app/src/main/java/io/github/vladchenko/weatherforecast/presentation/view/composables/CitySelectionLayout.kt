@@ -28,7 +28,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitiesNamesViewModel
+import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CitySelectionEvent
 import kotlinx.coroutines.FlowPreview
 
@@ -40,7 +40,7 @@ fun CitySelectionLayout(
     queryLabel: String,
     onEvent: (CitySelectionEvent) -> Unit,
     appBarViewModel: AppBarViewModel,
-    viewModel: CitiesNamesViewModel
+    viewModel: CitySearchViewModel
 ) {
     val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()

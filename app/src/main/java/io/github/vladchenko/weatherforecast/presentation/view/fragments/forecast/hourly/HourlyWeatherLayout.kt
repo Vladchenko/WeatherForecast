@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
-import io.github.vladchenko.weatherforecast.models.domain.HourlyItemDomainModel
-import io.github.vladchenko.weatherforecast.models.domain.HourlyWeatherDomainModel
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyItemDomainModel
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeatherDomainModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 import java.text.SimpleDateFormat
 import java.util.Date

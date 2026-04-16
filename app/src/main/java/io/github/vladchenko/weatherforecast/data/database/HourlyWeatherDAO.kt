@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import io.github.vladchenko.weatherforecast.models.data.database.HourlyWeatherEntity
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
 import kotlinx.serialization.InternalSerializationApi
 
 /**

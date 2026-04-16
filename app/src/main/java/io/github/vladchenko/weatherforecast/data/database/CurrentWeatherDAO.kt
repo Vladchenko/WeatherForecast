@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import io.github.vladchenko.weatherforecast.models.data.database.CurrentWeatherEntity
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.InternalSerializationApi
 

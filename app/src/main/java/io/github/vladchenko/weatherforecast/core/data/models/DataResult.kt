@@ -4,7 +4,7 @@ package io.github.vladchenko.weatherforecast.core.data.models
  * Sealed interface representing the result of a data operation in the data layer.
  *
  * Encapsulates success and error cases for network or database operations without exposing domain-layer types.
- * Used internally by data sources, mappers, and repository implementations before conversion to [io.github.vladchenko.weatherforecast.models.domain.LoadResult].
+ * Used internally by data sources, mappers, and repository implementations before conversion to [io.github.vladchenko.weatherforecast.core.domain.model.LoadResult].
  *
  * ## Purpose
  * - Ensures clean separation between layers by preventing data-layer components from depending on domain models.
@@ -38,7 +38,7 @@ sealed interface DataResult<out T> {
  * Sealed interface representing recoverable errors that can occur during data operations in the data layer.
  *
  * These are low-level, technical errors related to networking, parsing, or local storage.
- * They must be mapped to domain-level [io.github.vladchenko.weatherforecast.models.domain.ForecastError] before being exposed to the UI.
+ * They must be mapped to domain-level [io.github.vladchenko.weatherforecast.core.domain.model.ForecastError] before being exposed to the UI.
  *
  * ## Error Types
  * - [NetworkError]: Connectivity issues (e.g., timeout, no internet).

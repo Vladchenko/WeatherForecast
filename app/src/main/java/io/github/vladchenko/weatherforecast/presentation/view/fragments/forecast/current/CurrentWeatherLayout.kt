@@ -54,10 +54,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.models.domain.CityLocationModel
 import io.github.vladchenko.weatherforecast.models.presentation.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.presentation.view.fragments.forecast.hourly.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel

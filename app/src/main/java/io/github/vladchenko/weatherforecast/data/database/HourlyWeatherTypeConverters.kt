@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.data.database
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import io.github.vladchenko.weatherforecast.models.data.database.HourlyWeatherItemEntity
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherItemEntity
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 

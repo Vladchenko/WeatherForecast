@@ -4,9 +4,9 @@ import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.data.api.ApiConstants.CURRENT_WEATHER
 import io.github.vladchenko.weatherforecast.data.api.ApiConstants.GEO_DIRECT
 import io.github.vladchenko.weatherforecast.data.api.ApiConstants.HOURLY_WEATHER
-import io.github.vladchenko.weatherforecast.models.data.network.CitiesSearchResultDto
-import io.github.vladchenko.weatherforecast.models.data.network.CurrentWeatherDto
-import io.github.vladchenko.weatherforecast.models.data.network.HourlyWeatherDto
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchResultDto
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import retrofit2.http.GET
@@ -84,5 +84,5 @@ interface CityApiService {
         @Query("q") cityName: String,
         @Query("limit") limit: Int = 10,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
-    ): Response<List<CitiesSearchResultDto>>
+    ): Response<List<CitySearchResultDto>>
 }

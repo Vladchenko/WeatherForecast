@@ -4,9 +4,9 @@ import android.location.Location
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.location.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.models.domain.CityLocationModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.geolocation.GeoLocationPermission

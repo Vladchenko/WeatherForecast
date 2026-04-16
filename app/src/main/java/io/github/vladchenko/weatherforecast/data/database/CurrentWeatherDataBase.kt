@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import io.github.vladchenko.weatherforecast.models.data.database.CitySearchEntity
-import io.github.vladchenko.weatherforecast.models.data.database.CurrentWeatherEntity
-import io.github.vladchenko.weatherforecast.models.data.database.HourlyWeatherEntity
-import io.github.vladchenko.weatherforecast.models.data.database.RecentCitiesEntity
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
 import kotlinx.serialization.InternalSerializationApi
 
 /**
@@ -33,9 +33,9 @@ abstract class WeatherForecastDatabase : RoomDatabase() {
     /**
      * Provides access to city search data operations.
      *
-     * @return An implementation of [CitiesNamesDAO]
+     * @return An implementation of [CitySearchDAO]
      */
-    abstract fun getCitiesNamesInstance(): CitiesNamesDAO
+    abstract fun getCitiesNamesInstance(): CitySearchDAO
 
     /**
      * Provides access to current weather forecast data operations.

@@ -4,6 +4,7 @@ import android.location.Location
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.location.geolocation.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.core.location.geolocation.GeoLocationListener
 import io.github.vladchenko.weatherforecast.core.location.geolocation.geolocator.Geolocator
@@ -13,8 +14,7 @@ import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.GeoLocationException
-import io.github.vladchenko.weatherforecast.domain.city.ChosenCityInteractor
-import io.github.vladchenko.weatherforecast.models.domain.CityLocationModel
+import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler

@@ -1,11 +1,11 @@
 package io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection
 
-import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 
 /**
  * Sealed interface representing user actions in the city selection screen.
  *
- * This class is used to communicate UI events from the Compose UI layer to the [CitiesNamesViewModel]
+ * This class is used to communicate UI events from the Compose UI layer to the [CitySearchViewModel]
  * in a type-safe and centralized manner. Each event corresponds to a specific user interaction,
  * such as typing a query, selecting a city, or navigating back.
  *
@@ -14,7 +14,7 @@ import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
  * - Clear separation between UI actions and business logic
  * - Easier testing and maintenance
  *
- * Events are consumed by calling [CitiesNamesViewModel.onEvent] method.
+ * Events are consumed by calling [CitySearchViewModel.onEvent] method.
  */
 sealed interface CitySelectionEvent {
     /**

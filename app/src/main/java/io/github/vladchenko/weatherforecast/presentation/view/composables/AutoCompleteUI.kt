@@ -22,8 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.vladchenko.weatherforecast.models.domain.CityDomainModel
-import io.github.vladchenko.weatherforecast.models.domain.RecentCities
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.DataSource
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.forecast.WeatherUiState
 

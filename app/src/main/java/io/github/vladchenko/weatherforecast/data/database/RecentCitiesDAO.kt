@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import io.github.vladchenko.weatherforecast.models.data.database.RecentCitiesEntity
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
 
 /**
  * Data Access Object (DAO) for managing recently searched cities in the local database.
@@ -26,7 +26,7 @@ import io.github.vladchenko.weatherforecast.models.data.database.RecentCitiesEnt
  */
 @Dao
 interface RecentCitiesDAO {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insertOrUpdate(city: RecentCitiesEntity): Long
 
     @Query("SELECT * FROM recentCitiesNames ORDER BY lastUsed DESC")

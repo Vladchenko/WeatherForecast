@@ -7,7 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.data.database.CitiesNamesDAO
+import io.github.vladchenko.weatherforecast.data.database.CitySearchDAO
 import io.github.vladchenko.weatherforecast.data.database.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.data.database.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.data.database.RecentCitiesDAO
@@ -27,7 +27,7 @@ import javax.inject.Singleton
  * - Data Access Objects (DAOs) for each entity:
  *   - [CurrentWeatherDAO] – for current weather data
  *   - [HourlyWeatherDAO] – for hourly forecast entries
- * - [CitiesNamesDAO] – for cached city name suggestions
+ * - [CitySearchDAO] – for cached city name suggestions
  * - A [SharedPreferences] instance for lightweight persistent storage,
  *   used to save user preferences such as the selected city
  *
@@ -37,7 +37,7 @@ import javax.inject.Singleton
  * @see WeatherForecastDatabase
  * @see CurrentWeatherDAO
  * @see HourlyWeatherDAO
- * @see CitiesNamesDAO
+ * @see CitySearchDAO
  * @see SharedPreferences
  */
 @Module
@@ -76,7 +76,7 @@ object PersistenceModule {
     @Provides
     @Singleton
     @InternalSerializationApi
-    fun provideCitiesNamesDAO(database: WeatherForecastDatabase): CitiesNamesDAO {
+    fun provideCitiesNamesDAO(database: WeatherForecastDatabase): CitySearchDAO {
         return database.getCitiesNamesInstance()
     }
 
