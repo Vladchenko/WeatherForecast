@@ -7,11 +7,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
-import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
+import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 
+/**
+ * Composable wrapper for city search input with integrated auto-complete UI.
+ *
+ * Connects user actions in [AutoCompleteUI] to [CitySelectionEvent] events.
+ * Automatically triggers loading of recent cities on first focus.
+ *
+ * @param cityName Current city name/query
+ * @param queryLabel Label for the search field
+ * @param modifier Modifier for the container
+ * @param mainContentColor Primary UI color
+ * @param cityMaskPredictions Current prediction results
+ * @param recentCities Current recent cities data
+ * @param onEvent Event dispatcher for user actions
+ * @param onRecentsDelete Called when user requests deletion of all recent cities
+ */
 @Composable
 fun AddressEdit(
     cityName: String,
@@ -20,7 +35,8 @@ fun AddressEdit(
     mainContentColor: Color,
     cityMaskPredictions: WeatherUiState<List<CityDomainModel>>?,
     recentCities: WeatherUiState<RecentCities>?,
-    onEvent: (CitySelectionEvent) -> Unit
+    onEvent: (CitySelectionEvent) -> Unit,
+    onRecentsDelete: () -> Unit
 ) {
     Column(modifier = modifier.padding(top = 8.dp)) {
         AutoCompleteUI(
@@ -52,7 +68,8 @@ fun AddressEdit(
                     )
                 )
                 onEvent(CitySelectionEvent.ClearQuery)
-            }
+            },
+            onRecentsDelete = onRecentsDelete
         )
     }
 }

@@ -27,11 +27,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
+import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.FlowPreview
 
+/**
+ * Full screen layout for city selection with top app bar and background.
+ *
+ * Composes the complete UI for choosing a city, including:
+ * - Toolbar with title and subtitle from [AppBarViewModel]
+ * - Navigation back button
+ * - Background image
+ * - Search input and suggestions via [AddressEdit]
+ *
+ * Observes multiple view model flows using [collectAsStateWithLifecycle].
+ *
+ * @param mainContentColor Color for text and icons
+ * @param citySelectionTitle Title shown above the search field
+ * @param queryLabel Hint text inside the search field
+ * @param onEvent Dispatcher for user interaction events
+ * @param appBarViewModel Provides toolbar state
+ * @param viewModel Provides city search state and logic
+ */
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun CitySelectionLayout(
@@ -98,7 +116,8 @@ fun CitySelectionLayout(
                         mainContentColor = mainContentColor,
                         cityMaskPredictions = cityPredictionsUiState,
                         recentCities = recentCitiesNamesUiState,
-                        onEvent = onEvent
+                        onEvent = onEvent,
+                        onRecentsDelete = viewModel::deleteRecents
                     )
                 }
             }

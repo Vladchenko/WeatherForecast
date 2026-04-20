@@ -36,5 +36,5 @@ interface RecentCitiesDAO {
     suspend fun deleteCity(cityName: String)
 
     @Query("DELETE FROM recentCitiesNames")
-    suspend fun deleteAllCity()
+    suspend fun deleteAllCities()
 }

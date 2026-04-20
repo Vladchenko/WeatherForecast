@@ -42,4 +42,16 @@ class RecentCitiesInteractor(private val recentCitiesRepository: RecentCitiesRep
     suspend fun addCityToRecents(city: CityDomainModel) {
         recentCitiesRepository.addCityToRecents(city)
     }
+
+    /**
+     * Deletes all recent cities from persistent storage.
+     *
+     * Removes the entire history of recently searched cities. This operation is irreversible.
+     * Should be called when the user requests to clear their search history.
+     *
+     * Delegates deletion to the underlying repository.
+     */
+    suspend fun deleteRecentCities() {
+        recentCitiesRepository.deleteRecentCities()
+    }
 }

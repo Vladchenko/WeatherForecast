@@ -6,18 +6,18 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
-import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
-import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -208,6 +208,28 @@ class CitySearchViewModel @Inject constructor(
                     fetchRecentCities()
                 }
             }
+        }
+    }
+
+    /**
+     * Handles deletion of all recent cities.
+     *
+     * Launches a coroutine to:
+     * - Clear stored recent cities via [RecentCitiesInteractor.deleteRecentCities]
+     * - Re-fetch the updated list from the data source using [fetchRecentCities]
+     *
+     * This ensures that the UI state reflects the actual data in the database,
+     * maintaining consistency and handling potential errors during reload.
+     * Unlike direct state emission, this approach respects the single source of truth (database)
+     * and supports proper error propagation and loading states.
+     *
+     * @note Always re-fetches recent cities after deletion instead of manually emitting an empty state
+     *       to avoid inconsistencies if the deletion fails or is partial.
+     */
+    fun deleteRecents() {
+        viewModelScope.launch {
+            recentCitiesInteractor.deleteRecentCities()
+            fetchRecentCities()
         }
     }
 

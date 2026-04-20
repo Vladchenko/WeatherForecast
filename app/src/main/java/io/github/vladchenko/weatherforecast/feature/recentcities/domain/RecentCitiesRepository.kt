@@ -35,4 +35,12 @@ interface RecentCitiesRepository {
      * @return The row ID of the inserted or updated record; -1 if the operation failed
      */
     suspend fun addCityToRecents(city: CityDomainModel): Long
+
+    /**
+     * Deletes all recent cities from persistent storage.
+     *
+     * Removes the entire list of recently searched cities. This operation is irreversible
+     * and typically triggered by user request (e.g., via a "Clear All" button).
+     */
+    suspend fun deleteRecentCities()
 }

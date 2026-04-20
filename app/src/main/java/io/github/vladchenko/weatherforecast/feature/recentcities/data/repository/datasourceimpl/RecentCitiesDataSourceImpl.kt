@@ -1,8 +1,8 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasourceimpl
 
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
 import kotlinx.serialization.InternalSerializationApi
 
@@ -40,6 +40,10 @@ class RecentCitiesDataSourceImpl(
         val rowId = dao.insertOrUpdate(entity)
         loggingService.logDebugEvent(TAG, "City '$entity' added or updated with rowId: $rowId")
         return rowId
+    }
+
+    override suspend fun deleteRecentCities() {
+        dao.deleteAllCities()
     }
 
 

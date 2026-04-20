@@ -32,4 +32,15 @@ interface RecentCitiesDataSource {
      * @return The row ID of the inserted or updated record; -1 on failure
      */
     suspend fun addCityToRecents(entity: RecentCitiesEntity): Long
+
+    /**
+     * Deletes all stored recent cities from persistent storage.
+     *
+     * This function removes the entire list of recently searched cities,
+     * effectively resetting the recents history. Should be used when user
+     * requests to clear their search history.
+     *
+     * Implementations may use local storage such as Room database or SharedPreferences.
+     */
+    suspend fun deleteRecentCities()
 }

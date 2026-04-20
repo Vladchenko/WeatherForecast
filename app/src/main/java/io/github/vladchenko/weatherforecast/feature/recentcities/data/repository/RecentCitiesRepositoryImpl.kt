@@ -48,4 +48,10 @@ class RecentCitiesRepositoryImpl(
                 recentCitiesMapper.toEntity(city)
             )
         }
+
+    override suspend fun deleteRecentCities() {
+        withContext(coroutineDispatchers.io) {
+            recentCitiesDataSource.deleteRecentCities()
+        }
+    }
 }
