@@ -23,7 +23,20 @@ import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 /**
- * TODO
+ * Dagger module for providing core application-wide dependencies.
+ *
+ * This module defines bindings for fundamental components used across features,
+ * including:
+ * - [CoroutineDispatchers] and [CoroutineScope] for background operations
+ * - [PreferencesManager] for persistent key-value storage
+ * - [LoggingService] for consistent logging throughout the app
+ * - [PermissionChecker] for handling runtime location permissions
+ * - [ResourceManager] for accessing app resources (strings, colors, etc.)
+ * - Factories and helpers for common UI dialogs ([AlertDialogFactory], [LocationDialogFactory])
+ * - [DataErrorToForecastErrorMapper] for converting data-layer errors to domain errors
+ *
+ * All bindings are scoped to [SingletonComponent], ensuring single instances
+ * live for the entire application lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)

@@ -20,7 +20,17 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 import javax.inject.Singleton
 
 /**
- * TODO
+ * Dagger module for providing high-level feature components and view models.
+ *
+ * This module defines bindings for:
+ * - [ResponseProcessor] to handle API response validation and error mapping
+ * - [GeoLocationViewModelFactory] for creating location-aware view models
+ * - [AppBarStateMapper] to convert domain state into UI-specific app bar data
+ * - [AppBarViewModelFactory] for creating shared app bar view models
+ *
+ * All dependencies are scoped to [SingletonComponent], ensuring single instances
+ * across the application lifecycle. Depends on core services such as logging,
+ * resource management, dispatchers, and connectivity observation.
  */
 @Module
 @InstallIn(SingletonComponent::class)
