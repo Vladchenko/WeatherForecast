@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.MessageType
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusDisplay
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
-import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateConverter
+import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,13 +28,13 @@ import javax.inject.Inject
  *
  * @property statusRenderer Displays loading, success, warning, or error statuses
  * @property resourceManager Provides access to string resources
- * @property appBarStateConverter Converts [WeatherUiState] into [AppBarState] for UI rendering
+ * @property appBarStateMapper Converts [WeatherUiState] into [AppBarState] for UI rendering
  */
 @HiltViewModel
 class AppBarViewModel @Inject constructor(
     private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
-    private val appBarStateConverter: AppBarStateConverter
+    private val appBarStateMapper: AppBarStateMapper
 ) : ViewModel(), StatusDisplay {
 
     /**
@@ -67,13 +67,13 @@ class AppBarViewModel @Inject constructor(
     /**
      * Updates the entire AppBar state based on the current forecast UI state.
      *
-     * Uses [appBarStateConverter] to transform [WeatherUiState] into a corresponding
+     * Uses [appBarStateMapper] to transform [WeatherUiState] into a corresponding
      * [AppBarState], including dynamic title, subtitle, and styling.
      *
      * @param weatherUiState The current state of the forecast screen
      */
     fun updateAppBarState(weatherUiState: WeatherUiState<*>) {
-        val appBarState = appBarStateConverter.convert(forecastState = weatherUiState)
+        val appBarState = appBarStateMapper.toAppbarState(forecastState = weatherUiState)
         _appBarStateFlow.update { appBarState }
     }
 

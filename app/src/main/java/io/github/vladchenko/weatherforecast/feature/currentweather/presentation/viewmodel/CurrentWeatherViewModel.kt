@@ -12,18 +12,18 @@ import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toWeatherIconRes
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.CurrentWeather
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiConverter
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
-import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
-import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -51,7 +51,7 @@ import javax.inject.Inject
  * @property coroutineDispatchers configures dispatchers for coroutines
  * @property chosenCityInteractor handles persistence of the selected city
  * @property forecastRemoteInteractor loads current weather data
- * @property weatherDomainToUiConverter converts domain models to UI models
+ * @property weatherDomainToUiMapper converts domain models to UI models
  */
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
@@ -63,7 +63,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastRemoteInteractor: CurrentWeatherInteractor,
-    private val weatherDomainToUiConverter: WeatherDomainToUiConverter,
+    private val weatherDomainToUiMapper: WeatherDomainToUiMapper,
 ) : AbstractViewModel(connectivityObserver) {
 
     //region flows
@@ -329,7 +329,7 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     private fun toUiModel(forecastModel: CurrentWeather) =
-        weatherDomainToUiConverter.convert(
+        weatherDomainToUiMapper.toCurrentWeatherUi(
             model = forecastModel,
             defaultErrorMessage = resourceManager.getString(R.string.bad_date_format),
             toWeatherIconRes = { weatherIconId ->

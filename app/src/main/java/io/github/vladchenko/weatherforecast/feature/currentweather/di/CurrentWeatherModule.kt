@@ -25,8 +25,8 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.reposito
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasourceimpl.CurrentWeatherRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiConverter
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiConverterImpl
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModelFactory
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.serialization.InternalSerializationApi
@@ -83,8 +83,8 @@ class CurrentWeatherModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastUiConverter(): WeatherDomainToUiConverter {
-        return WeatherDomainToUiConverterImpl()
+    fun provideWeatherForecastUiConverter(): WeatherDomainToUiMapper {
+        return WeatherDomainToUiMapperImpl()
     }
 
     @Singleton
@@ -141,7 +141,7 @@ class CurrentWeatherModule {
         chosenCityInteractor: ChosenCityInteractor,
         coroutineDispatchers: CoroutineDispatchers,
         forecastRemoteInteractor: CurrentWeatherInteractor,
-        uiConverter: WeatherDomainToUiConverter
+        uiConverter: WeatherDomainToUiMapper
     ): CurrentWeatherViewModelFactory {
         return CurrentWeatherViewModelFactory(
             loggingService,

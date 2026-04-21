@@ -9,7 +9,7 @@ import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDisp
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherInteractor
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiConverter
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.serialization.InternalSerializationApi
 
@@ -34,7 +34,7 @@ class CurrentWeatherViewModelFactory(
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val weatherInteractor: CurrentWeatherInteractor,
-    private val uiConverter: WeatherDomainToUiConverter,
+    private val uiConverter: WeatherDomainToUiMapper,
 ) : ViewModelProvider.Factory {
 
     @InternalSerializationApi

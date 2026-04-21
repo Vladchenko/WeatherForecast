@@ -14,7 +14,7 @@ import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocat
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.PermissionChecker
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModelFactory
-import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateConverter
+import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModelFactory
 import javax.inject.Singleton
@@ -60,8 +60,8 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideAppBarStateConverter(resourceManager: ResourceManager): AppBarStateConverter {
-        return AppBarStateConverter(resourceManager)
+    fun provideAppBarStateConverter(resourceManager: ResourceManager): AppBarStateMapper {
+        return AppBarStateMapper(resourceManager)
     }
 
     @Singleton
@@ -69,12 +69,12 @@ class WeatherForecastModule {
     fun provideAppBarViewModelFactory(
         statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
-        appBarStateConverter: AppBarStateConverter
+        appBarStateMapper: AppBarStateMapper
     ): AppBarViewModelFactory {
         return AppBarViewModelFactory(
             statusRenderer,
             resourceManager,
-            appBarStateConverter
+            appBarStateMapper
         )
     }
 }

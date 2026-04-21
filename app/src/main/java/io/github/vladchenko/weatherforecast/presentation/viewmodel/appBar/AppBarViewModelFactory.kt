@@ -2,21 +2,21 @@ package io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateConverter
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
+import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 
 /**
  * AppBarViewModel factory
  *
  * @property statusRenderer displays loading, success, warning, or error statuses
  * @property resourceManager to get string resources
- * @property appBarStateConverter to convert forecast ui state to appbar ui state
+ * @property appBarStateMapper to convert forecast ui state to appbar ui state
  */
 class AppBarViewModelFactory(
     private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
-    private val appBarStateConverter: AppBarStateConverter
+    private val appBarStateMapper: AppBarStateMapper
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -24,7 +24,7 @@ class AppBarViewModelFactory(
         return AppBarViewModel(
             statusRenderer,
             resourceManager,
-            appBarStateConverter
+            appBarStateMapper
         ) as T
     }
 }

@@ -4,15 +4,15 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 
 /**
- * Weather forecast domain to ui model converter
+ * Weather forecast domain to ui model mapper
  */
-interface WeatherDomainToUiConverter {
+interface WeatherDomainToUiMapper {
 
     /**
      * Convert domain [model] to ui model, having [defaultErrorMessage] to define a default
      * message when date is incorrect and [toWeatherIconRes] to get weather icon id
      */
-    fun convert(model: CurrentWeather,
-                defaultErrorMessage: String,
-                toWeatherIconRes: (String) -> Int): CurrentWeatherUi
+    fun toCurrentWeatherUi(model: CurrentWeather,
+                           defaultErrorMessage: String,
+                           toWeatherIconRes: (String) -> Int): CurrentWeatherUi
 }

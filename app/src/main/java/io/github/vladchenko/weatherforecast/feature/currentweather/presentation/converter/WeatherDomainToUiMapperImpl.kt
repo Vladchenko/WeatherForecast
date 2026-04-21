@@ -10,17 +10,17 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
- * Implementation of [WeatherDomainToUiConverter]
+ * Implementation of [WeatherDomainToUiMapper]
  */
-class WeatherDomainToUiConverterImpl: WeatherDomainToUiConverter {
+class WeatherDomainToUiMapperImpl: WeatherDomainToUiMapper {
 
     private val formatter: DateTimeFormatter = DateTimeFormatter
         .ofPattern(UI_DATE_FORMAT)
         .withLocale(Locale.getDefault())
 
-    override fun convert(model: CurrentWeather,
-                         defaultErrorMessage: String,
-                         toWeatherIconRes: (String) -> Int
+    override fun toCurrentWeatherUi(model: CurrentWeather,
+                                    defaultErrorMessage: String,
+                                    toWeatherIconRes: (String) -> Int
     ): CurrentWeatherUi {
         val displayDate = try {
             val instant = Instant.ofEpochSecond(model.dateTime.toLong())

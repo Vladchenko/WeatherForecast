@@ -3,26 +3,26 @@ package io.github.vladchenko.weatherforecast.presentation.converter.appbar
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
-import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
+import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
 import javax.inject.Inject
 
 /**
- * Converter forecast ui state to an appbar ui state.
+ * Forecast ui state to an appbar ui state mapper.
  *
  * @property resourceManager Helper to retrieve localized strings from resources
  */
-class AppBarStateConverter @Inject constructor(
+class AppBarStateMapper @Inject constructor(
     private val resourceManager: ResourceManager
 ) {
 
     /**
      * Convert [forecastState] to [AppBarState]
      */
-    fun convert(forecastState: WeatherUiState<*>): AppBarState {
+    fun toAppbarState(forecastState: WeatherUiState<*>): AppBarState {
         val subtitle = when (forecastState) {
             is WeatherUiState.Loading -> resourceManager.getString(R.string.forecast_loading)
             is WeatherUiState.Error -> resourceManager.getString(
