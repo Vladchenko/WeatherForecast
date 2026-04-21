@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
-import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
@@ -241,11 +240,18 @@ fun CurrentWeatherLayout(
                                 )
                             },
                             label = "WeatherContent",
-                            modifier = Modifier.weight(1f) // Добавить вес
+                            modifier = Modifier.weight(1f)
                         ) { state ->
                             when (state) {
                                 is WeatherUiState.Loading -> {
-                                    ProgressBar()
+                                    CurrentWeatherSkeleton(
+                                        modifier = Modifier.fillMaxSize(),
+                                        shimmerColors = ShimmerDefaults.colors(
+                                            baseColor = Color.White.copy(alpha = 0.03f),
+                                            highlightColor = Color.White.copy(alpha = 0.35f),
+                                            durationMs = 2000,
+                                        )
+                                    )
                                 }
 
                                 is WeatherUiState.Error -> {

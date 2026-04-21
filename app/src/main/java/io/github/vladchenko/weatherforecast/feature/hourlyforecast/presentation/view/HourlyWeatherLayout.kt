@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyItemDomainModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
@@ -108,7 +107,15 @@ fun HourlyWeatherLayout(
                 }
 
                 is WeatherUiState.Loading -> {
-                    ProgressBar()
+                    HourlyWeatherSkeleton(
+                        itemWidth = 130.dp,
+                        itemHeight = 100.dp,
+                        itemsCount = 5,
+                        shimmerColors = HourlyShimmerDefaults.colors(
+                            baseColor = Color.White.copy(alpha = 0.03f),
+                            highlightColor = Color.White.copy(alpha = 0.35f)
+                        )
+                    )
                 }
 
                 is WeatherUiState.Success -> {
