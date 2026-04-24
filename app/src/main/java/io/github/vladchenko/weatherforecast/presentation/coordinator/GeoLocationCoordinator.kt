@@ -7,6 +7,8 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
@@ -36,28 +38,20 @@ import kotlinx.coroutines.launch
  * Designed to be used within a coroutine scope tied to the UI lifecycle. All collected flows
  * are observed on the main thread unless otherwise specified in the view model.
  *
+ * @property callback Sends callback events on some actions
  * @property geoLocationViewModel Provides geolocation state and operations
  * @property permissionResolver Handles runtime location permission requests
  * @property statusRenderer Displays loading, success, warning, or error statuses
  * @property dialogController Manages presentation of alert dialogs
  * @property resourceManager Accesses string resources for UI messages
- * @property onGotoCitySelection Callback invoked when user should be navigated to city selection screen
- * @property onRequestLocationPermission Callback triggered when location permission needs to be requested
- * @property onPermanentlyDenied Callback for handling permanent denial of location permission
- * @property onNegativeNoPermission Callback for when user declines permission without retrying
- * @property onForecastLoadForLocation Callback invoked with resolved city location to load forecast
  */
 class GeoLocationCoordinator(
-    private val geoLocationViewModel: GeoLocationViewModel,
-    private val permissionResolver: PermissionResolver,
+    private val callback: GeoLocationCallback,
     private val statusRenderer: StatusRenderer,
-    private val dialogController: WeatherDialogController,
     private val resourceManager: ResourceManager,
-    private val onGotoCitySelection: () -> Unit,
-    private val onRequestLocationPermission: () -> Unit,
-    private val onPermanentlyDenied: () -> Unit,
-    private val onNegativeNoPermission: () -> Unit,
-    private val onForecastLoadForLocation: (CityLocationModel) -> Unit
+    private val permissionResolver: PermissionResolver,
+    private val dialogController: WeatherDialogController,
+    private val geoLocationViewModel: GeoLocationViewModel
 ) {
 
     /**
@@ -82,7 +76,13 @@ class GeoLocationCoordinator(
                 launch { collectGeoLocationSuccessFlow(geoLocationViewModel.geoLocationSuccessFlow) }
                 launch { collectGeoLocationPermissionFlow(geoLocationViewModel.geoGeoLocationPermissionFlow) }
                 launch { collectGeoLocationDefineCitySuccessFlow(geoLocationViewModel.geoLocationDefineCitySuccessFlow) }
-                launch { geoLocationViewModel.selectCityFlow.collect { onGotoCitySelection() } }
+                launch {
+                    geoLocationViewModel.selectCityFlow.collect {
+                        callback.onEvent(
+                            GeoLocationCallbackEvent.GotoCitySelection
+                        )
+                    }
+                }
                 launch { collectGeoLocationErrorFlow(geoLocationViewModel.geoLocationFailFlow) }
             }
         }
@@ -144,7 +144,7 @@ class GeoLocationCoordinator(
             when (permission) {
                 GeoLocationPermission.Requested -> {
                     statusRenderer.showStatus(resourceManager.getString(R.string.geo_permission_required))
-                    onRequestLocationPermission()
+                    callback.onEvent(GeoLocationCallbackEvent.RequestPermission)
                 }
 
                 GeoLocationPermission.Denied -> {
@@ -154,7 +154,11 @@ class GeoLocationCoordinator(
                             geoLocationViewModel.resetGeoLocationRequestAttempts()
                             permissionResolver.requestLocationPermission()
                         },
-                        onNegativeClick = onNegativeNoPermission
+                        onNegativeClick = {
+                            callback.onEvent(
+                                GeoLocationCallbackEvent.OnNegativeNoPermission
+                            )
+                        }
                     )
                 }
 
@@ -170,7 +174,11 @@ class GeoLocationCoordinator(
                             geoLocationViewModel.resetGeoLocationRequestAttempts()
                             permissionResolver.requestLocationPermission()
                         },
-                        onNegativeClick = onPermanentlyDenied
+                        onNegativeClick = {
+                            callback.onEvent(
+                                GeoLocationCallbackEvent.OnPermanentlyDenied
+                            )
+                        }
                     )
                 }
             }
@@ -191,11 +199,15 @@ class GeoLocationCoordinator(
             dialogController.showLocationDefined(
                 city = model.city,
                 onPositiveClick = {
-                    onForecastLoadForLocation(model)
+                    callback.onEvent(
+                        GeoLocationCallbackEvent.OnForecastLoadForLocation(model)
+                    )
                 },
                 onNegativeClick = {
                     statusRenderer.showCitySelectionStatus()
-                    onGotoCitySelection()
+                    callback.onEvent(
+                        GeoLocationCallbackEvent.GotoCitySelection
+                    )
                 }
             )
         }
@@ -205,7 +217,9 @@ class GeoLocationCoordinator(
         flow.collect {
             dialogController.showGeoLocationError(
                 onPositiveClick = {
-                    onGotoCitySelection()
+                    callback.onEvent(
+                        GeoLocationCallbackEvent.GotoCitySelection
+                    )
                 },
                 onNegativeClick = {
                     startGeoLocation()

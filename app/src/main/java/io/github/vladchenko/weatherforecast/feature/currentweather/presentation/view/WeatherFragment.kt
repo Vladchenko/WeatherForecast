@@ -19,6 +19,8 @@ import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator
@@ -90,17 +92,30 @@ class WeatherFragment : Fragment() {
         ).create()
 
         coordinator = weatherCoordinatorFactory.create(
+            object : GeoLocationCallback {
+                override fun onEvent(event: GeoLocationCallbackEvent) {
+                    when (event) {
+                        GeoLocationCallbackEvent.GotoCitySelection -> gotoCitySelectionScreen()
+                        GeoLocationCallbackEvent.RequestPermission -> permissionResolver.requestLocationPermission()
+                        GeoLocationCallbackEvent.OnPermanentlyDenied,
+                        GeoLocationCallbackEvent.OnNegativeNoPermission -> activity?.finish()
+                        is GeoLocationCallbackEvent.OnForecastLoadForLocation -> {
+                            forecastViewModel.launchWeatherForecast(
+                                event.locationModel.city,
+                                event.locationModel.location.latitude.toString(),
+                                event.locationModel.location.longitude.toString()
+                            )
+                        }
+                    }
+                }
+            },
             forecastViewModel = forecastViewModel,
             appBarViewModel = appBarViewModel,
             geoLocationViewModel = geoLocationViewModel,
             statusRenderer = statusRenderer,
             dialogController = dialogController,
             resourceManager = resourceManager,
-            permissionResolver = permissionResolver,
-            onGotoCitySelection = { gotoCitySelectionScreen() },
-            onRequestLocationPermission = { permissionResolver.requestLocationPermission() },
-            onNegativeNoPermission = { activity?.finish() },
-            onPermanentlyDenied = { activity?.finish() }
+            permissionResolver = permissionResolver
         )
 
         coordinator.startObserving(viewLifecycleOwner.lifecycleScope, viewLifecycleOwner.lifecycle)

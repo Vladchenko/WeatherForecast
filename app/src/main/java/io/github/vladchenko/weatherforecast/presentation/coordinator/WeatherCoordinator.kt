@@ -6,6 +6,8 @@ import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
@@ -107,6 +109,7 @@ class WeatherCoordinator private constructor(
          * Initializes both [GeoLocationCoordinator] and [CitySelectionCoordinator]
          * with appropriate callbacks and shared dependencies.
          *
+         * @param callback on geo location events
          * @param statusRenderer Renderer for displaying status messages
          * @param appBarViewModel ViewModel controlling app bar appearance
          * @param resourceManager Accessor for localized string resources
@@ -114,24 +117,17 @@ class WeatherCoordinator private constructor(
          * @param dialogController Manages presentation of alert dialogs
          * @param forecastViewModel Main source of current weather data and user actions
          * @param geoLocationViewModel Provides geolocation state and operations
-         * @param onGotoCitySelection Callback invoked to navigate to city selection screen
-         * @param onPermanentlyDenied Callback for handling permanent denial of location permission
-         * @param onNegativeNoPermission Callback when user declines permission without retrying
-         * @param onRequestLocationPermission Callback to request location permission from system
          * @return A fully initialized and wired [WeatherCoordinator] instance
          */
         fun create(
+            callback: GeoLocationCallback,
             statusRenderer: StatusRenderer,
             appBarViewModel: AppBarViewModel,
             resourceManager: ResourceManager,
             permissionResolver: PermissionResolver,
             dialogController: WeatherDialogController,
             forecastViewModel: CurrentWeatherViewModel,
-            geoLocationViewModel: GeoLocationViewModel,
-            onGotoCitySelection: () -> Unit,
-            onPermanentlyDenied: () -> Unit,
-            onNegativeNoPermission: () -> Unit,
-            onRequestLocationPermission: () -> Unit
+            geoLocationViewModel: GeoLocationViewModel
         ): WeatherCoordinator {
             val geoLocationCoordinator = GeoLocationCoordinator(
                 geoLocationViewModel = geoLocationViewModel,
@@ -139,17 +135,7 @@ class WeatherCoordinator private constructor(
                 statusRenderer = statusRenderer,
                 dialogController = dialogController,
                 resourceManager = resourceManager,
-                onGotoCitySelection = onGotoCitySelection,
-                onRequestLocationPermission = onRequestLocationPermission,
-                onPermanentlyDenied = onPermanentlyDenied,
-                onNegativeNoPermission = onNegativeNoPermission,
-                onForecastLoadForLocation = { locationModel ->
-                    forecastViewModel.launchWeatherForecast(
-                        locationModel.city,
-                        locationModel.location.latitude.toString(),
-                        locationModel.location.longitude.toString()
-                    )
-                }
+                callback = callback
             )
 
             val citySelectionCoordinator = CitySelectionCoordinator(
@@ -158,7 +144,7 @@ class WeatherCoordinator private constructor(
                 statusRenderer = statusRenderer,
                 dialogController = dialogController,
                 resourceManager = resourceManager,
-                onGotoCitySelection = onGotoCitySelection
+                onGotoCitySelection = { callback.onEvent(GeoLocationCallbackEvent.GotoCitySelection) }
             )
 
             return WeatherCoordinator(
