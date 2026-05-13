@@ -80,8 +80,8 @@ class WeatherNavigator(private val navController: NavController) {
         val action =
             CitySearchFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(
                 chosenCity = formatFullCityName(city.name, city.state, city.country),
-                latitude = city.lat.toString(),
-                longitude = city.lon.toString()
+                latitude = city.lat.toFloat(),
+                longitude = city.lon.toFloat()
             )
         navController.navigate(action, fadeNavOptions())
     }

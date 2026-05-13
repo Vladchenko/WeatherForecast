@@ -38,12 +38,16 @@ class WeatherFragment : Fragment() {
 
     @Inject
     lateinit var statusRenderer: StatusRenderer
+
     @Inject
     lateinit var weatherCoordinatorFactory: WeatherCoordinator.Factory
+
     @Inject
     lateinit var permissionResolver: PermissionResolver
+
     @Inject
     lateinit var resourceManager: ResourceManager
+
     @Inject
     lateinit var alertDialogFactory: WeatherDialogFactory
 
@@ -61,7 +65,11 @@ class WeatherFragment : Fragment() {
             permissionResolver.handlePermissionResult(isGranted)
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return ComposeView(requireContext()).apply {
             setContent {
                 CurrentWeatherLayout(
@@ -99,11 +107,12 @@ class WeatherFragment : Fragment() {
                         GeoLocationCallbackEvent.RequestPermission -> permissionResolver.requestLocationPermission()
                         GeoLocationCallbackEvent.OnPermanentlyDenied,
                         GeoLocationCallbackEvent.OnNegativeNoPermission -> activity?.finish()
+
                         is GeoLocationCallbackEvent.OnForecastLoadForLocation -> {
                             forecastViewModel.launchWeatherForecast(
                                 event.locationModel.city,
-                                event.locationModel.location.latitude.toString(),
-                                event.locationModel.location.longitude.toString()
+                                event.locationModel.location.latitude,
+                                event.locationModel.location.longitude
                             )
                         }
                     }
@@ -123,7 +132,11 @@ class WeatherFragment : Fragment() {
         // Delay to ensure fragment's enter animation completes before updating weather.
         // Prevents overlap between screen fade-in and content refresh animation.
         view.postDelayed({
-            forecastViewModel.launchWeatherForecast(args.chosenCity, args.latitude, args.longitude)
+            forecastViewModel.launchWeatherForecast(
+                args.chosenCity,
+                args.latitude.toDouble(),
+                args.longitude.toDouble()
+            )
         }, 800)
     }
 

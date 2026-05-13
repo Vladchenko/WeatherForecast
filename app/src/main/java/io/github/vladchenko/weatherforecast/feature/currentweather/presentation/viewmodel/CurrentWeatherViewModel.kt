@@ -142,7 +142,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * @param latitude latitude of the chosen city
      * @param longitude longitude of the chosen city
      */
-    fun launchWeatherForecast(city: String, latitude: String, longitude: String) {
+    fun launchWeatherForecast(city: String, latitude: Double, longitude: Double) {
         viewModelScope.launch(exceptionHandler) {
             statusRenderer.showLoadingStatusFor(city)
             val (cityName, latValue, lonValue) = if (city.isBlank()) {
@@ -158,20 +158,10 @@ class CurrentWeatherViewModel @Inject constructor(
                     savedModel.location.longitude
                 )
             } else {
-                val lat = latitude.toDoubleOrNull() ?: run {
-                    statusRenderer.showError("Invalid latitude")
-                    _refreshingStateFlow.value = false
-                    return@launch
-                }
-                val lon = longitude.toDoubleOrNull() ?: run {
-                    statusRenderer.showError("Invalid longitude")
-                    _refreshingStateFlow.value = false
-                    return@launch
-                }
-                Triple(city, lat, lon)
+                Triple(city, latitude, longitude)
             }
 
-            loadRemoteForecastForLocation(cityName, latValue.toString(), lonValue.toString())
+            loadRemoteForecastForLocation(cityName, latValue, lonValue)
         }
     }
 
@@ -179,7 +169,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * Starts weather forecast loading triggered by pull-to-refresh.
      * Sets the refreshing state before launching the actual forecast load.
      */
-    fun launchWeatherForecastFromPullToRefresh(city: String, latitude: String, longitude: String) {
+    fun launchWeatherForecastFromPullToRefresh(city: String, latitude: Double, longitude: Double) {
         _refreshingStateFlow.value = true
         viewModelScope.launch(exceptionHandler) {
             launchWeatherForecast(city, latitude, longitude)
@@ -189,17 +179,17 @@ class CurrentWeatherViewModel @Inject constructor(
     /**
      * Loads remote forecast for location - [latitude] and [longitude] of [city].
      */
-    private fun loadRemoteForecastForLocation(city: String, latitude: String, longitude: String) {
+    private fun loadRemoteForecastForLocation(city: String, latitude: Double, longitude: Double) {
         showProgressBarState.value = true
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadWeatherForLocation(
                 city,
                 temperatureType,
-                latitude.toDouble(),
-                longitude.toDouble()
+                latitude,
+                longitude
             )
-            processServerResponse(city, result)
+            processServerResponse(city, latitude, longitude, result)
         }
     }
 
@@ -208,10 +198,14 @@ class CurrentWeatherViewModel @Inject constructor(
      * Handles remote, local, and error cases.
      *
      * @param city the requested city name
+     * @param latitude city's geographical position
+     * @param longitude city's geographical position
      * @param result the result from the interactor
      */
     private fun processServerResponse(
         city: String,
+        latitude: Double,
+        longitude: Double,
         result: LoadResult<CurrentWeather>
     ) {
         showProgressBarState.value = false
@@ -220,7 +214,13 @@ class CurrentWeatherViewModel @Inject constructor(
                 viewModelScope.launch(exceptionHandler) {
                     statusRenderer.showSuccessStatusFor(city)
                     showRemoteForecast(result.data.copy(city = city))
-                    val cityLocationModel = CityLocationModel(city, createLocation(result))
+                    val cityLocationModel = CityLocationModel(
+                        city,
+                        createLocation(
+                            result.data.coordinate.latitude,
+                            result.data.coordinate.longitude
+                        )
+                    )
                     chosenCityInteractor.saveChosenCity(cityLocationModel)
                     _chosenCityStateFlow.tryEmit(cityLocationModel)
                     loggingService.logDebugEvent(
@@ -242,6 +242,14 @@ class CurrentWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
+
+                viewModelScope.launch(exceptionHandler) {
+                    val cityLocationModel =
+                        CityLocationModel(city, createLocation(latitude, longitude))
+                    chosenCityInteractor.saveChosenCity(cityLocationModel)
+                    _chosenCityStateFlow.tryEmit(cityLocationModel)
+                }
+
                 _refreshingStateFlow.value = false
                 when (val error = result.error) {
                     is ForecastError.ApiKeyInvalid -> {
@@ -307,12 +315,11 @@ class CurrentWeatherViewModel @Inject constructor(
         _forecastStateFlow.value = WeatherUiState.Error(city, errorMessage)
     }
 
-    private fun createLocation(result: LoadResult.Remote<CurrentWeather>): Location {
-        return Location(LocationManager.NETWORK_PROVIDER).apply {
-            latitude = result.data.coordinate.latitude
-            longitude = result.data.coordinate.longitude
+    private fun createLocation(latitude: Double, longitude: Double): Location =
+        Location(LocationManager.NETWORK_PROVIDER).apply {
+            this.latitude = latitude
+            this.longitude = longitude
         }
-    }
 
     private fun showRemoteForecast(forecastModel: CurrentWeather) {
         _forecastStateFlow.value = WeatherUiState.Success(

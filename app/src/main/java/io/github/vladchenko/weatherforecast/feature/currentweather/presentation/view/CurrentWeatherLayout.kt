@@ -118,8 +118,8 @@ fun CurrentWeatherLayout(
                 if (isConnected && cityModel != null) {
                     viewModel.launchWeatherForecast(
                         city = cityModel.city,
-                        latitude = cityModel.location.latitude.toString(),
-                        longitude = cityModel.location.longitude.toString()
+                        latitude = cityModel.location.latitude,
+                        longitude = cityModel.location.longitude
                     )
                 }
             }
@@ -181,7 +181,7 @@ fun CurrentWeatherLayout(
         content = { innerPadding ->
             BackgroundImage()
             Box(
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
@@ -193,15 +193,15 @@ fun CurrentWeatherLayout(
                         if (cityModel != null) {
                             viewModel.launchWeatherForecastFromPullToRefresh(
                                 cityModel.city,
-                                cityModel.location.latitude.toString(),
-                                cityModel.location.longitude.toString()
+                                cityModel.location.latitude,
+                                cityModel.location.longitude
                             )
                         }
                     },
                     modifier = Modifier.fillMaxSize(),
                     indicator = {
                         PullToRefreshDefaults.Indicator(
-                            modifier = Modifier.Companion
+                            modifier = Modifier
                                 .align(Alignment.TopCenter),
                             isRefreshing = refreshingState,
                             state = refreshState
@@ -209,7 +209,7 @@ fun CurrentWeatherLayout(
                     }
                 ) {
                     Column(
-                        modifier = Modifier.Companion
+                        modifier = Modifier
                             .padding(
                                 PaddingValues(
                                     start = innerPadding.calculateStartPadding(
