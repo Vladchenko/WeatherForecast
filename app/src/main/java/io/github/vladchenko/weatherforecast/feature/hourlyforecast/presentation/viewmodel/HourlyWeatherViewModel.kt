@@ -9,14 +9,14 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
-import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
-import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,7 +127,7 @@ class HourlyWeatherViewModel @Inject constructor(
 
             is LoadResult.Error -> {
                 statusRenderer.showError(getErrorMessage(result))
-                _hourlyWeatherStateFlow.value = WeatherUiState.Error(city, result.error.toString())
+                _hourlyWeatherStateFlow.value = WeatherUiState.Error(city, getErrorMessage(result))
             }
         }
     }
