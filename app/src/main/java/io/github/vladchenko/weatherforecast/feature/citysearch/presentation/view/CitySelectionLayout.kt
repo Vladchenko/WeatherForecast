@@ -16,15 +16,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
@@ -60,11 +63,17 @@ fun CitySelectionLayout(
     appBarViewModel: AppBarViewModel,
     viewModel: CitySearchViewModel
 ) {
+    val context = LocalContext.current
     val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val cityPredictionsUiState by viewModel.cityPredictions.collectAsStateWithLifecycle()
     val recentCitiesNamesUiState by viewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
     val fontSize = appbarUiState.subtitleSize.toToolbarSubtitleFontSize()
+
+    // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
+    val statusColor = remember(appbarUiState) {
+        context.resolveColorAttr(appbarUiState.subtitleColorAttr)
+    }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -79,7 +88,7 @@ fun CitySelectionLayout(
                         )
                         Text(
                             text = appbarUiState.subtitle,
-                            color = mainContentColor,
+                            color = statusColor,
                             fontSize = fontSize,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis

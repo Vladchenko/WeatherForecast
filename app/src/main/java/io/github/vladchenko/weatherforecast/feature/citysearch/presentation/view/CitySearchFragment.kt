@@ -5,9 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -49,26 +46,13 @@ class CitySearchFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                val black = Color(0xFF000000)
-                MaterialTheme(
-                    colorScheme = lightColorScheme(
-                        primary = black,
-                        onPrimary = Color.Companion.White,
-                        secondary = Color(0xFF03DAC6),
-                        outline = black.copy(alpha = 0.6f),
-                        onSurface = black,
-                        surface = Color.Companion.White,
-                        background = Color.Companion.White,
-                    )
-                ) {
-                    CitySelectionLayout(
-                        citySelectionTitle = getString(R.string.city_selection_hint),
-                        queryLabel = getString(R.string.city_typing_begin),
-                        onEvent = { event -> viewModel.onEvent(event) },
-                        appBarViewModel = appBarViewModel,
-                        viewModel = viewModel
-                    )
-                }
+                CitySelectionLayout(
+                    citySelectionTitle = getString(R.string.city_selection_hint),
+                    queryLabel = getString(R.string.city_typing_begin),
+                    onEvent = { event -> viewModel.onEvent(event) },
+                    appBarViewModel = appBarViewModel,
+                    viewModel = viewModel
+                )
             }
         }
     }

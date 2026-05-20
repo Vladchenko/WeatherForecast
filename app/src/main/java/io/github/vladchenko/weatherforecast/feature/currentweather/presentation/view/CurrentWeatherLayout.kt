@@ -104,7 +104,7 @@ fun CurrentWeatherLayout(
 
     // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
     val statusColor = remember(appBarUiState.value) {
-        context.resolveColorAttr(appBarUiState.value.subtitleColorAttr) // ← Теперь это R.attr.colorInfo, а не цвет!
+        context.resolveColorAttr(appBarUiState.value.subtitleColorAttr)
     }
 
     LaunchedEffect(showHourlyForecast) {
