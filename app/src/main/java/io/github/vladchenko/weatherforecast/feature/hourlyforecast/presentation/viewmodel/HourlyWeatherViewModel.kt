@@ -52,7 +52,7 @@ class HourlyWeatherViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
-) : AbstractViewModel(connectivityObserver) {
+) : AbstractViewModel() {
 
     private var currentJob: Job? = null
 

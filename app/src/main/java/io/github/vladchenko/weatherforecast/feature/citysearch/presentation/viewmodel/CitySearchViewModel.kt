@@ -79,7 +79,7 @@ class CitySearchViewModel @Inject constructor(
     private val resourceManager: ResourceManager,
     private val citySearchInteractor: CitySearchInteractor,
     private val recentCitiesInteractor: RecentCitiesInteractor
-) : AbstractViewModel(connectivityObserver) {
+) : AbstractViewModel() {
 
     /**
      * Flow of navigation events triggered by user actions.

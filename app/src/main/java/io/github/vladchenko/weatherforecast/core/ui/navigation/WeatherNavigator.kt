@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.navOptions
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.model.CurrentScreen
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchFragmentDirections
@@ -66,6 +67,23 @@ class WeatherNavigator(private val navController: NavController) {
         val action =
             WeatherFragmentDirections.actionCurrentTimeForecastFragmentToCitiesNamesFragment()
         navController.navigate(action, fadeNavOptions())
+    }
+
+    /**
+     * Returns the current navigation destination as a [CurrentScreen] enum value.
+     *
+     * Maps the current [NavController] destination to a high-level screen representation
+     * used by the app's navigation logic. This allows other components (e.g., coordinators,
+     * view models) to react to the current screen without direct access to [NavController].
+     *
+     * @return [CurrentScreen.Weather] if the current destination is the weather fragment,
+     *         [CurrentScreen.CitySelection] if it's the city selection fragment,
+     *         defaults to [CurrentScreen.Weather] for unknown destinations.
+     */
+    fun getCurrentDestination() = when (navController.currentDestination?.id) {
+        R.id.currentTimeForecastFragment -> CurrentScreen.Weather
+        R.id.citiesNamesFragment -> CurrentScreen.CitySelection
+        else -> CurrentScreen.Weather
     }
 
     private fun handleEvent(event: CityNavigationEvent?) {

@@ -43,11 +43,11 @@ import javax.inject.Inject
  * - Handling errors and showing appropriate messages
  * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
  *
- * @property connectivityObserver observes internet connectivity state
  * @property statusRenderer Displays loading, success, warning, or error statuses
  * @property loggingService centralized service for application logging
  * @property resourceManager provides access to Android resources (strings, etc.)
  * @property preferencesManager manages user preferences (e.g. temperature unit)
+ * @property connectivityObserver observes internet connectivity state
  * @property coroutineDispatchers configures dispatchers for coroutines
  * @property chosenCityInteractor handles persistence of the selected city
  * @property forecastRemoteInteractor loads current weather data
@@ -55,16 +55,16 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
-    connectivityObserver: ConnectivityObserver,
     private val statusRenderer: StatusRenderer,
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val preferencesManager: PreferencesManager,
+    private val connectivityObserver: ConnectivityObserver,
     private val coroutineDispatchers: CoroutineDispatchers,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastRemoteInteractor: CurrentWeatherInteractor,
     private val weatherDomainToUiMapper: WeatherDomainToUiMapper,
-) : AbstractViewModel(connectivityObserver) {
+) : AbstractViewModel() {
 
     //region flows
     /**
@@ -144,6 +144,7 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun launchWeatherForecast(city: String, latitude: Double, longitude: Double) {
         viewModelScope.launch(exceptionHandler) {
+            _forecastStateFlow.value = WeatherUiState.Loading
             statusRenderer.showLoadingStatusFor(city)
             val (cityName, latValue, lonValue) = if (city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
@@ -173,6 +174,23 @@ class CurrentWeatherViewModel @Inject constructor(
         _refreshingStateFlow.value = true
         viewModelScope.launch(exceptionHandler) {
             launchWeatherForecast(city, latitude, longitude)
+        }
+    }
+
+    /**
+     * Starts weather loading if internet is available and a city is saved.
+     * Called externally (e.g., from WeatherCoordinator) when the screen is active.
+     */
+    fun refreshWeather() {
+        viewModelScope.launch {
+            val city = chosenCityStateFlow.value
+            city?.let {
+                launchWeatherForecast(
+                    it.city,
+                    it.location.latitude,
+                    it.location.longitude
+                )
+            }
         }
     }
 

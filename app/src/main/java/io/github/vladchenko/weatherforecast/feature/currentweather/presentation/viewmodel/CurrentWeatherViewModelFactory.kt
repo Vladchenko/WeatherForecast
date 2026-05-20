@@ -42,11 +42,11 @@ class CurrentWeatherViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CurrentWeatherViewModel::class.java)) {
             return CurrentWeatherViewModel(
-                connectivityObserver,
                 statusRenderer,
                 loggingService,
                 resourceManager,
                 preferencesManager,
+                connectivityObserver,
                 coroutineDispatchers,
                 chosenCityInteractor,
                 weatherInteractor,

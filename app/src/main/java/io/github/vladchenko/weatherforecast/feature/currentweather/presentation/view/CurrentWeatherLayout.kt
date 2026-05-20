@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
@@ -64,7 +63,6 @@ import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocat
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import kotlinx.coroutines.flow.drop
 
 /**
  * Composable layout for the main weather forecast screen.
@@ -107,22 +105,6 @@ fun CurrentWeatherLayout(
     // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
     val statusColor = remember(appBarUiState.value) {
         context.resolveColorAttr(appBarUiState.value.subtitleColorAttr) // ← Теперь это R.attr.colorInfo, а не цвет!
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.internetConnectedStateFlow
-            .drop(1)    // Drop initial value as it's emitted immediately on collection start
-            // and doesn't represent an actual connectivity change.
-            .collect { isConnected ->
-                val cityModel = viewModel.chosenCityStateFlow.value
-                if (isConnected && cityModel != null) {
-                    viewModel.launchWeatherForecast(
-                        city = cityModel.city,
-                        latitude = cityModel.location.latitude,
-                        longitude = cityModel.location.longitude
-                    )
-                }
-            }
     }
 
     LaunchedEffect(showHourlyForecast) {

@@ -50,7 +50,7 @@ class GeoLocationViewModel @Inject constructor(
     private val permissionChecker: PermissionChecker,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
-) : AbstractViewModel(connectivityObserver) {
+) : AbstractViewModel() {
 
     private var permissionRequests = 0
     private var geoLocatingAttempts = 0
