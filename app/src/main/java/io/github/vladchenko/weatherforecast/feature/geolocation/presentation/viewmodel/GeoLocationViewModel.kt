@@ -1,6 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel
 
 import android.location.Location
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
@@ -17,7 +18,6 @@ import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocato
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.PermissionChecker
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,7 +50,7 @@ class GeoLocationViewModel @Inject constructor(
     private val permissionChecker: PermissionChecker,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val coroutineDispatchers: CoroutineDispatchers,
-) : AbstractViewModel() {
+) : ViewModel() {
 
     private var permissionRequests = 0
     private var geoLocatingAttempts = 0
@@ -132,7 +132,6 @@ class GeoLocationViewModel @Inject constructor(
     )
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        showProgressBarState.value = false
         loggingService.logError(TAG, throwable.message.orEmpty())
         loggingService.logError(TAG, throwable.stackTraceToString())
 
@@ -189,7 +188,6 @@ class GeoLocationViewModel @Inject constructor(
         geoLocator.defineCurrentLocation(object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
                 _geoLocationSuccessFlow.tryEmit(location)
-                showProgressBarState.value = false
             }
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {

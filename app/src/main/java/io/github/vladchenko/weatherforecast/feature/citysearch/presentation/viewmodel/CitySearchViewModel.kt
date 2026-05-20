@@ -1,10 +1,10 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
@@ -16,7 +16,6 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.even
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
@@ -38,7 +37,6 @@ import javax.inject.Inject
  * - Loads and filters available city names based on user input
  * - Handles navigation events (back, select city)
  * - Displays status messages (errors, loading states) via [StatusRenderer]
- * - Responds to network connectivity changes inherited from [AbstractViewModel]
  *
  * ## State Flows
  * - [_cityMaskStateFlow]: Tracks current text input in the search field
@@ -63,7 +61,6 @@ import javax.inject.Inject
  * All coroutines are launched in [viewModelScope], ensuring automatic cancellation on ViewModel destruction.
  * State updates occur on the main thread, safe for UI observation.
  *
- * @param connectivityObserver Monitors network state; inherited base functionality from [AbstractViewModel]
  * @property loggingService Logs errors and debug information
  * @property statusRenderer Displays status messages to the user
  * @property resourceManager Provides access to string resources for dynamic UI content
@@ -73,13 +70,12 @@ import javax.inject.Inject
 @FlowPreview
 @HiltViewModel
 class CitySearchViewModel @Inject constructor(
-    connectivityObserver: ConnectivityObserver,
     private val loggingService: LoggingService,
     private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
     private val citySearchInteractor: CitySearchInteractor,
     private val recentCitiesInteractor: RecentCitiesInteractor
-) : AbstractViewModel() {
+) : ViewModel() {
 
     /**
      * Flow of navigation events triggered by user actions.

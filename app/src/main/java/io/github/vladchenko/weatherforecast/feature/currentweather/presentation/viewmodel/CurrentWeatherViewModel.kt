@@ -2,6 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.presentation
 
 import android.location.Location
 import android.location.LocationManager
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
@@ -23,7 +24,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -64,7 +64,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastRemoteInteractor: CurrentWeatherInteractor,
     private val weatherDomainToUiMapper: WeatherDomainToUiMapper,
-) : AbstractViewModel() {
+) : ViewModel() {
 
     //region flows
     /**
@@ -119,7 +119,6 @@ class CurrentWeatherViewModel @Inject constructor(
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in weather forecast loading", throwable)
         statusRenderer.showError(throwable.message.toString())
-        showProgressBarState.value = false
     }
 
     init {
@@ -198,7 +197,6 @@ class CurrentWeatherViewModel @Inject constructor(
      * Loads remote forecast for location - [latitude] and [longitude] of [city].
      */
     private fun loadRemoteForecastForLocation(city: String, latitude: Double, longitude: Double) {
-        showProgressBarState.value = true
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
             val result = forecastRemoteInteractor.loadWeatherForLocation(
@@ -226,7 +224,6 @@ class CurrentWeatherViewModel @Inject constructor(
         longitude: Double,
         result: LoadResult<CurrentWeather>
     ) {
-        showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
                 viewModelScope.launch(exceptionHandler) {

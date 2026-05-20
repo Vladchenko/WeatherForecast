@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
@@ -16,7 +17,6 @@ import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCity
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.AbstractViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +52,7 @@ class HourlyWeatherViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
-) : AbstractViewModel() {
+) : ViewModel() {
 
     private var currentJob: Job? = null
 
@@ -80,7 +80,6 @@ class HourlyWeatherViewModel @Inject constructor(
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in hourly weather loading", throwable)
         statusRenderer.showError(throwable.message.toString())
-        showProgressBarState.value = false
     }
 
     /**
@@ -89,7 +88,6 @@ class HourlyWeatherViewModel @Inject constructor(
      * @param cityModel contains city name and coordinates
      */
     fun loadHourlyWeatherForLocation(cityModel: CityLocationModel) {
-        showProgressBarState.value = true
         _hourlyWeatherStateFlow.value = WeatherUiState.Loading
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
@@ -105,7 +103,6 @@ class HourlyWeatherViewModel @Inject constructor(
     }
 
     private fun processServerResponse(city: String, result: LoadResult<HourlyWeather>) {
-        showProgressBarState.value = false
         when (result) {
             is LoadResult.Remote -> {
                 _hourlyWeatherStateFlow.value =
