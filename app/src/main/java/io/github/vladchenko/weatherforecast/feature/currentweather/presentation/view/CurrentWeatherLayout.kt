@@ -55,8 +55,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.getWeatherBackgroundResource
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocation
@@ -76,8 +78,7 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  * The background is set using a static image that fills the screen.
  *
  * @param mainContentTextColor Color used for all main content text elements
- * @param onCityClick Callback invoked when the city name is clicked
- * @param onBackClick Callback invoked when the back button is pressed
+ * @param onEvent Callback invoked on some events from UI
  * @param appBarViewModel ViewModel managing the app bar state (title, subtitle, colors)
  * @param viewModel Main ViewModel providing current weather forecast state
  * @param hourlyViewModel ViewModel providing hourly forecast data
@@ -87,8 +88,7 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 @NonSkippableComposable
 fun CurrentWeatherLayout(
     mainContentTextColor: Color,
-    onCityClick: () -> Unit,
-    onBackClick: () -> Unit,
+    onEvent: (CurrentWeatherEvent) -> Unit,
     appBarViewModel: AppBarViewModel,
     viewModel: CurrentWeatherViewModel,
     hourlyViewModel: HourlyWeatherViewModel,
@@ -142,7 +142,7 @@ fun CurrentWeatherLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = { onEvent(CurrentWeatherEvent.NavigateUp) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
@@ -254,7 +254,7 @@ fun CurrentWeatherLayout(
                                         MainContent(
                                             innerPadding = PaddingValues(),
                                             mainContentTextColor = mainContentTextColor,
-                                            onCityClick = onCityClick,
+                                            onCityClick = { onEvent(CurrentWeatherEvent.NavigateToCitySelection) },
                                             uiState = state
                                         )
                                         AnimatedVisibility(visible = showHourlyForecast) {

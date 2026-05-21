@@ -22,8 +22,10 @@ import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCity
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
+import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -102,6 +104,20 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     val chosenCityNotFoundStateFlow: SharedFlow<String>
         get() = _chosenCityNotFoundSharedFlow
+
+    /**
+     * SharedFlow that emits navigation and UI side-effect events triggered by user actions or business logic.
+     *
+     * This flow broadcasts one-time commands such as navigating back, opening city selection,
+     * or closing the app. Events are emitted via [sendNavigationEvent] and must be consumed
+     * by the UI layer (e.g., Fragment or Activity) to perform corresponding actions.
+     *
+     * Unlike state, these events are **not sticky** — they represent transient intents and should be handled once.
+     * The UI should collect this flow in a lifecycle-aware scope to avoid leaks.
+     */
+    val navigationEventFlow: SharedFlow<CityNavigationEvent>
+        get() = _navigationEventFlow
+
     private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1
     )
@@ -110,6 +126,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
     private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val _refreshingStateFlow = MutableStateFlow(false)
+    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
     //endregion flows
 
     private var currentJob: Job? = null
@@ -189,6 +206,24 @@ class CurrentWeatherViewModel @Inject constructor(
                     it.location.latitude,
                     it.location.longitude
                 )
+            }
+        }
+    }
+
+    /**
+     * Handles UI events related to navigation and user actions.
+     *
+     * This method is called by the UI layer (e.g., Composable) to communicate user intents
+     * such as navigating back or opening the city selection screen. It translates these events
+     * into navigation commands emitted via [navigationEventFlow].
+     *
+     * @param event the user action or UI event to process
+     */
+    fun onEvent(event: CurrentWeatherEvent) {
+        when (event) {
+            is CurrentWeatherEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.CloseApp)
+            is CurrentWeatherEvent.NavigateToCitySelection -> {
+                sendNavigationEvent(CityNavigationEvent.NavigateToCitySelection)
             }
         }
     }
@@ -358,6 +393,12 @@ class CurrentWeatherViewModel @Inject constructor(
                 toWeatherIconRes(weatherIconId)
             }
         )
+
+    private fun sendNavigationEvent(event: CityNavigationEvent) {
+        viewModelScope.launch {
+            _navigationEventFlow.emit(event)
+        }
+    }
 
     private suspend fun loadSavedCity() {
         val savedModel = chosenCityInteractor.loadChosenCity()

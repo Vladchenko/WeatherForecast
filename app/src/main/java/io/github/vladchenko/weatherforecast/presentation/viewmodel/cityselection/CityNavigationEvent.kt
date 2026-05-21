@@ -11,6 +11,16 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.City
  * @see io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel.navigationEventFlow
  */
 sealed interface CityNavigationEvent {
+
+    /**
+     * Request to close the application.
+     *
+     * This event signals that the app should terminate the current task and exit.
+     * Typically triggered by user action (e.g. double back press or exit button).
+     * The UI layer should call [Activity.finishAffinity] or equivalent to properly close the app.
+     */
+    data object CloseApp : CityNavigationEvent
+
     /**
      * Request to navigate back in the navigation stack.
      */
@@ -25,4 +35,13 @@ sealed interface CityNavigationEvent {
      * @property city the selected city domain model to display weather for
      */
     data class OpenWeatherFor(val city: CityDomainModel) : CityNavigationEvent
+
+    /**
+     * Request to navigate to the city selection screen.
+     *
+     * This event instructs the UI to open the city search or city list screen,
+     * allowing the user to pick a new location for weather forecast.
+     * Typically triggered from a settings menu or a "Change City" button.
+     */
+    data object NavigateToCitySelection : CityNavigationEvent
 }

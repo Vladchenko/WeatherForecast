@@ -17,6 +17,7 @@ import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
@@ -74,8 +75,7 @@ class WeatherFragment : Fragment() {
             setContent {
                 CurrentWeatherLayout(
                     mainContentTextColor = themeColor(R.attr.colorMainText),
-                    onCityClick = { gotoCitySelectionScreen() },
-                    onBackClick = { activity?.finish() },
+                    onEvent = { event -> forecastViewModel.onEvent(event) },
                     appBarViewModel = appBarViewModel,
                     viewModel = forecastViewModel,
                     hourlyViewModel = hourlyWeatherViewModel
@@ -86,6 +86,8 @@ class WeatherFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        navigator.start(viewLifecycleOwner, forecastViewModel.navigationEventFlow)
 
         permissionResolver.connect(
             launcher = requestPermissionLauncher,
@@ -103,7 +105,9 @@ class WeatherFragment : Fragment() {
             object : GeoLocationCallback {
                 override fun onEvent(event: GeoLocationCallbackEvent) {
                     when (event) {
-                        GeoLocationCallbackEvent.GotoCitySelection -> gotoCitySelectionScreen()
+                        GeoLocationCallbackEvent.GotoCitySelection -> forecastViewModel.onEvent(
+                            CurrentWeatherEvent.NavigateToCitySelection
+                        )
                         GeoLocationCallbackEvent.RequestPermission -> permissionResolver.requestLocationPermission()
                         GeoLocationCallbackEvent.OnPermanentlyDenied,
                         GeoLocationCallbackEvent.OnNegativeNoPermission -> activity?.finish()
@@ -138,9 +142,5 @@ class WeatherFragment : Fragment() {
                 args.longitude.toDouble()
             )
         }, 800)
-    }
-
-    private fun gotoCitySelectionScreen() {
-        navigator.navigateToCitySelection()
     }
 }

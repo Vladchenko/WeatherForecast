@@ -1,5 +1,8 @@
 package io.github.vladchenko.weatherforecast.core.ui.navigation
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -49,27 +52,6 @@ class WeatherNavigator(private val navController: NavController) {
     }
 
     /**
-     * Navigates from the current weather screen to the city selection screen.
-     *
-     * Uses a navigation action defined in [WeatherFragmentDirections] to transition
-     * to [CitiesNamesFragment] with a fade animation. The destination is added to the back stack,
-     * allowing users to return via "Up" or back button.
-     *
-     * Navigation options include:
-     * - Fade-in/fade-out animations for smooth transitions
-     * - `launchSingleTop = true` to avoid multiple instances of the same destination
-     * - `restoreState = true` to preserve fragment state across navigation
-     *
-     * This method is typically called when the user taps a location selector or edit button
-     * in the forecast UI.
-     */
-    fun navigateToCitySelection() {
-        val action =
-            WeatherFragmentDirections.actionCurrentTimeForecastFragmentToCitiesNamesFragment()
-        navController.navigate(action, fadeNavOptions())
-    }
-
-    /**
      * Returns the current navigation destination as a [CurrentScreen] enum value.
      *
      * Maps the current [NavController] destination to a high-level screen representation
@@ -88,13 +70,21 @@ class WeatherNavigator(private val navController: NavController) {
 
     private fun handleEvent(event: CityNavigationEvent?) {
         when (event) {
+            is CityNavigationEvent.CloseApp -> closeApp()
+            is CityNavigationEvent.NavigateToCitySelection -> navigateToCitySelection()
             is CityNavigationEvent.NavigateUp -> navController.popBackStack()
-            is CityNavigationEvent.OpenWeatherFor -> openCurrentWeatherFragment(event.city)
+            is CityNavigationEvent.OpenWeatherFor -> navigateToCurrentWeatherFragment(event.city)
             null -> Unit
         }
     }
 
-    private fun openCurrentWeatherFragment(city: CityDomainModel) {
+    private fun navigateToCitySelection() {
+        val action =
+            WeatherFragmentDirections.actionCurrentTimeForecastFragmentToCitiesNamesFragment()
+        navController.navigate(action, fadeNavOptions())
+    }
+
+    private fun navigateToCurrentWeatherFragment(city: CityDomainModel) {
         val action =
             CitySearchFragmentDirections.actionCitiesNamesFragmentToCurrentTimeForecastFragment(
                 chosenCity = formatFullCityName(city.name, city.state, city.country),
@@ -102,6 +92,10 @@ class WeatherNavigator(private val navController: NavController) {
                 longitude = city.lon.toFloat()
             )
         navController.navigate(action, fadeNavOptions())
+    }
+
+    private fun closeApp() {
+        navController.context.getActivity()?.finishAffinity()
     }
 
     private fun fadeNavOptions(): NavOptions = navOptions {
@@ -113,5 +107,11 @@ class WeatherNavigator(private val navController: NavController) {
         }
         launchSingleTop = true
         restoreState = true
+    }
+
+    private fun Context.getActivity(): Activity? = when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.getActivity()
+        else -> null
     }
 }
