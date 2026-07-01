@@ -161,7 +161,7 @@ fun CurrentWeatherLayout(
             )
         },
         content = { innerPadding ->
-            BackgroundImage()
+            BackgroundImage((forecastUiState.value as? WeatherUiState.Success)?.data?.weatherType.orEmpty())
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -281,13 +281,14 @@ fun CurrentWeatherLayout(
  * Displays the full-screen background image.
  *
  * The image covers the entire screen and respects scaffold padding.
+ * @param weatherType Type of weather displayed
  */
 @Composable
-private fun BackgroundImage() {
+private fun BackgroundImage(weatherType: String) {
     Image(
-        painter = painterResource(id = R.drawable.background2),
+        painter = painterResource(id = getWeatherBackgroundResource(weatherType)),
         contentDescription = null,
-        contentScale = ContentScale.FillBounds,
+        contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxSize(),
     )

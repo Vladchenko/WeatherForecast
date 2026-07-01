@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.repository
 
+import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
@@ -45,16 +46,20 @@ class CitySearchRepositoryImpl(
                 }
 
                 is DataResult.Error -> {
-                    loadFromCacheOrError(token)
+                    loadFromCacheOrError(
+                        token,
+                        (response.error as? DataError.NetworkError)?.cause?.message
+                            ?: "No cities match '$token' or no internet"
+                    )
                 }
             }
         }
 
-    private suspend fun loadFromCacheOrError(token: String): LoadResult<CitySearch> {
+    private suspend fun loadFromCacheOrError(token: String, error: String): LoadResult<CitySearch> {
         val cachedEntities = localDataSource.loadCitiesNames(token)
         if (cachedEntities.isEmpty()) {
             return LoadResult.Error(
-                token, ForecastError.NoDataAvailable("No cities match '$token' and no internet")
+                token, ForecastError.NoDataAvailable(error)
             )
         }
         return LoadResult.Local(

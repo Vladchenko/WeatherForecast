@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
@@ -277,7 +278,17 @@ class CitySearchViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                val errorMessage = result.error.toString()
+                val errorMessage = when (result.error) {
+                    is ForecastError.NoDataAvailable -> {
+                        // TODO Resolve error message without comparing with hardcoded string
+                        if (result.error.message.lowercase().contains("unable to resolve host")) {
+                            "Server doesn't respond"
+                        } else {
+                            result.error.message
+                        }
+                    }
+                    else -> result.error.toString()
+                }
                 statusRenderer.showError(errorMessage)
                 WeatherUiState.Error(
                     city = city,
