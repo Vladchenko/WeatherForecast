@@ -1,5 +1,9 @@
 pluginManagement {
     repositories {
+        maven {
+            allowInsecureProtocol = true
+            url 'http://localhost:8081/repository/maven-public/'
+        }
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -8,6 +12,10 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven {
+            allowInsecureProtocol = true
+            url 'http://localhost:8081/repository/maven-public/'
+        }ё
         google()
         mavenCentral()
     }
