@@ -12,11 +12,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
-import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
@@ -28,6 +26,7 @@ import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoor
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogFactory
 import io.github.vladchenko.weatherforecast.presentation.dialog.dialogcontroller.WeatherDialogControllerFactory
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
+import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import javax.inject.Inject
 
@@ -73,13 +72,14 @@ class WeatherFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                CurrentWeatherLayout(
-                    mainContentTextColor = themeColor(R.attr.colorMainText),
-                    onEvent = { event -> forecastViewModel.onEvent(event) },
-                    appBarViewModel = appBarViewModel,
-                    viewModel = forecastViewModel,
-                    hourlyViewModel = hourlyWeatherViewModel
-                )
+                WeatherForecastTheme {
+                    CurrentWeatherLayout(
+                        onEvent = { event -> forecastViewModel.onEvent(event) },
+                        appBarViewModel = appBarViewModel,
+                        viewModel = forecastViewModel,
+                        hourlyViewModel = hourlyWeatherViewModel
+                    )
+                }
             }
         }
     }

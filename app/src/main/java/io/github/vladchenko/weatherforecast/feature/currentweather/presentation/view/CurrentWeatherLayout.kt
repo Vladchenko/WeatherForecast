@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,10 +53,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.getWeatherBackgroundResource
-import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
@@ -77,23 +77,20 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  *
  * The background is set using a static image that fills the screen.
  *
- * @param mainContentTextColor Color used for all main content text elements
  * @param onEvent Callback invoked on some events from UI
  * @param appBarViewModel ViewModel managing the app bar state (title, subtitle, colors)
  * @param viewModel Main ViewModel providing current weather forecast state
  * @param hourlyViewModel ViewModel providing hourly forecast data
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 @NonSkippableComposable
 fun CurrentWeatherLayout(
-    mainContentTextColor: Color,
     onEvent: (CurrentWeatherEvent) -> Unit,
     appBarViewModel: AppBarViewModel,
     viewModel: CurrentWeatherViewModel,
     hourlyViewModel: HourlyWeatherViewModel,
 ) {
-    val context = LocalContext.current
     val forecastUiState = viewModel.forecastStateFlow.collectAsStateWithLifecycle()
     val appBarUiState = appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val hourlyForecastUiState = hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
@@ -103,9 +100,7 @@ fun CurrentWeatherLayout(
     val refreshState = rememberPullToRefreshState()
 
     // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
-    val statusColor = remember(appBarUiState.value) {
-        context.resolveColorAttr(appBarUiState.value.subtitleColorAttr)
-    }
+    val statusColor = rememberResolvedColorAttr(appBarUiState.value.subtitleColorAttr)
 
     LaunchedEffect(showHourlyForecast) {
         if (showHourlyForecast) {
@@ -130,7 +125,7 @@ fun CurrentWeatherLayout(
                         Text(
                             modifier = Modifier.padding(top = 4.dp),
                             text = appBarUiState.value.title,
-                            color = mainContentTextColor,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = appBarUiState.value.subtitle,
@@ -146,13 +141,17 @@ fun CurrentWeatherLayout(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
-                            tint = mainContentTextColor
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { showHourlyForecast = !showHourlyForecast }) {
-                        Icon(Icons.Filled.Timeline, "hourlyForecast", tint = mainContentTextColor)
+                        Icon(
+                            Icons.Filled.Timeline,
+                            "hourlyForecast",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -161,7 +160,7 @@ fun CurrentWeatherLayout(
             )
         },
         content = { innerPadding ->
-            BackgroundImage((forecastUiState.value as? WeatherUiState.Success)?.data?.weatherType.orEmpty())
+            BackgroundImage()
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -253,7 +252,7 @@ fun CurrentWeatherLayout(
                                     ) {
                                         MainContent(
                                             innerPadding = PaddingValues(),
-                                            mainContentTextColor = mainContentTextColor,
+                                            mainContentTextColor = MaterialTheme.colorScheme.onSurface,
                                             onCityClick = { onEvent(CurrentWeatherEvent.NavigateToCitySelection) },
                                             uiState = state
                                         )
@@ -262,7 +261,7 @@ fun CurrentWeatherLayout(
                                                 itemWidth = 130.dp,
                                                 itemHeight = 100.dp,
                                                 statusColor,
-                                                mainContentTextColor,
+                                                mainContentTextColor = MaterialTheme.colorScheme.onSurface,
                                                 hourlyWeather = hourlyForecastUiState.value,
                                             )
                                         }
@@ -281,12 +280,11 @@ fun CurrentWeatherLayout(
  * Displays the full-screen background image.
  *
  * The image covers the entire screen and respects scaffold padding.
- * @param weatherType Type of weather displayed
  */
 @Composable
-private fun BackgroundImage(weatherType: String) {
+private fun BackgroundImage() {
     Image(
-        painter = painterResource(id = getWeatherBackgroundResource(weatherType)),
+        painter = painterResource(id = R.drawable.background2),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier

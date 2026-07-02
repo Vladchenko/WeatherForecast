@@ -3,11 +3,15 @@ package io.github.vladchenko.weatherforecast.core.ui.utils
 import android.content.Context
 import android.util.TypedValue
 import androidx.annotation.AttrRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
 import io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
 
 /**
  * Presentation layer utility methods.
@@ -15,7 +19,9 @@ import io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants
 object UiUtils {
 
     /**
-     * Compose a full name for a city, consisting of [cityName] and if present [stateName], [countryName].
+     * Composes a full city name from [cityName], [stateName] (if present), and [countryName].
+     *
+     * Examples: `"London, UK"`, `"New York, NY, USA"`, `"Paris"`.
      */
     fun formatFullCityName(cityName: String, stateName: String?, countryName: String) =
         if (stateName.isNullOrBlank()) {
@@ -44,7 +50,10 @@ object UiUtils {
     }
 
     /**
-     * Defining weather type icon by [weatherIconId].
+     * Returns the appropriate weather icon drawable resource for [weatherIconId].
+     *
+     * Supports OpenWeatherMap icon codes (e.g., `"10d"`, `"50n"`).
+     * Falls back to `R.drawable.ic_0` if unknown.
      * Codes present at https://openweathermap.org/weather-conditions#Icon-list
      */
     fun toWeatherIconRes(weatherIconId: String): Int =
@@ -72,10 +81,32 @@ object UiUtils {
             "50n" to R.drawable.ic_50n,
         )
 
-    fun Context.resolveColorAttr(@AttrRes attr: Int): Color {
-        return TypedValue().run {
-            theme.resolveAttribute(attr, this, true)
-            Color(this.data)
+    /**
+     * Resolves a theme attribute color (e.g., `?attr/colorPrimary`) into a Compose [Color].
+     *
+     * Useful for integrating XML-based theme attributes into Compose UI.
+     */
+    fun Context.resolveColorAttr(@AttrRes attrRes: Int): Color {
+        val typedValue = TypedValue()
+        val resolveSuccess = theme.resolveAttribute(attrRes, typedValue, true)
+        return if (resolveSuccess) {
+            Color(typedValue.data)
+        } else {
+            // Fallback: если атрибут не найден — возвращаем Color.Unspecified
+            Color.Unspecified
+        }
+    }
+
+    /**
+     * A [remember]-enabled version of [resolveColorAttr] for Composables.
+     *
+     * Caches the resolved color for [attrRes] across recompositions.
+     */
+    @Composable
+    fun rememberResolvedColorAttr(@AttrRes attrRes: Int): Color {
+        val context = LocalContext.current
+        return remember(attrRes) {
+            context.resolveColorAttr(attrRes)
         }
     }
 }

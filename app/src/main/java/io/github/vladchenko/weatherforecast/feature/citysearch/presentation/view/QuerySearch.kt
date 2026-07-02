@@ -26,16 +26,38 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 
+/**
+ * Reusable search field with clear button and done keyboard action.
+ *
+ * Supports two visual styles:
+ * - [OutlinedTextField] (default: standard text field)
+ * - [OutlinedTextField] (when [useOutlined] is `true`)
+ *
+ * Behavior:
+ * - Clear button appears when field is focused and contains non-blank text
+ * - Tapping Done on keyboard triggers [onDoneActionClick]
+ * - Tapping clear button triggers [onClearClick]
+ * - Focus state changes are reported via [onFocusChanged]
+ *
+ * Fully customizable via [mainContentColor], which affects text, label, indicator, and icon colors.
+ *
+ * @param query Current text value
+ * @param label Field label (displayed as floating label or placeholder)
+ * @param useOutlined Whether to use OutlinedTextField variant
+ * @param mainContentColor Primary color used for text, labels, indicators, and icons
+ * @param onDoneActionClick Callback when user taps "Done" on keyboard
+ * @param onClearClick Callback when clear button is pressed
+ * @param onQueryChanged Callback triggered on each text change
+ * @param onFocusChanged Callback triggered when focus state changes (true = focused)
+ */
 @Composable
 fun QuerySearch(
     modifier: Modifier = Modifier,
     query: String,
     label: String,
     useOutlined: Boolean = false,
-    mainContentColor: Color = themeColor(R.attr.colorMainText),
+    mainContentColor: Color,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
     onQueryChanged: (String) -> Unit,

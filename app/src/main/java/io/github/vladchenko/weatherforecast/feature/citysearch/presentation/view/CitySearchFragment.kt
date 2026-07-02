@@ -8,13 +8,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
+import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.FlowPreview
 import javax.inject.Inject
@@ -34,7 +34,7 @@ class CitySearchFragment : Fragment() {
     lateinit var resourceManager: ResourceManager
 
     @FlowPreview
-    private val viewModel by viewModels<CitySearchViewModel>()
+    private val citySearchViewModel by activityViewModels<CitySearchViewModel>()
     private val appBarViewModel by activityViewModels<AppBarViewModel>()
     private val navigator by lazy { WeatherNavigator(findNavController()) }
 
@@ -46,13 +46,14 @@ class CitySearchFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                CitySelectionLayout(
-                    citySelectionTitle = getString(R.string.city_selection_hint),
-                    queryLabel = getString(R.string.city_typing_begin),
-                    onEvent = { event -> viewModel.onEvent(event) },
-                    appBarViewModel = appBarViewModel,
-                    viewModel = viewModel
-                )
+                WeatherForecastTheme {
+                    CitySelectionLayout(
+                        appBarViewModel = appBarViewModel,
+                        citySearchViewModel = citySearchViewModel,
+                        queryLabel = getString(R.string.city_typing_begin),
+                        citySelectionTitle = getString(R.string.city_selection_hint)
+                    )
+                }
             }
         }
     }
@@ -60,6 +61,6 @@ class CitySearchFragment : Fragment() {
     @FlowPreview
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        navigator.start(viewLifecycleOwner, viewModel.navigationEventFlow)
+        navigator.start(viewLifecycleOwner, citySearchViewModel.navigationEventFlow)
     }
 }

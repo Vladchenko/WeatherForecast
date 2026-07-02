@@ -15,7 +15,7 @@ dependencyResolutionManagement {
         maven {
             allowInsecureProtocol = true
             url 'http://localhost:8081/repository/maven-public/'
-        }ё
+        }
         google()
         mavenCentral()
     }

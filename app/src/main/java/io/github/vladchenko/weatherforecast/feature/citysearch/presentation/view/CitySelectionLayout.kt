@@ -10,70 +10,61 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.resolveColorAttr
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.core.ui.utils.themeColor
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.FlowPreview
 
 /**
- * Full screen layout for city selection with top app bar and background.
+ * Full-screen layout for city selection with top app bar and background image.
  *
- * Composes the complete UI for choosing a city, including:
- * - Toolbar with title and subtitle from [AppBarViewModel]
- * - Navigation back button
- * - Background image
- * - Search input and suggestions via [AddressEdit]
+ * Composes:
+ * - Top app bar with title and subtitle from [AppBarViewModel]
+ * - Back navigation button triggering [CitySelectionEvent.NavigateUp]
+ * - Background image and padding-safe content area
+ * - Search input and city suggestions via AddressEdit
  *
- * Observes multiple view model flows using [collectAsStateWithLifecycle].
+ * Uses collectAsStateWithLifecycle to observe state from multiple view models.
  *
- * @param mainContentColor Color for text and icons
- * @param citySelectionTitle Title shown above the search field
- * @param queryLabel Hint text inside the search field
- * @param onEvent Dispatcher for user interaction events
- * @param appBarViewModel Provides toolbar state
- * @param viewModel Provides city search state and logic
+ * @param queryLabel Hint text for the search input field
+ * @param citySelectionTitle Label shown above the search field
+ * @param appBarViewModel Shared instance for toolbar state synchronization
+ * @param citySearchViewModel ViewModel handling city search logic and state
  */
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
+@FlowPreview
+@ExperimentalMaterial3Api
 fun CitySelectionLayout(
-    mainContentColor: Color = themeColor(R.attr.colorMainText),
-    citySelectionTitle: String,
     queryLabel: String,
-    onEvent: (CitySelectionEvent) -> Unit,
-    appBarViewModel: AppBarViewModel,
-    viewModel: CitySearchViewModel
+    citySelectionTitle: String,
+    appBarViewModel: AppBarViewModel,   // Передаём внешний ViewModel, так как инстанс нужен общий чтобы не терять связь с тулбаром
+    citySearchViewModel: CitySearchViewModel
 ) {
-    val context = LocalContext.current
-    val cityUiState by viewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
-    val cityPredictionsUiState by viewModel.cityPredictions.collectAsStateWithLifecycle()
-    val recentCitiesNamesUiState by viewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
+    val cityUiState by citySearchViewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
+    val cityPredictionsUiState by citySearchViewModel.cityPredictions.collectAsStateWithLifecycle()
+    val recentCitiesNamesUiState by citySearchViewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
     val fontSize = appbarUiState.subtitleSize.toToolbarSubtitleFontSize()
 
-    // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
-    val statusColor = remember(appbarUiState) {
-        context.resolveColorAttr(appbarUiState.subtitleColorAttr)
-    }
+    val statusColor = rememberResolvedColorAttr(appbarUiState.subtitleColorAttr)
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -84,7 +75,7 @@ fun CitySelectionLayout(
                         Text(
                             modifier = Modifier.padding(top = 4.dp),
                             text = appbarUiState.title,
-                            color = mainContentColor,
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = appbarUiState.subtitle,
@@ -96,8 +87,12 @@ fun CitySelectionLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(CitySelectionEvent.NavigateUp) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "backIcon", tint = mainContentColor)
+                    IconButton(onClick = { citySearchViewModel.onEvent(CitySelectionEvent.NavigateUp) }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            "backIcon",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -110,23 +105,27 @@ fun CitySelectionLayout(
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier.fillMaxSize(),
             )
-            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     Text(
                         text = citySelectionTitle,
                         modifier = Modifier.padding(top = 16.dp),
                         fontSize = 16.sp,
-                        color = mainContentColor
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     AddressEdit(
                         cityName = cityUiState,
                         queryLabel = queryLabel,
                         modifier = Modifier,
-                        mainContentColor = mainContentColor,
+                        mainContentColor = MaterialTheme.colorScheme.onSurface,
                         cityMaskPredictions = cityPredictionsUiState,
                         recentCities = recentCitiesNamesUiState,
-                        onEvent = onEvent,
-                        onRecentsDelete = viewModel::deleteRecents
+                        onEvent = citySearchViewModel::onEvent,
+                        onRecentsDelete = citySearchViewModel::deleteRecents
                     )
                 }
             }
