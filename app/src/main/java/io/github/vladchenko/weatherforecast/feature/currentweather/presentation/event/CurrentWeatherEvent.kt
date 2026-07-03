@@ -22,4 +22,12 @@ sealed interface CurrentWeatherEvent {
      * Typically triggered from a "Change City" button or action in the toolbar.
      */
     data object NavigateToCitySelection : CurrentWeatherEvent
+
+    /**
+     * Request to reload current weather data.
+     *
+     * Typically triggered via pull-to-refresh gesture or manual refresh action.
+     * Results in [CurrentWeatherViewModel] re-fetching data from repository and updating state.
+     */
+    object RefreshWeather: CurrentWeatherEvent
 }

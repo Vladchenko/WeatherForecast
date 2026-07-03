@@ -211,19 +211,27 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Handles UI events related to navigation and user actions.
+     * Processes user-triggered events from the UI layer.
      *
-     * This method is called by the UI layer (e.g., Composable) to communicate user intents
-     * such as navigating back or opening the city selection screen. It translates these events
-     * into navigation commands emitted via [navigationEventFlow].
-     *
-     * @param event the user action or UI event to process
+     * Maps [CurrentWeatherEvent.NavigateUp], [NavigateToCitySelection], and [RefreshWeather]
+     * to navigation commands or weather reload using the currently saved city location.
      */
     fun onEvent(event: CurrentWeatherEvent) {
         when (event) {
             is CurrentWeatherEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.CloseApp)
             is CurrentWeatherEvent.NavigateToCitySelection -> {
                 sendNavigationEvent(CityNavigationEvent.NavigateToCitySelection)
+            }
+            is CurrentWeatherEvent.RefreshWeather -> {
+                _chosenCityStateFlow.value?.let { cityModel ->
+                    cityModel.let {
+                        launchWeatherForecastFromPullToRefresh(
+                            it.city,
+                            it.location.latitude,
+                            it.location.longitude
+                        )
+                    }
+                }
             }
         }
     }

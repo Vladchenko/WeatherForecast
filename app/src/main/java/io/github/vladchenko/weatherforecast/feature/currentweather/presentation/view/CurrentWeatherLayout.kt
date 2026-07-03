@@ -170,14 +170,7 @@ fun CurrentWeatherLayout(
                     state = refreshState,
                     isRefreshing = refreshingState,
                     onRefresh = {
-                        val cityModel = viewModel.chosenCityStateFlow.value
-                        if (cityModel != null) {
-                            viewModel.launchWeatherForecastFromPullToRefresh(
-                                cityModel.city,
-                                cityModel.location.latitude,
-                                cityModel.location.longitude
-                            )
-                        }
+                        onEvent(CurrentWeatherEvent.RefreshWeather)
                     },
                     modifier = Modifier.fillMaxSize(),
                     indicator = {
