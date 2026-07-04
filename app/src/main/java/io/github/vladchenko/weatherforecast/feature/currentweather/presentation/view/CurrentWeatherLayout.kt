@@ -37,6 +37,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonSkippableComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -114,16 +115,16 @@ fun CurrentWeatherLayout(
     val statusColor = rememberResolvedColorAttr(appBarUiState.subtitleColorAttr)
 
     LaunchedEffect(showHourlyForecast) {
-        if (showHourlyForecast) {
-            (weatherUiState as? WeatherUiState.Success)?.data?.let { data ->
-                val city = data.city
-                val coordinate = data.coordinate
-                val location = coordinate.let { coord ->
-                    createLocation(coord.latitude, coord.longitude)
-                }
-                val cityModel = CityLocationModel(city, location)
-                onLoadHourlyWeather(cityModel)
+        if (!showHourlyForecast) return@LaunchedEffect
+        when (weatherUiState) {
+            is WeatherUiState.Success -> {
+                val city = weatherUiState.data.city
+                val coordinate = weatherUiState.data.coordinate
+                val location = createLocation(coordinate.latitude, coordinate.longitude)
+                onLoadHourlyWeather(CityLocationModel(city, location))
             }
+
+            else -> return@LaunchedEffect
         }
     }
 

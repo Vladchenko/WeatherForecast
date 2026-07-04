@@ -33,6 +33,7 @@ sealed interface WeatherUiState<out T> {
      * @property source Indicates whether the data was obtained from the network ([DataSource.REMOTE])
      *                  or local storage ([DataSource.LOCAL]). Can be used to show freshness indicators.
      */
+    @Immutable
     data class Success<T>(
         val data: T,
         val source: DataSource
@@ -44,6 +45,7 @@ sealed interface WeatherUiState<out T> {
      * @property city The name of the city associated with the failed request (can be `null`, e.g., for location-based requests).
      * @property message A human-readable error message suitable for display in the UI (e.g., "City not found", "No internet connection").
      */
+    @Immutable
     data class Error(
         val city: String?,
         val message: String

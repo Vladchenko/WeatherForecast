@@ -1,6 +1,5 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models
 
-
 import androidx.compose.runtime.Immutable
 
 /**
@@ -19,6 +18,7 @@ import androidx.compose.runtime.Immutable
  * @property temperatureType Unit of temperature measurement (e.g., "°C", "°F")
  * @property serverError Error message from the API; empty if no error occurred
  */
+@Immutable
 data class CurrentWeatherUi(
     val city: String,
     val coordinate: Coordinate,
