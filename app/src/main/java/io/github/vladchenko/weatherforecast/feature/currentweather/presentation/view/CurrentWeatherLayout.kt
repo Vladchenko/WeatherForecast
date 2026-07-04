@@ -52,14 +52,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.getWeatherBackgroundResource
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocation
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
@@ -72,26 +71,28 @@ import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
  * and dynamic background based on weather type.
  *
  * ## Architecture
- * - Accepts **immutable** `AppBarUiState` — recomposes only when a *new instance* is passed
- * - Uses internal `collectAsStateWithLifecycle()` for forecast/hourly flows to ensure lifecycle-aware updates
+ * - Accepts **immutable** `appBarUiState`, `weatherUiState`, `refreshingState` — recomposes only when *new instances* are passed
+ * - **No ViewModel or StateFlow dependency** — fully decoupled from business logic
  * - Delegates events to [CurrentWeatherViewModel] via [onEvent] and [onLoadHourlyWeather]
  * - Uses `AnimatedContent` with staggered enter/exit for smooth state transitions
  *
  * ## State behavior
- * - `appBarUiState` is passed as `AppBarUiState` (not `State<AppBarUiState>`) — safe because:
- *   - `@Immutable data class` — Compose can skip recomposition if the reference is unchanged
- *   - Updates happen only when parent (`WeatherFragment`) provides a *new instance*
- * - `forecastUiState` and `hourlyWeatherUiState` are collected here — recompose this layout on new values
+ * - All UI states (`appBarUiState`, `weatherUiState`, `refreshingState`, `hourlyWeatherUiState`) are collected by parent (`WeatherFragment`)
+ * - `CurrentWeatherLayout` receives plain immutable objects, making it:
+ *   - Fully testable without ViewModel mocking
+ *   - Lifecycle-agnostic (works in `Fragment`, `Dialog`, `ModalBottomSheet`)
+ *   - Optimised for recomposition (Compose skips re-render if reference unchanged)
  *
  * ## Key events
- * - Toggling hourly forecast triggers [onLoadHourlyWeather] with resolved city location
+ * - Toggling hourly forecast triggers [onLoadHourlyWeather] with resolved city location (via [CityLocationModel])
  * - Pull-to-refresh fires [CurrentWeatherEvent.RefreshWeather]
  * - City click fires [CurrentWeatherEvent.NavigateToCitySelection]
  * - Back button fires [CurrentWeatherEvent.NavigateUp]
  *
+ * @param refreshingState Current weather refresh state (pull-to-refresh indicator)
  * @param appBarUiState App bar UI state (title, subtitle, colors, visibility)
- * @param viewModel Current weather ViewModel (provides forecast & refresh state)
  * @param onEvent Handler for UI events (navigation, refresh, toggle)
+ * @param weatherUiState Current weather UI state (success/loading/error with data)
  * @param onLoadHourlyWeather Callback invoked when hourly forecast is toggled on (expects resolved city)
  * @param hourlyWeatherUiState Hourly forecast UI state (can be null during initial load)
  */
@@ -99,23 +100,22 @@ import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 @Composable
 @NonSkippableComposable
 fun CurrentWeatherLayout(
+    refreshingState: Boolean,
     appBarUiState: AppBarUiState,
-    viewModel: CurrentWeatherViewModel,
     onEvent: (CurrentWeatherEvent) -> Unit,
+    weatherUiState: WeatherUiState<CurrentWeatherUi>,
     onLoadHourlyWeather: (CityLocationModel) -> Unit,
     hourlyWeatherUiState: WeatherUiState<HourlyWeather>?
 ) {
     val refreshState = rememberPullToRefreshState()
     var showHourlyForecast by remember { mutableStateOf(false) }
-    val forecastUiState = viewModel.forecastStateFlow.collectAsStateWithLifecycle()
-    val refreshingState by viewModel.refreshingStateFlow.collectAsStateWithLifecycle()
 
     // Разрешаем цвет аттрибута в UI-слое, где есть правильный Context
     val statusColor = rememberResolvedColorAttr(appBarUiState.subtitleColorAttr)
 
     LaunchedEffect(showHourlyForecast) {
         if (showHourlyForecast) {
-            (forecastUiState.value as? WeatherUiState.Success)?.data?.let { data ->
+            (weatherUiState as? WeatherUiState.Success)?.data?.let { data ->
                 val city = data.city
                 val coordinate = data.coordinate
                 val location = coordinate.let { coord ->
@@ -209,7 +209,7 @@ fun CurrentWeatherLayout(
                         verticalArrangement = Arrangement.SpaceBetween,
                     ) {
                         AnimatedContent(
-                            targetState = forecastUiState.value,
+                            targetState = weatherUiState,
                             transitionSpec = {
                                 // Сначала старый исчезает, потом новый появляется
                                 ContentTransform(

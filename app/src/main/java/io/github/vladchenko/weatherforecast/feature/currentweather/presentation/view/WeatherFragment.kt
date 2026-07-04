@@ -36,24 +36,32 @@ import javax.inject.Inject
 /**
  * Main weather screen fragment.
  *
- * Hosts [CurrentWeatherLayout] via Compose and coordinates:
- * - Weather data loading (via [CurrentWeatherViewModel])
- * - Location permissions & geo-resolution (via [GeoLocationViewModel] & [PermissionResolver])
- * - Dialogs & navigation (via [WeatherCoordinator])
- * - App bar state (via [AppBarViewModel])
+ * Orchestrates weather data loading, location permission handling, and UI rendering:
+ * - Collects [CurrentWeatherViewModel] and [HourlyWeatherViewModel] states
+ * - Delegates UI rendering to [CurrentWeatherLayout] via Compose
+ * - Coordinates geo-location, dialogs, and navigation via [WeatherCoordinator]
+ * - Manages lifecycle-aware subscriptions using `collectAsStateWithLifecycle`
  *
  * ## Architecture
- * - Uses **activity-scoped ViewModels** (shared across screens)
- * - Delegates UI rendering to [CurrentWeatherLayout]
+ * - Uses **activity-scoped ViewModels** shared across screens
+ * - **No ViewModel passing to UI layout** — only immutable UI states (`appBarUiState`, `weatherUiState`, etc.)
+ * - Delegates loading and events to ViewModels via callbacks (`onEvent`, `onLoadHourlyWeather`)
  * - Manages fragment lifecycle explicitly via `viewLifecycleOwner`
  *
  * ## Initialization flow
- * 1. [onCreateView] — Sets up Compose with [CurrentWeatherLayout], passing `appBarUiState` and ViewModels
+ * 1. [onCreateView] — Sets up Compose with [CurrentWeatherLayout], passing:
+ *    - Immutable UI states (`appBarUiState`, `weatherUiState`, `refreshingState`, `hourlyForecastUiState`)
+ *    - Callbacks for events: `onEvent = { ... }`, `onLoadHourlyWeather = { ... }`
  * 2. [onViewCreated] — Connects:
- *    - Navigator for navigation events
- *    - Permission resolver for location permission handling
- *    - Weather coordinator to orchestrate geo-location, UI updates, and dialog flow
- * 3. Launches initial weather fetch after fragment enter animation completes
+ *    - [WeatherNavigator] for navigation events
+ *    - [PermissionResolver] for location permission handling
+ *    - [WeatherCoordinator] to orchestrate geo-location, UI updates, and dialog flow
+ * 3. Launches initial weather fetch after fragment enter animation completes (800ms delay)
+ *
+ * ## State management
+ * - `weatherUiState`, `refreshingState`, `appBarUiState`, `hourlyForecastUiState` collected here
+ * - `CurrentWeatherLayout` receives **plain immutable objects**, not `StateFlow`/`ViewModel`
+ * - Ensures `CurrentWeatherLayout` is fully testable without ViewModel mocking
  */
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
@@ -74,7 +82,7 @@ class WeatherFragment : Fragment() {
     lateinit var alertDialogFactory: WeatherDialogFactory
 
     private val args: WeatherFragmentArgs by navArgs()
-    private val forecastViewModel: CurrentWeatherViewModel by activityViewModels()
+    private val weatherViewModel: CurrentWeatherViewModel by activityViewModels()
     private val appBarViewModel: AppBarViewModel by activityViewModels()
     private val geoLocationViewModel: GeoLocationViewModel by activityViewModels()
     private val hourlyWeatherViewModel: HourlyWeatherViewModel by activityViewModels()
@@ -95,14 +103,17 @@ class WeatherFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
+                val weatherUiState by weatherViewModel.weatherStateFlow.collectAsStateWithLifecycle()
+                val refreshingState by weatherViewModel.refreshingStateFlow.collectAsStateWithLifecycle()
                 val appBarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
                 val hourlyForecastUiState by hourlyWeatherViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
                 WeatherForecastTheme {
                     CurrentWeatherLayout(
-                        onEvent = { event -> forecastViewModel.onEvent(event) },
                         appBarUiState = appBarUiState,
-                        viewModel = forecastViewModel,
+                        weatherUiState = weatherUiState,
+                        refreshingState = refreshingState,
                         hourlyWeatherUiState = hourlyForecastUiState,
+                        onEvent = { event -> weatherViewModel.onEvent(event) },
                         onLoadHourlyWeather = { data -> hourlyWeatherViewModel.loadHourlyWeatherForLocation(data) }
                     )
                 }
@@ -113,7 +124,7 @@ class WeatherFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        navigator.start(viewLifecycleOwner, forecastViewModel.navigationEventFlow)
+        navigator.start(viewLifecycleOwner, weatherViewModel.navigationEventFlow)
 
         permissionResolver.connect(
             launcher = requestPermissionLauncher,
@@ -131,7 +142,7 @@ class WeatherFragment : Fragment() {
             object : GeoLocationCallback {
                 override fun onEvent(event: GeoLocationCallbackEvent) {
                     when (event) {
-                        GeoLocationCallbackEvent.GotoCitySelection -> forecastViewModel.onEvent(
+                        GeoLocationCallbackEvent.GotoCitySelection -> weatherViewModel.onEvent(
                             CurrentWeatherEvent.NavigateToCitySelection
                         )
                         GeoLocationCallbackEvent.RequestPermission -> permissionResolver.requestLocationPermission()
@@ -139,7 +150,7 @@ class WeatherFragment : Fragment() {
                         GeoLocationCallbackEvent.OnNegativeNoPermission -> activity?.finish()
 
                         is GeoLocationCallbackEvent.OnForecastLoadForLocation -> {
-                            forecastViewModel.launchWeatherForecast(
+                            weatherViewModel.launchWeatherForecast(
                                 event.locationModel.city,
                                 event.locationModel.location.latitude,
                                 event.locationModel.location.longitude
@@ -148,7 +159,7 @@ class WeatherFragment : Fragment() {
                     }
                 }
             },
-            forecastViewModel = forecastViewModel,
+            forecastViewModel = weatherViewModel,
             appBarViewModel = appBarViewModel,
             geoLocationViewModel = geoLocationViewModel,
             statusRenderer = statusRenderer,
@@ -162,7 +173,7 @@ class WeatherFragment : Fragment() {
         // Delay to ensure fragment's enter animation completes before updating weather.
         // Prevents overlap between screen fade-in and content refresh animation.
         view.postDelayed({
-            forecastViewModel.launchWeatherForecast(
+            weatherViewModel.launchWeatherForecast(
                 args.chosenCity,
                 args.latitude.toDouble(),
                 args.longitude.toDouble()

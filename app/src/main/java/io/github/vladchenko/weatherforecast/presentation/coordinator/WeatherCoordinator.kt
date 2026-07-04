@@ -70,7 +70,7 @@ class WeatherCoordinator private constructor(
     fun startObserving(scope: CoroutineScope, lifecycle: Lifecycle) {
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { collectForecastState(forecastViewModel.forecastStateFlow) }
+                launch { collectForecastState(forecastViewModel.weatherStateFlow) }
             }
         }
 

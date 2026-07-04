@@ -40,7 +40,7 @@ import javax.inject.Inject
  *
  * This ViewModel handles:
  * - Loading current weather data from remote or local sources
- * - Managing UI state via [forecastStateFlow]
+ * - Managing UI state via [weatherStateFlow]
  * - Persisting chosen city and its coordinates
  * - Handling errors and showing appropriate messages
  * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
@@ -80,7 +80,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * Public read-only flow that emits the current UI state of the weather forecast.
      * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
      */
-    val forecastStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>>
+    val weatherStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>>
         get() = _forecastStateFlow
 
     /**
