@@ -1,5 +1,7 @@
 package io.github.vladchenko.weatherforecast.core.ui.state
 
+import androidx.compose.runtime.Immutable
+
 /**
  * Sealed interface representing the different UI states for weather data loading.
  *
@@ -14,6 +16,7 @@ package io.github.vladchenko.weatherforecast.core.ui.state
  * - [Success]: Data has been successfully retrieved, along with the origin ([DataSource]).
  * - [Error]: An error occurred during the request; contains debug-friendly info and a displayable message.
  */
+@Immutable
 sealed interface WeatherUiState<out T> {
     /**
      * Represents the state when weather data is actively being loaded from a repository.

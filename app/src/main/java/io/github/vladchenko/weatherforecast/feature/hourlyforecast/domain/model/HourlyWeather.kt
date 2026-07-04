@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 
 /**
@@ -8,6 +9,7 @@ import kotlinx.collections.immutable.ImmutableList
  * @property city Name of the city for which the forecast is provided
  * @property hourlyForecasts List of hourly forecast entries
  */
+@Immutable
 data class HourlyWeather(
     val city: String,
     val hourlyForecasts: ImmutableList<HourlyItemDomainModel>
@@ -25,6 +27,7 @@ data class HourlyWeather(
  * @property weatherIcon Weather condition icon code (used to fetch corresponding image)
  * @property dateText Formatted time label (e.g. "14:00" or "Now")
  */
+@Immutable
 data class HourlyItemDomainModel(
     val timestamp: Long,
     val temperature: String,

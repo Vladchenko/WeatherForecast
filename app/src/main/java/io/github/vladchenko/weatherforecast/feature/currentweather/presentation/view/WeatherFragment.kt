@@ -96,12 +96,14 @@ class WeatherFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val appBarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
+                val hourlyForecastUiState by hourlyWeatherViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
                 WeatherForecastTheme {
                     CurrentWeatherLayout(
                         onEvent = { event -> forecastViewModel.onEvent(event) },
                         appBarUiState = appBarUiState,
                         viewModel = forecastViewModel,
-                        hourlyViewModel = hourlyWeatherViewModel
+                        hourlyWeatherUiState = hourlyForecastUiState,
+                        onLoadHourlyWeather = { data -> hourlyWeatherViewModel.loadHourlyWeatherForLocation(data) }
                     )
                 }
             }
