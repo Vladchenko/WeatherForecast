@@ -56,4 +56,12 @@ sealed interface CitySelectionEvent {
      * @property city The selected [io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel] containing name, latitude, longitude, country, and state
      */
     data class SelectCity(val city: CityDomainModel) : CitySelectionEvent
+
+    /**
+     * Requests clearing of the recently used cities cache.
+     *
+     * Triggered by user action (e.g., tapping "Clear history" in UI).
+     * Should reset recent cities list and persist the change.
+     */
+    object ClearRecentCities : CitySelectionEvent
 }

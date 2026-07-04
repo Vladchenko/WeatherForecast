@@ -11,6 +11,7 @@ import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * Composable wrapper for city search input with integrated auto-complete UI.
@@ -33,7 +34,7 @@ fun AddressEdit(
     queryLabel: String,
     modifier: Modifier,
     mainContentColor: Color,
-    cityMaskPredictions: WeatherUiState<List<CityDomainModel>>?,
+    cityMaskPredictions: WeatherUiState<ImmutableList<CityDomainModel>>?,
     recentCities: WeatherUiState<RecentCities>?,
     onEvent: (CitySelectionEvent) -> Unit,
     onRecentsDelete: () -> Unit

@@ -18,6 +18,7 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCi
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -109,7 +110,7 @@ class CitySearchViewModel @Inject constructor(
      *
      * Null until first successful search.
      */
-    val cityPredictions: StateFlow<WeatherUiState<List<CityDomainModel>>?>
+    val cityPredictions: StateFlow<WeatherUiState<ImmutableList<CityDomainModel>>?>
         get() = _cityPredictions
 
     /**
@@ -130,7 +131,7 @@ class CitySearchViewModel @Inject constructor(
         get() = _recentCitiesNamesFlow
 
     private val _cityMaskStateFlow = MutableStateFlow("")
-    private val _cityPredictions = MutableStateFlow<WeatherUiState<List<CityDomainModel>>?>(null)
+    private val _cityPredictions = MutableStateFlow<WeatherUiState<ImmutableList<CityDomainModel>>?>(null)
     private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
     private val _recentCitiesNamesFlow = MutableStateFlow<WeatherUiState<RecentCities>?>(null)
 
@@ -204,6 +205,10 @@ class CitySearchViewModel @Inject constructor(
                 viewModelScope.launch {
                     fetchRecentCities()
                 }
+            }
+
+            is CitySelectionEvent.ClearRecentCities -> {
+                deleteRecents()
             }
         }
     }

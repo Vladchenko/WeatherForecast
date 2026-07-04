@@ -5,9 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.R
@@ -46,10 +48,17 @@ class CitySearchFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
+                val appBarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
+                val cityUiState by citySearchViewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
+                val cityPredictionsUiState by citySearchViewModel.cityPredictions.collectAsStateWithLifecycle()
+                val recentCitiesNamesUiState by citySearchViewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
                 WeatherForecastTheme {
                     CitySelectionLayout(
-                        appBarViewModel = appBarViewModel,
-                        citySearchViewModel = citySearchViewModel,
+                        cityUiState = cityUiState,
+                        appBarUiState = appBarUiState,
+                        cityPredictionsUiState = cityPredictionsUiState,
+                        recentCitiesNamesUiState = recentCitiesNamesUiState,
+                        onEvent = { event -> citySearchViewModel.onEvent(event) },
                         queryLabel = getString(R.string.city_typing_begin),
                         citySelectionTitle = getString(R.string.city_selection_hint)
                     )

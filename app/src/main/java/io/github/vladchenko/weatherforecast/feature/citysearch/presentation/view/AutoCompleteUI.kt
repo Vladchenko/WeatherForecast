@@ -33,6 +33,8 @@ import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Composable function that displays a search interface with auto-complete functionality.
@@ -70,7 +72,7 @@ fun AutoCompleteUI(
     useOutlined: Boolean = false,
     mainContentColor: Color,
     onQueryChanged: (String) -> Unit,
-    predictions: WeatherUiState<List<CityDomainModel>>?,
+    predictions: WeatherUiState<ImmutableList<CityDomainModel>>?,
     recentCities: WeatherUiState<RecentCities>?,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
@@ -243,7 +245,7 @@ private fun AutoCompleteUISearchPreview() {
                 lat = 47.0167,
                 lon = 28.8489
             )
-        ),
+        ).toImmutableList(),
         source = DataSource.LOCAL
     )
     AutoCompleteUI(

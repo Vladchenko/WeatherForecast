@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -24,47 +23,49 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
+import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
+import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
 
 /**
- * Full-screen layout for city selection with top app bar and background image.
+ * Full-screen city selection layout with top app bar and background image.
  *
- * Composes:
- * - Top app bar with title and subtitle from [AppBarViewModel]
- * - Back navigation button triggering [CitySelectionEvent.NavigateUp]
- * - Background image and padding-safe content area
- * - Search input and city suggestions via AddressEdit
+ * Renders:
+ * - Top app bar (back button, title, subtitle) using [appBarUiState] from [AppBarViewModel]
+ * - Background image and padded content area
+ * - Search input and suggestions via [AddressEdit], including city predictions and recent cities
  *
- * Uses collectAsStateWithLifecycle to observe state from multiple view models.
+ * Delegates all interactions (search, selection, navigation, history management) to [onEvent].
  *
  * @param queryLabel Hint text for the search input field
- * @param citySelectionTitle Label shown above the search field
- * @param appBarViewModel Shared instance for toolbar state synchronization
- * @param citySearchViewModel ViewModel handling city search logic and state
+ * @param cityUiState Currently typed or selected city name (user input or saved city)
+ * @param citySelectionTitle Label displayed above the search field
+ * @param appBarUiState Toolbar state including title, subtitle, and styling
+ * @param onEvent Callback for user actions: navigation, city selection, recent cities management
+ * @param recentCitiesNamesUiState Recent cities data (optional)
+ * @param cityPredictionsUiState City search suggestions (optional)
  */
 @Composable
 @FlowPreview
 @ExperimentalMaterial3Api
 fun CitySelectionLayout(
     queryLabel: String,
+    cityUiState: String,
     citySelectionTitle: String,
-    appBarViewModel: AppBarViewModel,   // Передаём внешний ViewModel, так как инстанс нужен общий чтобы не терять связь с тулбаром
-    citySearchViewModel: CitySearchViewModel
+    appBarUiState: AppBarUiState,
+    onEvent: (CitySelectionEvent) -> Unit,
+    recentCitiesNamesUiState: WeatherUiState<RecentCities>?,
+    cityPredictionsUiState: WeatherUiState<ImmutableList<CityDomainModel>>?,
 ) {
-    val appbarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
-    val cityUiState by citySearchViewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
-    val cityPredictionsUiState by citySearchViewModel.cityPredictions.collectAsStateWithLifecycle()
-    val recentCitiesNamesUiState by citySearchViewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
-    val fontSize = appbarUiState.subtitleSize.toToolbarSubtitleFontSize()
-
-    val statusColor = rememberResolvedColorAttr(appbarUiState.subtitleColorAttr)
+    val statusColor = rememberResolvedColorAttr(appBarUiState.subtitleColorAttr)
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -74,20 +75,20 @@ fun CitySelectionLayout(
                     Column {
                         Text(
                             modifier = Modifier.padding(top = 4.dp),
-                            text = appbarUiState.title,
+                            text = appBarUiState.title,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = appbarUiState.subtitle,
+                            text = appBarUiState.subtitle,
                             color = statusColor,
-                            fontSize = fontSize,
+                            fontSize = appBarUiState.subtitleSize.toToolbarSubtitleFontSize(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { citySearchViewModel.onEvent(CitySelectionEvent.NavigateUp) }) {
+                    IconButton(onClick = { onEvent(CitySelectionEvent.NavigateUp) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
@@ -124,8 +125,8 @@ fun CitySelectionLayout(
                         mainContentColor = MaterialTheme.colorScheme.onSurface,
                         cityMaskPredictions = cityPredictionsUiState,
                         recentCities = recentCitiesNamesUiState,
-                        onEvent = citySearchViewModel::onEvent,
-                        onRecentsDelete = citySearchViewModel::deleteRecents
+                        onEvent = onEvent,
+                        onRecentsDelete = { onEvent(CitySelectionEvent.ClearRecentCities) }
                     )
                 }
             }
