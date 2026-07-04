@@ -58,7 +58,7 @@ fun CitySelectionLayout(
     appBarViewModel: AppBarViewModel,   // Передаём внешний ViewModel, так как инстанс нужен общий чтобы не терять связь с тулбаром
     citySearchViewModel: CitySearchViewModel
 ) {
-    val appbarUiState by appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
+    val appbarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
     val cityUiState by citySearchViewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val cityPredictionsUiState by citySearchViewModel.cityPredictions.collectAsStateWithLifecycle()
     val recentCitiesNamesUiState by citySearchViewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()

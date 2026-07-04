@@ -8,7 +8,7 @@ import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.MessageType
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusDisplay
-import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
+import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +28,7 @@ import javax.inject.Inject
  *
  * @property statusRenderer Displays loading, success, warning, or error statuses
  * @property resourceManager Provides access to string resources
- * @property appBarStateMapper Converts [WeatherUiState] into [AppBarState] for UI rendering
+ * @property appBarStateMapper Converts [WeatherUiState] into [AppBarUiState] for UI rendering
  */
 @HiltViewModel
 class AppBarViewModel @Inject constructor(
@@ -38,14 +38,14 @@ class AppBarViewModel @Inject constructor(
 ) : ViewModel(), StatusDisplay {
 
     /**
-     * Read-only StateFlow emitting the current [AppBarState].
+     * Read-only StateFlow emitting the current [AppBarUiState].
      *
      * Observed by the UI to update the toolbar's appearance (title, subtitle, colors).
      */
-    val appBarStateFlow: StateFlow<AppBarState>
-        get() = _appBarStateFlow.asStateFlow()
+    val appBarUiStateFlow: StateFlow<AppBarUiState>
+        get() = _appBarUiStateFlow.asStateFlow()
 
-    private val _appBarStateFlow = MutableStateFlow(AppBarState())
+    private val _appBarUiStateFlow = MutableStateFlow(AppBarUiState())
 
     init {
         statusRenderer.setTarget(this)
@@ -68,13 +68,13 @@ class AppBarViewModel @Inject constructor(
      * Updates the entire AppBar state based on the current forecast UI state.
      *
      * Uses [appBarStateMapper] to transform [WeatherUiState] into a corresponding
-     * [AppBarState], including dynamic title, subtitle, and styling.
+     * [AppBarUiState], including dynamic title, subtitle, and styling.
      *
      * @param weatherUiState The current state of the forecast screen
      */
     fun updateAppBarState(weatherUiState: WeatherUiState<*>) {
         val appBarState = appBarStateMapper.toAppbarState(forecastState = weatherUiState)
-        _appBarStateFlow.update { appBarState }
+        _appBarUiStateFlow.update { appBarState }
     }
 
     /**
@@ -86,11 +86,11 @@ class AppBarViewModel @Inject constructor(
      * @param title New title text to display
      */
     fun updateTitle(title: String) {
-        _appBarStateFlow.update { it.copy(title = title) }
+        _appBarUiStateFlow.update { it.copy(title = title) }
     }
 
     private fun updateSubtitle(text: String, @AttrRes colorAttr: Int) {
-        _appBarStateFlow.update {
+        _appBarUiStateFlow.update {
             it.copy(subtitle = text, subtitleColorAttr = colorAttr) // ← Сохраняем атрибут, не цвет
         }
     }

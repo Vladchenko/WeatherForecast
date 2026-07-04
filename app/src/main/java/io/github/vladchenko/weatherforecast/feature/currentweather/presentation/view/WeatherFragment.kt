@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -32,7 +34,26 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 import javax.inject.Inject
 
 /**
- * Fragment representing a weather forecast.
+ * Main weather screen fragment.
+ *
+ * Hosts [CurrentWeatherLayout] via Compose and coordinates:
+ * - Weather data loading (via [CurrentWeatherViewModel])
+ * - Location permissions & geo-resolution (via [GeoLocationViewModel] & [PermissionResolver])
+ * - Dialogs & navigation (via [WeatherCoordinator])
+ * - App bar state (via [AppBarViewModel])
+ *
+ * ## Architecture
+ * - Uses **activity-scoped ViewModels** (shared across screens)
+ * - Delegates UI rendering to [CurrentWeatherLayout]
+ * - Manages fragment lifecycle explicitly via `viewLifecycleOwner`
+ *
+ * ## Initialization flow
+ * 1. [onCreateView] — Sets up Compose with [CurrentWeatherLayout], passing `appBarUiState` and ViewModels
+ * 2. [onViewCreated] — Connects:
+ *    - Navigator for navigation events
+ *    - Permission resolver for location permission handling
+ *    - Weather coordinator to orchestrate geo-location, UI updates, and dialog flow
+ * 3. Launches initial weather fetch after fragment enter animation completes
  */
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
@@ -74,10 +95,11 @@ class WeatherFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
+                val appBarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
                 WeatherForecastTheme {
                     CurrentWeatherLayout(
                         onEvent = { event -> forecastViewModel.onEvent(event) },
-                        appBarViewModel = appBarViewModel,
+                        appBarUiState = appBarUiState,
                         viewModel = forecastViewModel,
                         hourlyViewModel = hourlyWeatherViewModel
                     )

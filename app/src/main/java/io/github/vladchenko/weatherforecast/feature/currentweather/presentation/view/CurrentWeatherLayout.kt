@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
@@ -64,55 +63,53 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
 import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocation
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
+import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 
 /**
- * Composable layout for the main weather forecast screen.
+ * Main weather screen layout.
  *
- * Displays:
- * - A top app bar with title, subtitle, back button, and hourly forecast toggle
- * - Current weather data (city, temperature, weather condition, time)
- * - Optional hourly forecast panel (shown when toggled)
- * - Full-screen progress indicator during data loading
+ * Displays current weather, optional hourly forecast panel, and pull-to-refresh.
+ * Uses dynamic background based on weather type.
  *
- * The background is set using a static image that fills the screen.
+ * ## Architecture
+ * - Accepts **immutable** `AppBarUiState` (not `State<T>`) — updates only when passed new instance
+ * - Collects `forecastStateFlow` and `hourlyWeatherStateFlow` internally via `collectAsStateWithLifecycle`
+ * - Delegates events to ViewModels via [onEvent]
  *
- * @param onEvent Callback invoked on some events from UI
- * @param appBarViewModel ViewModel managing the app bar state (title, subtitle, colors)
- * @param viewModel Main ViewModel providing current weather forecast state
- * @param hourlyViewModel ViewModel providing hourly forecast data
+ * @param onEvent UI event handler (navigation, refresh, toggle hourly forecast)
+ * @param appBarUiState App bar state (title, subtitle, colors, visibility)
+ * @param viewModel Current weather ViewModel
+ * @param hourlyViewModel Hourly forecast ViewModel
  */
 @ExperimentalMaterial3Api
 @Composable
 @NonSkippableComposable
 fun CurrentWeatherLayout(
     onEvent: (CurrentWeatherEvent) -> Unit,
-    appBarViewModel: AppBarViewModel,
+    appBarUiState: AppBarUiState,
     viewModel: CurrentWeatherViewModel,
     hourlyViewModel: HourlyWeatherViewModel,
 ) {
     val forecastUiState = viewModel.forecastStateFlow.collectAsStateWithLifecycle()
-    val appBarUiState = appBarViewModel.appBarStateFlow.collectAsStateWithLifecycle()
     val hourlyForecastUiState = hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
-    val fontSize = appBarUiState.value.subtitleSize.toToolbarSubtitleFontSize()
     var showHourlyForecast by remember { mutableStateOf(false) }
     val refreshingState by viewModel.refreshingStateFlow.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
 
-    // Разрешаем цвет атрибута в UI-слое, где есть правильный Context
-    val statusColor = rememberResolvedColorAttr(appBarUiState.value.subtitleColorAttr)
+    // Разрешаем цвет аттрибута в UI-слое, где есть правильный Context
+    val statusColor = rememberResolvedColorAttr(appBarUiState.subtitleColorAttr)
 
     LaunchedEffect(showHourlyForecast) {
         if (showHourlyForecast) {
-            val city = (forecastUiState.value as? WeatherUiState.Success)?.data?.city.orEmpty()
-            val coordinate =
-                (forecastUiState.value as? WeatherUiState.Success)?.data?.coordinate
-            val location = coordinate?.let { coord ->
-                createLocation(coord.latitude, coord.longitude)
+            (forecastUiState.value as? WeatherUiState.Success)?.data?.let { data ->
+                val city = data.city
+                val coordinate = data.coordinate
+                val location = coordinate.let { coord ->
+                    createLocation(coord.latitude, coord.longitude)
+                }
+                val cityModel = CityLocationModel(city, location)
+                hourlyViewModel.loadHourlyWeatherForLocation(cityModel)
             }
-            if (location == null) return@LaunchedEffect
-            val cityModel = CityLocationModel(city, location)
-            hourlyViewModel.loadHourlyWeatherForLocation(cityModel)
         }
     }
 
@@ -124,13 +121,13 @@ fun CurrentWeatherLayout(
                     Column {
                         Text(
                             modifier = Modifier.padding(top = 4.dp),
-                            text = appBarUiState.value.title,
+                            text = appBarUiState.title,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = appBarUiState.value.subtitle,
+                            text = appBarUiState.subtitle,
                             color = statusColor,
-                            fontSize = fontSize,
+                            fontSize = appBarUiState.subtitleSize.toToolbarSubtitleFontSize(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )

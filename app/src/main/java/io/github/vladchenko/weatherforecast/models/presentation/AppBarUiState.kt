@@ -1,11 +1,12 @@
 package io.github.vladchenko.weatherforecast.models.presentation
 
 import androidx.annotation.AttrRes
+import androidx.compose.runtime.Immutable
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
 
 /**
- * Model for the app bar state.
+ * Model for the app bar ui state.
  *
  * @property title of the app bar
  * @property subtitle of the app bar
@@ -16,7 +17,8 @@ import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
  * @property actionsVisible whether the actions are visible
  * @property navigationIconVisible whether the navigation icon is visible
  */
-data class AppBarState(
+@Immutable
+data class AppBarUiState(
     val title: String = "",
     val subtitle: String = "",
     val subtitleSize: SubtitleSize = SubtitleSize.Normal,

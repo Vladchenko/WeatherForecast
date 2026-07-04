@@ -7,7 +7,7 @@ import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
-import io.github.vladchenko.weatherforecast.models.presentation.AppBarState
+import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 import javax.inject.Inject
 
 /**
@@ -20,9 +20,9 @@ class AppBarStateMapper @Inject constructor(
 ) {
 
     /**
-     * Convert [forecastState] to [AppBarState]
+     * Convert [forecastState] to [AppBarUiState]
      */
-    fun toAppbarState(forecastState: WeatherUiState<*>): AppBarState {
+    fun toAppbarState(forecastState: WeatherUiState<*>): AppBarUiState {
         val subtitle = when (forecastState) {
             is WeatherUiState.Loading -> resourceManager.getString(R.string.forecast_loading)
             is WeatherUiState.Error -> resourceManager.getString(
@@ -50,7 +50,7 @@ class AppBarStateMapper @Inject constructor(
             }
         }
 
-        return AppBarState(
+        return AppBarUiState(
             title = resourceManager.getString(R.string.app_name),
             subtitle = subtitle,
             subtitleColorAttr = subtitleColorAttr,
