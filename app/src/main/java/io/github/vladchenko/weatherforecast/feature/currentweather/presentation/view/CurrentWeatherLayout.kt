@@ -337,6 +337,7 @@ private fun MainContent(
             fontWeight = FontWeight.Bold,
             color = mainContentTextColor,
             fontSize = 36.sp,
+            lineHeight = 40.sp,
         )
         Row(
             modifier = Modifier
