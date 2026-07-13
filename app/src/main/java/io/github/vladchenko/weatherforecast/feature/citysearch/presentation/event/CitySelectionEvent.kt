@@ -1,11 +1,9 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event
 
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
-
 /**
  * Sealed interface representing user actions in the city selection screen.
  *
- * This class is used to communicate UI events from the Compose UI layer to the [io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel]
+ * This class is used to communicate UI events from the Compose UI layer to the [CitySearchViewModel]
  * in a type-safe and centralized manner. Each event corresponds to a specific user interaction,
  * such as typing a query, selecting a city, or navigating back.
  *
@@ -14,7 +12,7 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.City
  * - Clear separation between UI actions and business logic
  * - Easier testing and maintenance
  *
- * Events are consumed by calling [io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel.onEvent] method.
+ * Events are consumed by calling [CitySearchViewModel.onCitySelectionEvent] method.
  */
 sealed interface CitySelectionEvent {
     /**
@@ -29,12 +27,6 @@ sealed interface CitySelectionEvent {
     data object LoadRecentCities : CitySelectionEvent
 
     /**
-     * User requested to navigate back (e.g. clicked "Up" button in toolbar).
-     * Should trigger screen dismissal or navigation up in the back stack.
-     */
-    data object NavigateUp : CitySelectionEvent
-
-    /**
      * The user has updated the city search query.
      *
      * This event is typically emitted on each keystroke (debounced) and triggers
@@ -43,19 +35,6 @@ sealed interface CitySelectionEvent {
      * @property mask The current text entered by the user for city name filtering
      */
     data class UpdateQuery(val mask: String) : CitySelectionEvent
-
-    /**
-     * A city has been selected from the suggestions list or recent cities.
-     *
-     * This event is triggered when the user taps on a predicted city name or selects one from the recent list.
-     * It carries the full domain model of the selected city, including coordinates and location details,
-     * which should be used to update the current city in the app and load its weather forecast.
-     *
-     * After processing, the query should typically be cleared and the keyboard dismissed.
-     *
-     * @property city The selected [io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel] containing name, latitude, longitude, country, and state
-     */
-    data class SelectCity(val city: CityDomainModel) : CitySelectionEvent
 
     /**
      * Requests clearing of the recently used cities cache.

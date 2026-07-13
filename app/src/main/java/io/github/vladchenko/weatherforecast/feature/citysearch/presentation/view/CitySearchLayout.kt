@@ -31,6 +31,8 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.City
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
@@ -43,25 +45,26 @@ import kotlinx.coroutines.FlowPreview
  * - Background image and padded content area
  * - Search input and suggestions via [AddressEdit], including city predictions and recent cities
  *
- * Delegates all interactions (search, selection, navigation, history management) to [onEvent].
+ * Delegates all interactions (search, selection, navigation, history management) to [onCitySelectionEvent].
  *
  * @param queryLabel Hint text for the search input field
  * @param cityUiState Currently typed or selected city name (user input or saved city)
  * @param citySelectionTitle Label displayed above the search field
  * @param appBarUiState Toolbar state including title, subtitle, and styling
- * @param onEvent Callback for user actions: navigation, city selection, recent cities management
+ * @param onCitySelectionEvent Callback for user actions: navigation, city selection, recent cities management
  * @param recentCitiesNamesUiState Recent cities data (optional)
  * @param cityPredictionsUiState City search suggestions (optional)
  */
 @Composable
 @FlowPreview
 @ExperimentalMaterial3Api
-fun CitySelectionLayout(
+fun CitySearchLayout(
     queryLabel: String,
     cityUiState: String,
     citySelectionTitle: String,
     appBarUiState: AppBarUiState,
-    onEvent: (CitySelectionEvent) -> Unit,
+    navigationDispatcher: NavigationEventDispatcher,
+    onCitySelectionEvent: (CitySelectionEvent) -> Unit,
     recentCitiesNamesUiState: WeatherUiState<RecentCities>?,
     cityPredictionsUiState: WeatherUiState<ImmutableList<CityDomainModel>>?,
 ) {
@@ -88,7 +91,7 @@ fun CitySelectionLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(CitySelectionEvent.NavigateUp) }) {
+                    IconButton(onClick = { navigationDispatcher.navigate(NavigationEvent.NavigateUp) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
@@ -119,14 +122,15 @@ fun CitySelectionLayout(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     AddressEdit(
+                        modifier = Modifier,
                         cityName = cityUiState,
                         queryLabel = queryLabel,
-                        modifier = Modifier,
-                        mainContentColor = MaterialTheme.colorScheme.onSurface,
-                        cityMaskPredictions = cityPredictionsUiState,
                         recentCities = recentCitiesNamesUiState,
-                        onEvent = onEvent,
-                        onRecentsDelete = { onEvent(CitySelectionEvent.ClearRecentCities) }
+                        navigationDispatcher = navigationDispatcher,
+                        onCitySelectionEvent = onCitySelectionEvent,
+                        cityMaskPredictions = cityPredictionsUiState,
+                        mainContentColor = MaterialTheme.colorScheme.onSurface,
+                        onRecentsDelete = { onCitySelectionEvent(CitySelectionEvent.ClearRecentCities) }
                     )
                 }
             }

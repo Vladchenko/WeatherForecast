@@ -58,23 +58,23 @@ import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.getWeatherBackgroundResource
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocation
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 
 /**
  * Main weather screen layout.
  *
- * Displays current weather with optional hourly forecast panel, pull-to-refresh,
- * and dynamic background based on weather type.
+ * Displays current weather with optional hourly forecast panel, pull-to-refresh.
  *
  * ## Architecture
  * - Accepts **immutable** `appBarUiState`, `weatherUiState`, `refreshingState` — recomposes only when *new instances* are passed
  * - **No ViewModel or StateFlow dependency** — fully decoupled from business logic
- * - Delegates events to [CurrentWeatherViewModel] via [onEvent] and [onLoadHourlyWeather]
+ * - Delegates events to [CurrentWeatherViewModel] via [onRefreshWeather] and [onLoadHourlyWeather]
  * - Uses `AnimatedContent` with staggered enter/exit for smooth state transitions
  *
  * ## State behavior
@@ -90,12 +90,14 @@ import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
  * - City click fires [CurrentWeatherEvent.NavigateToCitySelection]
  * - Back button fires [CurrentWeatherEvent.NavigateUp]
  *
- * @param refreshingState Current weather refresh state (pull-to-refresh indicator)
- * @param appBarUiState App bar UI state (title, subtitle, colors, visibility)
- * @param onEvent Handler for UI events (navigation, refresh, toggle)
- * @param weatherUiState Current weather UI state (success/loading/error with data)
- * @param onLoadHourlyWeather Callback invoked when hourly forecast is toggled on (expects resolved city)
- * @param hourlyWeatherUiState Hourly forecast UI state (can be null during initial load)
+ * @param refreshingState The current weather refresh state (controls pull-to-refresh indicator).
+ * @param appBarUiState The app bar UI state (title, subtitle, colors, visibility).
+ * @param onRefreshWeather Handler for refresh events.
+ * @param weatherUiState The current weather UI state (success/loading/error with data).
+ * @param onLoadHourlyWeather Callback invoked when the hourly forecast is toggled on;
+ *                            receives the resolved city location.
+ * @param hourlyWeatherUiState The hourly forecast UI state (can be null during initial load).
+ * @param navigationEventDispatcher Dispatcher for handling navigation events.
  */
 @ExperimentalMaterial3Api
 @Composable
@@ -103,10 +105,11 @@ import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 fun CurrentWeatherLayout(
     refreshingState: Boolean,
     appBarUiState: AppBarUiState,
-    onEvent: (CurrentWeatherEvent) -> Unit,
+    onRefreshWeather: () -> Unit,
     weatherUiState: WeatherUiState<CurrentWeatherUi>,
     onLoadHourlyWeather: (CityLocationModel) -> Unit,
-    hourlyWeatherUiState: WeatherUiState<HourlyWeather>?
+    hourlyWeatherUiState: WeatherUiState<HourlyWeather>?,
+    navigationEventDispatcher: NavigationEventDispatcher
 ) {
     val refreshState = rememberPullToRefreshState()
     var showHourlyForecast by remember { mutableStateOf(false) }
@@ -149,7 +152,7 @@ fun CurrentWeatherLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(CurrentWeatherEvent.NavigateUp) }) {
+                    IconButton(onClick = { navigationEventDispatcher.navigate(NavigationEvent.CloseApp) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
@@ -172,6 +175,14 @@ fun CurrentWeatherLayout(
             )
         },
         content = { innerPadding ->
+            val weatherType by remember(weatherUiState) {
+                derivedStateOf {
+                    when (weatherUiState) {
+                        is WeatherUiState.Success -> weatherUiState.data.weatherType
+                        else -> ""
+                    }
+                }
+            }
             BackgroundImage()
             Box(
                 modifier = Modifier
@@ -182,7 +193,7 @@ fun CurrentWeatherLayout(
                     state = refreshState,
                     isRefreshing = refreshingState,
                     onRefresh = {
-                        onEvent(CurrentWeatherEvent.RefreshWeather)
+                        onRefreshWeather()
                     },
                     modifier = Modifier.fillMaxSize(),
                     indicator = {
@@ -258,7 +269,7 @@ fun CurrentWeatherLayout(
                                         MainContent(
                                             innerPadding = PaddingValues(),
                                             mainContentTextColor = MaterialTheme.colorScheme.onSurface,
-                                            onCityClick = { onEvent(CurrentWeatherEvent.NavigateToCitySelection) },
+                                            onCityClick = { navigationEventDispatcher.navigate(NavigationEvent.NavigateToCitySelection) },
                                             uiState = state
                                         )
                                         AnimatedVisibility(visible = showHourlyForecast) {

@@ -22,10 +22,8 @@ import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCity
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.event.CurrentWeatherEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -105,19 +103,6 @@ class CurrentWeatherViewModel @Inject constructor(
     val chosenCityNotFoundStateFlow: SharedFlow<String>
         get() = _chosenCityNotFoundSharedFlow
 
-    /**
-     * SharedFlow that emits navigation and UI side-effect events triggered by user actions or business logic.
-     *
-     * This flow broadcasts one-time commands such as navigating back, opening city selection,
-     * or closing the app. Events are emitted via [sendNavigationEvent] and must be consumed
-     * by the UI layer (e.g., Fragment or Activity) to perform corresponding actions.
-     *
-     * Unlike state, these events are **not sticky** — they represent transient intents and should be handled once.
-     * The UI should collect this flow in a lifecycle-aware scope to avoid leaks.
-     */
-    val navigationEventFlow: SharedFlow<CityNavigationEvent>
-        get() = _navigationEventFlow
-
     private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
         extraBufferCapacity = 1
     )
@@ -126,7 +111,6 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
     private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val _refreshingStateFlow = MutableStateFlow(false)
-    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
     //endregion flows
 
     private var currentJob: Job? = null
@@ -183,56 +167,26 @@ class CurrentWeatherViewModel @Inject constructor(
     }
 
     /**
-     * Starts weather forecast loading triggered by pull-to-refresh.
-     * Sets the refreshing state before launching the actual forecast load.
-     */
-    fun launchWeatherForecastFromPullToRefresh(city: String, latitude: Double, longitude: Double) {
-        _refreshingStateFlow.value = true
-        viewModelScope.launch(exceptionHandler) {
-            launchWeatherForecast(city, latitude, longitude)
-        }
-    }
-
-    /**
-     * Starts weather loading if internet is available and a city is saved.
-     * Called externally (e.g., from WeatherCoordinator) when the screen is active.
-     */
-    fun refreshWeather() {
-        viewModelScope.launch {
-            val city = chosenCityStateFlow.value
-            city?.let {
-                launchWeatherForecast(
-                    it.city,
-                    it.location.latitude,
-                    it.location.longitude
-                )
-            }
-        }
-    }
-
-    /**
-     * Processes user-triggered events from the UI layer.
+     * Refreshes weather data using the currently saved city.
+     * Reuses the last known city location to fetch updated weather information.
      *
-     * Maps [CurrentWeatherEvent.NavigateUp], [NavigateToCitySelection], and [RefreshWeather]
-     * to navigation commands or weather reload using the currently saved city location.
+     * If [isPullToRefresh] is true, sets the refreshing state to true to indicate
+     * a manual pull-to-refresh action (UI can show refresh indicator).
+     *
+     * No-op if no city is currently saved (chosenCityStateFlow is null).
+     * In this case, user should first select a city via city search.
+     *
+     * @param isPullToRefresh true when triggered by user pull-to-refresh gesture
      */
-    fun onEvent(event: CurrentWeatherEvent) {
-        when (event) {
-            is CurrentWeatherEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.CloseApp)
-            is CurrentWeatherEvent.NavigateToCitySelection -> {
-                sendNavigationEvent(CityNavigationEvent.NavigateToCitySelection)
-            }
-            is CurrentWeatherEvent.RefreshWeather -> {
-                _chosenCityStateFlow.value?.let { cityModel ->
-                    cityModel.let {
-                        launchWeatherForecastFromPullToRefresh(
-                            it.city,
-                            it.location.latitude,
-                            it.location.longitude
-                        )
-                    }
-                }
-            }
+    fun refreshWeather(isPullToRefresh: Boolean) {
+        if (isPullToRefresh) _refreshingStateFlow.value = true
+        val city = chosenCityStateFlow.value
+        city?.let {
+            launchWeatherForecast(
+                it.city,
+                it.location.latitude,
+                it.location.longitude
+            )
         }
     }
 
@@ -401,12 +355,6 @@ class CurrentWeatherViewModel @Inject constructor(
                 toWeatherIconRes(weatherIconId)
             }
         )
-
-    private fun sendNavigationEvent(event: CityNavigationEvent) {
-        viewModelScope.launch {
-            _navigationEventFlow.emit(event)
-        }
-    }
 
     private suspend fun loadSavedCity() {
         val savedModel = chosenCityInteractor.loadChosenCity()

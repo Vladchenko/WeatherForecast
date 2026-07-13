@@ -17,13 +17,10 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.even
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.cityselection.CityNavigationEvent
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -43,7 +40,6 @@ import javax.inject.Inject
  * ## State Flows
  * - [_cityMaskStateFlow]: Tracks current text input in the search field
  * - [_cityPredictions]: Holds filtered list of cities matching the query
- * - [_navigationEventFlow]: Emits navigation commands to the UI layer
  *
  * ## Event Handling
  * Uses a sealed class [CitySelectionEvent] to handle all user interactions in a unidirectional data flow manner.
@@ -58,10 +54,6 @@ import javax.inject.Inject
  * ## Error Handling
  * Uses [CoroutineExceptionHandler] to catch and process exceptions during city lookup:
  *    Display raw message via [StatusRenderer]
- *
- * ## Thread Safety
- * All coroutines are launched in [viewModelScope], ensuring automatic cancellation on ViewModel destruction.
- * State updates occur on the main thread, safe for UI observation.
  *
  * @property loggingService Logs errors and debug information
  * @property statusRenderer Displays status messages to the user
@@ -80,22 +72,9 @@ class CitySearchViewModel @Inject constructor(
 ) : ViewModel() {
 
     /**
-     * Flow of navigation events triggered by user actions.
-     *
-     * Emits one-time events such as:
-     * - Navigating back up
-     * - Selecting a specific city to view its weather
-     *
-     * Consumers should collect this flow and trigger corresponding navigation actions.
-     * Events are nullable to allow resetting state if needed.
-     */
-    val navigationEventFlow: SharedFlow<CityNavigationEvent>
-        get() = _navigationEventFlow
-
-    /**
      * State flow representing the current user input in the city search field.
      *
-     * Updated via [onEvent] with [CitySelectionEvent.UpdateQuery].
+     * Updated via [onCitySelectionEvent] with [CitySelectionEvent.UpdateQuery].
      * Used to trigger debounced city name lookups.
      */
     val cityMaskStateFlow: StateFlow<String>
@@ -131,8 +110,8 @@ class CitySearchViewModel @Inject constructor(
         get() = _recentCitiesNamesFlow
 
     private val _cityMaskStateFlow = MutableStateFlow("")
-    private val _cityPredictions = MutableStateFlow<WeatherUiState<ImmutableList<CityDomainModel>>?>(null)
-    private val _navigationEventFlow = MutableSharedFlow<CityNavigationEvent>()
+    private val _cityPredictions =
+        MutableStateFlow<WeatherUiState<ImmutableList<CityDomainModel>>?>(null)
     private val _recentCitiesNamesFlow = MutableStateFlow<WeatherUiState<RecentCities>?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -173,27 +152,13 @@ class CitySearchViewModel @Inject constructor(
      * Processes incoming UI events and updates state accordingly.
      *
      * Dispatches behavior based on event type:
-     * - [CitySelectionEvent.NavigateUp]: Sends navigation up command
-     * - [CitySelectionEvent.SelectCity]: Navigates to weather screen for selected city and adds it to recents
      * - [CitySelectionEvent.ClearQuery]: Resets search query and clears results
      * - [CitySelectionEvent.UpdateQuery]: Updates search mask and triggers debounced search
      *
      * @param event The user action to process
      */
-    fun onEvent(event: CitySelectionEvent) {
+    fun onCitySelectionEvent(event: CitySelectionEvent) {
         when (event) {
-            is CitySelectionEvent.NavigateUp -> sendNavigationEvent(CityNavigationEvent.NavigateUp)
-            is CitySelectionEvent.SelectCity -> {
-                sendNavigationEvent(
-                    CityNavigationEvent.OpenWeatherFor(
-                        event.city
-                    )
-                )
-                viewModelScope.launch {
-                    recentCitiesInteractor.addCityToRecents(event.city)
-                }
-            }
-
             is CitySelectionEvent.ClearQuery -> {
                 _cityMaskStateFlow.value = ""
                 _cityPredictions.value = null
@@ -232,20 +197,6 @@ class CitySearchViewModel @Inject constructor(
         viewModelScope.launch {
             recentCitiesInteractor.deleteRecentCities()
             fetchRecentCities()
-        }
-    }
-
-    /**
-     * Emits a navigation event to the [navigationEventFlow].
-     *
-     * Used to communicate one-shot navigation commands to the UI controller.
-     * Launches in [viewModelScope] to ensure lifecycle safety.
-     *
-     * @param event The navigation command to emit
-     */
-    private fun sendNavigationEvent(event: CityNavigationEvent) {
-        viewModelScope.launch {
-            _navigationEventFlow.emit(event)
         }
     }
 
@@ -292,17 +243,18 @@ class CitySearchViewModel @Inject constructor(
                             result.error.message
                         }
                     }
+
                     else -> result.error.toString()
                 }
                 statusRenderer.showError(errorMessage)
-                WeatherUiState.Error(
+                _cityPredictions.value = WeatherUiState.Error(
                     city = city,
                     errorMessage
                 )
             }
 
             null -> {
-                WeatherUiState.Error(
+                _cityPredictions.value = WeatherUiState.Error(
                     city = city,
                     ""
                 )

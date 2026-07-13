@@ -11,22 +11,26 @@ import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import kotlinx.collections.immutable.ImmutableList
 
 /**
- * Composable wrapper for city search input with integrated auto-complete UI.
+ * A composable wrapper for the city search input field with integrated auto-complete UI.
  *
- * Connects user actions in [AutoCompleteUI] to [CitySelectionEvent] events.
- * Automatically triggers loading of recent cities on first focus.
+ * This component connects user actions from [AutoCompleteUI] to [CitySelectionEvent] events.
+ * It automatically triggers loading of recent cities when the input field receives focus
+ * for the first time.
  *
- * @param cityName Current city name/query
- * @param queryLabel Label for the search field
- * @param modifier Modifier for the container
- * @param mainContentColor Primary UI color
- * @param cityMaskPredictions Current prediction results
- * @param recentCities Current recent cities data
- * @param onEvent Event dispatcher for user actions
- * @param onRecentsDelete Called when user requests deletion of all recent cities
+ * @param cityName The current city name or search query text
+ * @param queryLabel The label text displayed in the search field
+ * @param modifier The modifier to be applied to the container
+ * @param mainContentColor The primary UI color used for styling
+ * @param cityMaskPredictions The current list of prediction results, wrapped in [WeatherUiState]
+ * @param recentCities The current recent cities data, wrapped in [WeatherUiState]
+ * @param onRecentsDelete Callback invoked when the user requests deletion of all recent cities
+ * @param navigationDispatcher Dispatcher for navigation events
+ * @param onCitySelectionEvent Callback for dispatching city selection events
  */
 @Composable
 fun AddressEdit(
@@ -34,10 +38,11 @@ fun AddressEdit(
     queryLabel: String,
     modifier: Modifier,
     mainContentColor: Color,
-    cityMaskPredictions: WeatherUiState<ImmutableList<CityDomainModel>>?,
+    onRecentsDelete: () -> Unit,
     recentCities: WeatherUiState<RecentCities>?,
-    onEvent: (CitySelectionEvent) -> Unit,
-    onRecentsDelete: () -> Unit
+    navigationDispatcher: NavigationEventDispatcher,
+    onCitySelectionEvent: (CitySelectionEvent) -> Unit,
+    cityMaskPredictions: WeatherUiState<ImmutableList<CityDomainModel>>?
 ) {
     Column(modifier = modifier.padding(top = 8.dp)) {
         AutoCompleteUI(
@@ -48,27 +53,28 @@ fun AddressEdit(
             mainContentColor = mainContentColor,
             onQueryChanged = { updatedCityMask ->
                 if (updatedCityMask.isNotBlank()) {
-                    onEvent(CitySelectionEvent.UpdateQuery(updatedCityMask))
+                    onCitySelectionEvent(CitySelectionEvent.UpdateQuery(updatedCityMask))
                 }
             },
             predictions = cityMaskPredictions,
             recentCities = recentCities,
-            onClearClick = { onEvent(CitySelectionEvent.ClearQuery) },
+            onClearClick = { onCitySelectionEvent(CitySelectionEvent.ClearQuery) },
             onDoneActionClick = { /* handled inside */ },
-            onFirstFocus = { onEvent(CitySelectionEvent.LoadRecentCities) },
+            onFirstFocus = { onCitySelectionEvent(CitySelectionEvent.LoadRecentCities) },
             onItemClick = { selectedCity ->
-                onEvent(
-                    CitySelectionEvent.SelectCity(
-                        CityDomainModel(
-                            name = selectedCity.name,
-                            state = selectedCity.state,
-                            country = selectedCity.country,
-                            lat = selectedCity.lat,
-                            lon = selectedCity.lon
+                navigationDispatcher.navigate(
+                    event =
+                        NavigationEvent.ShowWeatherFor(
+                            CityDomainModel(
+                                name = selectedCity.name,
+                                state = selectedCity.state,
+                                country = selectedCity.country,
+                                lat = selectedCity.lat,
+                                lon = selectedCity.lon
+                            )
                         )
-                    )
                 )
-                onEvent(CitySelectionEvent.ClearQuery)
+                onCitySelectionEvent(CitySelectionEvent.ClearQuery)
             },
             onRecentsDelete = onRecentsDelete
         )

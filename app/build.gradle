@@ -113,18 +113,17 @@ dependencies {
     implementation libs.androidx.activity.ktx
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
-    implementation libs.androidx.fragment.ktx
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.datastore.preferences
+    implementation libs.androidx.hilt.work
+    implementation libs.androidx.hilt.navigation.compose
+    implementation libs.androidx.legacy.support.v4
     implementation libs.androidx.lifecycle.viewmodel.ktx
     implementation libs.androidx.lifecycle.livedata.ktx
     implementation libs.androidx.lifecycle.runtime.compose
     implementation libs.androidx.lifecycle.runtime.ktx
-    implementation libs.androidx.navigation.fragment.ktx
-    implementation libs.androidx.navigation.ui.ktx
-    implementation libs.androidx.datastore.preferences
+    implementation libs.androidx.navigation.compose
     implementation libs.androidx.work.runtime.ktx
-    implementation libs.androidx.hilt.work
-    implementation libs.androidx.constraintlayout
-    implementation libs.androidx.legacy.support.v4
 
     // --- Room ---
     implementation libs.androidx.room.ktx

@@ -3,12 +3,14 @@ package io.github.vladchenko.weatherforecast.presentation.coordinator
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavController
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.model.CurrentScreen
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.core.ui.navigation.WeatherNavigator
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
+import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_SEARCH
+import io.github.vladchenko.weatherforecast.presentation.navigation.Route.WEATHER
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -26,19 +28,26 @@ import kotlinx.coroutines.flow.shareIn
  * - Ensures resource-efficient observation using [WhileSubscribed(5000)]
  * - Avoids duplicate UI updates with [distinctUntilChanged]
  *
- * The coordinator integrates with the app's navigation state via [WeatherNavigator] to make
- * context-aware decisions (e.g., not triggering weather refresh on city selection screen).
+ * The coordinator integrates with the app's navigation state via [navController] to make
+ * context-sensitive decisions (e.g., not triggering weather refresh on city selection screen)
+ * by checking the current destination route.
  *
+ * ## Compose Navigation
+ * Uses `navController.currentDestination?.route` to determine the current screen.
+ * This approach works with both:
+ * - `startDestination = "current_weather"` (with path parameters)
+ * - `startDestination = "city_search"`
+ *
+ * @property navController Navigation controller used to determine the current screen via `route`
  * @property statusRenderer Renders status and error messages to the UI
  * @property resourceManager Provides localized string resources
- * @property weatherNavigator Determines the current screen to enable context-sensitive behavior
  * @property connectivityObserver Source of network connectivity state
  * @property currentWeatherViewModel Triggers weather data refresh when connection is restored
  */
 class NetworkStatusCoordinator(
+    private val navController: NavController,
     private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
-    private val weatherNavigator: WeatherNavigator,
     private val connectivityObserver: ConnectivityObserver,
     private val currentWeatherViewModel: CurrentWeatherViewModel
 ) : DefaultLifecycleObserver {
@@ -70,11 +79,14 @@ class NetworkStatusCoordinator(
                 if (lastConnectionState != isConnected) {
                     when (isConnected) {
                         true -> {
-                            when(weatherNavigator.getCurrentDestination()) {
-                                CurrentScreen.Weather -> {
-                                    currentWeatherViewModel.refreshWeather()
+                            val route = navController.currentDestination?.route.orEmpty()
+                            when {
+                                route.contains(WEATHER) -> {
+                                    currentWeatherViewModel.refreshWeather(false)
                                 }
-                                CurrentScreen.CitySelection -> {}
+                                route == CITY_SEARCH -> {
+                                    // Do nothing
+                                }
                             }
                             statusRenderer.showStatus(resourceManager.getString(R.string.network_connected))
                         }
