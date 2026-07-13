@@ -2,6 +2,7 @@ package io.github.vladchenko.weatherforecast.presentation.view.activities
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,14 +21,24 @@ import io.github.vladchenko.weatherforecast.core.ui.systembars.setLightStatusBar
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setTransparentSystemBars
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
+import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
+import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcherImpl
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Inject
 
 /**
@@ -56,25 +67,96 @@ class WeatherActivity : AppCompatActivity() {
     @Inject
     lateinit var resourceManager: ResourceManager
 
+    @Inject
+    lateinit var permissionResolver: PermissionResolver
+
+    @Inject
+    lateinit var dialogController: WeatherDialogController
+
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()
     private val weatherViewModel: CurrentWeatherViewModel by viewModels()
-
+    private val geoLocationViewModel: GeoLocationViewModel by viewModels()
     private val hourlyWeatherViewModel: HourlyWeatherViewModel by viewModels()
 
-    private lateinit var networkCoordinator: NetworkStatusCoordinator
+    private val networkCoordinatorRef: NetworkStatusCoordinator by lazy {
+        NetworkStatusCoordinator(
+            navController = navControllerRef,
+            statusRenderer = statusRenderer,
+            resourceManager = resourceManager,
+            connectivityObserver = connectivityObserver,
+            currentWeatherViewModel = weatherViewModel
+        )
+    }
+    
+    private val weatherCoordinatorRef: WeatherCoordinator by lazy {
+        val geoLocationCallback = GeoLocationCallback { event ->
+            when (event) {
+                GeoLocationCallbackEvent.GotoCitySelection -> {
+                    navigationDispatcher.navigate(NavigationEvent.NavigateToCitySelection())
+                }
+                GeoLocationCallbackEvent.RequestPermission -> {
+                    permissionResolver.requestLocationPermission()
+                }
+                GeoLocationCallbackEvent.OnPermanentlyDenied,
+                GeoLocationCallbackEvent.OnNegativeNoPermission -> {
+                    finishAffinity()
+                }
+                is GeoLocationCallbackEvent.OnForecastLoadForLocation -> {
+                    weatherViewModel.launchWeatherForecast(
+                        event.locationModel.city,
+                        event.locationModel.location.latitude,
+                        event.locationModel.location.longitude
+                    )
+                }
+            }
+        }
+        
+        WeatherCoordinator.Factory().create(
+            callback = geoLocationCallback,
+            statusRenderer = statusRenderer,
+            appBarViewModel = appBarViewModel,
+            resourceManager = resourceManager,
+            permissionResolver = permissionResolver,
+            dialogController = dialogController,
+            forecastViewModel = weatherViewModel,
+            geoLocationViewModel = geoLocationViewModel
+        )
+    }
+    
+    private lateinit var navigationDispatcher: NavigationEventDispatcher
+    private lateinit var navControllerRef: NavController
+    
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            permissionResolver.handlePermissionResult(isGranted)
+        }
 
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Connect permission resolver to activity result launcher
+        permissionResolver.connect(
+            launcher = requestPermissionLauncher,
+            onPermissionResult = { isGranted ->
+                geoLocationViewModel.onPermissionResolution(isGranted)
+            }
+        )
+        
+        // Set Activity context for dialog controller to use AppCompat theme
+        (dialogController as WeatherDialogControllerImpl).setActivityContext(this)
+        
         setContent {
             val navController = rememberNavController()
-            val navigationDispatcher = NavigationEventDispatcherImpl(
+            navigationDispatcher = NavigationEventDispatcherImpl(
                 navController,
                 {
                     this.finishAffinity()
                 } )
-            initNetworkCoordinator(navController)
+            navControllerRef = navController
+            // Initialize coordinators after navController is set
+            initNetworkCoordinator()
             WeatherForecastTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -100,16 +182,19 @@ class WeatherActivity : AppCompatActivity() {
         hideBottomNavigationBar()
     }
 
-    private fun initNetworkCoordinator(navController: NavController) {
-        if (::networkCoordinator.isInitialized) return
-        networkCoordinator = NetworkStatusCoordinator(
-            navController = navController,
-            statusRenderer = statusRenderer,
-            resourceManager = resourceManager,
-            connectivityObserver = connectivityObserver,
-            currentWeatherViewModel = weatherViewModel
-        )
-        lifecycle.addObserver(networkCoordinator)
+    private fun initNetworkCoordinator() {
+        lifecycle.addObserver(networkCoordinatorRef)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val scope = kotlinx.coroutines.CoroutineScope(SupervisorJob())
+        weatherCoordinatorRef.startObserving(scope, lifecycle)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Observation stops automatically when lifecycle goes to STOPPED state
     }
 
     private fun isLightTheme(): Boolean {

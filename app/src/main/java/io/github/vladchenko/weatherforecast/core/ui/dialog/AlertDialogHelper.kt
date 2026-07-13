@@ -30,12 +30,15 @@ class AlertDialogHelper @Inject constructor(
      * - Not dismissible by tapping outside (`setCanceledOnTouchOutside(false)`)
      *
      * @param delegate The delegate providing title, message, and action callbacks
+     * @param context Optional context for dialog creation. If null, uses the injected context.
+     *                Use Activity context (e.g., this@Activity) for AppCompat themes.
      * @return Fully configured [AlertDialog] instance, ready to be shown
      *
      * @see AlertDialogDelegate for defining dialog content and behavior
      */
-    fun createDialog(delegate: AlertDialogDelegate): AlertDialog {
-        val alertDialogBuilder = delegate.createAlertDialogBuilder(context)
+    fun createDialog(delegate: AlertDialogDelegate, context: Context? = null): AlertDialog {
+        val dialogContext = context ?: this.context
+        val alertDialogBuilder = delegate.createAlertDialogBuilder(dialogContext)
         val dialog = alertDialogBuilder.create()
         dialog.setCancelable(false)
         dialog.setCanceledOnTouchOutside(false)
@@ -48,10 +51,12 @@ class AlertDialogHelper @Inject constructor(
      * Convenience method that combines dialog creation and display.
      *
      * @param delegate The delegate defining the dialog's content and actions
+     * @param context Optional context for dialog creation. If null, uses the injected context.
+     *                Use Activity context (e.g., this@Activity) for AppCompat themes.
      *
      * @see createDialog for creating without immediate show
      */
-    fun showDialog(delegate: AlertDialogDelegate) {
-        createDialog(delegate).show()
+    fun showDialog(delegate: AlertDialogDelegate, context: Context? = null) {
+        createDialog(delegate, context).show()
     }
 }
