@@ -6,9 +6,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavOptions
-import androidx.navigation.navOptions
-import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
@@ -67,15 +64,4 @@ fun CurrentWeatherScreen(
         onRefreshWeather = { weatherViewModel.refreshWeather(true) },
         onLoadHourlyWeather = { data -> hourlyViewModel.loadHourlyWeatherForLocation(data) }
     )
-}
-
-private fun fadeNavOptions(): NavOptions = navOptions {
-    anim {
-        enter = R.anim.fade_in
-        exit = R.anim.fade_out
-        popEnter = R.anim.fade_in
-        popExit = R.anim.fade_out
-    }
-    launchSingleTop = true
-    restoreState = true
 }

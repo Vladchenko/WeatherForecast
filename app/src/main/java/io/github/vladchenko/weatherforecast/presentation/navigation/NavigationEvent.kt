@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.presentation.navigation
 
+import androidx.navigation.NavOptions
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 
 /**
@@ -34,8 +35,11 @@ sealed interface NavigationEvent {
      * This event instructs the UI to open the city search or city list screen,
      * allowing the user to pick a new location for the weather forecast.
      * Typically triggered from a "Change City" button or action in the toolbar.
+     *
+     * @param navOptions Optional navigation options for custom animations and behavior.
+     *                   If null, default navigation behavior is used.
      */
-    data object NavigateToCitySelection : NavigationEvent
+    data class NavigateToCitySelection(val navOptions: NavOptions? = null) : NavigationEvent
 
     /**
      * Navigates to the weather forecast screen for the specified city.

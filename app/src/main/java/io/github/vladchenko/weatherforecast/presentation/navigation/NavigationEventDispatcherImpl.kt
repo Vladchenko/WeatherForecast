@@ -1,8 +1,12 @@
 package io.github.vladchenko.weatherforecast.presentation.navigation
 
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
+import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.urlEncode
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_SEARCH
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.weather
 
@@ -51,11 +55,20 @@ class NavigationEventDispatcherImpl(
             }
 
             is NavigationEvent.NavigateToCitySelection -> {
-                navController.navigate(CITY_SEARCH) {
-                    popUpTo(CITY_SEARCH) { inclusive = true } // или true, если нужно удалить весь стек
-                    launchSingleTop = true
-                }
+                val navOptions = event.navOptions ?: fadeNavOptions()
+                navController.navigate(CITY_SEARCH, navOptions)
             }
         }
     }
+}
+
+fun fadeNavOptions(): NavOptions = navOptions {
+    anim {
+        enter = R.anim.fade_in
+        exit = R.anim.fade_out
+        popEnter = R.anim.fade_in
+        popExit = R.anim.fade_out
+    }
+    launchSingleTop = true
+    restoreState = true
 }

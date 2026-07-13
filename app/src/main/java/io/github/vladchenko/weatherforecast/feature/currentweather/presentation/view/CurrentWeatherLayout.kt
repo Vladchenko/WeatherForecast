@@ -63,6 +63,7 @@ import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocat
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 
@@ -269,7 +270,13 @@ fun CurrentWeatherLayout(
                                         MainContent(
                                             innerPadding = PaddingValues(),
                                             mainContentTextColor = MaterialTheme.colorScheme.onSurface,
-                                            onCityClick = { navigationEventDispatcher.navigate(NavigationEvent.NavigateToCitySelection) },
+                                            onCityClick = {
+                                                navigationEventDispatcher.navigate(
+                                                    NavigationEvent.NavigateToCitySelection(
+                                                        fadeNavOptions()
+                                                    )
+                                                )
+                                            },
                                             uiState = state
                                         )
                                         AnimatedVisibility(visible = showHourlyForecast) {
