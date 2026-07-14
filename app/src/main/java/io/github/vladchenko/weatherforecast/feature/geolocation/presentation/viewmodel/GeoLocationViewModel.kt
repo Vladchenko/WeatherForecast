@@ -43,7 +43,7 @@ import javax.inject.Inject
 class GeoLocationViewModel @Inject constructor(
     connectivityObserver: ConnectivityObserver,
     private val geoLocationHelper: Geolocator,
-    private val loggingService: LoggingService,
+    val loggingService: LoggingService,
     private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
     private val geoLocator: DeviceLocationProvider,
@@ -66,9 +66,9 @@ class GeoLocationViewModel @Inject constructor(
 
     /**
      * Emits the current state of location permission request:
-     * - [io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission.Requested] – permission is being requested
-     * - [io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission.Denied] – user denied permission once
-     * - [io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission.PermanentlyDenied] – user denied multiple times (treated as permanent denial)
+     * - [GeoLocationPermission.Requested] – permission is being requested
+     * - [GeoLocationPermission.Denied] – user denied permission once
+     * - [GeoLocationPermission.PermanentlyDenied] – user denied multiple times (treated as permanent denial)
      *
      * Used by the UI to show appropriate rationale or redirect to settings.
      */
@@ -162,29 +162,14 @@ class GeoLocationViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Request geo location permission, when it is not granted.
-     */
-    fun requestGeoLocationPermission() {
-        if (permissionChecker.hasLocationPermission()) {
-            defineCurrentGeoLocation()
-        } else {
-            permissionRequests++
-            if (permissionRequests > 2) {
-                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.PermanentlyDenied)
-            } else {
-                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Requested)
-                loggingService.logInfoEvent(TAG, "Geo location permission requested")
-            }
-        }
-    }
-
     fun resetGeoLocationRequestAttempts() {
+        loggingService.logInfoEvent(TAG, "resetGeoLocationRequestAttempts called: resetting permissionRequests from $permissionRequests to 0")
         permissionRequests = 0
         geoLocatingAttempts = 0
     }
 
     fun defineCurrentGeoLocation() {
+        loggingService.logInfoEvent(TAG, "defineCurrentGeoLocation called")
         geoLocator.defineCurrentLocation(object : GeoLocationListener {
             override fun onCurrentGeoLocationSuccess(location: Location) {
                 _geoLocationSuccessFlow.tryEmit(location)
@@ -196,8 +181,9 @@ class GeoLocationViewModel @Inject constructor(
             }
 
             override fun onNoGeoLocationPermission() {
-                loggingService.logInfoEvent(TAG, "No geo location permission - requesting it")
-                requestGeoLocationPermission()
+                loggingService.logInfoEvent(TAG, "No geo location permission - emitting Requested")
+                // Emit Requested state to trigger permission request via WeatherActivity
+                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Requested)
             }
         })
     }
@@ -206,10 +192,25 @@ class GeoLocationViewModel @Inject constructor(
      * Proceed with a geo location permission result, having [isGranted] flag as a permission result.
      */
     fun onPermissionResolution(isGranted: Boolean) {
+        loggingService.logInfoEvent(TAG, "onPermissionResolution: isGranted=$isGranted, previous permissionRequests=$permissionRequests")
         if (isGranted) {
+            // Reset permission counter when permission is granted
+            permissionRequests = 0
+            loggingService.logInfoEvent(TAG, "onPermissionResolution: permission granted, permissionRequests reset to 0")
+            // Immediately proceed with location retrieval
             defineCurrentGeoLocation()
         } else {
-            _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Denied)
+            loggingService.logInfoEvent(TAG, "onPermissionResolution: permission denied")
+            // Increment counter on denial and emit Denied state
+            permissionRequests++
+            loggingService.logInfoEvent(TAG, "onPermissionResolution: incrementing permissionRequests to $permissionRequests")
+            if (permissionRequests > 1) {
+                loggingService.logInfoEvent(TAG, "onPermissionResolution: emitting PermanentlyDenied (permissionRequests=$permissionRequests)")
+                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.PermanentlyDenied)
+            } else {
+                loggingService.logInfoEvent(TAG, "onPermissionResolution: emitting Denied (permissionRequests=$permissionRequests)")
+                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Denied)
+            }
         }
     }
 

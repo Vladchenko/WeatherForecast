@@ -151,7 +151,6 @@ class GeoLocationCoordinator(
                     statusRenderer.showWarning(resourceManager.getString(R.string.geo_permission_denied))
                     dialogController.showNoPermission(
                         onPositiveClick = {
-                            geoLocationViewModel.resetGeoLocationRequestAttempts()
                             permissionResolver.requestLocationPermission()
                         },
                         onNegativeClick = {
@@ -171,8 +170,9 @@ class GeoLocationCoordinator(
                     statusRenderer.showError(resourceManager.getString(R.string.geo_permission_denied_permanently))
                     dialogController.showPermissionPermanentlyDenied(
                         onPositiveClick = {
-                            geoLocationViewModel.resetGeoLocationRequestAttempts()
-                            permissionResolver.requestLocationPermission()
+                            callback.onEvent(
+                                GeoLocationCallbackEvent.OnPermanentlyDenied
+                            )
                         },
                         onNegativeClick = {
                             callback.onEvent(

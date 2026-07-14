@@ -50,7 +50,7 @@
     <string name="geo_fail_title">Geolocation failed</string>
     <string name="geo_fail_subtitle">Confirm to select a new city or cancel to retry</string>
     <string name="geo_permission_denied">Geolocation permission denied</string>
-    <string name="geo_permission_denied_permanently">Geolocation permission permanently denied.\nEnable it in app settings or try again later.</string>
+    <string name="geo_permission_denied_permanently">Geolocation permission permanently denied.\nEnable it in app settings, app quits.</string>
 
     <string name="geo_resolving_for_city">Finding location for %1$s…</string>
     <string name="geo_resolution_failed">Unable to get get location. Check your connection.</string>
