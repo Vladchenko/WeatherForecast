@@ -28,13 +28,13 @@ interface CurrentWeatherDAO {
      * Inserts a new weather forecast into the database.
      *
      * If a conflict occurs (e.g., a forecast for the same city already exists),
-     * the existing record is replaced due to [androidx.room.OnConflictStrategy.Companion.REPLACE].
+     * the existing record is replaced due to [androidx.room.OnConflictStrategy.REPLACE].
      * Uses the primary key and field values from [model] to determine the conflict.
      *
      * @return The row ID of the inserted [io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity].
      */
     @InternalSerializationApi
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCityForecast(model: CurrentWeatherEntity): Long
 
     /**

@@ -16,7 +16,7 @@ import kotlinx.serialization.InternalSerializationApi
 interface CitySearchDAO {
 
     @InternalSerializationApi
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)    // Replaces an old entity with a new one, when a conflict arises
+    @Insert(onConflict = OnConflictStrategy.REPLACE)    // Replaces an old entity with a new one, when a conflict arises
     suspend fun insertCitiesNames(citiesNames: List<CitySearchEntity>): LongArray
 
     @InternalSerializationApi

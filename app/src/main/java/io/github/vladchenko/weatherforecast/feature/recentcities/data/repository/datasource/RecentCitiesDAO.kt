@@ -26,7 +26,7 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.Rece
  */
 @Dao
 interface RecentCitiesDAO {
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdate(city: RecentCitiesEntity): Long
 
     @Query("SELECT * FROM recentCitiesNames ORDER BY lastUsed DESC")
