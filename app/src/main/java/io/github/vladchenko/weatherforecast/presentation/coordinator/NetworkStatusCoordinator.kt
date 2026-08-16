@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavController
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -31,15 +32,15 @@ import kotlinx.coroutines.flow.shareIn
  * @property navController Navigation controller used to determine the current screen and decide whether to refresh weather data.
  * @property resourceManager Provides localized string resources for UI messages.
  * @property statusStateHolder Manages and broadcasts UI status messages (info for connected, error for disconnected).
+ * @property networkStateHolder Manages network connectivity (connect or disconnect)
  * @property connectivityObserver Provides the stream of network connectivity states.
- * @property currentWeatherViewModel Triggers a weather data refresh when the network is restored and the weather screen is active.
  */
 class NetworkStatusCoordinator(
     private val navController: NavController,
     private val resourceManager: ResourceManager,
     private val statusStateHolder: StatusStateHolder,
+    private val networkStateHolder: NetworkStateHolder,
     private val connectivityObserver: ConnectivityObserver,
-    private val currentWeatherViewModel: CurrentWeatherViewModel
 ) : DefaultLifecycleObserver {
 
     /**
@@ -80,7 +81,8 @@ class NetworkStatusCoordinator(
                             val route = navController.currentDestination?.route.orEmpty()
                             when {
                                 route.contains(WEATHER) -> {
-                                    currentWeatherViewModel.refreshWeather(false)
+//                                    currentWeatherViewModel.refreshWeather(false)
+                                    networkStateHolder.updateState(true)
                                 }
 
                                 route == CITY_SEARCH -> {
@@ -96,9 +98,12 @@ class NetworkStatusCoordinator(
                             )
                         }
 
-                        false -> statusStateHolder.updateStatus(
-                            StatusType.Error(resourceManager.getString(R.string.network_disconnected))
-                        )
+                        false -> {
+                            statusStateHolder.updateStatus(
+                                StatusType.Error(resourceManager.getString(R.string.network_disconnected))
+                            )
+                            networkStateHolder.updateState(false)
+                        }
                     }
                     lastConnectionState = isConnected
                 }

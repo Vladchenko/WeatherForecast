@@ -8,6 +8,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserverImpl
 import okhttp3.OkHttpClient
@@ -59,5 +61,11 @@ class NetworkModule {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideNetworkStateHolder(): NetworkStateHolder {
+        return NetworkStateHolderImpl()
     }
 }

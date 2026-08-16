@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -74,6 +75,9 @@ class WeatherActivity : AppCompatActivity() {
     @Inject
     lateinit var statusStateHolder: StatusStateHolder
 
+    @Inject
+    lateinit var networkStateHolder: NetworkStateHolder
+
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()
     private val weatherViewModel: CurrentWeatherViewModel by viewModels()
@@ -85,8 +89,8 @@ class WeatherActivity : AppCompatActivity() {
             navController = navControllerRef,
             resourceManager = resourceManager,
             statusStateHolder = statusStateHolder,
+            networkStateHolder = networkStateHolder,
             connectivityObserver = connectivityObserver,
-            currentWeatherViewModel = weatherViewModel
         )
     }
 

@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -67,12 +68,14 @@ class WeatherForecastModule {
     fun provideAppBarViewModelFactory(
         stateHolder: StatusStateHolder,
         resourceManager: ResourceManager,
-        appBarStateMapper: AppBarStateMapper
+        appBarStateMapper: AppBarStateMapper,
+        networkStateHolder: NetworkStateHolder
     ): AppBarViewModelFactory {
         return AppBarViewModelFactory(
             stateHolder,
             resourceManager,
             appBarStateMapper,
+            networkStateHolder
         )
     }
 }

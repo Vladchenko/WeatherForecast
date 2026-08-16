@@ -10,6 +10,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
@@ -66,6 +67,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val statusStateHolder: StatusStateHolder,
+    private val networkStateHolder: NetworkStateHolder,
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val weatherDomainToUiMapper: WeatherDomainToUiMapper,
@@ -138,6 +140,16 @@ class CurrentWeatherViewModel @Inject constructor(
             preferencesManager.temperatureTypeStateFlow.collect { tempType ->
                 loggingService.logDebugEvent(TAG, "Temperature unit changed: $tempType")
                 temperatureType = tempType
+            }
+        }
+        viewModelScope.launch(exceptionHandler) {
+            networkStateHolder.networkStateFlow.collect { state ->
+                when(state) {
+                    false -> {} // Do nothing
+                    true -> {
+                        refreshWeather(false)
+                    }
+                }
             }
         }
     }

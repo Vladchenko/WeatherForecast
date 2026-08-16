@@ -2,6 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -21,6 +22,7 @@ import kotlinx.serialization.InternalSerializationApi
  * @property stateHolder manages and broadcasts UI status messages (loading, errors, info)
  * @property resourceManager provides access to application string resources
  * @property preferencesManager manages user preferences (e.g., temperature units)
+ * @property networkStateHolder manages network connectivity (connect or disconnect)
  * @property chosenCityInteractor handles persistence of the last selected city
  * @property weatherInteractor provides domain logic for loading weather forecast data
  * @property uiConverter converts domain models to UI presentation models
@@ -30,6 +32,7 @@ class CurrentWeatherViewModelFactory(
     private val stateHolder: StatusStateHolder,
     private val resourceManager: ResourceManager,
     private val uiConverter: WeatherDomainToUiMapper,
+    private val networkStateHolder: NetworkStateHolder,
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val weatherInteractor: CurrentWeatherInteractor,
@@ -50,6 +53,7 @@ class CurrentWeatherViewModelFactory(
                 loggingService,
                 resourceManager,
                 stateHolder,
+                networkStateHolder,
                 preferencesManager,
                 chosenCityInteractor,
                 uiConverter,

@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -135,6 +136,7 @@ class CurrentWeatherModule {
         loggingService: LoggingService,
         stateHolder: StatusStateHolder,
         resourceManager: ResourceManager,
+        networkStateHolder: NetworkStateHolder,
         preferencesManager: PreferencesManager,
         chosenCityInteractor: ChosenCityInteractor,
         forecastRemoteInteractor: CurrentWeatherInteractor,
@@ -145,6 +147,7 @@ class CurrentWeatherModule {
             stateHolder,
             resourceManager,
             uiConverter,
+            networkStateHolder,
             preferencesManager,
             chosenCityInteractor,
             forecastRemoteInteractor
