@@ -27,8 +27,9 @@ import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocati
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
+import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelectionCoordinator
+import io.github.vladchenko.weatherforecast.presentation.coordinator.GeoLocationCoordinator
 import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
-import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoordinator
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
@@ -88,20 +89,19 @@ class WeatherActivity : AppCompatActivity() {
             currentWeatherViewModel = weatherViewModel
         )
     }
-    
-    private val weatherCoordinatorRef: WeatherCoordinator by lazy {
+
+    private val geoLocationCoordinatorRef: GeoLocationCoordinator by lazy {
         val geoLocationCallback = GeoLocationCallback { event ->
             when (event) {
-                GeoLocationCallbackEvent.GotoCitySelection -> {
-                    navigationDispatcher.navigate(NavigationEvent.NavigateToCitySelection())
-                }
-                GeoLocationCallbackEvent.RequestPermission -> {
+                is GeoLocationCallbackEvent.RequestPermission -> {
                     permissionResolver.requestLocationPermission()
                 }
-                GeoLocationCallbackEvent.OnPermanentlyDenied,
-                GeoLocationCallbackEvent.OnNegativeNoPermission -> {
+
+                is GeoLocationCallbackEvent.OnPermanentlyDenied,
+                is GeoLocationCallbackEvent.OnNegativeNoPermission -> {
                     finishAffinity()
                 }
+
                 is GeoLocationCallbackEvent.OnForecastLoadForLocation -> {
                     weatherViewModel.launchWeatherForecast(
                         event.locationModel.city,
@@ -109,23 +109,44 @@ class WeatherActivity : AppCompatActivity() {
                         event.locationModel.location.longitude
                     )
                 }
+
+                else -> {}
             }
         }
-        
-        WeatherCoordinator.Factory().create(
+
+        GeoLocationCoordinator.Factory().create(
             statusStateHolder = statusStateHolder,
             callback = geoLocationCallback,
             resourceManager = resourceManager,
             permissionResolver = permissionResolver,
             dialogController = dialogController,
-            forecastViewModel = weatherViewModel,
             geoLocationViewModel = geoLocationViewModel
         )
     }
-    
+
+    private val geoCitySelectionCoordinatorRef: CitySelectionCoordinator by lazy {
+        val geoLocationCallback = GeoLocationCallback { event ->
+            when (event) {
+                is GeoLocationCallbackEvent.GotoCitySelection -> {
+                    navigationDispatcher.navigate(NavigationEvent.NavigateToCitySelection())
+                }
+
+                else -> {}
+            }
+        }
+        CitySelectionCoordinator.Factory().create(
+            resourceManager = resourceManager,
+            dialogController = dialogController,
+            forecastViewModel = weatherViewModel,
+            statusStateHolder = statusStateHolder,
+            geoLocationCoordinator = geoLocationCoordinatorRef,
+            callback = geoLocationCallback
+        )
+    }
+
     private lateinit var navigationDispatcher: NavigationEventDispatcher
     private lateinit var navControllerRef: NavController
-    
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             permissionResolver.handlePermissionResult(isGranted)
@@ -134,7 +155,7 @@ class WeatherActivity : AppCompatActivity() {
     @ExperimentalMaterial3Api
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Connect permission resolver to activity result launcher
         permissionResolver.connect(
             launcher = requestPermissionLauncher,
@@ -142,17 +163,17 @@ class WeatherActivity : AppCompatActivity() {
                 geoLocationViewModel.onPermissionResolution(isGranted)
             }
         )
-        
+
         // Set Activity context for dialog controller to use AppCompat theme
         (dialogController as WeatherDialogControllerImpl).setActivityContext(this)
-        
+
         setContent {
             val navController = rememberNavController()
             navigationDispatcher = NavigationEventDispatcherImpl(
                 navController,
                 {
                     this.finishAffinity()
-                } )
+                })
             navControllerRef = navController
             // Initialize coordinators after navController is set
             initNetworkCoordinator()
@@ -188,7 +209,8 @@ class WeatherActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         val scope = kotlinx.coroutines.CoroutineScope(SupervisorJob())
-        weatherCoordinatorRef.startObserving(scope, lifecycle)
+        geoLocationCoordinatorRef.startObserving(scope, lifecycle)
+        geoCitySelectionCoordinatorRef.startObserving(scope, lifecycle)
     }
 
     override fun onStop() {

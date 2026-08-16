@@ -269,4 +269,49 @@ class GeoLocationCoordinator(
             )
         }
     }
+
+    /**
+     * Factory class for creating configured instances of [GeoLocationCoordinator].
+     *
+     * Encapsulates dependency injection logic and ensures proper wiring of internal components,
+     * promoting loose coupling and testability.
+     */
+    class Factory {
+        /**
+         * Creates and returns a fully configured [GeoLocationCoordinator] instance.
+         *
+         * Initializes the coordinator with all required dependencies:
+         * - [GeoLocationCallback] for event propagation to the UI layer.
+         * - [ResourceManager] for localized string resources.
+         * - [PermissionResolver] for handling runtime location permissions.
+         * - [StatusStateHolder] for broadcasting UI status updates.
+         * - [WeatherDialogController] for managing dialog presentation.
+         * - [GeoLocationViewModel] as the source of geolocation state.
+         *
+         * @param callback Interface for sending geolocation events to the UI.
+         * @param resourceManager Provides localized string resources.
+         * @param permissionResolver Handles runtime location permission requests.
+         * @param statusStateHolder Manages and broadcasts UI status updates.
+         * @param dialogController Manages presentation of alert dialogs.
+         * @param geoLocationViewModel Source of geolocation state and operations.
+         * @return A fully initialized [GeoLocationCoordinator] instance.
+         */
+        fun create(
+            callback: GeoLocationCallback,
+            resourceManager: ResourceManager,
+            permissionResolver: PermissionResolver,
+            statusStateHolder: StatusStateHolder,
+            dialogController: WeatherDialogController,
+            geoLocationViewModel: GeoLocationViewModel
+        ): GeoLocationCoordinator {
+            return GeoLocationCoordinator(
+                callback = callback,
+                resourceManager = resourceManager,
+                dialogController = dialogController,
+                permissionResolver = permissionResolver,
+                statusStateHolder = statusStateHolder,
+                geoLocationViewModel = geoLocationViewModel
+            )
+        }
+    }
 }

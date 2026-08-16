@@ -7,6 +7,8 @@ import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
+import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
@@ -108,6 +110,51 @@ class CitySelectionCoordinator(
     private suspend fun collectChosenCityBlankFlow(flow: SharedFlow<Unit>) {
         flow.collect {
             geoLocationCoordinator.startGeoLocation()
+        }
+    }
+
+    /**
+     * Factory class for creating configured instances of [CitySelectionCoordinator].
+     *
+     * Encapsulates dependency injection logic and ensures proper wiring of internal components,
+     * promoting loose coupling and testability.
+     */
+    class Factory {
+        /**
+         * Creates and returns a fully configured [CitySelectionCoordinator] instance.
+         *
+         * Initializes the coordinator with all required dependencies:
+         * - [GeoLocationCallback] for event propagation (wires navigation through [GeoLocationCallbackEvent.GotoCitySelection]).
+         * - [ResourceManager] for localized string resources.
+         * - [StatusStateHolder] for broadcasting UI status updates.
+         * - [WeatherDialogController] for managing dialog presentation.
+         * - [CurrentWeatherViewModel] as the source of city selection events.
+         * - [GeoLocationCoordinator] for handling geolocation-based city resolution as a fallback.
+         *
+         * @param callback Interface for sending geolocation events to the UI.
+         * @param resourceManager Provides localized string resources.
+         * @param statusStateHolder Manages and broadcasts UI status updates.
+         * @param dialogController Manages presentation of alert dialogs.
+         * @param forecastViewModel Source of city selection events (not found, blank input).
+         * @param geoLocationCoordinator Handles geolocation-based city resolution as a fallback.
+         * @return A fully initialized [CitySelectionCoordinator] instance.
+         */
+        fun create(
+            callback: GeoLocationCallback,
+            resourceManager: ResourceManager,
+            statusStateHolder: StatusStateHolder,
+            dialogController: WeatherDialogController,
+            forecastViewModel: CurrentWeatherViewModel,
+            geoLocationCoordinator: GeoLocationCoordinator,
+        ): CitySelectionCoordinator {
+            return CitySelectionCoordinator(
+                resourceManager = resourceManager,
+                dialogController = dialogController,
+                forecastViewModel = forecastViewModel,
+                statusStateHolder = statusStateHolder,
+                geoLocationCoordinator = geoLocationCoordinator,
+                onGotoCitySelection = { callback.onEvent(GeoLocationCallbackEvent.GotoCitySelection) }
+            )
         }
     }
 }
