@@ -3,26 +3,38 @@ package io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 
 /**
- * AppBarViewModel factory
+ * Factory for creating [AppBarViewModel] instances with dependency injection.
  *
- * @property statusRenderer displays loading, success, warning, or error statuses
- * @property resourceManager to get string resources
- * @property appBarStateMapper to convert forecast ui state to appbar ui state
+ * This factory follows the `ViewModelProvider.Factory` pattern to provide pre-configured
+ * dependencies to the ViewModel during instantiation. It encapsulates the creation logic
+ * for [AppBarViewModel], ensuring consistent initialization across the application.
+ *
+ * Dependencies provided:
+ * - [stateHolder] — manages and broadcasts UI status messages
+ * - [resourceManager] — provides access to application string resources
+ * - [appBarStateMapper] — converts domain forecast states to UI-appropriate app bar states
  */
 class AppBarViewModelFactory(
-    private val statusRenderer: StatusRenderer,
+    private val stateHolder: StatusStateHolder,
     private val resourceManager: ResourceManager,
     private val appBarStateMapper: AppBarStateMapper
 ) : ViewModelProvider.Factory {
 
+    /**
+     * Creates a new instance of the requested ViewModel.
+     *
+     * @param modelClass the class type of the ViewModel to create
+     * @return the newly created ViewModel instance
+     * @throws IllegalArgumentException if the model class is not supported
+     */
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return AppBarViewModel(
-            statusRenderer,
+            stateHolder,
             resourceManager,
             appBarStateMapper
         ) as T

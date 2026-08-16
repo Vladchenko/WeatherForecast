@@ -6,18 +6,16 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationException
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationListener
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.PermissionChecker
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
+import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel.Companion.GEO_LOCATING_ATTEMPTS
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,30 +24,39 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * View model for geo location or city name of a device.
+ * ViewModel responsible for managing the device's geolocation workflow.
  *
- * @constructor
- * @param connectivityObserver provides connectivity state
- * @property geoLocationHelper provides geo location service
- * @property loggingService centralized service for application logging
- * @property statusRenderer displays loading, success, warning, or error statuses
- * @property resourceManager provides access to string resources for dynamic UI content
- * @property geoLocator provides geo location service
- * @property permissionChecker to check if needed permission is provided
- * @property chosenCityInteractor saves/loads chosen city
- * @property coroutineDispatchers dispatchers for coroutines
+ * This ViewModel orchestrates the entire process of determining the user's current location:
+ * 1. **Permission Handling**: Manages the lifecycle of location permissions (Requested, Denied, PermanentlyDenied)
+ *    using [permissionRequests] counter to detect permanent denials.
+ * 2. **Hardware Location**: Delegates raw GPS/Network location retrieval to [DeviceLocationProvider].
+ * 3. **Reverse Geocoding**: Converts [Location] coordinates to a human-readable city name
+ *    using [Geolocator].
+ *
+ * The ViewModel emits various events via [SharedFlow]s to notify the UI layer (or Coordinators)
+ * about state changes, such as location acquisition, errors, or navigation requirements.
+ *
+ * ## Retry Mechanism
+ * Implements an automatic retry mechanism ([retryGeoLocationOrGotoCitySelectionScreen]) for hardware
+ * location failures, attempting up to [GEO_LOCATING_ATTEMPTS] times before failing the entire process.
+ *
+ * @property geoLocationHelper Provides reverse geocoding capabilities (coordinates -> city name).
+ * @property loggingService Centralized service for application logging.
+ * @property resourceManager Provides access to string resources for UI messages.
+ * @property geoLocator Hardware service for retrieving current device location.
+ * @property statusStateHolder Manages and broadcasts UI status messages (errors, warnings, info).
+ *
+ * @see DeviceLocationProvider
+ * @see Geolocator
+ * @see GeoLocationPermission
  */
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(
-    connectivityObserver: ConnectivityObserver,
     private val geoLocationHelper: Geolocator,
-    val loggingService: LoggingService,
-    private val statusRenderer: StatusRenderer,
+    private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
     private val geoLocator: DeviceLocationProvider,
-    private val permissionChecker: PermissionChecker,
-    private val chosenCityInteractor: ChosenCityInteractor,
-    private val coroutineDispatchers: CoroutineDispatchers,
+    private val statusStateHolder: StatusStateHolder,
 ) : ViewModel() {
 
     private var permissionRequests = 0
@@ -136,36 +143,28 @@ class GeoLocationViewModel @Inject constructor(
         loggingService.logError(TAG, throwable.stackTraceToString())
 
         if (throwable is GeoLocationException) {
-            statusRenderer.showError(throwable.message.toString())
             retryGeoLocationOrGotoCitySelectionScreen()
-        } else {
-            statusRenderer.showError(throwable.message.toString())
         }
+        showError(throwable.message.toString())
     }
 
     private fun retryGeoLocationOrGotoCitySelectionScreen() {
         geoLocatingAttempts++
         if (geoLocatingAttempts == GEO_LOCATING_ATTEMPTS) {
-            statusRenderer.showError(
+            showError(
                 resourceManager.getString(R.string.geo_retry)
             )
             _geoLocationFailFlow.tryEmit(Unit)
             geoLocatingAttempts = 0
         } else {
             viewModelScope.launch {
-                statusRenderer.showError(
+                showError(
                     resourceManager.getString(R.string.geo_max_attempts_exceeded)
                 )
                 delay(DELAY_BETWEEN_ATTEMPTS)
                 defineCurrentGeoLocation()
             }
         }
-    }
-
-    fun resetGeoLocationRequestAttempts() {
-        loggingService.logInfoEvent(TAG, "resetGeoLocationRequestAttempts called: resetting permissionRequests from $permissionRequests to 0")
-        permissionRequests = 0
-        geoLocatingAttempts = 0
     }
 
     fun defineCurrentGeoLocation() {
@@ -177,7 +176,7 @@ class GeoLocationViewModel @Inject constructor(
 
             override fun onCurrentGeoLocationFail(errorMessage: String) {
                 loggingService.logError(TAG, errorMessage)
-                statusRenderer.showError(errorMessage)
+                showError(errorMessage)
             }
 
             override fun onNoGeoLocationPermission() {
@@ -192,23 +191,38 @@ class GeoLocationViewModel @Inject constructor(
      * Proceed with a geo location permission result, having [isGranted] flag as a permission result.
      */
     fun onPermissionResolution(isGranted: Boolean) {
-        loggingService.logInfoEvent(TAG, "onPermissionResolution: isGranted=$isGranted, previous permissionRequests=$permissionRequests")
+        loggingService.logInfoEvent(
+            TAG,
+            "onPermissionResolution: isGranted=$isGranted, previous permissionRequests=$permissionRequests"
+        )
         if (isGranted) {
             // Reset permission counter when permission is granted
             permissionRequests = 0
-            loggingService.logInfoEvent(TAG, "onPermissionResolution: permission granted, permissionRequests reset to 0")
+            loggingService.logInfoEvent(
+                TAG,
+                "onPermissionResolution: permission granted, permissionRequests reset to 0"
+            )
             // Immediately proceed with location retrieval
             defineCurrentGeoLocation()
         } else {
             loggingService.logInfoEvent(TAG, "onPermissionResolution: permission denied")
             // Increment counter on denial and emit Denied state
             permissionRequests++
-            loggingService.logInfoEvent(TAG, "onPermissionResolution: incrementing permissionRequests to $permissionRequests")
+            loggingService.logInfoEvent(
+                TAG,
+                "onPermissionResolution: incrementing permissionRequests to $permissionRequests"
+            )
             if (permissionRequests > 1) {
-                loggingService.logInfoEvent(TAG, "onPermissionResolution: emitting PermanentlyDenied (permissionRequests=$permissionRequests)")
+                loggingService.logInfoEvent(
+                    TAG,
+                    "onPermissionResolution: emitting PermanentlyDenied (permissionRequests=$permissionRequests)"
+                )
                 _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.PermanentlyDenied)
             } else {
-                loggingService.logInfoEvent(TAG, "onPermissionResolution: emitting Denied (permissionRequests=$permissionRequests)")
+                loggingService.logInfoEvent(
+                    TAG,
+                    "onPermissionResolution: emitting Denied (permissionRequests=$permissionRequests)"
+                )
                 _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Denied)
             }
         }
@@ -218,7 +232,7 @@ class GeoLocationViewModel @Inject constructor(
      * Defines a city name that matches given [location]
      */
     fun defineCityNameByLocation(location: Location) {
-        viewModelScope.launch(coroutineDispatchers.io + exceptionHandler) {
+        viewModelScope.launch(exceptionHandler) {
             val city = geoLocationHelper.defineCityNameByLocation(location)
             loggingService.logDebugEvent(
                 TAG,
@@ -228,6 +242,14 @@ class GeoLocationViewModel @Inject constructor(
             _geoLocationByCitySuccessFlow.tryEmit(Unit)
             _geoLocationDefineCitySuccessFlow.tryEmit(cityModel)
         }
+    }
+
+    private fun showError(errorMessage: String) {
+        statusStateHolder.updateStatus(
+            StatusType.Error(
+                errorMessage
+            )
+        )
     }
 
     companion object {

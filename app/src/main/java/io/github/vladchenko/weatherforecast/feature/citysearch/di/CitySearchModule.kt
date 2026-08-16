@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
@@ -23,7 +24,6 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearch
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchRepository
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModelFactory
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Retrofit
 import javax.inject.Named
@@ -96,7 +96,6 @@ class CitySearchModule {
     @Provides
     @InternalSerializationApi
     fun provideCitySearchRepository(
-        loggingService: LoggingService,
         dtoMapper: CitySearchDtoMapper,
         entityMapper: CitySearchEntityMapper,
         coroutineDispatchers: CoroutineDispatchers,
@@ -104,7 +103,6 @@ class CitySearchModule {
         citySearchRemoteDataSource: CitySearchRemoteDataSource
     ): CitySearchRepository {
         return CitySearchRepositoryImpl(
-            loggingService,
             dtoMapper,
             entityMapper,
             coroutineDispatchers,
@@ -123,15 +121,15 @@ class CitySearchModule {
     @Provides
     fun provideCitySearchViewModelFactory(
         loggingService: LoggingService,
-        statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
+        statusStateHolder: StatusStateHolder,
         citySearchInteractor: CitySearchInteractor,
         recentCitiesInteractor: RecentCitiesInteractor
     ): CitySearchViewModelFactory {
         return CitySearchViewModelFactory(
             loggingService,
-            statusRenderer,
             resourceManager,
+            statusStateHolder,
             citySearchInteractor,
             recentCitiesInteractor
         )

@@ -6,14 +6,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.api.HourlyForecastApiService
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
@@ -26,7 +25,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.reposito
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModelFactory
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Retrofit
 import javax.inject.Named
@@ -123,20 +121,16 @@ class HourlyForecastModule {
     @Provides
     fun provideHourlyForecastViewModelFactory(
         loggingService: LoggingService,
-        statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
+        statusStateHolder: StatusStateHolder,
         preferencesManager: PreferencesManager,
-        connectivityObserver: ConnectivityObserver,
-        chosenCityInteractor: ChosenCityInteractor,
         forecastRemoteInteractor: HourlyWeatherInteractor
     ): HourlyWeatherViewModelFactory {
         return HourlyWeatherViewModelFactory(
             loggingService,
-            statusRenderer,
             resourceManager,
+            statusStateHolder,
             preferencesManager,
-            connectivityObserver,
-            chosenCityInteractor,
             forecastRemoteInteractor
         )
     }

@@ -7,16 +7,18 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Error
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Loading
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Success
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,35 +28,29 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel for hourly weather forecast.
+ * ViewModel responsible for managing the UI state and business logic of the hourly weather forecast.
  *
- * This ViewModel handles:
- * - Loading hourly weather data from remote or local sources
- * - Managing UI state via [hourlyWeatherStateFlow]
- * - Responding to city name or location-based requests
- * - Displaying success, warning, and error messages
- * - Using structured logging via [LoggingService] instead of direct [android.util.Log]
+ * This ViewModel orchestrates the data fetching process by delegating to [HourlyWeatherInteractor].
+ * It handles remote data fetching with automatic local cache fallback, manages user preferences
+ * (e.g., temperature unit), and emits state updates via [hourlyWeatherStateFlow].
  *
- * @param connectivityObserver observes internet connectivity state
- * @property statusRenderer displays status messages to the user
- * @property loggingService centralized service for application logging
- * @property resourceManager provides access to Android resources (strings, etc.)
- * @property preferencesManager manages user preferences (e.g. temperature unit)
- * @property chosenCityInteractor handles retrieval of the selected city
- * @property hourlyWeatherInteractor loads hourly weather data
+ * The ViewModel also handles various error scenarios (network errors, invalid city, etc.)
+ * and communicates status updates to the UI layer via [StatusStateHolder].
+ *
+ * @property loggingService Centralized service for application logging.
+ * @property resourceManager Provides access to Android string resources.
+ * @property statusStateHolder Manages and broadcasts UI status messages (info, warnings, errors).
+ * @property preferencesManager Manages user preferences such as temperature unit (Celsius/Fahrenheit).
+ * @property hourlyWeatherInteractor Domain-level interactor responsible for loading hourly weather data.
  */
 @HiltViewModel
 class HourlyWeatherViewModel @Inject constructor(
-    connectivityObserver: ConnectivityObserver,
-    private val statusRenderer: StatusRenderer,
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
+    private val statusStateHolder: StatusStateHolder,
     private val preferencesManager: PreferencesManager,
-    private val chosenCityInteractor: ChosenCityInteractor,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
 ) : ViewModel() {
-
-    private var currentJob: Job? = null
 
     /**
      * StateFlow that emits the current UI state for the hourly weather forecast.
@@ -74,12 +70,15 @@ class HourlyWeatherViewModel @Inject constructor(
      */
     val hourlyWeatherStateFlow: StateFlow<WeatherUiState<HourlyWeather>?>
         get() = _hourlyWeatherStateFlow
+
+    private var currentJob: Job? = null
+
     private val _hourlyWeatherStateFlow =
         MutableStateFlow<WeatherUiState<HourlyWeather>?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in hourly weather loading", throwable)
-        statusRenderer.showError(throwable.message.toString())
+        showError(throwable.message.toString())
     }
 
     /**
@@ -88,7 +87,7 @@ class HourlyWeatherViewModel @Inject constructor(
      * @param cityModel contains city name and coordinates
      */
     fun loadHourlyWeatherForLocation(cityModel: CityLocationModel) {
-        _hourlyWeatherStateFlow.value = WeatherUiState.Loading
+        _hourlyWeatherStateFlow.value = Loading
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureTypeStateFlow.first()
@@ -106,16 +105,19 @@ class HourlyWeatherViewModel @Inject constructor(
         when (result) {
             is LoadResult.Remote -> {
                 _hourlyWeatherStateFlow.value =
-                    WeatherUiState.Success(result.data, DataSource.REMOTE)
-                statusRenderer.showSuccessStatusFor(
-                    result.data.city
+                    Success(result.data, DataSource.REMOTE)
+                showStatus(
+                    resourceManager.getString(
+                        R.string.forecast_loaded_success,
+                        result.data.city
+                    )
                 )
             }
 
             is LoadResult.Local -> {
                 _hourlyWeatherStateFlow.value =
-                    WeatherUiState.Success(result.data, DataSource.LOCAL)
-                statusRenderer.showWarning(
+                    Success(result.data, DataSource.LOCAL)
+                showWarning(
                     resourceManager.getString(
                         R.string.forecast_outdated, city
                     )
@@ -123,10 +125,36 @@ class HourlyWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                statusRenderer.showError(getErrorMessage(result))
-                _hourlyWeatherStateFlow.value = WeatherUiState.Error(city, getErrorMessage(result))
+                showError(getErrorMessage(result))
+                _hourlyWeatherStateFlow.value = Error(city, getErrorMessage(result))
+            }
+
+            LoadResult.Loading -> {
+                showStatus(
+                    resourceManager.getString(
+                        R.string.forecast_hourly_loading
+                    )
+                )
             }
         }
+    }
+
+    private fun showError(errorMessage: String) {
+        statusStateHolder.updateStatus(
+            StatusType.Error(errorMessage)
+        )
+    }
+
+    private fun showWarning(statusMessage: String) {
+        statusStateHolder.updateStatus(
+            StatusType.Warning(statusMessage)
+        )
+    }
+
+    private fun showStatus(statusMessage: String) {
+        statusStateHolder.updateStatus(
+            StatusType.Info(statusMessage)
+        )
     }
 
     private fun getErrorMessage(result: LoadResult.Error): String =

@@ -6,50 +6,54 @@ import androidx.lifecycle.repeatOnLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 /**
- * Coordinates geolocation-related logic between UI components and business logic.
+ * Acts as the coordinator for the geolocation feature, bridging the UI layer and the [GeoLocationViewModel].
  *
- * This class acts as a mediator that observes flows from [GeoLocationViewModel] and translates them
- * into UI actions such as showing status messages, displaying dialogs, or triggering navigation.
- * It encapsulates the coordination logic to keep activities and fragments clean and testable.
+ * This class encapsulates the workflow for requesting, resolving, and handling location-based data.
+ * It observes state flows from the [GeoLocationViewModel] and triggers appropriate UI responses
+ * such as status updates, permission dialogs, or navigation events.
  *
- * ## Responsibilities
- * - Observes geolocation-related state changes via [SharedFlow]s from [GeoLocationViewModel]
- * - Triggers appropriate UI responses (status rendering, dialogs) based on state
- * - Handles permission resolution workflow in collaboration with [PermissionResolver]
- * - Delegates navigation and result delivery to callback functions
+ * ## Key Responsibilities
+ * - **State Observation**: Observes [SharedFlow]s from [GeoLocationViewModel] to react to geolocation events.
+ * - **Permission Management**: Collaborates with [PermissionResolver] to handle Android runtime permissions.
+ * - **User Guidance**: Uses [WeatherDialogController] and [StatusStateHolder] to guide the user through
+ *   location detection, permission denials, and city confirmation.
+ * - **Event Propagation**: Sends callback events via [GeoLocationCallback] when specific actions occur (e.g., location loaded, user denied).
  *
- * ## Lifecycle Management
- * Uses [repeatOnLifecycle] to ensure observation only occurs during active lifecycle states,
- * preventing memory leaks and unnecessary processing.
+ * ## Workflow
+ * 1. [startObserving] initiates flow collection when the UI component is in [Lifecycle.State.STARTED].
+ * 2. [startGeoLocation] triggers the process in the ViewModel.
+ * 3. The ViewModel updates flows (e.g., permission state, location updates).
+ * 4. This coordinator intercepts flows and handles UI logic (e.g., requesting permission, asking for city confirmation).
  *
  * ## Thread Safety
- * Designed to be used within a coroutine scope tied to the UI lifecycle. All collected flows
- * are observed on the main thread unless otherwise specified in the view model.
+ * Designed to be used within a coroutine scope tied to the UI lifecycle. All flows are observed
+ * on the main thread. State updates are sent via [StatusStateHolder] which manages the UI status.
  *
- * @property callback Sends callback events on some actions
- * @property geoLocationViewModel Provides geolocation state and operations
- * @property permissionResolver Handles runtime location permission requests
- * @property statusRenderer Displays loading, success, warning, or error statuses
- * @property dialogController Manages presentation of alert dialogs
- * @property resourceManager Accesses string resources for UI messages
+ * @property callback Interface for sending high-level events to the UI (e.g., load forecast, go to search).
+ * @property resourceManager Provides string resources for UI messages and dialogs.
+ * @property permissionResolver Handles the logic for requesting and checking location permissions.
+ * @property statusStateHolder Updates the global status bar (e.g., "Detecting location...", "City found").
+ * @property dialogController Manages the presentation of confirmation and error dialogs.
+ * @property geoLocationViewModel Source of geolocation state and triggers.
  */
 class GeoLocationCoordinator(
     private val callback: GeoLocationCallback,
-    private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
     private val permissionResolver: PermissionResolver,
+    private val statusStateHolder: StatusStateHolder,
     private val dialogController: WeatherDialogController,
     private val geoLocationViewModel: GeoLocationViewModel
 ) {
@@ -89,66 +93,84 @@ class GeoLocationCoordinator(
     }
 
     /**
-     * Initiates the process of determining the user's current geographic location.
+     * Initiates the geolocation process.
      *
-     * Updates UI status to indicate location triangulation is in progress and
-     * delegates the actual operation to [GeoLocationViewModel.defineCurrentGeoLocation].
+     * This is the entry point for the user to request their current location.
+     * It performs two actions:
+     * 1. Updates the [StatusStateHolder] to display an informational message ("Detecting location...").
+     * 2. Delegates the actual logic to [GeoLocationViewModel.defineCurrentGeoLocation],
+     *    which will likely trigger permission requests or location updates.
      */
     fun startGeoLocation() {
-        statusRenderer.showStatus(resourceManager.getString(R.string.geo_detecting))
+        statusStateHolder.updateStatus(
+            StatusType.Info(resourceManager.getString(R.string.geo_detecting))
+        )
         geoLocationViewModel.defineCurrentGeoLocation()
     }
 
     /**
-     * Collects successful emissions from [geoLocationViewModel.geoLocationByCitySuccessFlow].
+     * Handles the event when a city is successfully found via manual search.
      *
-     * Upon receiving a [CityLocationModel], updates the UI to reflect successful location resolution
-     * and triggers forecast loading for the resolved city via [onForecastLoadForLocation].
+     * Updates the status message to "Success" to indicate that the selected city is now being processed
+     * for weather loading (typically delegated to a parent listener or callback).
      *
-     * @param flow The shared flow emitting city location data upon successful lookup
+     * @param flow The [SharedFlow] emitting success events for city lookup.
      */
     private suspend fun collectGeoLocationByCitySuccessFlow(flow: SharedFlow<Unit>) {
         flow.collect {
-            statusRenderer.showStatus(resourceManager.getString(R.string.geo_success))
+            statusStateHolder.updateStatus(
+                StatusType.Info(resourceManager.getString(R.string.geo_success))
+            )
         }
     }
 
     /**
-     * Collects successful location readings from the device's location provider.
+     * Handles successful raw location updates from the device.
      *
-     * When a [Location] is received, updates status to indicate city name resolution
-     * and requests the view model to determine the corresponding city name.
+     * When a new [Location] (GPS/Network) is received, this method:
+     * 1. Updates the status to "Finding city..." to inform the user that reverse geocoding is happening.
+     * 2. Calls [GeoLocationViewModel.defineCityNameByLocation] to convert coordinates to a city name.
      *
-     * @param flow The shared flow emitting raw location coordinates
+     * @param flow The [SharedFlow] emitting raw [Location] updates.
      */
     private suspend fun collectGeoLocationSuccessFlow(flow: SharedFlow<Location>) {
         flow.collect { location ->
-            statusRenderer.showStatus(resourceManager.getString(R.string.geo_finding_city))
+            statusStateHolder.updateStatus(
+                StatusType.Info(resourceManager.getString(R.string.geo_finding_city))
+            )
             geoLocationViewModel.defineCityNameByLocation(location)
         }
     }
 
     /**
-     * Observes changes in location permission state and reacts accordingly.
+     * Observes and handles changes in the location permission state.
      *
-     * Handles four states:
-     * - [GeoLocationPermission.Requested]: Shows rationale and triggers permission request
-     * - [GeoLocationPermission.Denied]: Shows warning and offers retry option
-     * - [GeoLocationPermission.Granted]: Proceeds with location retrieval
-     * - [GeoLocationPermission.PermanentlyDenied]: Shows permanent denial dialog with guidance
+     * Implements the full permission lifecycle logic:
+     * - [GeoLocationPermission.Requested]: The app asks for permission for the first time. Updates status
+     *   and triggers the system permission dialog via [PermissionResolver.requestLocationPermission].
+     * - [GeoLocationPermission.Denied]: The user denied permission (not permanently). Shows a warning status
+     *   and a dialog offering to request permission again.
+     * - [GeoLocationPermission.Granted]: The user granted permission. Updates status to "Detecting" and starts
+     *   the location process.
+     * - [GeoLocationPermission.PermanentlyDenied]: The user checked "Don't ask again". Shows a permanent
+     *   error status and a dialog explaining they need to go to settings.
      *
-     * @param flow The shared flow emitting permission state updates
+     * @param flow The [SharedFlow] emitting permission state changes.
      */
     private suspend fun collectGeoLocationPermissionFlow(flow: SharedFlow<GeoLocationPermission>) {
         flow.collect { permission ->
             when (permission) {
                 GeoLocationPermission.Requested -> {
-                    statusRenderer.showStatus(resourceManager.getString(R.string.geo_permission_required))
+                    statusStateHolder.updateStatus(
+                        StatusType.Info(resourceManager.getString(R.string.geo_permission_required))
+                    )
                     callback.onEvent(GeoLocationCallbackEvent.RequestPermission)
                 }
 
                 GeoLocationPermission.Denied -> {
-                    statusRenderer.showWarning(resourceManager.getString(R.string.geo_permission_denied))
+                    statusStateHolder.updateStatus(
+                        StatusType.Warning(resourceManager.getString(R.string.geo_permission_denied))
+                    )
                     dialogController.showNoPermission(
                         onPositiveClick = {
                             permissionResolver.requestLocationPermission()
@@ -162,12 +184,16 @@ class GeoLocationCoordinator(
                 }
 
                 GeoLocationPermission.Granted -> {
-                    statusRenderer.showStatus(resourceManager.getString(R.string.geo_detecting))
+                    statusStateHolder.updateStatus(
+                        StatusType.Info(resourceManager.getString(R.string.geo_detecting))
+                    )
                     geoLocationViewModel.defineCurrentGeoLocation()
                 }
 
                 GeoLocationPermission.PermanentlyDenied -> {
-                    statusRenderer.showError(resourceManager.getString(R.string.geo_permission_denied_permanently))
+                    statusStateHolder.updateStatus(
+                        StatusType.Error(resourceManager.getString(R.string.geo_permission_denied_permanently))
+                    )
                     dialogController.showPermissionPermanentlyDenied(
                         onPositiveClick = {
                             callback.onEvent(
@@ -186,13 +212,16 @@ class GeoLocationCoordinator(
     }
 
     /**
-     * Collects successfully resolved city names from geographic coordinates.
+     * Handles the successful resolution of a city name from geographic coordinates.
      *
-     * When a city name is determined, shows a confirmation dialog allowing the user
-     * to accept or reject the detected location. Acceptance leads to forecast loading
-     * (handled by other flows), while rejection navigates to manual city selection.
+     * When [GeoLocationViewModel] successfully determines the city name from GPS data,
+     * this method displays a confirmation dialog ([WeatherDialogController.showLocationDefined]).
      *
-     * @param flow The shared flow emitting resolved city names
+     * The user is presented with the detected city name and two choices:
+     * - **Accept**: Sends [GeoLocationCallbackEvent.OnForecastLoadForLocation] to proceed with weather loading.
+     * - **Reject**: Updates status and sends [GeoLocationCallbackEvent.GotoCitySelection] to manually search.
+     *
+     * @param flow The [SharedFlow] emitting [CityLocationModel] objects.
      */
     private suspend fun collectGeoLocationDefineCitySuccessFlow(flow: SharedFlow<CityLocationModel>) {
         flow.collect { model ->
@@ -204,7 +233,9 @@ class GeoLocationCoordinator(
                     )
                 },
                 onNegativeClick = {
-                    statusRenderer.showCitySelectionStatus()
+                    statusStateHolder.updateStatus(
+                        StatusType.Info(resourceManager.getString(R.string.city_selection_title))
+                    )
                     callback.onEvent(
                         GeoLocationCallbackEvent.GotoCitySelection
                     )
@@ -213,6 +244,17 @@ class GeoLocationCoordinator(
         }
     }
 
+    /**
+     * Handles error events during the geolocation process.
+     *
+     * Displays an error dialog ([WeatherDialogController.showGeoLocationError]) indicating that
+     * the location could not be determined.
+     *
+     * - **Accept**: Navigates to manual city selection.
+     * - **Cancel**: Retries the geolocation process via [startGeoLocation].
+     *
+     * @param flow The [SharedFlow] emitting error events.
+     */
     private suspend fun collectGeoLocationErrorFlow(flow: SharedFlow<Unit>) {
         flow.collect {
             dialogController.showGeoLocationError(

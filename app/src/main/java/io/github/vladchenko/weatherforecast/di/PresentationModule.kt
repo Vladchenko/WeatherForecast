@@ -12,7 +12,6 @@ import io.github.vladchenko.weatherforecast.presentation.coordinator.WeatherCoor
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogFactory
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import javax.inject.Singleton
 
 /**
@@ -22,8 +21,6 @@ import javax.inject.Singleton
  * are created once and reused across the application.
  *
  * It provides:
- * - A factory for creating [StatusRenderer] instances, used to display status messages (e.g., loading, error)
- *   with proper string resource resolution via [ResourceManager]
  * - A factory for creating [WeatherCoordinator] instances, responsible for handling navigation
  *   and UI-side effects on the forecast screen
  *
@@ -33,12 +30,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object PresentationModule {
-
-    @Singleton
-    @Provides
-    fun provideStatusNotifierFactory(resourceManager: ResourceManager): StatusRenderer {
-        return StatusRenderer(resourceManager)
-    }
 
     @Singleton
     @Provides

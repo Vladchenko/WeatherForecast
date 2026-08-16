@@ -5,13 +5,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavController
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.model.CurrentScreen
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_SEARCH
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.WEATHER
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -19,53 +19,51 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 
 /**
- * A lifecycle-aware coordinator that monitors network connectivity and reacts accordingly.
+ * A lifecycle-aware coordinator that monitors network connectivity and reacts to state changes.
  *
- * Observes [ConnectivityObserver.isConnected] and:
- * - Displays user-friendly status messages via [StatusRenderer] ("Connected" / "Disconnected")
- * - Automatically refreshes weather data on reconnection, but **only** when the user is on the weather screen
- * - Prevents unnecessary updates on the city selection screen
- * - Ensures resource-efficient observation using [WhileSubscribed(5000)]
- * - Avoids duplicate UI updates with [distinctUntilChanged]
+ * This class observes [ConnectivityObserver.isConnected] and performs two main actions:
+ * 1. Updates the global UI status via [StatusStateHolder] ("Connected" / "Disconnected").
+ * 2. Automatically refreshes weather data upon reconnection, but **only** when the user is on the weather forecast screen.
  *
- * The coordinator integrates with the app's navigation state via [navController] to make
- * context-sensitive decisions (e.g., not triggering weather refresh on city selection screen)
- * by checking the current destination route.
+ * It prevents unnecessary updates by checking the current navigation route via [navController]
+ * and tracks the last known connection state to avoid redundant processing.
  *
- * ## Compose Navigation
- * Uses `navController.currentDestination?.route` to determine the current screen.
- * This approach works with both:
- * - `startDestination = "current_weather"` (with path parameters)
- * - `startDestination = "city_search"`
- *
- * @property navController Navigation controller used to determine the current screen via `route`
- * @property statusRenderer Renders status and error messages to the UI
- * @property resourceManager Provides localized string resources
- * @property connectivityObserver Source of network connectivity state
- * @property currentWeatherViewModel Triggers weather data refresh when connection is restored
+ * @property navController Navigation controller used to determine the current screen and decide whether to refresh weather data.
+ * @property resourceManager Provides localized string resources for UI messages.
+ * @property statusStateHolder Manages and broadcasts UI status messages (info for connected, error for disconnected).
+ * @property connectivityObserver Provides the stream of network connectivity states.
+ * @property currentWeatherViewModel Triggers a weather data refresh when the network is restored and the weather screen is active.
  */
 class NetworkStatusCoordinator(
     private val navController: NavController,
-    private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
+    private val statusStateHolder: StatusStateHolder,
     private val connectivityObserver: ConnectivityObserver,
     private val currentWeatherViewModel: CurrentWeatherViewModel
 ) : DefaultLifecycleObserver {
 
+    /**
+     * Tracks the previous network connection state to prevent duplicate UI updates
+     * and redundant weather refreshes.
+     */
     private var lastConnectionState: Boolean? = null
 
     /**
-     * Starts observing network connectivity when the lifecycle owner enters the STARTED state.
+     * Starts observing network connectivity when the lifecycle owner enters the [Lifecycle.State.STARTED] state.
      *
-     * Subscribes to [connectivityObserver.isConnected] and:
-     * - Displays a "Connected" status message via [statusRenderer] when connection is established.
-     * - Triggers weather refresh in [currentWeatherViewModel] only if the current screen is [CurrentScreen.Weather].
-     * - Displays a "Disconnected" error message when connection is lost.
+     * Subscribes to [connectivityObserver.isConnected] with the following behavior:
+     * - Filters out duplicate emissions using [distinctUntilChanged].
+     * - Shares the flow in the lifecycle's coroutine scope with a 5-second replay timeout ([WhileSubscribed]).
+     * - When connection is restored (`true`):
+     *   - Checks the current navigation route via [navController].
+     *   - If on the weather screen, triggers a weather refresh via [CurrentWeatherViewModel.refreshWeather].
+     *   - Displays a "Connected" status message.
+     * - When connection is lost (`false`):
+     *   - Displays a "Disconnected" error message.
      *
-     * Uses [WhileSubscribed] with a 5-second timeout to balance responsiveness and resource efficiency.
-     * Duplicate state emissions are suppressed using [distinctUntilChanged].
+     * Ensures resource-efficient observation that automatically respects the lifecycle owner's state.
      *
-     * @param owner The lifecycle owner (e.g., Activity or Fragment) that controls observation lifetime.
+     * @param owner The lifecycle owner (e.g., Activity) controlling the observation lifetime.
      */
     override fun onStart(owner: LifecycleOwner) {
         connectivityObserver.isConnected
@@ -84,13 +82,23 @@ class NetworkStatusCoordinator(
                                 route.contains(WEATHER) -> {
                                     currentWeatherViewModel.refreshWeather(false)
                                 }
+
                                 route == CITY_SEARCH -> {
                                     // Do nothing
                                 }
                             }
-                            statusRenderer.showStatus(resourceManager.getString(R.string.network_connected))
+                            statusStateHolder.updateStatus(
+                                StatusType.Info(
+                                    resourceManager.getString(
+                                        R.string.network_connected
+                                    )
+                                )
+                            )
                         }
-                        false -> statusRenderer.showError(resourceManager.getString(R.string.network_disconnected))
+
+                        false -> statusStateHolder.updateStatus(
+                            StatusType.Error(resourceManager.getString(R.string.network_disconnected))
+                        )
                     }
                     lastConnectionState = isConnected
                 }

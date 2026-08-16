@@ -8,7 +8,6 @@ import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
-import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.CurrentWeatherRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
@@ -93,7 +92,8 @@ class HourlyWeatherRepositoryImpl(
             try {
                 val entity = localDataSource.loadHourlyWeather(city)
                     ?: return@withContext LoadResult.Error(
-                        city, ForecastError.NoDataAvailable("No cached data found for city: $city")
+                        city = city,
+                        error = ForecastError.NoDataAvailable("No cached data found for city: $city")
                     )
                 val domainModel = entityMapper.toDomain(entity, temperatureType)
                 loggingService.logDebugEvent(
@@ -102,13 +102,19 @@ class HourlyWeatherRepositoryImpl(
                 )
                 LoadResult.Local(domainModel, remoteError)
             } catch (_: NoSuchDatabaseEntryException) {
-                loggingService.logDebugEvent(TAG, "No cached hourly forecast data found for city: $city")
-                LoadResult.Error(city, ForecastError.NoDataAvailable("No cached data for $city"))
+                loggingService.logDebugEvent(
+                    TAG,
+                    "No cached hourly forecast data found for city: $city"
+                )
+                LoadResult.Error(
+                    city = city,
+                    error = ForecastError.NoDataAvailable("No cached data for $city")
+                )
             } catch (e: Exception) {
                 loggingService.logError(TAG, "Failed to load cached hourly weather for $city", e)
                 LoadResult.Error(
-                    city,
-                    ForecastError.LocalDataCorrupted("Cache read failed: ${e.message}")
+                    city = city,
+                    error = ForecastError.LocalDataCorrupted("Cache read failed: ${e.message}")
                 )
             }
         }
@@ -127,8 +133,8 @@ class HourlyWeatherRepositoryImpl(
         } catch (e: Exception) {
             loggingService.logError(TAG, "Failed to map or save hourly weather for city: $city", e)
             LoadResult.Error(
-                city,
-                ForecastError.LocalDataCorrupted("Mapping or saving failed: ${e.message}")
+                city = city,
+                error = ForecastError.LocalDataCorrupted("Mapping or saving failed: ${e.message}")
             )
         }
     }

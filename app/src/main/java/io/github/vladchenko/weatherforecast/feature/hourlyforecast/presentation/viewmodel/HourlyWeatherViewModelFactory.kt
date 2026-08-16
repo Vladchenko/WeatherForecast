@@ -2,43 +2,45 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 
 /**
- * WeatherForecastViewModel factory
+ * Factory for creating [HourlyWeatherViewModel] instances.
  *
- * @property loggingService centralized service for structured logging
- * @property statusRenderer displays status messages to the user
- * @property resourceManager resource manager
- * @property preferencesManager preferences manager
- * @property connectivityObserver internet connectivity observer
- * @property chosenCityInteractor downloads a previously chosen city
- * @property forecastRemoteInteractor downloads weather forecast through network
+ * Implements [ViewModelProvider.Factory] to provide the necessary dependencies for the hourly
+ * weather feature.
+ *
+ * @property loggingService Service for application logging.
+ * @property resourceManager Provides access to application string resources.
+ * @property statusStateHolder Manages and broadcasts UI status messages.
+ * @property preferencesManager Manages user preferences (e.g., temperature units).
+ * @property forecastRemoteInteractor Domain interactor responsible for loading hourly weather data.
  */
 @Suppress("UNCHECKED_CAST")
 class HourlyWeatherViewModelFactory(
     private val loggingService: LoggingService,
-    private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
+    private val statusStateHolder: StatusStateHolder,
     private val preferencesManager: PreferencesManager,
-    private val connectivityObserver: ConnectivityObserver,
-    private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastRemoteInteractor: HourlyWeatherInteractor
 ) : ViewModelProvider.Factory {
+
+    /**
+     * Creates a new instance of [HourlyWeatherViewModel].
+     *
+     * @param modelClass The class of the ViewModel to create.
+     * @return The newly created [HourlyWeatherViewModel] instance.
+     */
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return HourlyWeatherViewModel(
-            connectivityObserver,
-            statusRenderer,
             loggingService,
             resourceManager,
+            statusStateHolder,
             preferencesManager,
-            chosenCityInteractor,
             forecastRemoteInteractor
         ) as T
     }

@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter
 
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.CurrentWeather
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 
 /**

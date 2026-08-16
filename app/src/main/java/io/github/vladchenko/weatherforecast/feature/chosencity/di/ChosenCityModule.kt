@@ -6,26 +6,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesConstants.SHARED_PREFERENCES_KEY
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.ChosenCityRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasource.ChosenCityDataSource
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasourceimpl.ChosenCityLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper.RecentCitiesMapper
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.RecentCitiesRepositoryImpl
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasourceimpl.RecentCitiesDataSourceImpl
-import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
-import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesRepository
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 /**

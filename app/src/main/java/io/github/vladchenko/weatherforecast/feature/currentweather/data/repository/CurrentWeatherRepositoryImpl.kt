@@ -14,8 +14,8 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.Cu
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherRemoteDataSource
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.CurrentWeather
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.InternalSerializationApi
 
@@ -92,10 +92,6 @@ class CurrentWeatherRepositoryImpl(
             when (result) {
                 is DataResult.Success -> {
                     fetchAndSave(result.data, city, temperatureType)
-                        ?: LoadResult.Error(
-                            city,
-                            ForecastError.NoDataAvailable("Mapped DTO is null")
-                        )
                 }
 
                 is DataResult.Error -> {
@@ -113,7 +109,7 @@ class CurrentWeatherRepositoryImpl(
         dto: CurrentWeatherDto,
         city: String,
         temperatureType: TemperatureType
-    ): LoadResult<CurrentWeather>? {
+    ): LoadResult<CurrentWeather> {
         return try {
             val entity = dtoMapper.toEntity(dto, city)
             saveWeather(entity)
@@ -121,7 +117,10 @@ class CurrentWeatherRepositoryImpl(
             LoadResult.Remote(domainModel)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to map or save weather data: $ex", ex)
-            LoadResult.Error(city, ForecastError.UncategorizedError(ex.message.toString(), ex))
+            LoadResult.Error(
+                city = city,
+                error = ForecastError.UncategorizedError(ex.message.toString(), ex)
+            )
         }
     }
 
@@ -135,7 +134,10 @@ class CurrentWeatherRepositoryImpl(
             loadCachedWeatherForLocation(city, temperatureType, remoteError)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex", ex)
-            LoadResult.Error(city, ForecastError.LocalDataCorrupted("Failed to read from cache: ${ex.message}"))
+            LoadResult.Error(
+                city = city,
+                error = ForecastError.LocalDataCorrupted("Failed to read from cache: ${ex.message}")
+            )
         }
     }
 
@@ -152,7 +154,10 @@ class CurrentWeatherRepositoryImpl(
                 LoadResult.Local(domainModel, remoteError)
             } catch (_: NoSuchDatabaseEntryException) {
                 loggingService.logDebugEvent(TAG, "No cached weather data found for city: $city")
-                LoadResult.Error(city, ForecastError.NoDataAvailable("No cached data for $city"))
+                LoadResult.Error(
+                    city = city,
+                    error = ForecastError.NoDataAvailable("No cached data for $city")
+                )
             } catch (ex: Exception) {
                 loggingService.logError(
                     TAG,
@@ -160,8 +165,8 @@ class CurrentWeatherRepositoryImpl(
                     ex
                 )
                 LoadResult.Error(
-                    city,
-                    ForecastError.LocalDataCorrupted("Local database query failed: ${ex.message}")
+                    city = city,
+                    error = ForecastError.LocalDataCorrupted("Local database query failed: ${ex.message}")
                 )
             }
         }

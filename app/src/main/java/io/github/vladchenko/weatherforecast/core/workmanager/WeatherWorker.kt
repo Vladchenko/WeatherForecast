@@ -10,7 +10,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
 import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date

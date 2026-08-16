@@ -3,18 +3,14 @@ package io.github.vladchenko.weatherforecast.presentation.coordinator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Coordinates high-level UI logic for the weather forecast screen.
@@ -38,14 +34,10 @@ import kotlinx.coroutines.launch
  * All coroutine collections occur on the main thread via [lifecycle.repeatOnLifecycle],
  * ensuring safe access to UI components.
  *
- * @property appBarViewModel Controls top app bar appearance based on weather state
- * @property forecastViewModel Main source of current weather data and user actions
  * @property geoLocationCoordinator Handles geolocation-specific workflow and user interactions
  * @property citySelectionCoordinator Manages responses to blank or invalid city input
  */
 class WeatherCoordinator private constructor(
-    private val appBarViewModel: AppBarViewModel,
-    private val forecastViewModel: CurrentWeatherViewModel,
     private val geoLocationCoordinator: GeoLocationCoordinator,
     private val citySelectionCoordinator: CitySelectionCoordinator
 ) {
@@ -68,28 +60,8 @@ class WeatherCoordinator private constructor(
      * @param lifecycle The lifecycle to which observation is bound
      */
     fun startObserving(scope: CoroutineScope, lifecycle: Lifecycle) {
-        scope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { collectForecastState(forecastViewModel.weatherStateFlow) }
-            }
-        }
-
         geoLocationCoordinator.startObserving(scope, lifecycle)
         citySelectionCoordinator.startObserving(scope, lifecycle)
-    }
-
-    /**
-     * Observes changes in the overall weather UI state and synchronizes the app bar.
-     *
-     * Keeps the top app bar (title, icons, etc.) in sync with the current weather data
-     * and loading state.
-     *
-     * @param flow A state flow representing the current [WeatherUiState]
-     */
-    private suspend fun collectForecastState(flow: StateFlow<WeatherUiState<*>>) {
-        flow.collect { state ->
-            appBarViewModel.updateAppBarState(state)
-        }
     }
 
     /**
@@ -110,10 +82,9 @@ class WeatherCoordinator private constructor(
          * with appropriate callbacks and shared dependencies.
          *
          * @param callback on geo location events
-         * @param statusRenderer Renderer for displaying status messages
-         * @param appBarViewModel ViewModel controlling app bar appearance
          * @param resourceManager Accessor for localized string resources
          * @param permissionResolver Handles runtime location permission requests
+         * @param statusStateHolder Manages and broadcasts UI status updates (loading, errors, info)
          * @param dialogController Manages presentation of alert dialogs
          * @param forecastViewModel Main source of current weather data and user actions
          * @param geoLocationViewModel Provides geolocation state and operations
@@ -121,35 +92,32 @@ class WeatherCoordinator private constructor(
          */
         fun create(
             callback: GeoLocationCallback,
-            statusRenderer: StatusRenderer,
-            appBarViewModel: AppBarViewModel,
             resourceManager: ResourceManager,
             permissionResolver: PermissionResolver,
+            statusStateHolder: StatusStateHolder,
             dialogController: WeatherDialogController,
             forecastViewModel: CurrentWeatherViewModel,
             geoLocationViewModel: GeoLocationViewModel
         ): WeatherCoordinator {
             val geoLocationCoordinator = GeoLocationCoordinator(
-                geoLocationViewModel = geoLocationViewModel,
-                permissionResolver = permissionResolver,
-                statusRenderer = statusRenderer,
-                dialogController = dialogController,
+                callback = callback,
                 resourceManager = resourceManager,
-                callback = callback
+                dialogController = dialogController,
+                permissionResolver = permissionResolver,
+                statusStateHolder = statusStateHolder,
+                geoLocationViewModel = geoLocationViewModel
             )
 
             val citySelectionCoordinator = CitySelectionCoordinator(
-                forecastViewModel = forecastViewModel,
-                geoLocationCoordinator = geoLocationCoordinator,
-                statusRenderer = statusRenderer,
-                dialogController = dialogController,
                 resourceManager = resourceManager,
+                dialogController = dialogController,
+                forecastViewModel = forecastViewModel,
+                statusStateHolder = statusStateHolder,
+                geoLocationCoordinator = geoLocationCoordinator,
                 onGotoCitySelection = { callback.onEvent(GeoLocationCallbackEvent.GotoCitySelection) }
             )
 
             return WeatherCoordinator(
-                appBarViewModel = appBarViewModel,
-                forecastViewModel = forecastViewModel,
                 geoLocationCoordinator = geoLocationCoordinator,
                 citySelectionCoordinator = citySelectionCoordinator
             )

@@ -9,6 +9,10 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Error
+import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Success
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
@@ -16,7 +20,6 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.City
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
@@ -29,44 +32,46 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel responsible for managing UI state and business logic in the city selection screen.
+ * ViewModel responsible for managing UI state and business logic for city search.
  *
- * ## Responsibilities
- * - Manages user input for city name search with debounced query processing
- * - Loads and filters available city names based on user input
- * - Handles navigation events (back, select city)
- * - Displays status messages (errors, loading states) via [StatusRenderer]
+ * This ViewModel handles:
+ * - User input tracking for city name search with debounced query processing
+ * - Loading, filtering, and displaying city predictions
+ * - Managing recently searched cities (loading, clearing)
+ * - Displaying status messages (errors, loading states) via [StatusStateHolder]
  *
- * ## State Flows
+ * ## State Management
  * - [_cityMaskStateFlow]: Tracks current text input in the search field
  * - [_cityPredictions]: Holds filtered list of cities matching the query
+ * - [_recentCitiesNamesFlow]: Manages state of recently searched cities
  *
  * ## Event Handling
- * Uses a sealed class [CitySelectionEvent] to handle all user interactions in a unidirectional data flow manner.
- * This ensures predictable state changes and simplifies testing.
+ * Uses [CitySelectionEvent] sealed class to handle UI interactions in a unidirectional
+ * data flow manner, ensuring predictable state updates and simplifying testing.
  *
  * ## Search Behavior
- * Implements debounce (1 second) on user input to avoid excessive database or API calls.
- * Only triggers search when:
- * - Input is not blank
- * - Value has changed since last emission
+ * Implements a 1-second debounce on user input to minimize unnecessary database/remote calls.
+ * Search triggers only when input is non-empty and differs from the previous value.
  *
  * ## Error Handling
- * Uses [CoroutineExceptionHandler] to catch and process exceptions during city lookup:
- *    Display raw message via [StatusRenderer]
+ * Utilizes [CoroutineExceptionHandler] for uncaught exceptions and dedicated methods
+ * ([showError], [showStatus]) for displaying feedback via [StatusStateHolder].
  *
- * @property loggingService Logs errors and debug information
- * @property statusRenderer Displays status messages to the user
- * @property resourceManager Provides access to string resources for dynamic UI content
- * @property citySearchInteractor Business logic layer for loading and filtering city names
- * @property recentCitiesInteractor Operates recently used cities
+ * @property loggingService Centralized logging service for errors and debug info
+ * @property resourceManager Provides access to string resources for UI messages
+ * @property statusStateHolder Manages and broadcasts UI status updates (loading, errors, info)
+ * @property citySearchInteractor Handles domain logic for fetching and filtering city names
+ * @property recentCitiesInteractor Manages recently searched cities persistence and loading
+ *
+ * @see CitySelectionEvent
+ * @see StatusStateHolder
  */
 @FlowPreview
 @HiltViewModel
 class CitySearchViewModel @Inject constructor(
     private val loggingService: LoggingService,
-    private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
+    private val statusStateHolder: StatusStateHolder,
     private val citySearchInteractor: CitySearchInteractor,
     private val recentCitiesInteractor: RecentCitiesInteractor
 ) : ViewModel() {
@@ -116,12 +121,14 @@ class CitySearchViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, throwable.message.orEmpty(), throwable)
-        statusRenderer.showError(throwable.message.toString())
+        showError(throwable.message.toString())
     }
 
     init {
         startDebouncedSearch()
-        statusRenderer.showCitySelectionStatus()
+        statusStateHolder.updateStatus(
+            StatusType.Info(resourceManager.getString(R.string.city_selection_title))
+        )
     }
 
     /**
@@ -154,6 +161,8 @@ class CitySearchViewModel @Inject constructor(
      * Dispatches behavior based on event type:
      * - [CitySelectionEvent.ClearQuery]: Resets search query and clears results
      * - [CitySelectionEvent.UpdateQuery]: Updates search mask and triggers debounced search
+     * - [CitySelectionEvent.LoadRecentCities]: Triggers loading of recently searched cities
+     * - [CitySelectionEvent.ClearRecentCities]: Clears recently searched cities from database
      *
      * @param event The user action to process
      */
@@ -215,22 +224,24 @@ class CitySearchViewModel @Inject constructor(
             updateCityPredictions(query, response)
         } catch (e: Exception) {
             loggingService.logError(TAG, "Error loading cities for query: $query", e)
-            statusRenderer.showError(e.message.toString())
+            showError(e.message.toString())
         }
     }
 
     private fun updateCityPredictions(city: String, result: LoadResult<CitySearch>?) {
         when (result) {
             is LoadResult.Remote -> {
-                statusRenderer.showStatus(resourceManager.getString(R.string.city_predictions_provided))
+                showStatus(resourceManager.getString(R.string.city_predictions_provided))
                 _cityPredictions.value =
-                    WeatherUiState.Success(data = result.data.cities, DataSource.REMOTE)
+                    Success(data = result.data.cities, DataSource.REMOTE)
             }
 
             is LoadResult.Local -> {
-                statusRenderer.showWarning(resourceManager.getString(R.string.city_predictions_from_cache))
+                statusStateHolder.updateStatus(
+                    StatusType.Warning(resourceManager.getString(R.string.city_predictions_from_cache))
+                )
                 _cityPredictions.value =
-                    WeatherUiState.Success(data = result.data.cities, DataSource.LOCAL)
+                    Success(data = result.data.cities, DataSource.LOCAL)
             }
 
             is LoadResult.Error -> {
@@ -246,17 +257,20 @@ class CitySearchViewModel @Inject constructor(
 
                     else -> result.error.toString()
                 }
-                statusRenderer.showError(errorMessage)
-                _cityPredictions.value = WeatherUiState.Error(
+                showError(errorMessage)
+                _cityPredictions.value = Error(
                     city = city,
                     errorMessage
                 )
             }
 
             null -> {
-                _cityPredictions.value = WeatherUiState.Error(
-                    city = city,
-                    ""
+                _cityPredictions.value = Error(city = city, "")
+            }
+
+            LoadResult.Loading -> {
+                showStatus(
+                    resourceManager.getString(R.string.city_predictions_loading)
                 )
             }
         }
@@ -272,7 +286,7 @@ class CitySearchViewModel @Inject constructor(
                 is LoadResult.Local -> {
                     loggingService.logInfoEvent(TAG, response.data.cities.toString())
                     _recentCitiesNamesFlow.emit(
-                        WeatherUiState.Success(
+                        Success(
                             response.data,
                             DataSource.LOCAL
                         )
@@ -282,17 +296,35 @@ class CitySearchViewModel @Inject constructor(
                 is LoadResult.Remote -> {
                     loggingService.logInfoEvent(TAG, response.data.cities.toString())
                     _recentCitiesNamesFlow.emit(
-                        WeatherUiState.Success(
+                        Success(
                             response.data,
                             DataSource.REMOTE
                         )
                     )
                 }
+
+                LoadResult.Loading -> {
+                    showStatus(
+                        resourceManager.getString(R.string.recent_cities_loading)
+                    )
+                }
             }
         } catch (e: Exception) {
             loggingService.logError(TAG, "Error loading recent cities", e)
-            statusRenderer.showError(e.message.toString())
+            showError(e.message.toString())
         }
+    }
+
+    private fun showError(errorMessage: String) {
+        statusStateHolder.updateStatus(
+            StatusType.Error(errorMessage)
+        )
+    }
+
+    private fun showStatus(statusMessage: String) {
+        statusStateHolder.updateStatus(
+            StatusType.Info(statusMessage)
+        )
     }
 
     companion object {

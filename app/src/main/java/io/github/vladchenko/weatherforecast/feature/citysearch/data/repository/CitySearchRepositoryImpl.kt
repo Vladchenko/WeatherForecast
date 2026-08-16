@@ -5,7 +5,6 @@ import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchDtoMapper
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchEntityMapper
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchLocalDataSource
@@ -18,7 +17,6 @@ import kotlinx.serialization.InternalSerializationApi
 /**
  * CitiesNamesRepository implementation to retrieve cities names.
  *
- * @property loggingService to log events
  * @property dtoMapper mapper to convert dto to entity
  * @property entityMapper mapper to convert entity to model
  * @property coroutineDispatchers dispatchers for coroutines
@@ -27,7 +25,6 @@ import kotlinx.serialization.InternalSerializationApi
  */
 @InternalSerializationApi
 class CitySearchRepositoryImpl(
-    private val loggingService: LoggingService,
     private val dtoMapper: CitySearchDtoMapper,
     private val entityMapper: CitySearchEntityMapper,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -55,11 +52,12 @@ class CitySearchRepositoryImpl(
             }
         }
 
-    private suspend fun loadFromCacheOrError(token: String, error: String): LoadResult<CitySearch> {
-        val cachedEntities = localDataSource.loadCitiesNames(token)
+    private suspend fun loadFromCacheOrError(city: String, error: String): LoadResult<CitySearch> {
+        val cachedEntities = localDataSource.loadCitiesNames(city)
         if (cachedEntities.isEmpty()) {
             return LoadResult.Error(
-                token, ForecastError.NoDataAvailable(error)
+                city = city,
+                error = ForecastError.NoDataAvailable(error)
             )
         }
         return LoadResult.Local(

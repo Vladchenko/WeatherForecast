@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.domain.model
 
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.City
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -9,12 +10,24 @@ import javax.net.ssl.SSLException
  * Represents the result of a data loading operation, including source and error context.
  *
  * Designed for use in repositories that support fallback to local data when remote fetch fails.
+ * This sealed interface allows exhaustive `when` expressions in UI and domain logic.
  *
- * - [Remote]: Successfully loaded from network; represents fresh data.
- * - [Local]: Loaded from cache/database because remote request failed; includes the reason for failure.
- * - [Error]: Failed to load data both remotely and locally; indicates a critical failure.
+ * Variants:
+ * - [Remote]: Successfully loaded from a network API (fresh data).
+ * - [Local]: Loaded from a local cache/database because the remote request failed (stale data).
+ * - [Error]: Failed to load data from both remote and local sources.
+ * - [Loading]: Represents an intermediate state where data is being fetched.
+ *
+ * @see ForecastError
  */
 sealed interface LoadResult<out T> {
+
+    /**
+     * Represents an intermediate state where data is currently being loaded
+     * from a source (network or local cache).
+     */
+    object Loading : LoadResult<Nothing>
+
     /**
      * Data successfully loaded from a remote source (e.g., network API).
      *
@@ -28,7 +41,7 @@ sealed interface LoadResult<out T> {
      * Data loaded from a local source (e.g., database) due to remote fetch failure.
      *
      * Used when the app falls back to cached data. The original remote error is preserved
-     * to inform the user or analytics.
+     * in [remoteError] to inform the user or analytics about why local data is being shown.
      *
      * @param data the cached domain model
      * @param remoteError the reason why the remote request failed
@@ -41,13 +54,17 @@ sealed interface LoadResult<out T> {
     /**
      * Failed to retrieve data from both remote and local sources.
      *
-     * Indicates a serious issue (e.g., no internet, corrupted cache) where no data is available.
+     * This state indicates a critical failure (e.g., no internet, corrupted cache, API error)
+     * where no data is available to display.
      *
-     * @param city to provide weather forecast for
-     * @param error the domain-level error describing the failure
+     * @param city The canonical city name resolved for the forecast (e.g., "London, GB").
+     * @param requestedCity The original city input provided by the user (if any).
+     *                      Useful for debugging or UI messaging to match the request with the response.
+     * @param error The domain-level error describing the specific failure reason.
      */
     data class Error(
         val city: String? = null,
+        val requestedCity: City? = null,
         val error: ForecastError
     ) : LoadResult<Nothing>
 }
@@ -55,7 +72,8 @@ sealed interface LoadResult<out T> {
 /**
  * Sealed interface representing domain-specific errors that can occur during data fetching.
  *
- * Ensures exhaustive handling in UI and improves user experience by providing meaningful messages.
+ * This hierarchy ensures exhaustive handling in UI and domain logic, improving robustness
+ * and allowing meaningful error messages for the user.
  */
 sealed interface ForecastError {
     /**
@@ -83,14 +101,16 @@ sealed interface ForecastError {
     /**
      * Network-related error occurred (e.g., timeout, connection lost, SSL handshake failure).
      *
-     * @param cause underlying exception (e.g., ConnectException, SocketTimeoutException)
-     * @param type optional classification of network issue
+     * @param cause The underlying [Throwable] that caused the network error (e.g., [ConnectException]).
+     * @param type The specific type of network error (nullable).
      */
     data class NetworkError(
         val cause: Throwable,
         val type: Type? = null
     ) : ForecastError {
-
+        /**
+         * Represents the type of network error.
+         */
         enum class Type {
             /** No network connectivity available */
             NoInternet,
@@ -109,6 +129,14 @@ sealed interface ForecastError {
         }
 
         companion object {
+            /**
+             * Factory method to create a [NetworkError] from a generic [Throwable].
+             *
+             * Analyzes the exception type to determine the specific [Type] of network error.
+             *
+             * @param cause The underlying throwable to wrap and classify.
+             * @return A new [NetworkError] with the appropriate [Type].
+             */
             fun fromThrowable(cause: Throwable): NetworkError {
                 val type = when (cause) {
                     is ConnectException -> Type.ConnectionFailed
@@ -125,6 +153,8 @@ sealed interface ForecastError {
     /**
      * No data is available from any source.
      *
+     * This error is used when the API returns no data or an empty response.
+     *
      * @param message description of the data absence
      */
     data class NoDataAvailable(val message: String) : ForecastError
@@ -132,11 +162,10 @@ sealed interface ForecastError {
     /**
      * An error that does not fall into any of the predefined categories.
      *
-     * Used as a fallback for exceptional cases not anticipated in normal operation flow.
-     * Should be rare and typically indicates a need to expand error handling coverage.
+     * Used as a fallback for unexpected exceptions not covered by specific error types.
      *
      * @param message description of the error
-     * @param cause optional original exception for debugging
+     * @param cause optional original exception for debugging (nullable)
      */
     data class UncategorizedError(
         val message: String,

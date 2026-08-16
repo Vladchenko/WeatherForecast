@@ -4,18 +4,14 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.PermissionChecker
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModelFactory
 import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModelFactory
 import javax.inject.Singleton
 
@@ -47,24 +43,16 @@ class WeatherForecastModule {
     fun provideGeoLocationViewModelFactory(
         geoLocationHelper: Geolocator,
         loggingService: LoggingService,
-        statusRenderer: StatusRenderer,
         resourceManager: ResourceManager,
         geoLocator: DeviceLocationProvider,
-        permissionChecker: PermissionChecker,
-        connectivityObserver: ConnectivityObserver,
-        chosenCityInteractor: ChosenCityInteractor,
-        coroutineDispatchers: CoroutineDispatchers,
+        statusStateHolder: StatusStateHolder,
     ): GeoLocationViewModelFactory {
         return GeoLocationViewModelFactory(
             geoLocationHelper,
             loggingService,
-            statusRenderer,
             resourceManager,
             geoLocator,
-            permissionChecker,
-            connectivityObserver,
-            chosenCityInteractor,
-            coroutineDispatchers
+            statusStateHolder,
         )
     }
 
@@ -77,14 +65,14 @@ class WeatherForecastModule {
     @Singleton
     @Provides
     fun provideAppBarViewModelFactory(
-        statusRenderer: StatusRenderer,
+        stateHolder: StatusStateHolder,
         resourceManager: ResourceManager,
         appBarStateMapper: AppBarStateMapper
     ): AppBarViewModelFactory {
         return AppBarViewModelFactory(
-            statusRenderer,
+            stateHolder,
             resourceManager,
-            appBarStateMapper
+            appBarStateMapper,
         )
     }
 }

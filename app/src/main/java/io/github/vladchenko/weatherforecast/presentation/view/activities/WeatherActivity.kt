@@ -16,6 +16,7 @@ import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigationBar
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setLightStatusBars
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setTransparentSystemBars
@@ -34,7 +35,6 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcherImpl
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.FlowPreview
@@ -62,9 +62,6 @@ class WeatherActivity : AppCompatActivity() {
     lateinit var connectivityObserver: ConnectivityObserver
 
     @Inject
-    lateinit var statusRenderer: StatusRenderer
-
-    @Inject
     lateinit var resourceManager: ResourceManager
 
     @Inject
@@ -72,6 +69,9 @@ class WeatherActivity : AppCompatActivity() {
 
     @Inject
     lateinit var dialogController: WeatherDialogController
+
+    @Inject
+    lateinit var statusStateHolder: StatusStateHolder
 
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()
@@ -82,8 +82,8 @@ class WeatherActivity : AppCompatActivity() {
     private val networkCoordinatorRef: NetworkStatusCoordinator by lazy {
         NetworkStatusCoordinator(
             navController = navControllerRef,
-            statusRenderer = statusRenderer,
             resourceManager = resourceManager,
+            statusStateHolder = statusStateHolder,
             connectivityObserver = connectivityObserver,
             currentWeatherViewModel = weatherViewModel
         )
@@ -113,9 +113,8 @@ class WeatherActivity : AppCompatActivity() {
         }
         
         WeatherCoordinator.Factory().create(
+            statusStateHolder = statusStateHolder,
             callback = geoLocationCallback,
-            statusRenderer = statusRenderer,
-            appBarViewModel = appBarViewModel,
             resourceManager = resourceManager,
             permissionResolver = permissionResolver,
             dialogController = dialogController,

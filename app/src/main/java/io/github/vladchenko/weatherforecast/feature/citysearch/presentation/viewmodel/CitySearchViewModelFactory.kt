@@ -3,36 +3,44 @@ package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.vie
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.coroutines.FlowPreview
 
 /**
- * CitiesNamesViewModel factory
+ * Factory for creating [CitySearchViewModel] instances.
  *
- * @property loggingService provides logging
- * @property statusRenderer displays loading, success, warning, or error statuses
- * @property resourceManager provides string resources
- * @property citySearchInteractor provides domain layer data for searched cities
- * @property recentCitiesInteractor provides domain layer data for cities searched recently
+ * Implements [ViewModelProvider.Factory] to inject dependencies into the ViewModel.
+ *
+ * @property loggingService service for application logging
+ * @property resourceManager provides access to string resources
+ * @property statusStateHolder manages and broadcasts UI status updates
+ * @property citySearchInteractor handles domain logic for searching city names
+ * @property recentCitiesInteractor handles domain logic for recently searched cities
  */
 class CitySearchViewModelFactory(
     private val loggingService: LoggingService,
-    private val statusRenderer: StatusRenderer,
     private val resourceManager: ResourceManager,
+    private val statusStateHolder: StatusStateHolder,
     private val citySearchInteractor: CitySearchInteractor,
     private val recentCitiesInteractor: RecentCitiesInteractor,
 ) : ViewModelProvider.Factory {
 
+    /**
+     * Creates a new instance of [CitySearchViewModel].
+     *
+     * @param modelClass the class type of the ViewModel to create
+     * @return the newly created ViewModel instance
+     */
     @FlowPreview
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CitySearchViewModel(
             loggingService,
-            statusRenderer,
             resourceManager,
+            statusStateHolder,
             citySearchInteractor,
             recentCitiesInteractor
         ) as T

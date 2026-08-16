@@ -3,8 +3,8 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.utils.TemperatureConversionUtils
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.Coordinate
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.models.CurrentWeather
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.Coordinate
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import kotlin.math.roundToInt
 
 /**

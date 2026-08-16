@@ -6,9 +6,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
-import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
@@ -23,12 +23,11 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.reposito
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasourceimpl.CurrentWeatherLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasourceimpl.CurrentWeatherRemoteDataSourceImpl
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherInteractor
-import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
+import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModelFactory
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Retrofit
 import javax.inject.Named
@@ -134,25 +133,21 @@ class CurrentWeatherModule {
     @Provides
     fun provideForecastViewModelFactory(
         loggingService: LoggingService,
-        statusRenderer: StatusRenderer,
+        stateHolder: StatusStateHolder,
         resourceManager: ResourceManager,
         preferencesManager: PreferencesManager,
-        connectivityObserver: ConnectivityObserver,
         chosenCityInteractor: ChosenCityInteractor,
-        coroutineDispatchers: CoroutineDispatchers,
         forecastRemoteInteractor: CurrentWeatherInteractor,
         uiConverter: WeatherDomainToUiMapper
     ): CurrentWeatherViewModelFactory {
         return CurrentWeatherViewModelFactory(
             loggingService,
-            statusRenderer,
+            stateHolder,
             resourceManager,
+            uiConverter,
             preferencesManager,
-            connectivityObserver,
             chosenCityInteractor,
-            coroutineDispatchers,
-            forecastRemoteInteractor,
-            uiConverter
+            forecastRemoteInteractor
         )
     }
 }

@@ -12,11 +12,11 @@ import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManagerImpl
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchersImpl
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionCheckerImpl
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.PermissionChecker
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog.LocationDialogFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -30,7 +30,6 @@ import javax.inject.Singleton
  * - [CoroutineDispatchers] and [CoroutineScope] for background operations
  * - [PreferencesManager] for persistent key-value storage
  * - [LoggingService] for consistent logging throughout the app
- * - [PermissionChecker] for handling runtime location permissions
  * - [ResourceManager] for accessing app resources (strings, colors, etc.)
  * - Factories and helpers for common UI dialogs ([AlertDialogFactory], [LocationDialogFactory])
  * - [DataErrorToForecastErrorMapper] for converting data-layer errors to domain errors
@@ -67,11 +66,11 @@ class CoreModule {
         return LoggingService()
     }
 
-    @Singleton
-    @Provides
-    fun providePermissionChecker(@ApplicationContext context: Context): PermissionChecker {
-        return PermissionCheckerImpl(context)
-    }
+//    @Singleton
+//    @Provides
+//    fun providePermissionChecker(@ApplicationContext context: Context): PermissionChecker {
+//        return PermissionCheckerImpl(context)
+//    }
 
     @Singleton
     @Provides
@@ -100,4 +99,8 @@ class CoreModule {
         alertDialogFactory: AlertDialogFactory,
         resourceManager: ResourceManager
     ): LocationDialogFactory = LocationDialogFactory(alertDialogFactory, resourceManager)
+
+    @Singleton
+    @Provides
+    fun provideWeatherStateHolder(): StatusStateHolder = StatusStateHolderImpl()
 }

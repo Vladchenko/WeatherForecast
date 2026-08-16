@@ -3,54 +3,67 @@ package io.github.vladchenko.weatherforecast.presentation.coordinator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.presentation.status.StatusRenderer
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 /**
- * Coordinates user actions related to city selection and fallback strategies.
+ * Coordinates user actions and fallback strategies related to city selection.
  *
- * This coordinator handles cases where:
- * - No city was selected (blank input)
- * - Selected city was not found
+ * This class acts as an intermediary between [CurrentWeatherViewModel] and the UI layer,
+ * handling edge cases where city selection fails or input is missing. It provides
+ * a clean separation between navigation logic and city selection resolution.
  *
- * It presents appropriate UI feedback and offers resolution paths such as:
- * - Retrying with geolocation
- * - Navigating to manual city selection
+ * ## Key Scenarios
+ * 1. **City Not Found**: When the user searches for a city that doesn't exist in the weather API database.
+ *    - Displays a warning status message with the city name.
+ *    - Shows a dialog offering to navigate to manual city selection.
  *
- * Decouples city selection logic from weather coordination concerns.
+ * 2. **Blank City Input**: When the user attempts to load weather without providing a city name,
+ *    and no previously saved city exists.
+ *    - Automatically triggers geolocation via [GeoLocationCoordinator] as a fallback strategy.
  *
- * @property forecastViewModel provides state and events related to city input
- * @property geoLocationCoordinator handles location-based city resolution
- * @property statusRenderer displays status messages to the user
- * @property dialogController manages presentation of selection dialogs
- * @property resourceManager accesses localized string resources
- * @property onGotoCitySelection triggers navigation to city picker
+ * ## Lifecycle Awareness
+ * All flow observation is scoped to [Lifecycle.State.STARTED] to prevent memory leaks
+ * and unnecessary work while the UI is not visible.
+ *
+ * @property onGotoCitySelection Callback triggered when the user needs to manually select a city.
+ * @property resourceManager Provides localized string resources for UI messages.
+ * @property statusStateHolder Manages and broadcasts UI status updates (info, warnings, errors).
+ * @property dialogController Manages the presentation of selection and error dialogs.
+ * @property forecastViewModel Source of city selection events (not found, blank input).
+ * @property geoLocationCoordinator Handles geolocation-based city resolution as a fallback.
+ *
+ * @see CurrentWeatherViewModel
+ * @see GeoLocationCoordinator
+ * @see WeatherDialogController
  */
 class CitySelectionCoordinator(
-    private val forecastViewModel: CurrentWeatherViewModel,
-    private val geoLocationCoordinator: GeoLocationCoordinator,
-    private val statusRenderer: StatusRenderer,
-    private val dialogController: WeatherDialogController,
+    private val onGotoCitySelection: () -> Unit,
     private val resourceManager: ResourceManager,
-    private val onGotoCitySelection: () -> Unit
+    private val statusStateHolder: StatusStateHolder,
+    private val dialogController: WeatherDialogController,
+    private val forecastViewModel: CurrentWeatherViewModel,
+    private val geoLocationCoordinator: GeoLocationCoordinator
 ) {
 
     /**
-     * Starts observing city-related flows and reacting to invalid or missing input.
+     * Starts observing city-related flows from [CurrentWeatherViewModel] and reacting to events.
      *
-     * Launches collection of:
-     * - [CurrentWeatherViewModel.chosenCityNotFoundStateFlow]
-     * - [CurrentWeatherViewModel.chosenCityBlankStateFlow]
+     * Launches collection of two flows:
+     * - [CurrentWeatherViewModel.chosenCityNotFoundStateFlow] — for handling unknown city names.
+     * - [CurrentWeatherViewModel.chosenCityBlankStateFlow] — for handling missing city input.
      *
-     * All observations are lifecycle-safe and occur during [Lifecycle.State.STARTED].
+     * All observation occurs within [Lifecycle.State.STARTED] to ensure lifecycle safety
+     * and prevent memory leaks.
      *
-     * @param scope Coroutine scope for launching collectors
-     * @param lifecycle Lifecycle to bind observation duration to
+     * @param scope The coroutine scope (typically provided by the Activity/Fragment) for launching collectors.
+     * @param lifecycle The lifecycle of the UI component to bind observation to.
      */
     fun startObserving(scope: CoroutineScope, lifecycle: Lifecycle) {
         scope.launch {
@@ -61,10 +74,21 @@ class CitySelectionCoordinator(
         }
     }
 
+    /**
+     * Handles events when a searched city is not found by the weather API.
+     *
+     * Displays a warning status message via [StatusStateHolder] containing the unknown city name,
+     * then shows a dialog ([WeatherDialogController.showChosenCityNotFound]) offering the user
+     * the option to navigate to manual city selection.
+     *
+     * @param flow The [SharedFlow] emitting unknown city names.
+     */
     private suspend fun collectChosenCityNotFoundFlow(flow: SharedFlow<String>) {
         flow.collect { city ->
-            statusRenderer.showWarning(
-                resourceManager.getString(R.string.forecast_no_data_for_city, city)
+            statusStateHolder.updateStatus(
+                StatusType.Warning(
+                    resourceManager.getString(R.string.forecast_no_data_for_city, city)
+                )
             )
             dialogController.showChosenCityNotFound(city) {
                 onGotoCitySelection()
@@ -72,6 +96,15 @@ class CitySelectionCoordinator(
         }
     }
 
+    /**
+     * Handles events when the user attempts to load weather without providing a city name
+     * and no saved city exists.
+     *
+     * As a fallback strategy, triggers geolocation via [GeoLocationCoordinator.startGeoLocation]
+     * to automatically detect the user's current location and resolve the city from coordinates.
+     *
+     * @param flow The [SharedFlow] emitting blank city events.
+     */
     private suspend fun collectChosenCityBlankFlow(flow: SharedFlow<Unit>) {
         flow.collect {
             geoLocationCoordinator.startGeoLocation()

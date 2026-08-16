@@ -6,9 +6,22 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.City
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.util.ValidationUtils
 
 /**
- * Cities names interactor.
+ * Domain-level interactor responsible for searching city names.
  *
- * @property citySearchRepository provides domain-layer data.
+ * This interactor orchestrates the city search process by:
+ * 1. Validating the search query token via [ValidationUtils]
+ * 2. Delegating the actual data fetching to [CitySearchRepository]
+ * 3. Handling validation errors and wrapping them in appropriate [LoadResult] or [ForecastError] types
+ *
+ * It serves as the bridge between the presentation layer and the data layer
+ * for the city search feature, encapsulating the specific business logic
+ * for token validation before fetching city data.
+ *
+ * @property citySearchRepository provides domain-layer data access for city search operations
+ *
+ * @see ValidationUtils
+ * @see CitySearchRepository
+ * @see CitySearch
  */
 class CitySearchInteractor(private val citySearchRepository: CitySearchRepository) {
 
@@ -20,8 +33,8 @@ class CitySearchInteractor(private val citySearchRepository: CitySearchRepositor
             .map { citySearchRepository.loadCitiesNames(it) }
             .getOrElse {
                 LoadResult.Error(
-                    token,
-                    ForecastError.UncategorizedError(it.message ?: "Invalid query")
+                    city = token,
+                    error = ForecastError.UncategorizedError(it.message ?: "Invalid query")
                 )
             }
     }
