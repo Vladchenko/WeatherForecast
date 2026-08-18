@@ -46,6 +46,7 @@
     <string name="geo_finding_city">Finding city from geolocation…</string>
     <string name="geo_detecting">Detecting your geolocation…</string>
     <string name="geo_cancelled">Geolocation detection cancelled</string>
+    <string name="geo_granted">Geolocation detection granted</string>
     <string name="geo_success">Geolocation detected successfully</string>
     <string name="geo_max_attempts_exceeded">Geo location attempts exceeded</string>
     <string name="geo_retry">Geolocation failed, retrying</string>

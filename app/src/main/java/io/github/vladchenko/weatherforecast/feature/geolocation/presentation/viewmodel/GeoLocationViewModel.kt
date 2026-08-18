@@ -8,7 +8,9 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Error
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Warning
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationException
@@ -63,86 +65,26 @@ class GeoLocationViewModel @Inject constructor(
     private var geoLocatingAttempts = 0
 
     /**
-     * Emitted when the user should be redirected to the city selection screen.
+     * Unified event bus for the entire geolocation workflow.
      *
-     * This typically happens when geolocation fails after maximum retry attempts,
-     * or when the user denies permission permanently.
+     * Consolidates all state changes, user interactions, and results into a single [SharedFlow].
+     * Emits events of type [GeoLocationEvent], covering permission state transitions, raw location
+     * acquisition, city resolution, and navigation triggers. Replaces multiple individual flows to
+     * simplify UI handling. The [extraBufferCapacity = 1] ensures events are not dropped during
+     * ViewModel-to-UI state transitions.
      */
-    val selectCityFlow: SharedFlow<Unit>
-        get() = _selectCityFlow
+    val geoLocationEventsFlow: SharedFlow<GeoLocationEvent>
+        get() = _geoLocationEventsFlow
 
-    /**
-     * Emits the current state of location permission request:
-     * - [GeoLocationPermission.Requested] – permission is being requested
-     * - [GeoLocationPermission.Denied] – user denied permission once
-     * - [GeoLocationPermission.PermanentlyDenied] – user denied multiple times (treated as permanent denial)
-     *
-     * Used by the UI to show appropriate rationale or redirect to settings.
-     */
-    val geoGeoLocationPermissionFlow: SharedFlow<GeoLocationPermission>
-        get() = _geoGeoLocationPermissionFlow
-
-    /**
-     * Emitted when a city name has been successfully resolved from the device's location.
-     *
-     * Carries a [io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel] containing the city name and associated coordinates.
-     *
-     * Triggers UI updates such as updating the selected city or refreshing weather data.
-     */
-    val geoLocationDefineCitySuccessFlow: SharedFlow<CityLocationModel>
-        get() = _geoLocationDefineCitySuccessFlow
-
-    /**
-     * Emitted when the device's raw GPS location has been successfully obtained.
-     *
-     * Contains a [android.location.Location] object with latitude and longitude.
-     *
-     * Used to trigger downstream operations like reverse geocoding to find the city name.
-     */
-    val geoLocationSuccessFlow: SharedFlow<Location>
-        get() = _geoLocationSuccessFlow
-
-    /**
-     * Emitted when a city has been successfully processed and saved as the chosen city.
-     *
-     * Indicates that geolocation-to-city workflow completed and the app can proceed
-     * with loading weather data or navigating away from the geolocation screen.
-     */
-    val geoLocationByCitySuccessFlow: SharedFlow<Unit>
-        get() = _geoLocationByCitySuccessFlow
-
-    /**
-     * Emitted when geolocation has failed after exhausting all retry attempts.
-     *
-     * Signals that the app should either allow manual city selection or let the user retry manually.
-     *
-     * Does not carry data — serves as a trigger for UI navigation or user interaction.
-     */
-    val geoLocationFailFlow: SharedFlow<Unit>
-        get() = _geoLocationFailFlow
-
-    private val _selectCityFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    private val _geoGeoLocationPermissionFlow = MutableSharedFlow<GeoLocationPermission>(
-        extraBufferCapacity = 1 // Collector is not alive when flow emits value, so buffer is needed
-    )
-    private val _geoLocationSuccessFlow = MutableSharedFlow<Location>(
-        extraBufferCapacity = 1
-    )
-    private val _geoLocationDefineCitySuccessFlow = MutableSharedFlow<CityLocationModel>(
-        extraBufferCapacity = 1
-    )
-    private val _geoLocationByCitySuccessFlow = MutableSharedFlow<Unit>(
-        extraBufferCapacity = 1
-    )
-    private val _geoLocationFailFlow = MutableSharedFlow<Unit>(
-        extraBufferCapacity = 1
-    )
+    private val _geoLocationEventsFlow =
+        MutableSharedFlow<GeoLocationEvent>(extraBufferCapacity = 1)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, throwable.message.orEmpty())
         loggingService.logError(TAG, throwable.stackTraceToString())
 
         if (throwable is GeoLocationException) {
+            // TODO Bad to retry from exceptionHandler, replace with using try-catch when needed
             retryGeoLocationOrGotoCitySelectionScreen()
         }
         showError(throwable.message.toString())
@@ -154,7 +96,7 @@ class GeoLocationViewModel @Inject constructor(
             showError(
                 resourceManager.getString(R.string.geo_retry)
             )
-            _geoLocationFailFlow.tryEmit(Unit)
+            _geoLocationEventsFlow.tryEmit(GeoLocationEvent.DefineLocationFail)
             geoLocatingAttempts = 0
         } else {
             viewModelScope.launch {
@@ -162,27 +104,39 @@ class GeoLocationViewModel @Inject constructor(
                     resourceManager.getString(R.string.geo_max_attempts_exceeded)
                 )
                 delay(DELAY_BETWEEN_ATTEMPTS)
-                defineCurrentGeoLocation()
+                defineDeviceGeoLocation()
             }
         }
     }
 
-    fun defineCurrentGeoLocation() {
-        loggingService.logInfoEvent(TAG, "defineCurrentGeoLocation called")
-        geoLocator.defineCurrentLocation(object : GeoLocationListener {
-            override fun onCurrentGeoLocationSuccess(location: Location) {
-                _geoLocationSuccessFlow.tryEmit(location)
+    fun defineDeviceGeoLocation() {
+        loggingService.logInfoEvent(TAG, "defineDeviceGeoLocation called")
+        statusStateHolder.updateStatus(
+            Info(
+                resourceManager.getString(R.string.geo_detecting)
+            )
+        )
+        geoLocator.defineDeviceLocation(object : GeoLocationListener {
+            override fun onDeviceGeoLocationSuccess(location: Location) {
+                loggingService.logError(TAG, "Device geo location success")
+                statusStateHolder.updateStatus(
+                    Info(resourceManager.getString(R.string.geo_success))
+                )
+                _geoLocationEventsFlow.tryEmit(GeoLocationEvent.DeviceGeoLocationSuccess(location))
             }
 
-            override fun onCurrentGeoLocationFail(errorMessage: String) {
+            override fun onDeviceGeoLocationFail(errorMessage: String) {
                 loggingService.logError(TAG, errorMessage)
                 showError(errorMessage)
             }
 
             override fun onNoGeoLocationPermission() {
                 loggingService.logInfoEvent(TAG, "No geo location permission - emitting Requested")
+                statusStateHolder.updateStatus(
+                    Info(resourceManager.getString(R.string.geo_permission_required))
+                )
                 // Emit Requested state to trigger permission request via WeatherActivity
-                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Requested)
+                _geoLocationEventsFlow.tryEmit(GeoLocationEvent.GeoLocationPermission.Requested)
             }
         })
     }
@@ -202,8 +156,11 @@ class GeoLocationViewModel @Inject constructor(
                 TAG,
                 "onPermissionResolution: permission granted, permissionRequests reset to 0"
             )
+            statusStateHolder.updateStatus(
+                Info(resourceManager.getString(R.string.geo_granted))
+            )
             // Immediately proceed with location retrieval
-            defineCurrentGeoLocation()
+            _geoLocationEventsFlow.tryEmit(GeoLocationEvent.GeoLocationPermission.Granted)
         } else {
             loggingService.logInfoEvent(TAG, "onPermissionResolution: permission denied")
             // Increment counter on denial and emit Denied state
@@ -217,13 +174,19 @@ class GeoLocationViewModel @Inject constructor(
                     TAG,
                     "onPermissionResolution: emitting PermanentlyDenied (permissionRequests=$permissionRequests)"
                 )
-                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.PermanentlyDenied)
+                statusStateHolder.updateStatus(
+                    Error(resourceManager.getString(R.string.geo_permission_denied_permanently))
+                )
+                _geoLocationEventsFlow.tryEmit(GeoLocationEvent.GeoLocationPermission.PermanentlyDenied)
             } else {
                 loggingService.logInfoEvent(
                     TAG,
                     "onPermissionResolution: emitting Denied (permissionRequests=$permissionRequests)"
                 )
-                _geoGeoLocationPermissionFlow.tryEmit(GeoLocationPermission.Denied)
+                statusStateHolder.updateStatus(
+                    Warning(resourceManager.getString(R.string.geo_permission_denied))
+                )
+                _geoLocationEventsFlow.tryEmit(GeoLocationEvent.GeoLocationPermission.Denied)
             }
         }
     }
@@ -239,14 +202,17 @@ class GeoLocationViewModel @Inject constructor(
                 "City defined successfully by location = $location, city = $city"
             )
             val cityModel = CityLocationModel(city, location)
-            _geoLocationByCitySuccessFlow.tryEmit(Unit)
-            _geoLocationDefineCitySuccessFlow.tryEmit(cityModel)
+            _geoLocationEventsFlow.tryEmit(
+                GeoLocationEvent.DefineCityNameByLocationSuccess(
+                    cityModel
+                )
+            )
         }
     }
 
     private fun showError(errorMessage: String) {
         statusStateHolder.updateStatus(
-            StatusType.Error(
+            Error(
                 errorMessage
             )
         )

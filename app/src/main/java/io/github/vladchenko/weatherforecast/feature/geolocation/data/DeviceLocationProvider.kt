@@ -44,7 +44,7 @@ class DeviceLocationProvider @Inject constructor(
      *
      * @param locationListener Listener to receive success or error events
      */
-    fun defineCurrentLocation(locationListener: GeoLocationListener) {
+    fun defineDeviceLocation(locationListener: GeoLocationListener) {
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
             fusedLocationClient.getCurrentLocation(
@@ -55,14 +55,14 @@ class DeviceLocationProvider @Inject constructor(
                     override fun isCancellationRequested() = false
                 })
                 .addOnSuccessListener { location: Location? ->
-                    onDefineLocationSuccess(location, locationListener, context)
+                    onDeviceLocationSuccess(location, locationListener, context)
                 }
                 .addOnFailureListener { exception ->
-                    onDefineLocationFailure(exception, locationListener)
+                    onDeviceLocationFailure(exception, locationListener)
                 }
                 .addOnCanceledListener {
                     loggingService.logError(TAG, "Geo location cancelled")
-                    locationListener.onCurrentGeoLocationFail(context.getString(R.string.geo_cancelled))
+                    locationListener.onDeviceGeoLocationFail(context.getString(R.string.geo_cancelled))
                 }
         } catch (sec: SecurityException) {
             loggingService.logError(TAG, "SecurityException in location request: ", sec)
@@ -70,7 +70,7 @@ class DeviceLocationProvider @Inject constructor(
         }
     }
 
-    private fun onDefineLocationFailure(
+    private fun onDeviceLocationFailure(
         it: Exception,
         locationListener: GeoLocationListener
     ) {
@@ -79,11 +79,11 @@ class DeviceLocationProvider @Inject constructor(
         if (errorMessage.contains("permission", ignoreCase = true)) {
             locationListener.onNoGeoLocationPermission()
         } else {
-            locationListener.onCurrentGeoLocationFail(it.message.orEmpty())
+            locationListener.onDeviceGeoLocationFail(it.message.orEmpty())
         }
     }
 
-    private fun onDefineLocationSuccess(
+    private fun onDeviceLocationSuccess(
         location: Location?,
         locationListener: GeoLocationListener,
         appContext: Context
@@ -91,9 +91,9 @@ class DeviceLocationProvider @Inject constructor(
         loggingService.logDebugEvent(TAG, "Location retrieved: $location")
         if (location == null) {
             loggingService.logError(TAG, "Location is null after successful callback")
-            locationListener.onCurrentGeoLocationFail(appContext.getString(R.string.geo_resolution_failed))
+            locationListener.onDeviceGeoLocationFail(appContext.getString(R.string.geo_resolution_failed))
         } else {
-            locationListener.onCurrentGeoLocationSuccess(location)
+            locationListener.onDeviceGeoLocationSuccess(location)
         }
     }
 
