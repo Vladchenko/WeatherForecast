@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import io.github.vladchenko.weatherforecast.core.workmanager.WorkerStarter
+import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import javax.inject.Inject
 
 /**
@@ -19,6 +20,9 @@ class WeatherForecastApp() : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerStarter: WorkerStarter
+
+    @Inject
+    lateinit var networkStatusCoordinator: NetworkStatusCoordinator
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()

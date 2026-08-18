@@ -10,7 +10,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -84,16 +83,6 @@ class WeatherActivity : AppCompatActivity() {
     private val geoLocationViewModel: GeoLocationViewModel by viewModels()
     private val hourlyWeatherViewModel: HourlyWeatherViewModel by viewModels()
 
-    private val networkCoordinatorRef: NetworkStatusCoordinator by lazy {
-        NetworkStatusCoordinator(
-            navController = navControllerRef,
-            resourceManager = resourceManager,
-            statusStateHolder = statusStateHolder,
-            networkStateHolder = networkStateHolder,
-            connectivityObserver = connectivityObserver,
-        )
-    }
-
     private val geoLocationCoordinatorRef: GeoLocationCoordinator by lazy {
         val geoLocationCallback = GeoLocationCallback { event ->
             when (event) {
@@ -149,7 +138,6 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     private lateinit var navigationDispatcher: NavigationEventDispatcher
-    private lateinit var navControllerRef: NavController
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -178,9 +166,7 @@ class WeatherActivity : AppCompatActivity() {
                 {
                     this.finishAffinity()
                 })
-            navControllerRef = navController
             // Initialize coordinators after navController is set
-            initNetworkCoordinator()
             WeatherForecastTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -204,10 +190,6 @@ class WeatherActivity : AppCompatActivity() {
         setTransparentSystemBars()
         setLightStatusBars(isLight = isLightTheme())
         hideBottomNavigationBar()
-    }
-
-    private fun initNetworkCoordinator() {
-        lifecycle.addObserver(networkCoordinatorRef)
     }
 
     override fun onStart() {
