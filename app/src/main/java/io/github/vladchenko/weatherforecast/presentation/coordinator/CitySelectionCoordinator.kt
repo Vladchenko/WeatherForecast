@@ -6,6 +6,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
@@ -57,9 +58,8 @@ class CitySelectionCoordinator(
     /**
      * Starts observing city-related flows from [CurrentWeatherViewModel] and reacting to events.
      *
-     * Launches collection of two flows:
-     * - [CurrentWeatherViewModel.chosenCityNotFoundStateFlow] — for handling unknown city names.
-     * - [CurrentWeatherViewModel.chosenCityBlankStateFlow] — for handling missing city input.
+     * Launches collection of [CurrentWeatherViewModel.cityErrorEventFlow] flow for handling missing
+     * city input or unknown city names.
      *
      * All observation occurs within [Lifecycle.State.STARTED] to ensure lifecycle safety
      * and prevent memory leaks.
@@ -70,46 +70,42 @@ class CitySelectionCoordinator(
     fun startObserving(scope: CoroutineScope, lifecycle: Lifecycle) {
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { collectChosenCityNotFoundFlow(forecastViewModel.chosenCityNotFoundStateFlow) }
-                launch { collectChosenCityBlankFlow(forecastViewModel.chosenCityBlankStateFlow) }
+                launch { collectCityErrorEventFlow(forecastViewModel.cityErrorEventFlow) }
             }
         }
     }
 
     /**
-     * Handles events when a searched city is not found by the weather API.
+     * Observes the city error event flow and handles specific error scenarios.
      *
-     * Displays a warning status message via [StatusStateHolder] containing the unknown city name,
-     * then shows a dialog ([WeatherDialogController.showChosenCityNotFound]) offering the user
-     * the option to navigate to manual city selection.
+     * Responds to missing or unresolvable city input by triggering fallback strategies:
+     * - For missing city input: initiates geolocation to determine the current location.
+     * - For unresolvable city names: displays a warning status message and shows a dialog
+     *   prompting the user to manually select a city.
      *
-     * @param flow The [SharedFlow] emitting unknown city names.
+     * @param flow The [SharedFlow] emitting [CityErrorEvent] instances.
      */
-    private suspend fun collectChosenCityNotFoundFlow(flow: SharedFlow<String>) {
-        flow.collect { city ->
-            statusStateHolder.updateStatus(
-                StatusType.Warning(
-                    resourceManager.getString(R.string.forecast_no_data_for_city, city)
-                )
-            )
-            dialogController.showChosenCityNotFound(city) {
-                onGotoCitySelection()
-            }
-        }
-    }
+    private suspend fun collectCityErrorEventFlow(flow: SharedFlow<CityErrorEvent>) {
+        flow.collect { value ->
+            when (value) {
+                is CityErrorEvent.CityBlank -> {
+                    geoLocationCoordinator.startGeoLocation()
+                }
 
-    /**
-     * Handles events when the user attempts to load weather without providing a city name
-     * and no saved city exists.
-     *
-     * As a fallback strategy, triggers geolocation via [GeoLocationCoordinator.startGeoLocation]
-     * to automatically detect the user's current location and resolve the city from coordinates.
-     *
-     * @param flow The [SharedFlow] emitting blank city events.
-     */
-    private suspend fun collectChosenCityBlankFlow(flow: SharedFlow<Unit>) {
-        flow.collect {
-            geoLocationCoordinator.startGeoLocation()
+                is CityErrorEvent.CityNotFound -> {
+                    statusStateHolder.updateStatus(
+                        StatusType.Warning(
+                            resourceManager.getString(
+                                R.string.forecast_no_data_for_city,
+                                value.name
+                            )
+                        )
+                    )
+                    dialogController.showChosenCityNotFound(value.name) {
+                        onGotoCitySelection()
+                    }
+                }
+            }
         }
     }
 

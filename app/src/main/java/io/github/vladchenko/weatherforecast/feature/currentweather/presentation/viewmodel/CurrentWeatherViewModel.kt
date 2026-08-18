@@ -90,34 +90,20 @@ class CurrentWeatherViewModel @Inject constructor(
         get() = _forecastStateFlow
 
     /**
-     * Public read-only flow that emits the currently selected city with its coordinates.
-     * Returns null if no city has been selected yet.
+     * SharedFlow that emits city-related error events when the requested city cannot be loaded.
+     *
+     * Used to notify the UI layer about failures to resolve or fetch the selected city.
+     * Emits [CityErrorEvent] instances indicating either a missing city input or a city that could not be found.
      */
-    val chosenCityStateFlow: StateFlow<CityLocationModel?>
-        get() = _chosenCityStateFlow
+    val cityErrorEventFlow: SharedFlow<CityErrorEvent>
+        get() = _cityErrorEventFlow
 
-    /**
-     * SharedFlow that emits a unit event when the user attempts to load forecast
-     * with an empty city name and no saved city exists.
-     * Used to trigger UI actions like showing a dialog or navigating to city selection.
-     */
-    val chosenCityBlankStateFlow: SharedFlow<Unit>
-        get() = _chosenCityBlankSharedFlow
-
-    /**
-     * SharedFlow that emits the name of the city when it was not found during forecast loading.
-     * Used to display a warning message or prompt the user to check the city name.
-     */
-    val chosenCityNotFoundStateFlow: SharedFlow<String>
-        get() = _chosenCityNotFoundSharedFlow
-
-    private val _chosenCityBlankSharedFlow = MutableSharedFlow<Unit>(
+    private val _cityErrorEventFlow = MutableSharedFlow<CityErrorEvent>(
         extraBufferCapacity = 1
     )
     private val _forecastStateFlow =
         MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading)
     private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
-    private val _chosenCityNotFoundSharedFlow = MutableSharedFlow<String>(extraBufferCapacity = 1)
     private val _refreshingStateFlow = MutableStateFlow(false)
     //endregion flows
 
@@ -144,7 +130,7 @@ class CurrentWeatherViewModel @Inject constructor(
         }
         viewModelScope.launch(exceptionHandler) {
             networkStateHolder.networkStateFlow.collect { state ->
-                when(state) {
+                when (state) {
                     false -> {} // Do nothing
                     true -> {
                         refreshWeather(false)
@@ -168,7 +154,7 @@ class CurrentWeatherViewModel @Inject constructor(
             val (cityName, latValue, lonValue) = if (city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
-                    _chosenCityBlankSharedFlow.tryEmit(Unit)
+                    _cityErrorEventFlow.tryEmit(CityErrorEvent.CityBlank)
                     _refreshingStateFlow.value = false
                     return@launch
                 }
@@ -199,7 +185,7 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun refreshWeather(isPullToRefresh: Boolean) {
         if (isPullToRefresh) _refreshingStateFlow.value = true
-        val city = chosenCityStateFlow.value
+        val city = _chosenCityStateFlow.value
         city?.let {
             launchWeatherForecast(
                 it.city,
@@ -306,7 +292,9 @@ class CurrentWeatherViewModel @Inject constructor(
                                 resourceManager.getString(R.string.city_not_found, error.city)
                             )
                         )
-                        _chosenCityNotFoundSharedFlow.tryEmit(error.city)
+                        _cityErrorEventFlow.tryEmit(
+                            CityErrorEvent.CityNotFound(error.city)
+                        )
                     }
 
                     is ForecastError.LocalDataCorrupted -> {
