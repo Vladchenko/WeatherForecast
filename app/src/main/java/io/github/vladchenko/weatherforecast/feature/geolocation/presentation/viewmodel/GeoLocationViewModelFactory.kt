@@ -7,6 +7,7 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 
 /**
  * Factory for creating instances of [GeoLocationViewModel].
@@ -27,6 +28,7 @@ class GeoLocationViewModelFactory(
     private val resourceManager: ResourceManager,
     private val geoLocator: DeviceLocationProvider,
     private val statusStateHolder: StatusStateHolder,
+    private val dialogController: WeatherDialogController,
 ) : ViewModelProvider.Factory {
 
     /**
@@ -41,7 +43,8 @@ class GeoLocationViewModelFactory(
             loggingService,
             resourceManager,
             geoLocator,
-            statusStateHolder
+            statusStateHolder,
+            dialogController,
         ) as T
     }
 }
