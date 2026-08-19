@@ -35,13 +35,6 @@ fun interface GeoLocationCallback {
  *
  * Using a sealed interface ensures that all cases are known at compile time, allowing
  * for exhaustive `when` statements and reducing the risk of unhandled cases.
- *
- * Events include:
- * - [GotoCitySelection]: User should be navigated to city selection screen
- * - [RequestPermission]: App needs to request location permission from the user
- * - [OnPermanentlyDenied]: User permanently denied permission; consider showing guidance
- * - [OnNegativeNoPermission]: User declined permission without choosing "don't ask again"
- * - [OnForecastLoadForLocation]: Geolocation succeeded; launch forecast for the given location
  */
 sealed interface GeoLocationEvent {
     /**
@@ -49,6 +42,11 @@ sealed interface GeoLocationEvent {
      * Typically triggered when geolocation is unavailable or user cancels.
      */
     data object GotoCitySelection : GeoLocationEvent
+
+    /**
+     * Define geo location of device user runs this app on
+     */
+    data object DefineDeviceLocation : GeoLocationEvent
 
     /**
      * Request to show a system permission dialog for location access.

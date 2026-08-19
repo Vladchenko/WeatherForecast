@@ -99,12 +99,12 @@ class WeatherActivity : AppCompatActivity() {
             }
         }
         CitySelectionCoordinator.Factory().create(
+            callback = geoLocationCallback,
             resourceManager = resourceManager,
             dialogController = dialogController,
             forecastViewModel = weatherViewModel,
             statusStateHolder = statusStateHolder,
-            geoLocationViewModel = geoLocationViewModel,
-            callback = geoLocationCallback
+            geoLocationEventBus = geoLocationEventBus
         )
     }
 
@@ -203,6 +203,9 @@ class WeatherActivity : AppCompatActivity() {
                         )
                     }
 
+                    is GeoLocationEvent.DefineDeviceLocation -> {
+                        geoLocationViewModel.defineDeviceGeoLocation()
+                    }
                     else -> {
                     }
                 }
