@@ -2,6 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.vi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -20,6 +21,7 @@ import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogCon
  * @property resourceManager Helper to retrieve localized strings and application resources.
  * @property geoLocator Service responsible for retrieving the device's current location (GPS/Network).
  * @property statusStateHolder Manager for handling and broadcasting UI status messages (e.g., errors, info).
+ * @property geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
  */
 @Suppress("UNCHECKED_CAST")
 class GeoLocationViewModelFactory(
@@ -29,6 +31,7 @@ class GeoLocationViewModelFactory(
     private val geoLocator: DeviceLocationProvider,
     private val statusStateHolder: StatusStateHolder,
     private val dialogController: WeatherDialogController,
+    private val geoLocationEventBus: GeoLocationEventBus,
 ) : ViewModelProvider.Factory {
 
     /**
@@ -45,6 +48,7 @@ class GeoLocationViewModelFactory(
             geoLocator,
             statusStateHolder,
             dialogController,
+            geoLocationEventBus
         ) as T
     }
 }

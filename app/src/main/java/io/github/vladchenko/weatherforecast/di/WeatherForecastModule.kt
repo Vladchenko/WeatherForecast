@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -13,6 +14,7 @@ import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocat
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModelFactory
 import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModelFactory
 import javax.inject.Singleton
 
@@ -47,6 +49,8 @@ class WeatherForecastModule {
         resourceManager: ResourceManager,
         geoLocator: DeviceLocationProvider,
         statusStateHolder: StatusStateHolder,
+        dialogController: WeatherDialogController,
+        geoLocationEventBus: GeoLocationEventBus,
     ): GeoLocationViewModelFactory {
         return GeoLocationViewModelFactory(
             geoLocationHelper,
@@ -54,6 +58,8 @@ class WeatherForecastModule {
             resourceManager,
             geoLocator,
             statusStateHolder,
+            dialogController,
+            geoLocationEventBus
         )
     }
 

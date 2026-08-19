@@ -57,10 +57,6 @@ import javax.inject.Inject
  * @property chosenCityInteractor Handles persistence and retrieval of the selected city
  * @property weatherDomainToUiMapper Converts domain models ([CurrentWeather]) to UI models ([CurrentWeatherUi])
  * @property forecastRemoteInteractor Loads weather data from the remote API with local cache fallback
- *
- * @see WeatherUiState
- * @see StatusStateHolder
- * @see CurrentWeatherInteractor
  */
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(

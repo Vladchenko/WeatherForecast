@@ -10,9 +10,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationCallback
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
@@ -23,8 +27,6 @@ import io.github.vladchenko.weatherforecast.core.ui.systembars.setTransparentSys
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelectionCoordinator
@@ -39,6 +41,7 @@ import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTh
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -76,6 +79,9 @@ class WeatherActivity : AppCompatActivity() {
     @Inject
     lateinit var networkStateHolder: NetworkStateHolder
 
+    @Inject
+    lateinit var geoLocationEventBus: GeoLocationEventBus
+
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()
     private val weatherViewModel: CurrentWeatherViewModel by viewModels()
@@ -85,7 +91,7 @@ class WeatherActivity : AppCompatActivity() {
     private val geoCitySelectionCoordinatorRef: CitySelectionCoordinator by lazy {
         val geoLocationCallback = GeoLocationCallback { event ->
             when (event) {
-                is GeoLocationCallbackEvent.GotoCitySelection -> {
+                is GeoLocationEvent.GotoCitySelection -> {
                     navigationDispatcher.navigate(NavigationEvent.NavigateToCitySelection())
                 }
 
@@ -113,6 +119,8 @@ class WeatherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        collectGeoLocationEvents()
+
         // Connect permission resolver to activity result launcher
         permissionResolver.connect(
             launcher = requestPermissionLauncher,
@@ -124,30 +132,6 @@ class WeatherActivity : AppCompatActivity() {
         // Set Activity context for dialog controller to use AppCompat theme
         (dialogController as WeatherDialogControllerImpl).setActivityContext(this)
 
-        geoLocationViewModel.setCallback(
-            { event ->
-                when (event) {
-                    is GeoLocationCallbackEvent.RequestPermission -> {
-                        permissionResolver.requestLocationPermission()
-                    }
-
-                    is GeoLocationCallbackEvent.OnPermanentlyDenied,
-                    is GeoLocationCallbackEvent.OnNegativeNoPermission -> {
-                        finishAffinity()
-                    }
-
-                    is GeoLocationCallbackEvent.OnForecastLoadForLocation -> {
-                        weatherViewModel.launchWeatherForecast(
-                            event.locationModel.city,
-                            event.locationModel.location.latitude,
-                            event.locationModel.location.longitude
-                        )
-                    }
-
-                    else -> {}
-                }
-            }
-        )
         setContent {
             val navController = rememberNavController()
             navigationDispatcher = NavigationEventDispatcherImpl(
@@ -196,5 +180,33 @@ class WeatherActivity : AppCompatActivity() {
         val currentNightMode =
             resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         return currentNightMode != android.content.res.Configuration.UI_MODE_NIGHT_YES
+    }
+
+    private fun collectGeoLocationEvents() {
+        lifecycleScope.launch {
+            geoLocationEventBus.geoLocationEventsFlow.collect { event ->
+                when (event) {
+                    is GeoLocationEvent.RequestPermission -> {
+                        permissionResolver.requestLocationPermission()
+                    }
+
+                    is GeoLocationEvent.OnPermanentlyDenied,
+                    is GeoLocationEvent.OnNegativeNoPermission -> {
+                        finishAffinity()
+                    }
+
+                    is GeoLocationEvent.OnForecastLoadForLocation -> {
+                        weatherViewModel.launchWeatherForecast(
+                            event.locationModel.city,
+                            event.locationModel.location.latitude,
+                            event.locationModel.location.longitude
+                        )
+                    }
+
+                    else -> {
+                    }
+                }
+            }
+        }
     }
 }

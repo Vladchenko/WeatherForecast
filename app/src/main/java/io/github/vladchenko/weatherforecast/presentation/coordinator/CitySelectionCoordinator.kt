@@ -3,14 +3,14 @@ package io.github.vladchenko.weatherforecast.presentation.coordinator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationCallback
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import kotlinx.coroutines.CoroutineScope
@@ -121,7 +121,7 @@ class CitySelectionCoordinator(
          * Creates and returns a fully configured [CitySelectionCoordinator] instance.
          *
          * Initializes the coordinator with all required dependencies:
-         * - [GeoLocationCallback] for event propagation (wires navigation through [GeoLocationCallbackEvent.GotoCitySelection]).
+         * - [GeoLocationEvent] for event propagation (wires navigation through [GeoLocationEvent.GotoCitySelection]).
          * - [ResourceManager] for localized string resources.
          * - [StatusStateHolder] for broadcasting UI status updates.
          * - [WeatherDialogController] for managing dialog presentation.
@@ -149,7 +149,7 @@ class CitySelectionCoordinator(
                 forecastViewModel = forecastViewModel,
                 statusStateHolder = statusStateHolder,
                 geoLocationViewModel = geoLocationViewModel,
-                onGotoCitySelection = { callback.onEvent(GeoLocationCallbackEvent.GotoCitySelection) }
+                onGotoCitySelection = { callback.onEvent(GeoLocationEvent.GotoCitySelection) }
             )
         }
     }

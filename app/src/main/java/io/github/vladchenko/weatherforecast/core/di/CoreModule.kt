@@ -7,6 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBusImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManagerImpl
@@ -103,4 +105,10 @@ class CoreModule {
     @Singleton
     @Provides
     fun provideWeatherStateHolder(): StatusStateHolder = StatusStateHolderImpl()
+
+    @Singleton
+    @Provides
+    fun provideGeoLocationStateHolder(): GeoLocationEventBus {
+        return GeoLocationEventBusImpl()
+    }
 }

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Error
@@ -13,14 +15,9 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Warning
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallback
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent.GotoCitySelection
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationCallbackEvent.OnForecastLoadForLocation
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationException
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationListener
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
-import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.model.GeoLocationPermission
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel.Companion.GEO_LOCATING_ATTEMPTS
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -40,7 +37,8 @@ import javax.inject.Inject
  *    using [Geolocator].
  *
  * The ViewModel emits various events via [SharedFlow]s to notify the UI layer (or Coordinators)
- * about state changes, such as location acquisition, errors, or navigation requirements.
+ * about state changes, such as location acquisition, errors, or navigation requirements,
+ * broadcasting them through [geoLocationEventBus].
  *
  * ## Retry Mechanism
  * Implements an automatic retry mechanism ([retryGeoLocationOrGotoCitySelectionScreen]) for hardware
@@ -51,10 +49,7 @@ import javax.inject.Inject
  * @property resourceManager Provides access to string resources for UI messages.
  * @property geoLocator Hardware service for retrieving current device location.
  * @property statusStateHolder Manages and broadcasts UI status messages (errors, warnings, info).
- *
- * @see DeviceLocationProvider
- * @see Geolocator
- * @see GeoLocationPermission
+ * @property geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
  */
 @HiltViewModel
 class GeoLocationViewModel @Inject constructor(
@@ -64,12 +59,11 @@ class GeoLocationViewModel @Inject constructor(
     private val geoLocator: DeviceLocationProvider,
     private val statusStateHolder: StatusStateHolder,
     private val dialogController: WeatherDialogController,
+    private val geoLocationEventBus: GeoLocationEventBus,
 ) : ViewModel() {
 
     private var permissionRequests = 0
     private var geoLocatingAttempts = 0
-
-    private var callback: GeoLocationCallback? = null
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, throwable.message.orEmpty())
@@ -80,10 +74,6 @@ class GeoLocationViewModel @Inject constructor(
             retryGeoLocationOrGotoCitySelectionScreen()
         }
         showError(throwable.message.toString())
-    }
-
-    fun setCallback(callback: GeoLocationCallback) {
-        this.callback = callback
     }
 
     fun defineDeviceGeoLocation() {
@@ -113,7 +103,7 @@ class GeoLocationViewModel @Inject constructor(
                     Info(resourceManager.getString(R.string.geo_permission_required))
                 )
                 // Emit Requested state to trigger permission request via WeatherActivity
-                callback?.onEvent(GeoLocationCallbackEvent.RequestPermission)
+                geoLocationEventBus.send(GeoLocationEvent.RequestPermission)
             }
         })
     }
@@ -156,14 +146,10 @@ class GeoLocationViewModel @Inject constructor(
                 )
                 dialogController.showPermissionPermanentlyDenied(
                     onPositiveClick = {
-                        callback?.onEvent(
-                            GeoLocationCallbackEvent.OnPermanentlyDenied
-                        )
+                        geoLocationEventBus.send(GeoLocationEvent.OnPermanentlyDenied)
                     },
                     onNegativeClick = {
-                        callback?.onEvent(
-                            GeoLocationCallbackEvent.OnPermanentlyDenied
-                        )
+                        geoLocationEventBus.send(GeoLocationEvent.OnPermanentlyDenied)
                     }
                 )
             } else {
@@ -176,12 +162,10 @@ class GeoLocationViewModel @Inject constructor(
                 )
                 dialogController.showNoPermission(
                     onPositiveClick = {
-                        callback?.onEvent(GeoLocationCallbackEvent.RequestPermission)
+                        geoLocationEventBus.send(GeoLocationEvent.RequestPermission)
                     },
                     onNegativeClick = {
-                        callback?.onEvent(
-                            GeoLocationCallbackEvent.OnNegativeNoPermission
-                        )
+                        geoLocationEventBus.send(GeoLocationEvent.OnNegativeNoPermission)
                     }
                 )
             }
@@ -202,17 +186,13 @@ class GeoLocationViewModel @Inject constructor(
             dialogController.showLocationDefined(
                 city = cityModel.city,
                 onPositiveClick = {
-                    callback?.onEvent(
-                        OnForecastLoadForLocation(cityModel)
-                    )
+                    geoLocationEventBus.send(GeoLocationEvent.OnForecastLoadForLocation(cityModel))
                 },
                 onNegativeClick = {
                     statusStateHolder.updateStatus(
                         Info(resourceManager.getString(R.string.city_selection_title))
                     )
-                    callback?.onEvent(
-                        GotoCitySelection
-                    )
+                    geoLocationEventBus.send(GeoLocationEvent.GotoCitySelection)
                 }
             )
         }
@@ -226,9 +206,7 @@ class GeoLocationViewModel @Inject constructor(
             )
             dialogController.showGeoLocationError(
                 onPositiveClick = {
-                    callback?.onEvent(
-                        GotoCitySelection
-                    )
+                    geoLocationEventBus.send(GeoLocationEvent.GotoCitySelection)
                 },
                 onNegativeClick = {
                     statusStateHolder.updateStatus(
