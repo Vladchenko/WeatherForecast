@@ -91,7 +91,6 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
  * - City click fires [CurrentWeatherEvent.NavigateToCitySelection]
  * - Back button fires [CurrentWeatherEvent.NavigateUp]
  *
- * @param refreshingState The current weather refresh state (controls pull-to-refresh indicator).
  * @param appBarUiState The app bar UI state (title, subtitle, colors, visibility).
  * @param onRefreshWeather Handler for refresh events.
  * @param weatherUiState The current weather UI state (success/loading/error with data).
@@ -104,7 +103,6 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
 @Composable
 @NonSkippableComposable
 fun CurrentWeatherLayout(
-    refreshingState: Boolean,
     appBarUiState: AppBarUiState,
     onRefreshWeather: () -> Unit,
     weatherUiState: WeatherUiState<CurrentWeatherUi>,
@@ -184,6 +182,14 @@ fun CurrentWeatherLayout(
                     }
                 }
             }
+            val isManualRefreshing by remember(weatherUiState) {
+                derivedStateOf {
+                    when (weatherUiState) {
+                        is WeatherUiState.Loading -> weatherUiState.isManualRefresh
+                        else -> false
+                    }
+                }
+            }
             BackgroundImage()
             Box(
                 modifier = Modifier
@@ -192,7 +198,7 @@ fun CurrentWeatherLayout(
             ) {
                 PullToRefreshBox(
                     state = refreshState,
-                    isRefreshing = refreshingState,
+                    isRefreshing = isManualRefreshing,
                     onRefresh = {
                         onRefreshWeather()
                     },
@@ -201,7 +207,7 @@ fun CurrentWeatherLayout(
                         PullToRefreshDefaults.Indicator(
                             modifier = Modifier
                                 .align(Alignment.TopCenter),
-                            isRefreshing = refreshingState,
+                            isRefreshing = isManualRefreshing,
                             state = refreshState
                         )
                     }

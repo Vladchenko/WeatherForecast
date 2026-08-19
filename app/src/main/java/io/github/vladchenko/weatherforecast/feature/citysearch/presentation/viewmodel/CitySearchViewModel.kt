@@ -149,7 +149,7 @@ class CitySearchViewModel @Inject constructor(
                 .filter { it.isNotBlank() }
                 .distinctUntilChanged()
                 .collect { query ->
-                    _cityPredictions.value = WeatherUiState.Loading
+                    _cityPredictions.value = WeatherUiState.Loading(false)
                     fetchCities(query)
                 }
         }
@@ -214,7 +214,7 @@ class CitySearchViewModel @Inject constructor(
      *
      * Executes suspended call to [citySearchInteractor.loadCitiesNames].
      * Updates [_cityPredictions] with result.
-     * Shows error via [statusRenderer] if response contains an error message.
+     * Shows error via [statusStateHolder] if response contains an error message.
      *
      * @param query The city name substring to search for
      */

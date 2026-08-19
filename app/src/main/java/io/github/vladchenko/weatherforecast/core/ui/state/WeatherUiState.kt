@@ -9,7 +9,7 @@ import androidx.compose.runtime.Immutable
  * to the UI in a unidirectional and reactive way via [StateFlow]. Ensures that all possible states are handled
  * exhaustively in the UI layer using `when` expressions.
  *
- * @param T The type of data held in the [Success] state (e.g., [io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi], [HourlyWeatherDomainModel]).
+ * @param T The type of data held in the [Success] state (e.g., [CurrentWeatherUi], [HourlyWeatherDomainModel]).
  *
  * Possible states:
  * - [Loading]: Data is currently being fetched from a data source.
@@ -23,8 +23,11 @@ sealed interface WeatherUiState<out T> {
      *
      * This state is typically used to trigger a loading spinner or placeholder content in the UI.
      * It carries no data since nothing has been loaded yet.
+     *
+     * @property isManualRefresh  true when a refresh operation is in progress, false otherwise.
+     *                            Can be observed to show/hide swipe-to-refresh indicators.
      */
-    object Loading : WeatherUiState<Nothing>
+    data class Loading(val isManualRefresh: Boolean = false) : WeatherUiState<Nothing>
 
     /**
      * Represents a successful result from a weather data request.

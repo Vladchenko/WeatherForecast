@@ -87,7 +87,7 @@ class HourlyWeatherViewModel @Inject constructor(
      * @param cityModel contains city name and coordinates
      */
     fun loadHourlyWeatherForLocation(cityModel: CityLocationModel) {
-        _hourlyWeatherStateFlow.value = Loading
+        _hourlyWeatherStateFlow.value = Loading(false)
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
             val temperatureType = preferencesManager.temperatureTypeStateFlow.first()

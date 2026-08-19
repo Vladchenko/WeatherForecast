@@ -72,13 +72,6 @@ class CurrentWeatherViewModel @Inject constructor(
 
     //region flows
     /**
-     * Emits true when a refresh operation is in progress, false otherwise.
-     * Can be observed to show/hide swipe-to-refresh indicators.
-     */
-    val refreshingStateFlow: StateFlow<Boolean>
-        get() = _refreshingStateFlow
-
-    /**
      * Public read-only flow that emits the current UI state of the weather forecast.
      * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
      */
@@ -98,9 +91,8 @@ class CurrentWeatherViewModel @Inject constructor(
         extraBufferCapacity = 1
     )
     private val _forecastStateFlow =
-        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading)
+        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading(false))
     private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
-    private val _refreshingStateFlow = MutableStateFlow(false)
     //endregion flows
 
     private var currentJob: Job? = null
@@ -151,7 +143,6 @@ class CurrentWeatherViewModel @Inject constructor(
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
                     _cityErrorEventFlow.tryEmit(CityErrorEvent.CityBlank)
-                    _refreshingStateFlow.value = false
                     return@launch
                 }
                 Triple(
@@ -180,7 +171,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * @param isPullToRefresh true when triggered by user pull-to-refresh gesture
      */
     fun refreshWeather(isPullToRefresh: Boolean) {
-        if (isPullToRefresh) _refreshingStateFlow.value = true
+        _forecastStateFlow.tryEmit(WeatherUiState.Loading(isManualRefresh = isPullToRefresh))
         val city = _chosenCityStateFlow.value
         city?.let {
             launchWeatherForecast(
@@ -247,7 +238,6 @@ class CurrentWeatherViewModel @Inject constructor(
                         TAG,
                         "Chosen city saved to database: $city"
                     )
-                    _refreshingStateFlow.value = false
                 }
             }
 
@@ -260,7 +250,6 @@ class CurrentWeatherViewModel @Inject constructor(
                     )
                 )
                 showLocalForecast(result.data.copy(city = city))
-                _refreshingStateFlow.value = false
             }
 
             is LoadResult.Error -> {
@@ -271,8 +260,6 @@ class CurrentWeatherViewModel @Inject constructor(
                     chosenCityInteractor.saveChosenCity(cityLocationModel)
                     _chosenCityStateFlow.tryEmit(cityLocationModel)
                 }
-
-                _refreshingStateFlow.value = false
                 when (val error = result.error) {
                     is ForecastError.ApiKeyInvalid -> {
                         statusStateHolder.updateStatus(

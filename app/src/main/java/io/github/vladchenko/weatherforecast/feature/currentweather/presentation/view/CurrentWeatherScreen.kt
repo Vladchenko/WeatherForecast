@@ -47,7 +47,6 @@ fun CurrentWeatherScreen(
     weatherViewModel: CurrentWeatherViewModel = hiltViewModel(),
 ) {
     val weatherUiState by weatherViewModel.weatherStateFlow.collectAsStateWithLifecycle()
-    val refreshingState by weatherViewModel.refreshingStateFlow.collectAsStateWithLifecycle()
     val appBarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
     val hourlyWeatherUiState by hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
 
@@ -58,7 +57,6 @@ fun CurrentWeatherScreen(
     CurrentWeatherLayout(
         appBarUiState = appBarUiState,
         weatherUiState = weatherUiState,
-        refreshingState = refreshingState,
         hourlyWeatherUiState = hourlyWeatherUiState,
         navigationEventDispatcher = navigationEventDispatcher,
         onRefreshWeather = { weatherViewModel.refreshWeather(true) },
