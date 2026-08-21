@@ -10,8 +10,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchScreen
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.createLocation
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.CurrentWeatherScreen
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
@@ -72,12 +74,11 @@ fun WeatherAppNavHost(
             val lon = backStackEntry.arguments?.getFloat(LONGITUDE_PARAM)?.toDouble() ?: .0
 
             CurrentWeatherScreen(
-                initialLat = lat,
-                initialLon = lon,
-                initialCity = city,
+                cityModel = CityLocationModel (city, createLocation(lat, lon)),
                 appBarViewModel = appBarViewModel,
                 hourlyViewModel = hourlyViewModel,
                 weatherViewModel = weatherViewModel,
+//                weatherStateHolder = weatherStateHolder,
                 navigationEventDispatcher = navigationDispatcher
             )
         }

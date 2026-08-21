@@ -197,9 +197,7 @@ class WeatherActivity : AppCompatActivity() {
 
                     is GeoLocationEvent.OnForecastLoadForLocation -> {
                         weatherViewModel.launchWeatherForecast(
-                            event.locationModel.city,
-                            event.locationModel.location.latitude,
-                            event.locationModel.location.longitude
+                            event.locationModel
                         )
                     }
 

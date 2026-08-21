@@ -3,7 +3,7 @@
     <string name="bad_date_format">Invalid date format</string>
 
     <!-- City Selection -->
-    <string name="city_not_found">City "%s" not found. Please check the name.</string>
+    <string name="city_not_found">City %1$s not found. Please check the name.</string>
     <string name="city_predictions_provided">City predictions ready</string>
     <string name="city_predictions_loading">City predictions loading</string>
     <string name="city_predictions_from_cache">No connection — showing saved cities</string>
