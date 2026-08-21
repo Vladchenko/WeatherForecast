@@ -189,7 +189,7 @@ class HourlyWeatherViewModel @Inject constructor(
                 resourceManager.getString(R.string.local_data_corrupted)
 
             is ForecastError.UncategorizedError ->
-                resourceManager.getString(R.string.unexpected_error)
+                resourceManager.getString(R.string.uncategorized_error)
         }
 
     companion object {

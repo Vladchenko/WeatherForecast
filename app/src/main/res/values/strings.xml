@@ -60,6 +60,6 @@
     <string name="geo_permission_required">Location permission required</string>
     <string name="geo_permission_request_message">This app needs location access to detect your area. Allow permission or exit.</string>
 
-    <string name="unexpected_error">An unexpected error occurred.</string>
+    <string name="uncategorized_error">An uncategorized error occurred.</string>
     <string name="recent_cities_loading">Recent cities loading…</string>
 </resources>

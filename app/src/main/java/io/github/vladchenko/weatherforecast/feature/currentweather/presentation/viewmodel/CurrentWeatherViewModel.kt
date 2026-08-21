@@ -240,26 +240,24 @@ class CurrentWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-
                 scope.launch {
                     val cityLocationModel =
                         CityLocationModel(cityModel.city, cityModel.location)
                     chosenCityInteractor.saveChosenCity(cityLocationModel)
                 }
+                var errorMessage = ""
                 when (val error = result.error) {
                     is ForecastError.ApiKeyInvalid -> {
-                        statusStateHolder.updateStatus(
-                            Error(
-                                resourceManager.getString(R.string.api_key_invalid, cityModel.city)
-                            )
-                        )
+                        errorMessage =
+                            resourceManager.getString(R.string.api_key_invalid, cityModel.city)
+                        statusStateHolder.updateStatus(Error(errorMessage))
                     }
 
                     is ForecastError.CityNotFound -> {
+                        errorMessage =
+                            resourceManager.getString(R.string.city_not_found, error.city)
                         statusStateHolder.updateStatus(
-                            Warning(
-                                resourceManager.getString(R.string.city_not_found, error.city)
-                            )
+                            Warning(errorMessage)
                         )
                         _cityErrorEventFlow.tryEmit(
                             CityErrorEvent.CityNotFound(error.city)
@@ -267,100 +265,83 @@ class CurrentWeatherViewModel @Inject constructor(
                     }
 
                     is ForecastError.LocalDataCorrupted -> {
-                        statusStateHolder.updateStatus(
-                            Error(
-                                resourceManager.getString(
-                                    R.string.local_data_corrupted,
+                        errorMessage = resourceManager.getString(
+                            R.string.local_data_corrupted,
+                            cityModel.city
+                        )
+                        statusStateHolder.updateStatus(Error(errorMessage))
+                    }
+
+                    is ForecastError.NetworkError ->
+                        when (error.type) {
+                            ForecastError.NetworkError.Type.ConnectionFailed -> {
+                                errorMessage = resourceManager.getString(
+                                    R.string.connection_refused,
                                     cityModel.city
                                 )
-                            )
-                        )
-                    }
+                                statusStateHolder.updateStatus(Error(errorMessage))
+                            }
 
-                    is ForecastError.NetworkError -> when (error.type) {
-                        ForecastError.NetworkError.Type.ConnectionFailed ->
-                            statusStateHolder.updateStatus(
-                                Error(
-                                    resourceManager.getString(
-                                        R.string.connection_refused,
-                                        cityModel.city
-                                    )
+                            ForecastError.NetworkError.Type.NoInternet -> {
+                                errorMessage = resourceManager.getString(
+                                    R.string.network_disconnected,
+                                    cityModel.city
                                 )
-                            )
+                                statusStateHolder.updateStatus(Error(errorMessage))
+                            }
 
-                        ForecastError.NetworkError.Type.NoInternet ->
-                            statusStateHolder.updateStatus(
-                                Error(
-                                    resourceManager.getString(
-                                        R.string.network_disconnected,
-                                        cityModel.city
-                                    )
+                            ForecastError.NetworkError.Type.Timeout -> {
+                                errorMessage = resourceManager.getString(
+                                    R.string.request_timeout,
+                                    cityModel.city
                                 )
-                            )
+                                statusStateHolder.updateStatus(Error(errorMessage))
+                            }
 
-                        ForecastError.NetworkError.Type.Timeout ->
-                            statusStateHolder.updateStatus(
-                                Error(
-                                    resourceManager.getString(
-                                        R.string.request_timeout,
-                                        cityModel.city
-                                    )
+                            ForecastError.NetworkError.Type.SecurityError -> {
+                                errorMessage = resourceManager.getString(
+                                    R.string.ssl_error,
+                                    cityModel.city
                                 )
-                            )
+                                statusStateHolder.updateStatus(Error(errorMessage))
+                            }
 
-                        ForecastError.NetworkError.Type.SecurityError ->
-                            statusStateHolder.updateStatus(
-                                Error(
-                                    resourceManager.getString(
-                                        R.string.ssl_error,
-                                        cityModel.city
-                                    )
+                            else -> {
+                                errorMessage = resourceManager.getString(
+                                    R.string.network_error_generic,
+                                    cityModel.city
                                 )
-                            )
-
-                        else ->
-                            statusStateHolder.updateStatus(
-                                Error(
-                                    resourceManager.getString(
-                                        R.string.network_error_generic,
-                                        cityModel.city
-                                    )
-                                )
-                            )
-                    }
+                                statusStateHolder.updateStatus(Error(errorMessage))
+                            }
+                        }
 
                     is ForecastError.NoDataAvailable -> {
-                        statusStateHolder.updateStatus(
-                            Error(
-                                resourceManager.getString(
-                                    R.string.no_weather_data_available,
-                                    cityModel.city
-                                )
-                            )
+                        errorMessage = resourceManager.getString(
+                            R.string.no_weather_data_available,
+                            cityModel.city
                         )
+                        statusStateHolder.updateStatus(Error(errorMessage))
                     }
 
                     is ForecastError.UncategorizedError -> {
-                        if (error.cause != null) {
-                            loggingService.logError(TAG, "Unexpected error", error.cause)
-                        } else {
-                            loggingService.logError(TAG, "Unexpected error: ${error.message}")
-                        }
-                        statusStateHolder.updateStatus(
-                            Error(
-                                resourceManager.getString(R.string.unexpected_error, cityModel.city)
-                            )
-                        )
+                        val error = error.cause ?: error.message
+                        loggingService.logError(TAG, "Uncategorized error: $error")
+                        statusStateHolder.updateStatus(Error(error.toString()))
                     }
                 }
+                _forecastStateFlow.value = WeatherUiState.Error(
+                    cityModel.city, errorMessage
+                )
             }
 
-            LoadResult.Loading ->
+            LoadResult.Loading -> {
                 statusStateHolder.updateStatus(
                     Info(
                         resourceManager.getString(R.string.forecast_downloading)
                     )
                 )
+                _forecastStateFlow.value = WeatherUiState.Loading()
+            }
         }
     }
 
