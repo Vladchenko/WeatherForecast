@@ -92,7 +92,6 @@ class CurrentWeatherViewModel @Inject constructor(
     )
     private val _forecastStateFlow =
         MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading(false))
-    private val _chosenCityStateFlow = MutableStateFlow<CityLocationModel?>(null)
     //endregion flows
 
     private var currentJob: Job? = null
@@ -172,13 +171,15 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun refreshWeather(isPullToRefresh: Boolean) {
         _forecastStateFlow.tryEmit(WeatherUiState.Loading(isManualRefresh = isPullToRefresh))
-        val city = _chosenCityStateFlow.value
-        city?.let {
-            launchWeatherForecast(
-                it.city,
-                it.location.latitude,
-                it.location.longitude
-            )
+        viewModelScope.launch(exceptionHandler) {
+            val city = chosenCityInteractor.loadChosenCity()
+            city.let {
+                launchWeatherForecast(
+                    it.city,
+                    it.location.latitude,
+                    it.location.longitude
+                )
+            }
         }
     }
 
@@ -233,7 +234,6 @@ class CurrentWeatherViewModel @Inject constructor(
                         )
                     )
                     chosenCityInteractor.saveChosenCity(cityLocationModel)
-                    _chosenCityStateFlow.tryEmit(cityLocationModel)
                     loggingService.logDebugEvent(
                         TAG,
                         "Chosen city saved to database: $city"
@@ -258,7 +258,6 @@ class CurrentWeatherViewModel @Inject constructor(
                     val cityLocationModel =
                         CityLocationModel(city, createLocation(latitude, longitude))
                     chosenCityInteractor.saveChosenCity(cityLocationModel)
-                    _chosenCityStateFlow.tryEmit(cityLocationModel)
                 }
                 when (val error = result.error) {
                     is ForecastError.ApiKeyInvalid -> {
@@ -425,7 +424,6 @@ class CurrentWeatherViewModel @Inject constructor(
     private suspend fun loadSavedCity() {
         val savedModel = chosenCityInteractor.loadChosenCity()
         if (savedModel.city.isNotBlank()) {
-            _chosenCityStateFlow.value = savedModel
             loggingService.logDebugEvent(
                 TAG,
                 "Loaded saved city from interactor: ${savedModel.city}"
