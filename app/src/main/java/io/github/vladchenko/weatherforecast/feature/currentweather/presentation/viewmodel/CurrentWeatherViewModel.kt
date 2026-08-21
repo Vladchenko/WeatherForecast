@@ -27,6 +27,7 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.mo
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,18 +105,19 @@ class CurrentWeatherViewModel @Inject constructor(
             Error(throwable.message.toString())
         )
     }
+    val scope = CoroutineScope(viewModelScope.coroutineContext + exceptionHandler)
 
     init {
-        viewModelScope.launch(exceptionHandler) {
+        scope.launch {
             loadSavedCity()
         }
-        viewModelScope.launch(exceptionHandler) {
+        scope.launch {
             preferencesManager.temperatureTypeStateFlow.collect { tempType ->
                 loggingService.logDebugEvent(TAG, "Temperature unit changed: $tempType")
                 temperatureType = tempType
             }
         }
-        viewModelScope.launch(exceptionHandler) {
+        scope.launch {
             networkStateHolder.networkStateFlow.collect { state ->
                 when (state) {
                     false -> {} // Do nothing
@@ -136,7 +138,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * @param longitude longitude of the chosen city
      */
     fun launchWeatherForecast(city: String, latitude: Double, longitude: Double) {
-        viewModelScope.launch(exceptionHandler) {
+        scope.launch {
             showLoadingStatusFor(city)
             val (cityName, latValue, lonValue) = if (city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
@@ -171,7 +173,7 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun refreshWeather(isPullToRefresh: Boolean) {
         _forecastStateFlow.tryEmit(WeatherUiState.Loading(isManualRefresh = isPullToRefresh))
-        viewModelScope.launch(exceptionHandler) {
+        scope.launch {
             val city = chosenCityInteractor.loadChosenCity()
             city.let {
                 launchWeatherForecast(
@@ -188,7 +190,7 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     private fun loadRemoteForecastForLocation(city: String, latitude: Double, longitude: Double) {
         currentJob?.cancel()
-        currentJob = viewModelScope.launch(exceptionHandler) {
+        currentJob = scope.launch {
             val result = forecastRemoteInteractor.loadWeatherForLocation(
                 city,
                 temperatureType,
@@ -216,7 +218,7 @@ class CurrentWeatherViewModel @Inject constructor(
     ) {
         when (result) {
             is LoadResult.Remote -> {
-                viewModelScope.launch(exceptionHandler) {
+                scope.launch {
                     statusStateHolder.updateStatus(
                         Info(
                             resourceManager.getString(
@@ -254,7 +256,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
             is LoadResult.Error -> {
 
-                viewModelScope.launch(exceptionHandler) {
+                scope.launch {
                     val cityLocationModel =
                         CityLocationModel(city, createLocation(latitude, longitude))
                     chosenCityInteractor.saveChosenCity(cityLocationModel)
@@ -393,7 +395,7 @@ class CurrentWeatherViewModel @Inject constructor(
      *
      * @param city Name of the city being loaded
      */
-    fun showLoadingStatusFor(city: String) {
+    private fun showLoadingStatusFor(city: String) {
         if (city.isBlank()) {
             statusStateHolder.updateStatus(
                 Info(
