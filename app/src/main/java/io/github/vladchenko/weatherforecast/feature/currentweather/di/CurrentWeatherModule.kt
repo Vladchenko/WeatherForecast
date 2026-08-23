@@ -29,6 +29,7 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.Cu
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModelFactory
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.WeatherResponseHandler
 import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Retrofit
 import javax.inject.Named
@@ -136,21 +137,37 @@ class CurrentWeatherModule {
         loggingService: LoggingService,
         stateHolder: StatusStateHolder,
         resourceManager: ResourceManager,
+        uiConverter: WeatherDomainToUiMapper,
         networkStateHolder: NetworkStateHolder,
         preferencesManager: PreferencesManager,
         chosenCityInteractor: ChosenCityInteractor,
-        forecastRemoteInteractor: CurrentWeatherInteractor,
-        uiConverter: WeatherDomainToUiMapper
+        forecastInteractor: CurrentWeatherInteractor,
+        weatherResponseHandler: WeatherResponseHandler
     ): CurrentWeatherViewModelFactory {
         return CurrentWeatherViewModelFactory(
             loggingService,
-            stateHolder,
             resourceManager,
             uiConverter,
+            stateHolder,
             networkStateHolder,
             preferencesManager,
             chosenCityInteractor,
-            forecastRemoteInteractor
+            forecastInteractor,
+            weatherResponseHandler,
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherResponseHandler(
+        loggingService: LoggingService,
+        statusStateHolder: StatusStateHolder,
+        resourceManager: ResourceManager,
+    ): WeatherResponseHandler {
+        return WeatherResponseHandler(
+            loggingService,
+            resourceManager,
+            statusStateHolder,
         )
     }
 }

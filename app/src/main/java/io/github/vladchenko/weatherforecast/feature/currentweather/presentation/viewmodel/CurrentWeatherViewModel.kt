@@ -1,13 +1,10 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel
 
-import android.location.Location
-import android.location.LocationManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
-import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
@@ -18,7 +15,6 @@ import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Error
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Warning
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toWeatherIconRes
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
@@ -57,8 +53,9 @@ import javax.inject.Inject
  * @property networkStateHolder Manages network connectivity (connect or disconnect)
  * @property preferencesManager Manages user preferences (e.g., temperature unit: Celsius/Fahrenheit)
  * @property chosenCityInteractor Handles persistence and retrieval of the selected city
+ * @property forecastInteractor Loads weather data from the remote API with local cache fallback
+ * @property weatherResponseHandler Processes raw weather data loading results and maps them to a UI-ready structure
  * @property weatherDomainToUiMapper Converts domain models ([CurrentWeather]) to UI models ([CurrentWeatherUi])
- * @property forecastRemoteInteractor Loads weather data from the remote API with local cache fallback
  */
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
@@ -68,8 +65,9 @@ class CurrentWeatherViewModel @Inject constructor(
     private val networkStateHolder: NetworkStateHolder,
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
+    private val forecastInteractor: CurrentWeatherInteractor,
+    private val weatherResponseHandler: WeatherResponseHandler,
     private val weatherDomainToUiMapper: WeatherDomainToUiMapper,
-    private val forecastRemoteInteractor: CurrentWeatherInteractor,
 ) : ViewModel() {
 
     //region flows
@@ -180,7 +178,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private fun loadRemoteForecastForLocation(cityModel: CityLocationModel) {
         currentJob?.cancel()
         currentJob = scope.launch {
-            val result = forecastRemoteInteractor.loadWeatherForLocation(
+            val result = forecastInteractor.loadWeatherForLocation(
                 cityModel.city,
                 temperatureType,
                 cityModel.location.latitude,
@@ -201,164 +199,44 @@ class CurrentWeatherViewModel @Inject constructor(
         cityModel: CityLocationModel,
         result: LoadResult<CurrentWeather>
     ) {
-        when (result) {
-            is LoadResult.Remote -> {
+        val processedResponse = weatherResponseHandler.processServerResponse(
+            cityModel = cityModel,
+            loadResult = result,
+        )
+        processedResponse.let { response ->
+            response.remoteWeatherToShow?.let {
+                showRemoteWeather(it)
+            }
+            response.localWeatherToShow?.let {
+                showLocalWeather(it)
+            }
+            response.cityModelToSave?.let {
                 scope.launch {
-                    statusStateHolder.updateStatus(
-                        Info(
-                            resourceManager.getString(
-                                R.string.forecast_loaded_success,
-                                cityModel.city
-                            )
-                        )
-                    )
-                    showRemoteForecast(result.data.copy(city = cityModel.city))
-                    val cityLocationModel = CityLocationModel(
-                        cityModel.city,
-                        createLocation(
-                            result.data.coordinate.latitude,
-                            result.data.coordinate.longitude
-                        )
-                    )
-                    chosenCityInteractor.saveChosenCity(cityLocationModel)
-                    loggingService.logDebugEvent(
-                        TAG,
-                        "Chosen city saved to database: $cityModel.city"
-                    )
+                    chosenCityInteractor.saveChosenCity(response.cityModelToSave)
                 }
             }
-
-            is LoadResult.Local -> {
-                statusStateHolder.updateStatus(
-                    Warning(
-                        resourceManager.getString(
-                            R.string.forecast_outdated, cityModel.city
-                        )
-                    )
-                )
-                showLocalForecast(result.data.copy(city = cityModel.city))
-            }
-
-            is LoadResult.Error -> {
-                scope.launch {
-                    val cityLocationModel =
-                        CityLocationModel(cityModel.city, cityModel.location)
-                    chosenCityInteractor.saveChosenCity(cityLocationModel)
-                }
-                var errorMessage = ""
-                when (val error = result.error) {
-                    is ForecastError.ApiKeyInvalid -> {
-                        errorMessage =
-                            resourceManager.getString(R.string.api_key_invalid, cityModel.city)
-                        statusStateHolder.updateStatus(Error(errorMessage))
-                    }
-
-                    is ForecastError.CityNotFound -> {
-                        errorMessage =
-                            resourceManager.getString(R.string.city_not_found, error.city)
-                        statusStateHolder.updateStatus(
-                            Warning(errorMessage)
-                        )
-                        _cityErrorEventFlow.tryEmit(
-                            CityErrorEvent.CityNotFound(error.city)
-                        )
-                    }
-
-                    is ForecastError.LocalDataCorrupted -> {
-                        errorMessage = resourceManager.getString(
-                            R.string.local_data_corrupted,
-                            cityModel.city
-                        )
-                        statusStateHolder.updateStatus(Error(errorMessage))
-                    }
-
-                    is ForecastError.NetworkError ->
-                        when (error.type) {
-                            ForecastError.NetworkError.Type.ConnectionFailed -> {
-                                errorMessage = resourceManager.getString(
-                                    R.string.connection_refused,
-                                    cityModel.city
-                                )
-                                statusStateHolder.updateStatus(Error(errorMessage))
-                            }
-
-                            ForecastError.NetworkError.Type.NoInternet -> {
-                                errorMessage = resourceManager.getString(
-                                    R.string.network_disconnected,
-                                    cityModel.city
-                                )
-                                statusStateHolder.updateStatus(Error(errorMessage))
-                            }
-
-                            ForecastError.NetworkError.Type.Timeout -> {
-                                errorMessage = resourceManager.getString(
-                                    R.string.request_timeout,
-                                    cityModel.city
-                                )
-                                statusStateHolder.updateStatus(Error(errorMessage))
-                            }
-
-                            ForecastError.NetworkError.Type.SecurityError -> {
-                                errorMessage = resourceManager.getString(
-                                    R.string.ssl_error,
-                                    cityModel.city
-                                )
-                                statusStateHolder.updateStatus(Error(errorMessage))
-                            }
-
-                            else -> {
-                                errorMessage = resourceManager.getString(
-                                    R.string.network_error_generic,
-                                    cityModel.city
-                                )
-                                statusStateHolder.updateStatus(Error(errorMessage))
-                            }
-                        }
-
-                    is ForecastError.NoDataAvailable -> {
-                        errorMessage = resourceManager.getString(
-                            R.string.no_weather_data_available,
-                            cityModel.city
-                        )
-                        statusStateHolder.updateStatus(Error(errorMessage))
-                    }
-
-                    is ForecastError.UncategorizedError -> {
-                        val error = error.cause ?: error.message
-                        loggingService.logError(TAG, "Uncategorized error: $error")
-                        statusStateHolder.updateStatus(Error(error.toString()))
-                    }
-                }
+            response.errorToShow?.let {
                 _forecastStateFlow.value = WeatherUiState.Error(
-                    cityModel.city, errorMessage
+                    cityModel.city, it
                 )
             }
-
-            LoadResult.Loading -> {
-                statusStateHolder.updateStatus(
-                    Info(
-                        resourceManager.getString(R.string.forecast_downloading)
-                    )
-                )
+            response.cityError?.let {
+                _cityErrorEventFlow.tryEmit(it)
+            }
+            if (response.isLoading == true) {
                 _forecastStateFlow.value = WeatherUiState.Loading()
             }
         }
     }
 
-    private fun createLocation(latitude: Double, longitude: Double): Location =
-        Location(LocationManager.NETWORK_PROVIDER).apply {
-            this.latitude = latitude
-            this.longitude = longitude
-        }
-
-    private fun showRemoteForecast(forecastModel: CurrentWeather) {
+    private fun showRemoteWeather(forecastModel: CurrentWeather) {
         _forecastStateFlow.value = WeatherUiState.Success(
             toUiModel(forecastModel),
             DataSource.REMOTE
         )
     }
 
-    private fun showLocalForecast(forecastModel: CurrentWeather) {
+    private fun showLocalWeather(forecastModel: CurrentWeather) {
         _forecastStateFlow.value = WeatherUiState.Success(
             toUiModel(forecastModel),
             DataSource.LOCAL

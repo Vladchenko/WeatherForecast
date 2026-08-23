@@ -25,6 +25,7 @@ import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigat
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setLightStatusBars
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setTransparentSystemBars
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.WeatherStateHolder
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
@@ -39,6 +40,7 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -81,6 +83,9 @@ class WeatherActivity : AppCompatActivity() {
 
     @Inject
     lateinit var geoLocationEventBus: GeoLocationEventBus
+
+    @Inject
+    lateinit var weatherStateHolder: WeatherStateHolder
 
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()
@@ -167,7 +172,7 @@ class WeatherActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val scope = kotlinx.coroutines.CoroutineScope(SupervisorJob())
+        val scope = CoroutineScope(SupervisorJob())
         geoCitySelectionCoordinatorRef.startObserving(scope, lifecycle)
     }
 
@@ -178,8 +183,8 @@ class WeatherActivity : AppCompatActivity() {
 
     private fun isLightTheme(): Boolean {
         val currentNightMode =
-            resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-        return currentNightMode != android.content.res.Configuration.UI_MODE_NIGHT_YES
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return currentNightMode != Configuration.UI_MODE_NIGHT_YES
     }
 
     private fun collectGeoLocationEvents() {

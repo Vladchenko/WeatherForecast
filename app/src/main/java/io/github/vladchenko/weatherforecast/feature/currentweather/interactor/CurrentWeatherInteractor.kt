@@ -13,7 +13,9 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.mo
  * @property currentWeatherRepository The repository responsible for providing weather data
  *                                   from remote or local sources.
  */
-class CurrentWeatherInteractor(private val currentWeatherRepository: CurrentWeatherRepository) {
+class CurrentWeatherInteractor(
+    private val currentWeatherRepository: CurrentWeatherRepository
+) {
 
     /**
      * Loads the current weather for a given geographic location.
