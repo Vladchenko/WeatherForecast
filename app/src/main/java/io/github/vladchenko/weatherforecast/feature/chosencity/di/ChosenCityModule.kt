@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesConstants.SHARED_PREFERENCES_KEY
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.ChosenCityRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasource.ChosenCityDataSource
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasourceimpl.ChosenCityLocalDataSourceImpl
@@ -45,7 +46,10 @@ class ChosenCityModule {
 
     @Singleton
     @Provides
-    fun provideChosenCityInteractor(chosenCityRepository: ChosenCityRepository): ChosenCityInteractor {
-        return ChosenCityInteractor(chosenCityRepository)
+    fun provideChosenCityInteractor(
+        loggingService: LoggingService,
+        chosenCityRepository: ChosenCityRepository
+    ): ChosenCityInteractor {
+        return ChosenCityInteractor(loggingService, chosenCityRepository)
     }
 }

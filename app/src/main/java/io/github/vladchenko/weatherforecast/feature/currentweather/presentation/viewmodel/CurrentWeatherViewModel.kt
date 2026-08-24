@@ -104,11 +104,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
     init {
         scope.launch {
-            loadSavedCity()
-        }
-        scope.launch {
             preferencesManager.temperatureTypeStateFlow.collect { tempType ->
-                loggingService.logDebugEvent(TAG, "Temperature unit changed: $tempType")
                 temperatureType = tempType
             }
         }
@@ -250,18 +246,6 @@ class CurrentWeatherViewModel @Inject constructor(
                     )
                 )
             )
-        }
-    }
-
-    private suspend fun loadSavedCity() {
-        val savedModel = chosenCityInteractor.loadChosenCity()
-        if (savedModel.city.isNotBlank()) {
-            loggingService.logDebugEvent(
-                TAG,
-                "Loaded saved city from interactor: ${savedModel.city}"
-            )
-        } else {
-            loggingService.logDebugEvent(TAG, "No saved city found in interactor")
         }
     }
 
