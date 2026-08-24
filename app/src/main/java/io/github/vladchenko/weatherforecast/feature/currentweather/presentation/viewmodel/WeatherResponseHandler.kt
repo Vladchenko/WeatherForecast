@@ -2,12 +2,12 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.presentation
 
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.createLocation
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.WeatherResponseHandlerResult
 
 /**
@@ -54,7 +54,7 @@ class WeatherResponseHandler(
                 )
                 val cityLocationModel = CityLocationModel(
                     cityModel.city,
-                    createLocation(
+                    Coordinate(
                         loadResult.data.coordinate.latitude,
                         loadResult.data.coordinate.longitude
                     )
@@ -75,7 +75,7 @@ class WeatherResponseHandler(
                 )
                 val cityLocationModel = CityLocationModel(
                     cityModel.city,
-                    createLocation(
+                    Coordinate(
                         loadResult.data.coordinate.latitude,
                         loadResult.data.coordinate.longitude
                     )
@@ -87,7 +87,7 @@ class WeatherResponseHandler(
             }
 
             is LoadResult.Error -> {
-                val cityLocationModel = CityLocationModel(cityModel.city, cityModel.location)
+                val cityLocationModel = CityLocationModel(cityModel.city, cityModel.coordinate)
                 var cityError: CityErrorEvent? = null
                 var errorMessage: Int = Integer.MIN_VALUE
                 when (val error = loadResult.error) {

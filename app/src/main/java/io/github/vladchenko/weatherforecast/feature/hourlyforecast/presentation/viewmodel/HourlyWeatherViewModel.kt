@@ -93,8 +93,8 @@ class HourlyWeatherViewModel @Inject constructor(
             val result = hourlyWeatherInteractor.loadHourlyWeatherForLocation(
                 cityModel.city,
                 temperatureType,
-                cityModel.location.latitude,
-                cityModel.location.longitude
+                cityModel.coordinate.latitude,
+                cityModel.coordinate.longitude
             )
             processServerResponse(cityModel.city, result)
         }

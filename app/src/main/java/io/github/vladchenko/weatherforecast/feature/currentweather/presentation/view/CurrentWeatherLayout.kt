@@ -56,11 +56,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.feature.geolocation.util.createLocation
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
@@ -122,9 +122,17 @@ fun CurrentWeatherLayout(
         when (weatherUiState) {
             is WeatherUiState.Success -> {
                 val city = weatherUiState.data.city
-                val coordinate = weatherUiState.data.coordinate
-                val location = createLocation(coordinate.latitude, coordinate.longitude)
-                onLoadHourlyWeather(CityLocationModel(city, location))
+                val coordinate =
+                    Coordinate(
+                        weatherUiState.data.coordinate.latitude,
+                        weatherUiState.data.coordinate.longitude
+                    )
+                onLoadHourlyWeather(
+                    CityLocationModel(
+                        city,
+                        coordinate
+                    )
+                )
             }
 
             else -> return@LaunchedEffect

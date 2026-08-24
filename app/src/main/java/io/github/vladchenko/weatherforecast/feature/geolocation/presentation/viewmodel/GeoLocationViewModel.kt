@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -162,7 +163,11 @@ class GeoLocationViewModel @Inject constructor(
                 TAG,
                 "City defined successfully by location = $location, city = $city"
             )
-            val cityModel = CityLocationModel(city, location)
+            val cityModel =
+                CityLocationModel(
+                    city,
+                    Coordinate(location.latitude, location.longitude)
+                )
             dialogController.showLocationDefined(
                 city = cityModel.city,
                 onPositiveClick = {
