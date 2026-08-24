@@ -260,10 +260,6 @@ class CitySearchViewModel @Inject constructor(
             null -> {
                 _cityPredictions.value = Error(city = city, messageId = 0, message = null)
             }
-
-            LoadResult.Loading -> {
-                showStatus(R.string.city_predictions_loading)
-            }
         }
     }
 
@@ -292,10 +288,6 @@ class CitySearchViewModel @Inject constructor(
                             DataSource.REMOTE
                         )
                     )
-                }
-
-                LoadResult.Loading -> {
-                    showStatus(R.string.recent_cities_loading)
                 }
             }
         } catch (e: Exception) {

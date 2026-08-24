@@ -125,12 +125,6 @@ class HourlyWeatherViewModel @Inject constructor(
                 _hourlyWeatherStateFlow.value =
                     Error(city = city, messageId = getErrorMessage(result), message = null)
             }
-
-            LoadResult.Loading -> {
-                statusStateHolder.updateInfoStatus(
-                    R.string.forecast_hourly_loading
-                )
-            }
         }
     }
 

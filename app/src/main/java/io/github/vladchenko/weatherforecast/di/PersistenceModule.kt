@@ -7,11 +7,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
-import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
@@ -51,12 +50,6 @@ object PersistenceModule {
         @ApplicationContext context: Context
     ): WeatherForecastDatabase {
         return WeatherForecastDatabase.getInstance(context)
-        // following code was present earlier,
-//        Room.databaseBuilder(
-//            context,
-//            WeatherForecastDatabase::class.java,
-//            "weather_forecast_database"
-//        ).build()
     }
 
     @Provides

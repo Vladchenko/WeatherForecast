@@ -152,13 +152,6 @@ class WeatherResponseHandler(
                     cityError = cityError,
                 )
             }
-
-            LoadResult.Loading -> {
-                statusStateHolder.updateInfoStatus(R.string.forecast_downloading, cityModel.city)
-                return WeatherResponseHandlerResult(
-                    isLoading = true
-                )
-            }
         }
     }
 
