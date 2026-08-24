@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.preferences.PreferencesConstants.SHARED_PREFERENCES_KEY
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO
@@ -57,6 +58,9 @@ object PersistenceModule {
     fun provideSharedPreferences(
         @ApplicationContext context: Context
     ): SharedPreferences {
-        return context.getSharedPreferences("weather_forecast_prefs", Context.MODE_PRIVATE)
+        return context.getSharedPreferences(
+            SHARED_PREFERENCES_KEY,
+            Context.MODE_PRIVATE
+        )
     }
 }

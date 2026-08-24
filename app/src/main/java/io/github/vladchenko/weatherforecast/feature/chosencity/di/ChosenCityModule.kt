@@ -1,12 +1,10 @@
 package io.github.vladchenko.weatherforecast.feature.chosencity.di
 
-import android.app.Application
-import android.content.Context
+import android.content.SharedPreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.core.preferences.PreferencesConstants.SHARED_PREFERENCES_KEY
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.ChosenCityRepositoryImpl
@@ -29,10 +27,8 @@ class ChosenCityModule {
 
     @Singleton
     @Provides
-    fun provideChosenCityDataSource(app: Application): ChosenCityDataSource {
-        return ChosenCityLocalDataSourceImpl(
-            app.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-        )
+    fun provideChosenCityDataSource(sharedPreferences: SharedPreferences): ChosenCityDataSource {
+        return ChosenCityLocalDataSourceImpl(sharedPreferences)
     }
 
     @Singleton
