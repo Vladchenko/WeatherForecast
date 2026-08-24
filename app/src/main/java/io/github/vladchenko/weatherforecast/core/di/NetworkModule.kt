@@ -12,7 +12,6 @@ import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserverImpl
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import kotlinx.coroutines.CoroutineScope
@@ -77,14 +76,12 @@ class NetworkModule {
     @Provides
     fun provideNetworkStatusCoordinator(
         coroutineScope: CoroutineScope,
-        resourceManager: ResourceManager,
         statusStateHolder: StatusStateHolder,
         networkStateHolder: NetworkStateHolder,
         connectivityObserver: ConnectivityObserver,
     ): NetworkStatusCoordinator {
         return NetworkStatusCoordinator(
             coroutineScope,
-            resourceManager,
             statusStateHolder,
             networkStateHolder,
             connectivityObserver

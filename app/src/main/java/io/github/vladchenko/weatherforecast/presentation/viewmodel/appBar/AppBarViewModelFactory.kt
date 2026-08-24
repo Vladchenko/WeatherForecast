@@ -3,9 +3,7 @@ package io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
 
 /**
  * Factory for creating [AppBarViewModel] instances with dependency injection.
@@ -15,14 +13,10 @@ import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBar
  * for [AppBarViewModel], ensuring consistent initialization across the application.
  *
  * @property stateHolder manages and broadcasts UI status messages
- * @property resourceManager provides access to application string resources
- * @property appBarStateMapper converts domain forecast states to UI-appropriate app bar states
  * @property networkStateHolder manages network connectivity (connect or disconnect)
  */
 class AppBarViewModelFactory(
     private val stateHolder: StatusStateHolder,
-    private val resourceManager: ResourceManager,
-    private val appBarStateMapper: AppBarStateMapper,
     private val networkStateHolder: NetworkStateHolder
 ) : ViewModelProvider.Factory {
 
@@ -37,8 +31,6 @@ class AppBarViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return AppBarViewModel(
             stateHolder,
-            resourceManager,
-            appBarStateMapper,
             networkStateHolder,
         ) as T
     }

@@ -6,14 +6,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModelFactory
-import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModelFactory
 import javax.inject.Singleton
@@ -24,7 +22,6 @@ import javax.inject.Singleton
  * This module defines bindings for:
  * - [ResponseProcessor] to handle API response validation and error mapping
  * - [GeoLocationViewModelFactory] for creating location-aware view models
- * - [AppBarStateMapper] to convert domain state into UI-specific app bar data
  * - [AppBarViewModelFactory] for creating shared app bar view models
  *
  * All dependencies are scoped to [SingletonComponent], ensuring single instances
@@ -46,7 +43,6 @@ class WeatherForecastModule {
     fun provideGeoLocationViewModelFactory(
         geoLocationHelper: Geolocator,
         loggingService: LoggingService,
-        resourceManager: ResourceManager,
         geoLocator: DeviceLocationProvider,
         statusStateHolder: StatusStateHolder,
         dialogController: WeatherDialogController,
@@ -55,7 +51,6 @@ class WeatherForecastModule {
         return GeoLocationViewModelFactory(
             geoLocationHelper,
             loggingService,
-            resourceManager,
             geoLocator,
             statusStateHolder,
             dialogController,
@@ -65,22 +60,12 @@ class WeatherForecastModule {
 
     @Singleton
     @Provides
-    fun provideAppBarStateConverter(resourceManager: ResourceManager): AppBarStateMapper {
-        return AppBarStateMapper(resourceManager)
-    }
-
-    @Singleton
-    @Provides
     fun provideAppBarViewModelFactory(
         stateHolder: StatusStateHolder,
-        resourceManager: ResourceManager,
-        appBarStateMapper: AppBarStateMapper,
         networkStateHolder: NetworkStateHolder
     ): AppBarViewModelFactory {
         return AppBarViewModelFactory(
             stateHolder,
-            resourceManager,
-            appBarStateMapper,
             networkStateHolder
         )
     }

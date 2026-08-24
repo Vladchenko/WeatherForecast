@@ -1,5 +1,7 @@
 package io.github.vladchenko.weatherforecast.core.ui.status
 
+import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -13,17 +15,51 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * The initial status is set to [StatusType.Info] with an empty message.
  *
- * @see StatusStateHolder
+ * @property resourceManager provides access to application string resources
  */
-class StatusStateHolderImpl() : StatusStateHolder {
+class StatusStateHolderImpl(
+    private val resourceManager: ResourceManager
+) : StatusStateHolder {
 
-    override val statusStateFlow: StateFlow<StatusType>
+    override val statusStateFlow: StateFlow<StatusData>
         get() = _statusStateFlow
 
-    private val _statusStateFlow =
-        MutableStateFlow<StatusType>(StatusType.Info(""))
-
-    override fun updateStatus(status: StatusType) {
-        _statusStateFlow.value = status
+    override fun updateErrorStatus(stringId: Int, vararg args: Any) {
+        _statusStateFlow.tryEmit(
+            StatusData(
+            resourceManager.getString(stringId, *args),
+            resourceManager.getThemeColorRes(R.attr.colorError)
+            )
+        )
     }
+
+    override fun updateErrorStatus(message: String, vararg args: Any) {
+        _statusStateFlow.tryEmit(
+            StatusData(
+                message,
+                resourceManager.getThemeColorRes(R.attr.colorError)
+            )
+        )
+    }
+
+    override fun updateInfoStatus(stringId: Int, vararg args: Any) {
+        _statusStateFlow.tryEmit(
+            StatusData(
+                resourceManager.getString(stringId, *args),
+                resourceManager.getThemeColorRes(R.attr.colorInfo)
+            )
+        )
+    }
+
+    override fun updateWarningStatus(stringId: Int, vararg args: Any) {
+        _statusStateFlow.tryEmit(
+            StatusData(
+                resourceManager.getString(stringId, *args),
+                resourceManager.getThemeColorRes(R.attr.colorWarning)
+            )
+        )
+    }
+
+    private val _statusStateFlow =
+        MutableStateFlow<StatusData>(StatusData("", 0))
 }

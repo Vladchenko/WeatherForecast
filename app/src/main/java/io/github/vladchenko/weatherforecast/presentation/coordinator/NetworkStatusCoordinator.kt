@@ -3,9 +3,7 @@ package io.github.vladchenko.weatherforecast.presentation.coordinator
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -21,14 +19,12 @@ import kotlinx.coroutines.flow.shareIn
  * 2. Automatically refreshes weather data upon reconnection, but **only** when the user is on the weather forecast screen.
  *
  * @property applicationScope The coroutine scope bound to the application lifecycle.
- * @property resourceManager Provides localized string resources for UI messages.
  * @property statusStateHolder Manages and broadcasts UI status messages (info for connected, error for disconnected).
  * @property networkStateHolder Manages network connectivity (connect or disconnect)
  * @property connectivityObserver Provides the stream of network connectivity states.
  */
 class NetworkStatusCoordinator(
     private val applicationScope: CoroutineScope,
-    private val resourceManager: ResourceManager,
     private val statusStateHolder: StatusStateHolder,
     private val networkStateHolder: NetworkStateHolder,
     private val connectivityObserver: ConnectivityObserver,
@@ -66,20 +62,12 @@ class NetworkStatusCoordinator(
                 if (lastConnectionState != isConnected) {
                     when (isConnected) {
                         true -> {
-                            statusStateHolder.updateStatus(
-                                StatusType.Info(
-                                    resourceManager.getString(
-                                        R.string.network_connected
-                                    )
-                                )
-                            )
+                            statusStateHolder.updateInfoStatus(R.string.network_connected)
                             networkStateHolder.updateState(true)
                         }
 
                         false -> {
-                            statusStateHolder.updateStatus(
-                                StatusType.Error(resourceManager.getString(R.string.network_disconnected))
-                            )
+                            statusStateHolder.updateErrorStatus(R.string.network_disconnected)
                             networkStateHolder.updateState(false)
                         }
                     }

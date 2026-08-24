@@ -99,7 +99,9 @@ class CoreModule {
 
     @Singleton
     @Provides
-    fun provideWeatherStateHolder(): StatusStateHolder = StatusStateHolderImpl()
+    fun provideWeatherStateHolder(
+        resourceManager: ResourceManager
+    ): StatusStateHolder = StatusStateHolderImpl(resourceManager)
 
     @Singleton
     @Provides

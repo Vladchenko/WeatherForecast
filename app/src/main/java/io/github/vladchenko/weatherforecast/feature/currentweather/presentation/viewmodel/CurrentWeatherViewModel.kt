@@ -12,8 +12,6 @@ import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Error
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
@@ -96,9 +94,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in weather forecast loading", throwable)
-        statusStateHolder.updateStatus(
-            Error(throwable.message.toString())
-        )
+        statusStateHolder.updateErrorStatus(throwable.message.toString())
     }
     val scope = CoroutineScope(viewModelScope.coroutineContext + exceptionHandler)
 
@@ -232,19 +228,11 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     private fun showLoadingStatusFor(city: String) {
         if (city.isBlank()) {
-            statusStateHolder.updateStatus(
-                Info(
-                    resourceManager.getString(R.string.forecast_downloading)
-                )
-            )
+            statusStateHolder.updateInfoStatus(R.string.forecast_downloading)
         } else {
-            statusStateHolder.updateStatus(
-                Info(
-                    resourceManager.getString(
-                        R.string.forecast_loading,
-                        city
-                    )
-                )
+            statusStateHolder.updateInfoStatus(
+                R.string.forecast_loading,
+                city
             )
         }
     }

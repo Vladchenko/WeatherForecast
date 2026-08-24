@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -259,9 +260,14 @@ fun CurrentWeatherLayout(
                                 }
 
                                 is WeatherUiState.Error -> {
+                                    val message = if (state.messageId != null) {
+                                        stringResource(id = state.messageId)
+                                    } else {
+                                        state.message
+                                    }
                                     Text(
                                         modifier = Modifier.padding(top = 80.dp),
-                                        text = state.message,
+                                        text = message.toString(),
                                         fontSize = 32.sp,
                                         color = statusColor,
                                         textAlign = TextAlign.Center

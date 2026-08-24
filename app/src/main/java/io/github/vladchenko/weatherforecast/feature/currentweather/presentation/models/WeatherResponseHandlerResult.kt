@@ -14,7 +14,7 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
  * - Handler: Business logic for processing responses.
  * - ViewModel: UI state management.
  *
- * @property errorToShow The error message to display to the user.
+ * @property errorToShow The error resource id to display to the user.
  *                       Contains localized error text, or null if there is no error.
  * @property isLoading Indicates whether the weather data is currently being loaded.
  * @property cityError A special city error event (e.g., city not found),
@@ -27,7 +27,7 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
  *                           Used to update user preferences. Can be null in some loading cases.
  */
 data class WeatherResponseHandlerResult(
-    val errorToShow: String? = null,
+    val errorToShow: Int? = null,
     val isLoading: Boolean? = false,
     val cityError: CityErrorEvent? = null,
     val localWeatherToShow: CurrentWeather? = null,

@@ -6,13 +6,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Error
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Success
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
@@ -58,7 +56,6 @@ import javax.inject.Inject
  * ([showError], [showStatus]) for displaying feedback via [StatusStateHolder].
  *
  * @property loggingService Centralized logging service for errors and debug info
- * @property resourceManager Provides access to string resources for UI messages
  * @property statusStateHolder Manages and broadcasts UI status updates (loading, errors, info)
  * @property citySearchInteractor Handles domain logic for fetching and filtering city names
  * @property recentCitiesInteractor Manages recently searched cities persistence and loading
@@ -70,7 +67,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CitySearchViewModel @Inject constructor(
     private val loggingService: LoggingService,
-    private val resourceManager: ResourceManager,
     private val statusStateHolder: StatusStateHolder,
     private val citySearchInteractor: CitySearchInteractor,
     private val recentCitiesInteractor: RecentCitiesInteractor
@@ -126,9 +122,7 @@ class CitySearchViewModel @Inject constructor(
 
     init {
         startDebouncedSearch()
-        statusStateHolder.updateStatus(
-            StatusType.Info(resourceManager.getString(R.string.city_selection_title))
-        )
+        statusStateHolder.updateInfoStatus(R.string.city_selection_title)
     }
 
     /**
@@ -231,15 +225,13 @@ class CitySearchViewModel @Inject constructor(
     private fun updateCityPredictions(city: String, result: LoadResult<CitySearch>?) {
         when (result) {
             is LoadResult.Remote -> {
-                showStatus(resourceManager.getString(R.string.city_predictions_provided))
+                showStatus(R.string.city_predictions_provided)
                 _cityPredictions.value =
                     Success(data = result.data.cities, DataSource.REMOTE)
             }
 
             is LoadResult.Local -> {
-                statusStateHolder.updateStatus(
-                    StatusType.Warning(resourceManager.getString(R.string.city_predictions_from_cache))
-                )
+                statusStateHolder.updateWarningStatus(R.string.city_predictions_from_cache)
                 _cityPredictions.value =
                     Success(data = result.data.cities, DataSource.LOCAL)
             }
@@ -260,18 +252,17 @@ class CitySearchViewModel @Inject constructor(
                 showError(errorMessage)
                 _cityPredictions.value = Error(
                     city = city,
-                    errorMessage
+                    message = errorMessage,
+                    messageId = null
                 )
             }
 
             null -> {
-                _cityPredictions.value = Error(city = city, "")
+                _cityPredictions.value = Error(city = city, messageId = 0, message = null)
             }
 
             LoadResult.Loading -> {
-                showStatus(
-                    resourceManager.getString(R.string.city_predictions_loading)
-                )
+                showStatus(R.string.city_predictions_loading)
             }
         }
     }
@@ -304,9 +295,7 @@ class CitySearchViewModel @Inject constructor(
                 }
 
                 LoadResult.Loading -> {
-                    showStatus(
-                        resourceManager.getString(R.string.recent_cities_loading)
-                    )
+                    showStatus(R.string.recent_cities_loading)
                 }
             }
         } catch (e: Exception) {
@@ -316,15 +305,11 @@ class CitySearchViewModel @Inject constructor(
     }
 
     private fun showError(errorMessage: String) {
-        statusStateHolder.updateStatus(
-            StatusType.Error(errorMessage)
-        )
+        statusStateHolder.updateErrorStatus(errorMessage)
     }
 
-    private fun showStatus(statusMessage: String) {
-        statusStateHolder.updateStatus(
-            StatusType.Info(statusMessage)
-        )
+    private fun showStatus(statusMessage: Int) {
+        statusStateHolder.updateInfoStatus(statusMessage)
     }
 
     companion object {

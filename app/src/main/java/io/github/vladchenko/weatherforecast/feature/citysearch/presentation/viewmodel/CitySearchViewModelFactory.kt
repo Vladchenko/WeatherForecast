@@ -2,7 +2,6 @@ package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.vie
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
@@ -15,14 +14,12 @@ import kotlinx.coroutines.FlowPreview
  * Implements [ViewModelProvider.Factory] to inject dependencies into the ViewModel.
  *
  * @property loggingService service for application logging
- * @property resourceManager provides access to string resources
  * @property statusStateHolder manages and broadcasts UI status updates
  * @property citySearchInteractor handles domain logic for searching city names
  * @property recentCitiesInteractor handles domain logic for recently searched cities
  */
 class CitySearchViewModelFactory(
     private val loggingService: LoggingService,
-    private val resourceManager: ResourceManager,
     private val statusStateHolder: StatusStateHolder,
     private val citySearchInteractor: CitySearchInteractor,
     private val recentCitiesInteractor: RecentCitiesInteractor,
@@ -39,7 +36,6 @@ class CitySearchViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CitySearchViewModel(
             loggingService,
-            resourceManager,
             statusStateHolder,
             citySearchInteractor,
             recentCitiesInteractor

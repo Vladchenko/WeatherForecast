@@ -5,7 +5,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -121,14 +120,12 @@ class CitySearchModule {
     @Provides
     fun provideCitySearchViewModelFactory(
         loggingService: LoggingService,
-        resourceManager: ResourceManager,
         statusStateHolder: StatusStateHolder,
         citySearchInteractor: CitySearchInteractor,
         recentCitiesInteractor: RecentCitiesInteractor
     ): CitySearchViewModelFactory {
         return CitySearchViewModelFactory(
             loggingService,
-            resourceManager,
             statusStateHolder,
             citySearchInteractor,
             recentCitiesInteractor

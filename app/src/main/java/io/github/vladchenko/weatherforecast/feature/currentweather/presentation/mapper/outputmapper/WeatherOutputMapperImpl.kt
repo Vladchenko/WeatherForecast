@@ -60,7 +60,7 @@ class WeatherOutputMapperImpl(
             }
             response.errorToShow?.let {
                 uiState = WeatherUiState.Error(
-                    cityModel.city, it
+                    city = cityModel.city, message = null, messageId = it
                 )
             }
             response.cityError?.let {

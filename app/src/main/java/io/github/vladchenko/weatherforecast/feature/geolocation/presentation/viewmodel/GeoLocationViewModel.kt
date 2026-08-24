@@ -8,11 +8,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Error
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Warning
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationException
@@ -46,7 +42,6 @@ import javax.inject.Inject
  *
  * @property geoLocationHelper Provides reverse geocoding capabilities (coordinates -> city name).
  * @property loggingService Centralized service for application logging.
- * @property resourceManager Provides access to string resources for UI messages.
  * @property geoLocator Hardware service for retrieving current device location.
  * @property statusStateHolder Manages and broadcasts UI status messages (errors, warnings, info).
  * @property geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
@@ -55,7 +50,6 @@ import javax.inject.Inject
 class GeoLocationViewModel @Inject constructor(
     private val geoLocationHelper: Geolocator,
     private val loggingService: LoggingService,
-    private val resourceManager: ResourceManager,
     private val geoLocator: DeviceLocationProvider,
     private val statusStateHolder: StatusStateHolder,
     private val dialogController: WeatherDialogController,
@@ -73,35 +67,27 @@ class GeoLocationViewModel @Inject constructor(
             // TODO Bad to retry from exceptionHandler, replace with using try-catch when needed
             retryGeoLocationOrGotoCitySelectionScreen()
         }
-        showError(throwable.message.toString())
+        statusStateHolder.updateErrorStatus(throwable.message.toString())
     }
 
     fun defineDeviceGeoLocation() {
         loggingService.logInfoEvent(TAG, "defineDeviceGeoLocation called")
-        statusStateHolder.updateStatus(
-            Info(
-                resourceManager.getString(R.string.geo_detecting)
-            )
-        )
+        statusStateHolder.updateInfoStatus(R.string.geo_detecting)
         geoLocator.defineDeviceLocation(object : GeoLocationListener {
             override fun onDeviceGeoLocationSuccess(location: Location) {
                 loggingService.logError(TAG, "Device geo location success")
-                statusStateHolder.updateStatus(
-                    Info(resourceManager.getString(R.string.geo_success))
-                )
+                statusStateHolder.updateInfoStatus(R.string.geo_success)
                 defineCityNameByLocation(location)
             }
 
             override fun onDeviceGeoLocationFail(errorMessage: String) {
                 loggingService.logError(TAG, errorMessage)
-                showError(errorMessage)
+                statusStateHolder.updateErrorStatus(errorMessage)
             }
 
             override fun onNoGeoLocationPermission() {
                 loggingService.logInfoEvent(TAG, "No geo location permission - emitting Requested")
-                statusStateHolder.updateStatus(
-                    Info(resourceManager.getString(R.string.geo_permission_required))
-                )
+                statusStateHolder.updateInfoStatus(R.string.geo_permission_required)
                 // Emit Requested state to trigger permission request via WeatherActivity
                 geoLocationEventBus.send(GeoLocationEvent.RequestPermission)
             }
@@ -123,9 +109,7 @@ class GeoLocationViewModel @Inject constructor(
                 TAG,
                 "onPermissionResolution: permission granted, permissionRequests reset to 0"
             )
-            statusStateHolder.updateStatus(
-                Info(resourceManager.getString(R.string.geo_granted))
-            )
+            statusStateHolder.updateInfoStatus(R.string.geo_granted)
             // Immediately proceed with location retrieval
             defineDeviceGeoLocation()
         } else {
@@ -141,9 +125,7 @@ class GeoLocationViewModel @Inject constructor(
                     TAG,
                     "onPermissionResolution: emitting PermanentlyDenied (permissionRequests=$permissionRequests)"
                 )
-                statusStateHolder.updateStatus(
-                    Error(resourceManager.getString(R.string.geo_permission_denied_permanently))
-                )
+                showError(R.string.geo_permission_denied_permanently)
                 dialogController.showPermissionPermanentlyDenied(
                     onPositiveClick = {
                         geoLocationEventBus.send(GeoLocationEvent.OnPermanentlyDenied)
@@ -157,9 +139,7 @@ class GeoLocationViewModel @Inject constructor(
                     TAG,
                     "onPermissionResolution: emitting Denied (permissionRequests=$permissionRequests)"
                 )
-                statusStateHolder.updateStatus(
-                    Warning(resourceManager.getString(R.string.geo_permission_denied))
-                )
+                statusStateHolder.updateWarningStatus(R.string.geo_permission_denied)
                 dialogController.showNoPermission(
                     onPositiveClick = {
                         geoLocationEventBus.send(GeoLocationEvent.RequestPermission)
@@ -189,9 +169,7 @@ class GeoLocationViewModel @Inject constructor(
                     geoLocationEventBus.send(GeoLocationEvent.OnForecastLoadForLocation(cityModel))
                 },
                 onNegativeClick = {
-                    statusStateHolder.updateStatus(
-                        Info(resourceManager.getString(R.string.city_selection_title))
-                    )
+                    statusStateHolder.updateInfoStatus(R.string.city_selection_title)
                     geoLocationEventBus.send(GeoLocationEvent.GotoCitySelection)
                 }
             )
@@ -201,38 +179,28 @@ class GeoLocationViewModel @Inject constructor(
     private fun retryGeoLocationOrGotoCitySelectionScreen() {
         geoLocatingAttempts++
         if (geoLocatingAttempts == GEO_LOCATING_ATTEMPTS) {
-            showError(
-                resourceManager.getString(R.string.geo_retry)
-            )
+            showError(R.string.geo_retry)
             dialogController.showGeoLocationError(
                 onPositiveClick = {
                     geoLocationEventBus.send(GeoLocationEvent.GotoCitySelection)
                 },
                 onNegativeClick = {
-                    statusStateHolder.updateStatus(
-                        Info(resourceManager.getString(R.string.geo_detecting))
-                    )
+                    statusStateHolder.updateInfoStatus(R.string.geo_detecting)
                     defineDeviceGeoLocation()
                 }
             )
             geoLocatingAttempts = 0
         } else {
             viewModelScope.launch {
-                showError(
-                    resourceManager.getString(R.string.geo_max_attempts_exceeded)
-                )
+                showError(R.string.geo_max_attempts_exceeded)
                 delay(DELAY_BETWEEN_ATTEMPTS)
                 defineDeviceGeoLocation()
             }
         }
     }
 
-    private fun showError(errorMessage: String) {
-        statusStateHolder.updateStatus(
-            Error(
-                errorMessage
-            )
-        )
+    private fun showError(errorMessage: Int) {
+        statusStateHolder.updateErrorStatus(errorMessage)
     }
 
     companion object {

@@ -162,11 +162,9 @@ class CurrentWeatherModule {
     fun provideWeatherResponseHandler(
         loggingService: LoggingService,
         statusStateHolder: StatusStateHolder,
-        resourceManager: ResourceManager,
     ): WeatherResponseHandler {
         return WeatherResponseHandler(
             loggingService,
-            resourceManager,
             statusStateHolder,
         )
     }

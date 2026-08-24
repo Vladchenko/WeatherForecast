@@ -6,10 +6,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationCallback
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
@@ -38,7 +35,6 @@ import kotlinx.coroutines.launch
  * and unnecessary work while the UI is not visible.
  *
  * @property onGotoCitySelection Callback triggered when the user needs to manually select a city.
- * @property resourceManager Provides localized string resources for UI messages.
  * @property statusStateHolder Manages and broadcasts UI status updates (info, warnings, errors).
  * @property dialogController Manages the presentation of selection and error dialogs.
  * @property forecastViewModel Source of city selection events (not found, blank input).
@@ -46,7 +42,6 @@ import kotlinx.coroutines.launch
  */
 class CitySelectionCoordinator(
     private val onGotoCitySelection: () -> Unit,
-    private val resourceManager: ResourceManager,
     private val statusStateHolder: StatusStateHolder,
     private val dialogController: WeatherDialogController,
     private val forecastViewModel: CurrentWeatherViewModel,
@@ -87,20 +82,13 @@ class CitySelectionCoordinator(
         flow.collect { value ->
             when (value) {
                 is CityErrorEvent.CityBlank -> {
-                    statusStateHolder.updateStatus(
-                        Info(resourceManager.getString(R.string.geo_detecting))
-                    )
+                    statusStateHolder.updateInfoStatus(R.string.geo_detecting)
                     geoLocationEventBus.send(GeoLocationEvent.DefineDeviceLocation)
                 }
 
                 is CityErrorEvent.CityNotFound -> {
-                    statusStateHolder.updateStatus(
-                        StatusType.Warning(
-                            resourceManager.getString(
-                                R.string.forecast_no_data_for_city,
-                                value.name
-                            )
-                        )
+                    statusStateHolder.updateWarningStatus(
+                        R.string.forecast_no_data_for_city, value.name
                     )
                     dialogController.showChosenCityNotFound(value.name) {
                         onGotoCitySelection()
@@ -121,7 +109,6 @@ class CitySelectionCoordinator(
          * Creates and returns a fully configured [CitySelectionCoordinator] instance.
          *
          * @param callback Interface for sending geolocation events to the UI.
-         * @param resourceManager Provides localized string resources.
          * @param statusStateHolder Manages and broadcasts UI status updates.
          * @param geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
          * @param dialogController Manages presentation of alert dialogs.
@@ -130,14 +117,12 @@ class CitySelectionCoordinator(
          */
         fun create(
             callback: GeoLocationCallback,
-            resourceManager: ResourceManager,
             statusStateHolder: StatusStateHolder,
             geoLocationEventBus: GeoLocationEventBus,
             dialogController: WeatherDialogController,
             forecastViewModel: CurrentWeatherViewModel,
         ): CitySelectionCoordinator {
             return CitySelectionCoordinator(
-                resourceManager = resourceManager,
                 dialogController = dialogController,
                 forecastViewModel = forecastViewModel,
                 statusStateHolder = statusStateHolder,

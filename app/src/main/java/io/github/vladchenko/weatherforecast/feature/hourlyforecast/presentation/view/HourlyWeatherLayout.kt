@@ -97,8 +97,13 @@ fun HourlyWeatherLayout(
                             .background(color = mainContentTextColor.copy(alpha = 0.4f)),
                         contentAlignment = Alignment.Center
                     ) {
+                        val message = hourlyWeather.message?.let {
+                            hourlyWeather.messageId?.let { id ->
+                                stringResource(id)
+                            }
+                        }
                         Text(
-                            text = hourlyWeather.message,
+                            text = message.orEmpty(),
                             fontSize = 32.sp,
                             color = statusColor,
                             textAlign = TextAlign.Center

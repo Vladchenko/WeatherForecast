@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.ui.status
 
+import androidx.annotation.StringRes
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -21,16 +22,40 @@ interface StatusStateHolder {
     /**
      * Immutable public view of the current status state.
      *
-     * Emits the latest [StatusType] to all active collectors. UI components should observe
+     * Emits the latest [StatusData] to all active collectors. UI components should observe
      * this flow to react to status changes in real-time.
      */
-    val statusStateFlow: StateFlow<StatusType>
+    val statusStateFlow: StateFlow<StatusData>
 
     /**
-     * Updates the current status state.
-     * Called by ViewModels or interactors to broadcast a new status to observing UI components.
+     * Broadcasts an error status message using a string resource ID.
      *
-     * @param status the new [StatusType] to emit (e.g., [StatusType.Info], [StatusType.Warning], [StatusType.Error])
+     * @param stringId Resource ID of the error message string.
+     * @param args Optional arguments to pass to [String.format] for string interpolation.
      */
-    fun updateStatus(status: StatusType)
+    fun updateErrorStatus(@StringRes stringId: Int, vararg args: Any)
+
+    /**
+     * Broadcasts an error status message using a plain string.
+     *
+     * @param message The error message text.
+     * @param args Optional arguments to pass to [String.format] for string interpolation.
+     */
+    fun updateErrorStatus(message: String, vararg args: Any)
+
+    /**
+     * Broadcasts an info status message using a string resource ID.
+     *
+     * @param stringId Resource ID of the info message string.
+     * @param args Optional arguments to pass to [String.format] for string interpolation.
+     */
+    fun updateInfoStatus(@StringRes stringId: Int, vararg args: Any)
+
+    /**
+     * Broadcasts a warning status message using a string resource ID.
+     *
+     * @param stringId Resource ID of the warning message string.
+     * @param args Optional arguments to pass to [String.format] for string interpolation.
+     */
+    fun updateWarningStatus(@StringRes stringId: Int, vararg args: Any)
 }

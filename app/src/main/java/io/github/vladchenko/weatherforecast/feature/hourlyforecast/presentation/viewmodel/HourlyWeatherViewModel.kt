@@ -15,7 +15,6 @@ import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Error
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Loading
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Success
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
@@ -78,7 +77,7 @@ class HourlyWeatherViewModel @Inject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in hourly weather loading", throwable)
-        showError(throwable.message.toString())
+        statusStateHolder.updateErrorStatus(throwable.message.toString())
     }
 
     /**
@@ -106,90 +105,49 @@ class HourlyWeatherViewModel @Inject constructor(
             is LoadResult.Remote -> {
                 _hourlyWeatherStateFlow.value =
                     Success(result.data, DataSource.REMOTE)
-                showStatus(
-                    resourceManager.getString(
-                        R.string.forecast_loaded_success,
-                        result.data.city
-                    )
+                statusStateHolder.updateInfoStatus(
+                    R.string.forecast_loaded_success,
+                    result.data.city
                 )
             }
 
             is LoadResult.Local -> {
                 _hourlyWeatherStateFlow.value =
                     Success(result.data, DataSource.LOCAL)
-                showWarning(
-                    resourceManager.getString(
-                        R.string.forecast_outdated, city
-                    )
+                statusStateHolder.updateWarningStatus(
+                    R.string.forecast_outdated,
+                    city
                 )
             }
 
             is LoadResult.Error -> {
-                showError(getErrorMessage(result))
-                _hourlyWeatherStateFlow.value = Error(city, getErrorMessage(result))
+                statusStateHolder.updateErrorStatus(getErrorMessage(result), city)
+                _hourlyWeatherStateFlow.value =
+                    Error(city = city, messageId = getErrorMessage(result), message = null)
             }
 
             LoadResult.Loading -> {
-                showStatus(
-                    resourceManager.getString(
-                        R.string.forecast_hourly_loading
-                    )
+                statusStateHolder.updateInfoStatus(
+                    R.string.forecast_hourly_loading
                 )
             }
         }
     }
 
-    private fun showError(errorMessage: String) {
-        statusStateHolder.updateStatus(
-            StatusType.Error(errorMessage)
-        )
-    }
-
-    private fun showWarning(statusMessage: String) {
-        statusStateHolder.updateStatus(
-            StatusType.Warning(statusMessage)
-        )
-    }
-
-    private fun showStatus(statusMessage: String) {
-        statusStateHolder.updateStatus(
-            StatusType.Info(statusMessage)
-        )
-    }
-
-    private fun getErrorMessage(result: LoadResult.Error): String =
+    private fun getErrorMessage(result: LoadResult.Error): Int =
         when (val error = result.error) {
             is ForecastError.NetworkError -> when (error.type) {
-                ForecastError.NetworkError.Type.ConnectionFailed ->
-                    resourceManager.getString(R.string.connection_refused)
-
-                ForecastError.NetworkError.Type.NoInternet ->
-                    resourceManager.getString(R.string.network_disconnected)
-
-                ForecastError.NetworkError.Type.Timeout ->
-                    resourceManager.getString(R.string.request_timeout)
-
-                ForecastError.NetworkError.Type.SecurityError ->
-                    resourceManager.getString(R.string.ssl_error)
-
-                else ->
-                    resourceManager.getString(R.string.network_error_generic)
+                ForecastError.NetworkError.Type.ConnectionFailed -> R.string.connection_refused
+                ForecastError.NetworkError.Type.NoInternet -> R.string.network_disconnected
+                ForecastError.NetworkError.Type.Timeout -> R.string.request_timeout
+                ForecastError.NetworkError.Type.SecurityError -> R.string.ssl_error
+                else -> R.string.network_error_generic
             }
-
-            is ForecastError.ApiKeyInvalid ->
-                resourceManager.getString(R.string.api_key_invalid)
-
-            is ForecastError.CityNotFound ->
-                resourceManager.getString(R.string.city_not_found, error.city)
-
-            is ForecastError.NoDataAvailable ->
-                resourceManager.getString(R.string.no_weather_data_available)
-
-            is ForecastError.LocalDataCorrupted ->
-                resourceManager.getString(R.string.local_data_corrupted)
-
-            is ForecastError.UncategorizedError ->
-                resourceManager.getString(R.string.uncategorized_error)
+            is ForecastError.ApiKeyInvalid -> R.string.api_key_invalid
+            is ForecastError.CityNotFound -> R.string.city_not_found
+            is ForecastError.NoDataAvailable -> R.string.no_weather_data_available
+            is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
+            is ForecastError.UncategorizedError -> R.string.uncategorized_error
         }
 
     companion object {

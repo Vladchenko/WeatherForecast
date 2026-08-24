@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
 
 /**
@@ -14,13 +13,11 @@ import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
  * and allows them to confirm or cancel the action.
  *
  * @property city Name of the city for which forecast was not found
- * @property resourceManager Helper to retrieve localized strings from resources
  * @property onPositiveClick Callback triggered when the "OK" button is pressed
  * @property onNegativeClick Callback triggered when the "Cancel" button is pressed (not currently set in builder)
  */
 class SelectedCityNotFoundAlertDialogDelegate(
     private val city: String,
-    private val resourceManager: ResourceManager,
     private val onPositiveClick: () -> Unit,
     private val onNegativeClick: () -> Unit
 ) : AlertDialogDelegate {
@@ -36,8 +33,8 @@ class SelectedCityNotFoundAlertDialogDelegate(
      */
     override fun createAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(resourceManager.getString(R.string.forecast_no_data_for_city, city))
-        builder.setMessage(resourceManager.getString(R.string.forecast_no_data_message))
+        builder.setTitle(context.getString(R.string.forecast_no_data_for_city, city))
+        builder.setMessage(context.getString(R.string.forecast_no_data_message))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

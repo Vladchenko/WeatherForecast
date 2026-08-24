@@ -6,11 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusType
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
-import io.github.vladchenko.weatherforecast.presentation.converter.appbar.AppBarStateMapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,15 +25,11 @@ import javax.inject.Inject
  * State is emitted via [appBarUiStateFlow] and observed by the UI layer to update the Toolbar.
  *
  * @property stateHolder broadcasts application-wide status messages
- * @property resourceManager provides access to string resources (available for future extensibility)
- * @property appBarStateMapper converter for mapping forecast states (reserved for future use)
  * @property networkStateHolder manages network connectivity (connect or disconnect)
  */
 @HiltViewModel
 class AppBarViewModel @Inject constructor(
     private val stateHolder: StatusStateHolder,
-    private val resourceManager: ResourceManager,
-    private val appBarStateMapper: AppBarStateMapper,
     private val networkStateHolder: NetworkStateHolder
 ) : ViewModel() {
 
@@ -51,46 +44,32 @@ class AppBarViewModel @Inject constructor(
     private val _appBarUiStateFlow = MutableStateFlow(AppBarUiState())
 
     init {
-        _appBarUiStateFlow.update {
-            AppBarUiState(
-                resourceManager.getString(R.string.app_name)
-            )
-        }
         viewModelScope.launch {
             stateHolder.statusStateFlow.collect { statusState ->
-                when (statusState) {
-                    is StatusType.Error -> {
-                        updateSubtitle(statusState.message, R.attr.colorError)
-                    }
-
-                    is StatusType.Info -> {
-                        updateSubtitle(statusState.message, R.attr.colorInfo)
-                    }
-
-                    is StatusType.Warning -> {
-                        updateSubtitle(statusState.message, R.attr.colorWarning)
-                    }
-                }
+                updateSubtitle(statusState.message, statusState.messageColor)
             }
         }
         viewModelScope.launch {
             networkStateHolder.networkStateFlow.collect { state ->
                 when (state) {
                     false -> {
-                        updateSubtitle(
-                            resourceManager.getString(R.string.network_disconnected),
-                            R.attr.colorError
-                        )
+                        stateHolder.updateErrorStatus(R.string.network_disconnected)
                     }
 
                     true -> {
-                        updateSubtitle(
-                            resourceManager.getString(R.string.network_connected),
-                            R.attr.colorInfo
-                        )
+                        stateHolder.updateInfoStatus(R.string.network_connected)
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Update title with [titleText]
+     */
+    fun updateTitle(titleText: String) {
+        _appBarUiStateFlow.update {
+            it.copy(title = titleText)
         }
     }
 
