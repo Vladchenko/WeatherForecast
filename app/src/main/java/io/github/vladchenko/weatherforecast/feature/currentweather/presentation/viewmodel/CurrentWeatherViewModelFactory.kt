@@ -9,7 +9,7 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
 import kotlinx.serialization.InternalSerializationApi
 
 /**
@@ -20,24 +20,22 @@ import kotlinx.serialization.InternalSerializationApi
  *
  * @property loggingService Centralized service for application logging
  * @property resourceManager Provides access to application string resources
- * @property uiConverter Converts domain models to UI presentation models
  * @property statusStateHolder Manages and broadcasts UI status messages (loading, errors, info)
  * @property networkStateHolder Manages network connectivity (connect or disconnect)
  * @property preferencesManager Manages user preferences (e.g., temperature units)
+ * @property weatherOutputMapper Processes raw weather data loading results and maps them to a UI-ready structure
  * @property chosenCityInteractor Handles persistence of the last selected city
  * @property forecastInteractor Provides domain logic for loading weather forecast data
- * @property weatherResponseHandler Handles processing of weather response results
  */
 class CurrentWeatherViewModelFactory(
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
-    private val uiConverter: WeatherDomainToUiMapper,
     private val statusStateHolder: StatusStateHolder,
     private val networkStateHolder: NetworkStateHolder,
     private val preferencesManager: PreferencesManager,
+    private val weatherOutputMapper: WeatherOutputMapper,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastInteractor: CurrentWeatherInteractor,
-    private val weatherResponseHandler: WeatherResponseHandler,
 ) : ViewModelProvider.Factory {
 
     /**
@@ -57,10 +55,9 @@ class CurrentWeatherViewModelFactory(
                 statusStateHolder,
                 networkStateHolder,
                 preferencesManager,
+                weatherOutputMapper,
                 chosenCityInteractor,
                 forecastInteractor,
-                weatherResponseHandler,
-                uiConverter,
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

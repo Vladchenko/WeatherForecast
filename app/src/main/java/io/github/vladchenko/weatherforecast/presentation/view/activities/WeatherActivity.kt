@@ -25,7 +25,6 @@ import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigat
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setLightStatusBars
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setTransparentSystemBars
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.WeatherStateHolder
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
@@ -83,9 +82,6 @@ class WeatherActivity : AppCompatActivity() {
 
     @Inject
     lateinit var geoLocationEventBus: GeoLocationEventBus
-
-    @Inject
-    lateinit var weatherStateHolder: WeatherStateHolder
 
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()

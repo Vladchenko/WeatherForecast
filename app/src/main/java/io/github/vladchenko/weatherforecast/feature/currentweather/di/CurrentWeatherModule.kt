@@ -26,8 +26,10 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.reposito
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasourceimpl.CurrentWeatherRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapperImpl
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapper
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapperImpl
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModelFactory
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.WeatherResponseHandler
 import kotlinx.serialization.InternalSerializationApi
@@ -137,23 +139,21 @@ class CurrentWeatherModule {
         loggingService: LoggingService,
         stateHolder: StatusStateHolder,
         resourceManager: ResourceManager,
-        uiConverter: WeatherDomainToUiMapper,
         networkStateHolder: NetworkStateHolder,
         preferencesManager: PreferencesManager,
+        weatherOutputMapper: WeatherOutputMapper,
         chosenCityInteractor: ChosenCityInteractor,
         forecastInteractor: CurrentWeatherInteractor,
-        weatherResponseHandler: WeatherResponseHandler
     ): CurrentWeatherViewModelFactory {
         return CurrentWeatherViewModelFactory(
             loggingService,
             resourceManager,
-            uiConverter,
             stateHolder,
             networkStateHolder,
             preferencesManager,
+            weatherOutputMapper,
             chosenCityInteractor,
             forecastInteractor,
-            weatherResponseHandler,
         )
     }
 
@@ -168,6 +168,20 @@ class CurrentWeatherModule {
             loggingService,
             resourceManager,
             statusStateHolder,
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherOutputMapper(
+        resourceManager: ResourceManager,
+        weatherResponseHandler: WeatherResponseHandler,
+        weatherDomainToUiMapper: WeatherDomainToUiMapper,
+    ): WeatherOutputMapper {
+        return WeatherOutputMapperImpl(
+            resourceManager,
+            weatherResponseHandler,
+            weatherDomainToUiMapper
         )
     }
 }

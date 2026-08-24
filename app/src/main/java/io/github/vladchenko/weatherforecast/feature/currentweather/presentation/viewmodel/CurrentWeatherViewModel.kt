@@ -10,17 +10,15 @@ import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Error
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusType.Info
-import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toWeatherIconRes
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter.WeatherDomainToUiMapper
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -52,10 +50,9 @@ import javax.inject.Inject
  * @property statusStateHolder Manages and broadcasts UI status messages (info, warnings, errors)
  * @property networkStateHolder Manages network connectivity (connect or disconnect)
  * @property preferencesManager Manages user preferences (e.g., temperature unit: Celsius/Fahrenheit)
+ * @property weatherOutputMapper Processes raw weather data loading results and maps them to a UI-ready structure
  * @property chosenCityInteractor Handles persistence and retrieval of the selected city
  * @property forecastInteractor Loads weather data from the remote API with local cache fallback
- * @property weatherResponseHandler Processes raw weather data loading results and maps them to a UI-ready structure
- * @property weatherDomainToUiMapper Converts domain models ([CurrentWeather]) to UI models ([CurrentWeatherUi])
  */
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
@@ -64,10 +61,9 @@ class CurrentWeatherViewModel @Inject constructor(
     private val statusStateHolder: StatusStateHolder,
     private val networkStateHolder: NetworkStateHolder,
     private val preferencesManager: PreferencesManager,
+    private val weatherOutputMapper: WeatherOutputMapper,
     private val chosenCityInteractor: ChosenCityInteractor,
     private val forecastInteractor: CurrentWeatherInteractor,
-    private val weatherResponseHandler: WeatherResponseHandler,
-    private val weatherDomainToUiMapper: WeatherDomainToUiMapper,
 ) : ViewModel() {
 
     //region flows
@@ -199,48 +195,35 @@ class CurrentWeatherViewModel @Inject constructor(
         cityModel: CityLocationModel,
         result: LoadResult<CurrentWeather>
     ) {
-        val processedResponse = weatherResponseHandler.processServerResponse(
+        val processedResponse = weatherOutputMapper.mapToUi(
             cityModel = cityModel,
             loadResult = result,
         )
         processedResponse.let { response ->
-            response.remoteWeatherToShow?.let {
-                showRemoteWeather(it)
-            }
-            response.localWeatherToShow?.let {
-                showLocalWeather(it)
+            when (response.uiState) {
+                is WeatherUiState.Success -> {
+                    _forecastStateFlow.value = response.uiState
+                }
+
+                is WeatherUiState.Loading -> {
+                    _forecastStateFlow.value = WeatherUiState.Loading()
+                }
+
+                is WeatherUiState.Error -> {
+                    _forecastStateFlow.value = response.uiState
+                }
+
+                null -> {}
             }
             response.cityModelToSave?.let {
                 scope.launch {
                     chosenCityInteractor.saveChosenCity(response.cityModelToSave)
                 }
             }
-            response.errorToShow?.let {
-                _forecastStateFlow.value = WeatherUiState.Error(
-                    cityModel.city, it
-                )
-            }
             response.cityError?.let {
                 _cityErrorEventFlow.tryEmit(it)
             }
-            if (response.isLoading == true) {
-                _forecastStateFlow.value = WeatherUiState.Loading()
-            }
         }
-    }
-
-    private fun showRemoteWeather(forecastModel: CurrentWeather) {
-        _forecastStateFlow.value = WeatherUiState.Success(
-            toUiModel(forecastModel),
-            DataSource.REMOTE
-        )
-    }
-
-    private fun showLocalWeather(forecastModel: CurrentWeather) {
-        _forecastStateFlow.value = WeatherUiState.Success(
-            toUiModel(forecastModel),
-            DataSource.LOCAL
-        )
     }
 
     /**
@@ -269,15 +252,6 @@ class CurrentWeatherViewModel @Inject constructor(
             )
         }
     }
-
-    private fun toUiModel(forecastModel: CurrentWeather) =
-        weatherDomainToUiMapper.toCurrentWeatherUi(
-            model = forecastModel,
-            defaultErrorMessage = resourceManager.getString(R.string.bad_date_format),
-            toWeatherIconRes = { weatherIconId ->
-                toWeatherIconRes(weatherIconId)
-            }
-        )
 
     private suspend fun loadSavedCity() {
         val savedModel = chosenCityInteractor.loadChosenCity()

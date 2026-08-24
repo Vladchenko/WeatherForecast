@@ -78,7 +78,6 @@ fun WeatherAppNavHost(
                 appBarViewModel = appBarViewModel,
                 hourlyViewModel = hourlyViewModel,
                 weatherViewModel = weatherViewModel,
-//                weatherStateHolder = weatherStateHolder,
                 navigationEventDispatcher = navigationDispatcher
             )
         }

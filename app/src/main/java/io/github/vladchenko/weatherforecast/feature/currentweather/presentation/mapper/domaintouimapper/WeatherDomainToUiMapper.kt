@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.converter
+package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper
 
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi

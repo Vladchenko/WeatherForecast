@@ -68,11 +68,6 @@ class CoreModule {
         return LoggingService()
     }
 
-//    @Singleton
-//    @Provides
-//    fun providePermissionChecker(@ApplicationContext context: Context): PermissionChecker {
-//        return PermissionCheckerImpl(context)
-//    }
 
     @Singleton
     @Provides
