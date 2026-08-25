@@ -70,7 +70,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
      */
     val weatherStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>>
-        get() = _forecastStateFlow
+        get() = _weatherStateFlow
 
     /**
      * SharedFlow that emits city-related error events when the requested city cannot be loaded.
@@ -84,7 +84,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val _cityErrorEventFlow = MutableSharedFlow<CityErrorEvent>(
         extraBufferCapacity = 1
     )
-    private val _forecastStateFlow =
+    private val _weatherStateFlow =
         MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading(false))
     //endregion flows
 
@@ -153,7 +153,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * @param isPullToRefresh true when triggered by user pull-to-refresh gesture
      */
     fun refreshWeather(isPullToRefresh: Boolean) {
-        _forecastStateFlow.tryEmit(WeatherUiState.Loading(isManualRefresh = isPullToRefresh))
+        _weatherStateFlow.tryEmit(WeatherUiState.Loading(isManualRefresh = isPullToRefresh))
         scope.launch {
             val city = chosenCityInteractor.loadChosenCity()
             launchWeatherForecast(city)
@@ -169,8 +169,8 @@ class CurrentWeatherViewModel @Inject constructor(
             val result = forecastInteractor.loadWeatherForLocation(
                 cityModel.city,
                 temperatureType,
-                cityModel.location.latitude,
-                cityModel.location.longitude
+                cityModel.coordinate.latitude,
+                cityModel.coordinate.longitude
             )
             processServerResponse(cityModel, result)
         }
@@ -194,15 +194,15 @@ class CurrentWeatherViewModel @Inject constructor(
         processedResponse.let { response ->
             when (response.uiState) {
                 is WeatherUiState.Success -> {
-                    _forecastStateFlow.value = response.uiState
+                    _weatherStateFlow.value = response.uiState
                 }
 
                 is WeatherUiState.Loading -> {
-                    _forecastStateFlow.value = WeatherUiState.Loading()
+                    _weatherStateFlow.value = WeatherUiState.Loading()
                 }
 
                 is WeatherUiState.Error -> {
-                    _forecastStateFlow.value = response.uiState
+                    _weatherStateFlow.value = response.uiState
                 }
 
                 null -> {}
