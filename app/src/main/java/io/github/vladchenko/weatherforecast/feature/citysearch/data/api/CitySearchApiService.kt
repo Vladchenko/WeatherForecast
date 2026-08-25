@@ -2,7 +2,6 @@ package io.github.vladchenko.weatherforecast.feature.citysearch.data.api
 
 import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchResultDto
-import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -19,7 +18,7 @@ interface CitySearchApiService {
      * @param apiKey API key for authentication
      * @return Response containing list of matching cities
      */
-    @InternalSerializationApi
+
     @GET(ApiConstants.GEO_DIRECT)
     suspend fun searchCities(
         @Query("q") cityName: String,

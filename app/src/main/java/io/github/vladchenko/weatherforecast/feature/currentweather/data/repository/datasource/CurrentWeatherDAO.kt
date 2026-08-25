@@ -8,7 +8,6 @@ import androidx.room.Query
 import androidx.room.Update
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Data Access Object for managing current weather forecasts in the local database.
@@ -33,7 +32,6 @@ interface CurrentWeatherDAO {
      *
      * @return The row ID of the inserted [io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity].
      */
-    @InternalSerializationApi
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCityForecast(model: CurrentWeatherEntity): Long
 
@@ -46,7 +44,6 @@ interface CurrentWeatherDAO {
      * @return The number of rows updated (typically 1 if found, 0 otherwise).
      */
     @Update
-    @InternalSerializationApi
     suspend fun updateCityForecast(model: CurrentWeatherEntity): Int
 
     /**
@@ -57,7 +54,6 @@ interface CurrentWeatherDAO {
      * @return The number of deleted rows (1 if found, 0 otherwise).
      */
     @Delete
-    @InternalSerializationApi
     suspend fun deleteCityForecast(model: CurrentWeatherEntity): Int
 
     /**
@@ -67,7 +63,6 @@ interface CurrentWeatherDAO {
      *
      * @return The total number of deleted rows.
      */
-    @InternalSerializationApi
     @Query("DELETE FROM citiesForecasts")
     suspend fun deleteAll(): Int
 
@@ -79,7 +74,6 @@ interface CurrentWeatherDAO {
      *
      * Note: For reactive use in UI layers, prefer [getAllCitiesForecasts].
      */
-    @InternalSerializationApi
     @Query("SELECT * FROM citiesForecasts WHERE city = :city")
     fun findCityForecast(city: String): CurrentWeatherEntity?
 
@@ -89,7 +83,6 @@ interface CurrentWeatherDAO {
      * Emits a fresh list of [CurrentWeatherEntity] every time the data in the database changes.
      * Ideal for observing live updates in ViewModels or Compose UI.
      */
-    @InternalSerializationApi
     @Query("SELECT * FROM citiesForecasts")
     fun getAllCitiesForecasts(): Flow<List<CurrentWeatherEntity>>
 }

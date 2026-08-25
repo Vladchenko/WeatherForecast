@@ -25,7 +25,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.reposito
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModelFactory
-import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -44,7 +43,6 @@ class HourlyForecastModule {
 
     @Provides
     @Singleton
-    @InternalSerializationApi
     fun provideHourlyForecastDAO(database: WeatherForecastDatabase): HourlyWeatherDAO {
         return database.getHourlyForecastInstance()
     }
@@ -57,7 +55,6 @@ class HourlyForecastModule {
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideHourlyForecastLocalDataSource(loggingService: LoggingService, forecastDAO: HourlyWeatherDAO): HourlyWeatherLocalDataSource {
         return HourlyWeatherLocalDataSourceImpl(forecastDAO, loggingService)
     }
@@ -76,21 +73,18 @@ class HourlyForecastModule {
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideHourlyWeatherDtoMapper(): HourlyWeatherDtoMapper {
         return HourlyWeatherDtoMapper()
     }
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideHourlyWeatherEntityMapper(): HourlyWeatherEntityMapper {
         return HourlyWeatherEntityMapper()
     }
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideHourlyForecastRepository(
         loggingService: LoggingService,
         dtoMapper: HourlyWeatherDtoMapper,

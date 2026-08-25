@@ -2,7 +2,6 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper
 
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Mapper class that converts [CurrentWeatherDto] (network model) into [CurrentWeatherEntity] (database model).
@@ -14,7 +13,6 @@ import kotlinx.serialization.InternalSerializationApi
  * @see toEntity for the main mapping function
  * @see fallbackEntity for default values when weather information is missing
  */
-@InternalSerializationApi
 class CurrentWeatherDtoMapper {
 
     /**

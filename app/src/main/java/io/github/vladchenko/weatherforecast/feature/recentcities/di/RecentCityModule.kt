@@ -14,7 +14,6 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasourceimpl.RecentCitiesDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesRepository
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 /**
@@ -30,14 +29,12 @@ class CityManagementModule {
 
     @Provides
     @Singleton
-    @InternalSerializationApi
     fun provideRecentCitiesDAO(database: WeatherForecastDatabase): RecentCitiesDAO {
         return database.getRecentCitiesDao()
     }
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideRecentCitiesMapper(): RecentCitiesMapper {
         return RecentCitiesMapper()
     }

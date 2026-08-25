@@ -3,7 +3,6 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.api
 import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.api.HourlyForecastApiConstants.HOURLY_WEATHER
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
-import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -22,14 +21,12 @@ interface HourlyForecastApiService {
      * @param apiKey API key for authentication
      * @return Response containing hourly forecast data
      */
-    @InternalSerializationApi
     @GET(HOURLY_WEATHER)
     suspend fun loadHourlyForecast(
         @Query("q") cityName: String,
         @Query("appid") apiKey: String = BuildConfig.API_KEY
     ): Response<HourlyWeatherDto>
 
-    @InternalSerializationApi
     @GET(HOURLY_WEATHER)
     suspend fun loadHourlyForecastByLocation(
         @Query("lat") latitude: Double,

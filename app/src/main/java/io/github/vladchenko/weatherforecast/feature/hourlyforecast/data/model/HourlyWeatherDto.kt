@@ -1,7 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model
 
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
 /**
@@ -15,7 +14,6 @@ import kotlinx.serialization.Serializable
  * @property hourlyForecasts List of weather conditions for each hour
  */
 @Serializable
-@InternalSerializationApi
 data class HourlyWeatherDto(
     @SerializedName("city")
     val city: HourlyCityDto,
@@ -31,7 +29,6 @@ data class HourlyWeatherDto(
  * @property country Country code (ISO 3166-1 alpha-2)
  */
 @Serializable
-@InternalSerializationApi
 data class HourlyCityDto(
     @SerializedName("id")
     val id: Long,
@@ -53,7 +50,6 @@ data class HourlyCityDto(
  * @property dateText Formatted date-time string (e.g. "2023-10-05 12:00:00")
  */
 @Serializable
-@InternalSerializationApi
 data class HourlyWeatherItemDto(
     @SerializedName("dt")
     val timestamp: Long,
@@ -78,7 +74,6 @@ data class HourlyWeatherItemDto(
  * @property humidity Humidity percentage
  */
 @Serializable
-@InternalSerializationApi
 data class HourlyMainDto(
     @SerializedName("temp")
     val temp: Double,
@@ -105,7 +100,6 @@ data class HourlyMainDto(
  * @property icon Icon code for UI rendering
  */
 @Serializable
-@InternalSerializationApi
 data class WeatherItemDto(
     @SerializedName("id")
     val id: Long,
@@ -125,7 +119,6 @@ data class WeatherItemDto(
  * @property gust Optional wind gust speed in m/s
  */
 @Serializable
-@InternalSerializationApi
 data class HourlyWindDto(
     @SerializedName("speed")
     val speed: Double,

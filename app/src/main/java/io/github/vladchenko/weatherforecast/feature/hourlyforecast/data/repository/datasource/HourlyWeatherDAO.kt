@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Data Access Object for managing hourly weather forecasts in the local database.
@@ -18,7 +17,6 @@ import kotlinx.serialization.InternalSerializationApi
  * @see HourlyWeatherEntity
  */
 @Dao
-@InternalSerializationApi
 interface HourlyWeatherDAO {
 
     /**

@@ -12,7 +12,6 @@ import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabas
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Singleton
 
 /**
@@ -46,7 +45,6 @@ object PersistenceModule {
 
     @Provides
     @Singleton
-    @InternalSerializationApi
     fun provideWeatherForecastDatabase(
         @ApplicationContext context: Context
     ): WeatherForecastDatabase {

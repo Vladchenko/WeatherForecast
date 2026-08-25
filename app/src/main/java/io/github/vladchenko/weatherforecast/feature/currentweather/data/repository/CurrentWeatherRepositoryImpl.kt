@@ -17,7 +17,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.reposito
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Implementation of [CurrentWeatherRepository] that retrieves and caches current weather data
@@ -67,7 +66,6 @@ import kotlinx.serialization.InternalSerializationApi
  * @property currentWeatherLocalDataSource Data source for persistent storage and retrieval of weather data.
  * @property currentWeatherRemoteDataSource Data source for fetching data from the remote API.
  */
-@InternalSerializationApi
 class CurrentWeatherRepositoryImpl(
     private val loggingService: LoggingService,
     private val dtoMapper: CurrentWeatherDtoMapper,
@@ -78,7 +76,6 @@ class CurrentWeatherRepositoryImpl(
     private val currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource
 ) : CurrentWeatherRepository {
 
-    @InternalSerializationApi
     override suspend fun refreshWeatherForLocation(
         city: String,
         temperatureType: TemperatureType,
@@ -104,7 +101,6 @@ class CurrentWeatherRepositoryImpl(
             }
         }
 
-    @InternalSerializationApi
     private suspend fun fetchAndSave(
         dto: CurrentWeatherDto,
         city: String,
@@ -124,7 +120,6 @@ class CurrentWeatherRepositoryImpl(
         }
     }
 
-    @InternalSerializationApi
     private suspend fun loadCachedWeatherForLocationOrError(
         city: String,
         temperatureType: TemperatureType,
@@ -141,7 +136,6 @@ class CurrentWeatherRepositoryImpl(
         }
     }
 
-    @InternalSerializationApi
     private suspend fun loadCachedWeatherForLocation(
         city: String,
         temperatureType: TemperatureType,
@@ -171,7 +165,6 @@ class CurrentWeatherRepositoryImpl(
             }
         }
 
-    @InternalSerializationApi
     private suspend fun saveWeather(response: CurrentWeatherEntity) =
         withContext(coroutineDispatchers.io) {
             currentWeatherLocalDataSource.saveWeather(response)

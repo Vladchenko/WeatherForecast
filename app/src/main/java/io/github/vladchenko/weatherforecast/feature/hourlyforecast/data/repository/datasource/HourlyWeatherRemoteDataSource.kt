@@ -2,7 +2,6 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.reposit
 
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Remote(network) data source interface.
@@ -12,14 +11,12 @@ interface HourlyWeatherRemoteDataSource {
     /**
      * Load hourly weather forecast for [city].
      */
-    @InternalSerializationApi
     suspend fun loadHourlyWeatherForCity(city: String): DataResult<HourlyWeatherDto>
 
     /**
      * Load hourly weather forecast for a location defined by [latitude] and [longitude].
      * [city] is to inform a user for case when loading fails.
      */
-    @InternalSerializationApi
     suspend fun loadHourlyWeatherForLocation(
         city: String,
         latitude: Double,

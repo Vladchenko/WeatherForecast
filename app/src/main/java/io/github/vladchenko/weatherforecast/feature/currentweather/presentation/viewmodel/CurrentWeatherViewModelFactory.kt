@@ -10,7 +10,6 @@ import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Factory for creating [CurrentWeatherViewModel] instances with dependency injection.
@@ -45,7 +44,6 @@ class CurrentWeatherViewModelFactory(
      * @return the newly created ViewModel instance
      * @throws IllegalArgumentException if the model class is not [CurrentWeatherViewModel]
      */
-    @InternalSerializationApi
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CurrentWeatherViewModel::class.java)) {

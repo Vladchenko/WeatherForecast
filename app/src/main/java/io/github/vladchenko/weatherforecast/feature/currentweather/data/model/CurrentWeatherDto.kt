@@ -1,6 +1,5 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.data.model
 
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
 /**
@@ -25,7 +24,6 @@ import kotlinx.serialization.Serializable
  * @property cod Internal status code returned by OpenWeather
  */
 @Serializable
-@InternalSerializationApi
 data class CurrentWeatherDto(
     val coord: CoordinateDto,
     val weather: List<WeatherDto>,
@@ -49,7 +47,6 @@ data class CurrentWeatherDto(
  * @property lon Longitude in decimal degrees
  */
 @Serializable
-@InternalSerializationApi
 data class CoordinateDto(
     val lat: Double,
     val lon: Double
@@ -66,7 +63,6 @@ data class CoordinateDto(
  * @property icon Icon code to display appropriate weather icon
  */
 @Serializable
-@InternalSerializationApi
 data class WeatherDto(
     val id: Long,
     val main: String,
@@ -85,7 +81,6 @@ data class WeatherDto(
  * @property humidity Humidity percentage
  */
 @Serializable
-@InternalSerializationApi
 data class MainDto(
     val temp: Double,
     val feelsLike: Double,
@@ -103,7 +98,6 @@ data class MainDto(
  * @property gust Optional wind gust speed in m/s
  */
 @Serializable
-@InternalSerializationApi
 data class WindDto(
     val speed: Double,
     val deg: Long,
@@ -116,7 +110,6 @@ data class WindDto(
  * @property all Cloudiness percentage (0-100%)
  */
 @Serializable
-@InternalSerializationApi
 data class CloudsDto(
     val all: Long
 )
@@ -131,7 +124,6 @@ data class CloudsDto(
  * @property sunset Sunset time, Unix timestamp (seconds)
  */
 @Serializable
-@InternalSerializationApi
 data class SystemDto(
     val type: Long,
     val id: Long,

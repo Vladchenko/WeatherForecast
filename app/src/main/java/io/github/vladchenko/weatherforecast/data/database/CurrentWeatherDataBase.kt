@@ -12,7 +12,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.Ho
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Main Room database for the weather forecast application.
@@ -31,7 +30,6 @@ import kotlinx.serialization.InternalSerializationApi
     version = 8,
     exportSchema = false
 )
-@InternalSerializationApi
 abstract class WeatherForecastDatabase : RoomDatabase() {
 
     /**

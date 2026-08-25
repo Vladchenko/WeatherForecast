@@ -4,7 +4,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.Ho
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherItemEntity
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Mapper class responsible for converting [HourlyWeatherDto] (network model) into [HourlyWeatherEntity] (database model).
@@ -15,7 +14,6 @@ import kotlinx.serialization.InternalSerializationApi
  *
  * @see toEntity for the main transformation function
  */
-@InternalSerializationApi
 class HourlyWeatherDtoMapper {
 
     /**

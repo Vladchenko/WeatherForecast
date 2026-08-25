@@ -3,7 +3,6 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.data.api
 import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiConstants.CURRENT_WEATHER
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
-import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -20,7 +19,6 @@ interface CurrentWeatherApiService {
      * Get [io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto] current weather forecast for a city by [cityName],
      * providing [apiKey] for authentication on server.
      */
-    @InternalSerializationApi
     @GET(CURRENT_WEATHER)
     suspend fun loadCurrentWeatherForCity(
         @Query("q") cityName: String,
@@ -32,7 +30,6 @@ interface CurrentWeatherApiService {
      * Get [CurrentWeatherDto] current weather forecast for a location by [lat] and [lon] coordinate,
      * providing [apiKey] for authentication on server.
      */
-    @InternalSerializationApi
     @GET(CURRENT_WEATHER)
     suspend fun loadCurrentWeatherForLocation(
         @Query("lat")

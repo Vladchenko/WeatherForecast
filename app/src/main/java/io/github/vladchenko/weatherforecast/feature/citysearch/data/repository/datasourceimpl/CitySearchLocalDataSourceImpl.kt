@@ -1,10 +1,9 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasourceimpl
 
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchLocalDataSource
-import kotlinx.serialization.InternalSerializationApi
 import javax.inject.Inject
 
 /**
@@ -13,7 +12,6 @@ import javax.inject.Inject
  * @property dao Room library data model to access data locally.
  * @property loggingService centralized service for structured logging
  */
-@InternalSerializationApi
 class CitySearchLocalDataSourceImpl @Inject constructor(
     private val dao: CitySearchDAO,
     private val loggingService: LoggingService
@@ -30,7 +28,6 @@ class CitySearchLocalDataSourceImpl @Inject constructor(
         dao.insertCitiesNames(citiesNames)
     }
 
-    @InternalSerializationApi
     override suspend fun deleteAllCitiesNames() {
         dao.deleteAll()
         loggingService.logDebugEvent(TAG, "All city names deleted from local database")

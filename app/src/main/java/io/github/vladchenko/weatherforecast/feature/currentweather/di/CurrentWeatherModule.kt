@@ -32,7 +32,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModelFactory
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.WeatherResponseHandler
-import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -51,7 +50,6 @@ class CurrentWeatherModule {
 
     @Provides
     @Singleton
-    @InternalSerializationApi
     fun provideWeatherForecastDAO(database: WeatherForecastDatabase): CurrentWeatherDAO {
         return database.getWeatherForecastInstance()
     }
@@ -71,7 +69,6 @@ class CurrentWeatherModule {
         return CurrentWeatherLocalDataSourceImpl(forecastDAO, loggingService)
     }
 
-    @InternalSerializationApi
     @Singleton
     @Provides
     fun provideWeatherForecastRemoteDataSource(
@@ -92,21 +89,18 @@ class CurrentWeatherModule {
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideCurrentWeatherDtoMapper(): CurrentWeatherDtoMapper {
         return CurrentWeatherDtoMapper()
     }
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideCurrentWeatherEntityMapper(): CurrentWeatherEntityMapper {
         return CurrentWeatherEntityMapper()
     }
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideWeatherForecastRepository(
         loggingService: LoggingService,
         dtoMapper: CurrentWeatherDtoMapper,

@@ -16,7 +16,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.reposito
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Implementation of [HourlyWeatherRepository] that provides hourly weather data
@@ -52,7 +51,6 @@ import kotlinx.serialization.InternalSerializationApi
  * @property remoteDataSource Data source for fetching data from the remote API.
  * @property errorMapper Converts [io.github.vladchenko.weatherforecast.core.data.model.DataError] to [ForecastError] for domain consistency.
  */
-@InternalSerializationApi
 class HourlyWeatherRepositoryImpl(
     private val loggingService: LoggingService,
     private val dispatchers: CoroutineDispatchers,

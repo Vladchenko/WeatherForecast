@@ -23,7 +23,6 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearch
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchRepository
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModelFactory
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
-import kotlinx.serialization.InternalSerializationApi
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -42,7 +41,7 @@ class CitySearchModule {
 
     @Provides
     @Singleton
-    @InternalSerializationApi
+
     fun provideCitySearchDAO(database: WeatherForecastDatabase): CitySearchDAO {
         return database.getCitySearchInstance()
     }
@@ -55,19 +54,16 @@ class CitySearchModule {
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideCitySearchDtoMapper(): CitySearchDtoMapper {
         return CitySearchDtoMapper()
     }
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideCitySearchEntityMapper(): CitySearchEntityMapper {
         return CitySearchEntityMapper()
     }
 
-    @InternalSerializationApi
     @Singleton
     @Provides
     fun provideCitySearchLocalDataSource(
@@ -93,7 +89,6 @@ class CitySearchModule {
 
     @Singleton
     @Provides
-    @InternalSerializationApi
     fun provideCitySearchRepository(
         dtoMapper: CitySearchDtoMapper,
         entityMapper: CitySearchEntityMapper,

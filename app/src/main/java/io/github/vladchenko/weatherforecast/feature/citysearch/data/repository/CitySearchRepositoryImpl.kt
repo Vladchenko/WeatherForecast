@@ -12,7 +12,6 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.d
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchRepository
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * CitiesNamesRepository implementation to retrieve cities names.
@@ -23,7 +22,6 @@ import kotlinx.serialization.InternalSerializationApi
  * @property localDataSource to download cities names from database
  * @property remoteDataSource to download cities names remotely
  */
-@InternalSerializationApi
 class CitySearchRepositoryImpl(
     private val dtoMapper: CitySearchDtoMapper,
     private val entityMapper: CitySearchEntityMapper,
@@ -31,6 +29,7 @@ class CitySearchRepositoryImpl(
     private val localDataSource: CitySearchLocalDataSource,
     private val remoteDataSource: CitySearchRemoteDataSource,
 ) : CitySearchRepository {
+
 
     override suspend fun loadCitiesNames(token: String): LoadResult<CitySearch> =
         withContext(coroutineDispatchers.io) {

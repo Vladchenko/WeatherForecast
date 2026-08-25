@@ -3,12 +3,10 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.reposit
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.core.utils.toDataError
-import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiService
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.api.HourlyForecastApiService
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.api.HourlyForecastApiService
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherRemoteDataSource
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Implementation of [HourlyWeatherRemoteDataSource] that fetches hourly forecast data from the remote API.
@@ -23,7 +21,6 @@ class HourlyWeatherRemoteDataSourceImpl(
     private val responseProcessor: ResponseProcessor
 ) : HourlyWeatherRemoteDataSource {
 
-    @InternalSerializationApi
     override suspend fun loadHourlyWeatherForCity(city: String): DataResult<HourlyWeatherDto> {
         return runCatching {
             val response = apiService.loadHourlyForecast(city)
@@ -39,7 +36,6 @@ class HourlyWeatherRemoteDataSourceImpl(
         }
     }
 
-    @InternalSerializationApi
     override suspend fun loadHourlyWeatherForLocation(
         city: String,
         latitude: Double,

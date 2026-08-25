@@ -1,7 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local
 
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
-import kotlinx.serialization.InternalSerializationApi
 
 /**
  * Data source for local cities names operations.
@@ -17,7 +16,6 @@ interface CitySearchLocalDataSource {
      * @param token The search query to match against city names
      * @return List of [CitySearchEntity] instances matching the query
      */
-    @InternalSerializationApi
     suspend fun loadCitiesNames(token: String): List<CitySearchEntity>
 
     /**

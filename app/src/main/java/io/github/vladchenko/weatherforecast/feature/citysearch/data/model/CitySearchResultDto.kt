@@ -1,6 +1,5 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.model
 
-import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.Serializable
 
 /**
@@ -16,7 +15,6 @@ import kotlinx.serialization.Serializable
  * @property state Optional state or province name (e.g., "California"), if applicable.
  */
 @Serializable
-@InternalSerializationApi
 data class CitySearchResultDto(
     val name: String,
     val lat: Double,
