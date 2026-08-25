@@ -5,7 +5,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
@@ -21,8 +20,6 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.d
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasourceimpl.CitySearchRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchRepository
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModelFactory
-import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -110,21 +107,4 @@ class CitySearchModule {
     fun provideCitySearchInteractor(citySearchRepository: CitySearchRepository): CitySearchInteractor {
         return CitySearchInteractor(citySearchRepository)
     }
-
-    @Singleton
-    @Provides
-    fun provideCitySearchViewModelFactory(
-        loggingService: LoggingService,
-        statusStateHolder: StatusStateHolder,
-        citySearchInteractor: CitySearchInteractor,
-        recentCitiesInteractor: RecentCitiesInteractor
-    ): CitySearchViewModelFactory {
-        return CitySearchViewModelFactory(
-            loggingService,
-            statusStateHolder,
-            citySearchInteractor,
-            recentCitiesInteractor
-        )
-    }
-
 }

@@ -6,15 +6,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
-import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
-import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiService
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
@@ -30,7 +27,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapperImpl
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModelFactory
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.WeatherResponseHandler
 import retrofit2.Retrofit
 import javax.inject.Named
@@ -125,30 +121,6 @@ class CurrentWeatherModule {
     @Provides
     fun provideWeatherForecastRemoteInteractor(currentWeatherRepository: CurrentWeatherRepository): CurrentWeatherInteractor {
         return CurrentWeatherInteractor(currentWeatherRepository)
-    }
-
-    @Singleton
-    @Provides
-    fun provideForecastViewModelFactory(
-        loggingService: LoggingService,
-        stateHolder: StatusStateHolder,
-        resourceManager: ResourceManager,
-        networkStateHolder: NetworkStateHolder,
-        preferencesManager: PreferencesManager,
-        weatherOutputMapper: WeatherOutputMapper,
-        chosenCityInteractor: ChosenCityInteractor,
-        forecastInteractor: CurrentWeatherInteractor,
-    ): CurrentWeatherViewModelFactory {
-        return CurrentWeatherViewModelFactory(
-            loggingService,
-            resourceManager,
-            stateHolder,
-            networkStateHolder,
-            preferencesManager,
-            weatherOutputMapper,
-            chosenCityInteractor,
-            forecastInteractor,
-        )
     }
 
     @Singleton

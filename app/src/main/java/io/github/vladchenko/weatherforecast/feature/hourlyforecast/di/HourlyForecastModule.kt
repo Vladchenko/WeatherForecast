@@ -6,9 +6,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
-import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
@@ -24,7 +21,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.reposito
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasourceimpl.HourlyWeatherRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModelFactory
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -109,23 +105,5 @@ class HourlyForecastModule {
     @Provides
     fun provideHourlyForecastRemoteInteractor(hourlyWeatherRepository: HourlyWeatherRepository): HourlyWeatherInteractor {
         return HourlyWeatherInteractor(hourlyWeatherRepository)
-    }
-
-    @Singleton
-    @Provides
-    fun provideHourlyForecastViewModelFactory(
-        loggingService: LoggingService,
-        resourceManager: ResourceManager,
-        statusStateHolder: StatusStateHolder,
-        preferencesManager: PreferencesManager,
-        forecastRemoteInteractor: HourlyWeatherInteractor
-    ): HourlyWeatherViewModelFactory {
-        return HourlyWeatherViewModelFactory(
-            loggingService,
-            resourceManager,
-            statusStateHolder,
-            preferencesManager,
-            forecastRemoteInteractor
-        )
     }
 }
