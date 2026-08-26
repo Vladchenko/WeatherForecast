@@ -35,7 +35,6 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.FlowPreview
 
 /**
  * Full-screen city selection layout with top app bar and background image.
@@ -56,7 +55,6 @@ import kotlinx.coroutines.FlowPreview
  * @param cityPredictionsUiState City search suggestions (optional)
  */
 @Composable
-@FlowPreview
 @ExperimentalMaterial3Api
 fun CitySearchLayout(
     queryLabel: String,

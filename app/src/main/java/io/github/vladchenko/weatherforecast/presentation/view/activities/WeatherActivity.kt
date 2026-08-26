@@ -55,7 +55,6 @@ import javax.inject.Inject
  * Provides shared view models for weather, forecast, and city search
  * Configures status and navigation bars appearance
  */
-@FlowPreview
 @AndroidEntryPoint
 class WeatherActivity : AppCompatActivity() {
 

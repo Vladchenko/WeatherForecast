@@ -10,7 +10,6 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import kotlinx.coroutines.FlowPreview
 
 /**
  * The root composable for the city selection screen.
@@ -24,7 +23,6 @@ import kotlinx.coroutines.FlowPreview
  *                            Default: Hilt-provided instance.
  */
 @ExperimentalMaterial3Api
-@FlowPreview
 @Composable
 fun CitySearchScreen(
     appBarViewModel: AppBarViewModel = hiltViewModel(),

@@ -23,7 +23,6 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LATITU
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LONGITUDE_PARAM
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.WEATHER
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import kotlinx.coroutines.FlowPreview
 
 /**
  * Navigation host for the Weather Forecast app.
@@ -44,7 +43,6 @@ import kotlinx.coroutines.FlowPreview
  * @param citySearchViewModel Shared view model for city search
  * @param weatherViewModel Shared view model for current weather
  */
-@FlowPreview
 @ExperimentalMaterial3Api
 @Composable
 fun WeatherAppNavHost(
