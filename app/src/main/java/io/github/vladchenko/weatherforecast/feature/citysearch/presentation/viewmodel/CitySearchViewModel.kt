@@ -220,7 +220,7 @@ class CitySearchViewModel @Inject constructor(
         }
     }
 
-    private fun updateCityPredictions(city: String, result: LoadResult<CitySearch>?) {
+    private fun updateCityPredictions(city: String, result: LoadResult<CitySearch>) {
         when (result) {
             is LoadResult.Remote -> {
                 showStatus(R.string.city_predictions_provided)
@@ -253,10 +253,6 @@ class CitySearchViewModel @Inject constructor(
                     message = errorMessage,
                     messageId = null
                 )
-            }
-
-            null -> {
-                _cityPredictions.value = Error(city = city, messageId = 0, message = null)
             }
         }
     }
