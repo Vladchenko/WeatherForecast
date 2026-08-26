@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
@@ -195,6 +196,9 @@ class CurrentWeatherViewModel @Inject constructor(
             when (response.uiState) {
                 is WeatherUiState.Success -> {
                     _weatherStateFlow.value = response.uiState
+                    scope.launch {
+                        saveCity(cityModel, response.uiState)
+                    }
                 }
 
                 is WeatherUiState.Loading -> {
@@ -207,15 +211,25 @@ class CurrentWeatherViewModel @Inject constructor(
 
                 null -> {}
             }
-            response.cityModelToSave?.let {
-                scope.launch {
-                    chosenCityInteractor.saveChosenCity(response.cityModelToSave)
-                }
-            }
             response.cityError?.let {
                 _cityErrorEventFlow.tryEmit(it)
             }
         }
+    }
+
+    private suspend fun saveCity(
+        cityModel: CityLocationModel,
+        uiState: WeatherUiState.Success<CurrentWeatherUi>
+    ) {
+        chosenCityInteractor.saveChosenCity(
+            CityLocationModel(
+                cityModel.city,
+                Coordinate(
+                    uiState.data.coordinate.latitude,
+                    uiState.data.coordinate.longitude
+                )
+            )
+        )
     }
 
     /**

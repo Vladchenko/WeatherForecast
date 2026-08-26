@@ -2,7 +2,6 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.presentation
 
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
-import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -52,20 +51,12 @@ class WeatherResponseHandler(
                     R.string.forecast_loaded_success,
                     cityModel.city
                 )
-                val cityLocationModel = CityLocationModel(
-                    cityModel.city,
-                    Coordinate(
-                        loadResult.data.coordinate.latitude,
-                        loadResult.data.coordinate.longitude
-                    )
-                )
                 loggingService.logDebugEvent(
                     TAG,
                     "Chosen city saved to database: $cityModel.city"
                 )
                 return WeatherResponseHandlerResult(
                     remoteWeatherToShow = loadResult.data.copy(city = cityModel.city),
-                    cityModelToSave = cityLocationModel,
                 )
             }
 
@@ -73,21 +64,12 @@ class WeatherResponseHandler(
                 statusStateHolder.updateWarningStatus(
                     R.string.forecast_outdated, cityModel.city
                 )
-                val cityLocationModel = CityLocationModel(
-                    cityModel.city,
-                    Coordinate(
-                        loadResult.data.coordinate.latitude,
-                        loadResult.data.coordinate.longitude
-                    )
-                )
                 return WeatherResponseHandlerResult(
                     localWeatherToShow = loadResult.data.copy(city = cityModel.city),
-                    cityModelToSave = cityLocationModel,
                 )
             }
 
             is LoadResult.Error -> {
-                val cityLocationModel = CityLocationModel(cityModel.city, cityModel.coordinate)
                 var cityError: CityErrorEvent? = null
                 var errorMessage: Int = Integer.MIN_VALUE
                 when (val error = loadResult.error) {
@@ -147,7 +129,6 @@ class WeatherResponseHandler(
                     }
                 }
                 return WeatherResponseHandlerResult(
-                    cityModelToSave = cityLocationModel,
                     errorToShow = errorMessage,
                     cityError = cityError,
                 )

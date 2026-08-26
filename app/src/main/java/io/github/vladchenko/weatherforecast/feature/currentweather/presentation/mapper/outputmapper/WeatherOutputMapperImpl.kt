@@ -41,7 +41,6 @@ class WeatherOutputMapperImpl(
         )
         var cityError: CityErrorEvent? = null
         var uiState: WeatherUiState<CurrentWeatherUi>? = null
-        var cityModelToSave: CityLocationModel? = null
         processedResponse.let { response ->
             response.remoteWeatherToShow?.let {
                 uiState = WeatherUiState.Success(
@@ -54,9 +53,6 @@ class WeatherOutputMapperImpl(
                     toUiModel(it),
                     DataSource.LOCAL
                 )
-            }
-            response.cityModelToSave?.let {
-                cityModelToSave = response.cityModelToSave
             }
             response.errorToShow?.let {
                 uiState = WeatherUiState.Error(
@@ -72,7 +68,6 @@ class WeatherOutputMapperImpl(
         }
         return WeatherProcessingResult(
             uiState = uiState,
-            cityModelToSave = cityModelToSave,
             cityError = cityError
         )
     }

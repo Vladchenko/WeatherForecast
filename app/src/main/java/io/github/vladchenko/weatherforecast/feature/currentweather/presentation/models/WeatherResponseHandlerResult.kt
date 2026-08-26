@@ -1,6 +1,5 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models
 
-import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 
@@ -23,8 +22,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
  *                              Contains the loaded data, or null if loading failed.
  * @property remoteWeatherToShow The weather data model loaded from internet to display in the UI.
  *                               Contains the loaded data, or null if loading failed.
- * @property cityModelToSave The selected city model to save to storage.
- *                           Used to update user preferences. Can be null in some loading cases.
  */
 data class WeatherResponseHandlerResult(
     val errorToShow: Int? = null,
@@ -32,5 +29,4 @@ data class WeatherResponseHandlerResult(
     val cityError: CityErrorEvent? = null,
     val localWeatherToShow: CurrentWeather? = null,
     val remoteWeatherToShow: CurrentWeather? = null,
-    val cityModelToSave: CityLocationModel? = null,
 )
