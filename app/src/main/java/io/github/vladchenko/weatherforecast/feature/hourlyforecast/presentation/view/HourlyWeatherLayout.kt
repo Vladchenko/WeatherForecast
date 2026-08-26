@@ -149,6 +149,10 @@ fun HourlyWeatherLayout(
                         }
                     }
                 }
+
+                WeatherUiState.Idle -> {
+                    // Do nothing
+                }
             }
         }
     }

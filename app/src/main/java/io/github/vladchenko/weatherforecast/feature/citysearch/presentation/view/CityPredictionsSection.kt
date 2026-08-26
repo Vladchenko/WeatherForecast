@@ -10,9 +10,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
 
 @Composable
 fun CityPredictionsSection(
@@ -51,6 +51,9 @@ fun CityPredictionsSection(
                     fontSize = 14.sp
                 )
             }
+        }
+        WeatherUiState.Idle -> {
+            // Do nothing
         }
         null -> Unit
     }

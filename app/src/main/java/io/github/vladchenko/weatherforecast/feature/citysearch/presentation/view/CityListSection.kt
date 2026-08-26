@@ -66,6 +66,9 @@ fun CityListSection(
                 fontSize = 14.sp
             )
         }
+        WeatherUiState.Idle -> {
+            // Do nothing
+        }
         null -> Unit
     }
 }

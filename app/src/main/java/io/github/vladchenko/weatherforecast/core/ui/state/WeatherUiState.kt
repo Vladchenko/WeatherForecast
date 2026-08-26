@@ -12,12 +12,22 @@ import androidx.compose.runtime.Immutable
  * @param T The type of data held in the [Success] state (e.g., [CurrentWeatherUi], [HourlyWeatherDomainModel]).
  *
  * Possible states:
+ * - [Idle]: No weather data has been requested yet.
  * - [Loading]: Data is currently being fetched from a data source.
  * - [Success]: Data has been successfully retrieved, along with the origin ([DataSource]).
  * - [Error]: An error occurred during the request; contains debug-friendly info and a displayable message.
  */
 @Immutable
 sealed interface WeatherUiState<out T> {
+
+    /**
+     * Represents the initial state before any weather data request has been triggered.
+     *
+     * Used when the UI is displayed for the first time and no loading operation has been initiated yet.
+     * This state allows the UI to show placeholder content or an empty state instead of a loading spinner.
+     */
+    object Idle : WeatherUiState<Nothing>
+
     /**
      * Represents the state when weather data is actively being loaded from a repository.
      *

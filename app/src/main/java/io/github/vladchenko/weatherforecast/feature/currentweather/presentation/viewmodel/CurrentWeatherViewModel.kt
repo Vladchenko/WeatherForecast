@@ -86,7 +86,7 @@ class CurrentWeatherViewModel @Inject constructor(
         extraBufferCapacity = 1
     )
     private val _weatherStateFlow =
-        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading(false))
+        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Idle)
     //endregion flows
 
     private var currentJob: Job? = null
@@ -207,6 +207,10 @@ class CurrentWeatherViewModel @Inject constructor(
 
                 is WeatherUiState.Error -> {
                     _weatherStateFlow.value = response.uiState
+                }
+
+                WeatherUiState.Idle -> {
+                    _weatherStateFlow.value = WeatherUiState.Idle
                 }
 
                 null -> {}

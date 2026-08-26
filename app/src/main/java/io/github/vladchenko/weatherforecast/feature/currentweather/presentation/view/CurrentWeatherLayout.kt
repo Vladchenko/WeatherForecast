@@ -310,6 +310,10 @@ fun CurrentWeatherLayout(
                                         }
                                     }
                                 }
+
+                                WeatherUiState.Idle -> {
+                                    // Do nothing
+                                }
                             }
                         }
                     }

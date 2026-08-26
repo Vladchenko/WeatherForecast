@@ -40,7 +40,6 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNa
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
