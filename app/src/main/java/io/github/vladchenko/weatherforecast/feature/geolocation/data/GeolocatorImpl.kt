@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.geolocation.data
 
-import android.location.Location
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.api.NominatimApi
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationException
@@ -22,12 +22,12 @@ class GeolocatorImpl(
     private val coroutineDispatchers: CoroutineDispatchers
 ) : Geolocator {
 
-    override suspend fun defineCityNameByLocation(location: Location): String =
+    override suspend fun defineCityNameByLocation(coordinate: Coordinate): String =
         withContext(coroutineDispatchers.io) {
             try {
                 val response = nominatimApi.reverse(
-                    lat = location.latitude,
-                    lon = location.longitude
+                    lat = coordinate.latitude,
+                    lon = coordinate.longitude
                 )
                 response.address.getCityOrLocality()
             } catch (e: Exception) {
@@ -35,12 +35,12 @@ class GeolocatorImpl(
             }
         }
 
-    override suspend fun defineLocationByCity(city: String): Location =
+    override suspend fun defineLocationByCity(city: String): Coordinate =
         withContext(coroutineDispatchers.io) {
             try {
                 val results = nominatimApi.search(query = city)
                 if (results.isNotEmpty()) {
-                    results[0].toAndroidLocation()
+                    results[0].toCoordinate()
                 } else {
                     throw GeoLocationException(RuntimeException("City not found: $city"))
                 }

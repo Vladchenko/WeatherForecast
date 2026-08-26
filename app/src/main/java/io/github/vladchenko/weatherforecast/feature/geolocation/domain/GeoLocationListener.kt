@@ -1,15 +1,15 @@
 package io.github.vladchenko.weatherforecast.feature.geolocation.domain
 
-import android.location.Location
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 
 /**
  * Listener that retrieves a geo location for a device user runs this app on.
  */
 interface GeoLocationListener {
     /**
-     * Callback for a geo location success. Feeds [location] with a latitude and longitude in it.
+     * Callback for a geo location success. Feeds [coordinate] with a latitude and longitude in it.
      */
-    fun onDeviceGeoLocationSuccess(location: Location)
+    fun onDeviceGeoLocationSuccess(coordinate: Coordinate)
 
     /**
      * When geo location failed, inform about it with [errorMessage].

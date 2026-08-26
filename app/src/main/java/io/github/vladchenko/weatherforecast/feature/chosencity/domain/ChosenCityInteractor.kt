@@ -1,6 +1,5 @@
 package io.github.vladchenko.weatherforecast.feature.chosencity.domain
 
-import android.location.Location
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 
@@ -15,7 +14,7 @@ class ChosenCityInteractor(
 ) {
 
     /**
-     * Download model of city chosen by user, consisting its name and [Location]
+     * Download model of city chosen by user, consisting its name and coordinate.
      *
      * @return data model for city
      */

@@ -9,6 +9,7 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationListener
 import javax.inject.Inject
@@ -52,10 +53,18 @@ class DeviceLocationProvider @Inject constructor(
                 object : CancellationToken() {
                     override fun onCanceledRequested(p0: OnTokenCanceledListener) =
                         CancellationTokenSource().token
+
                     override fun isCancellationRequested() = false
                 })
                 .addOnSuccessListener { location: Location? ->
-                    onDeviceLocationSuccess(location, locationListener, context)
+                    onDeviceLocationSuccess(
+                        Coordinate(
+                            location?.latitude ?: 0.0,
+                            location?.longitude ?: 0.0
+                        ),
+                        locationListener,
+                        context
+                    )
                 }
                 .addOnFailureListener { exception ->
                     onDeviceLocationFailure(exception, locationListener)
@@ -84,16 +93,16 @@ class DeviceLocationProvider @Inject constructor(
     }
 
     private fun onDeviceLocationSuccess(
-        location: Location?,
+        coordinate: Coordinate?,
         locationListener: GeoLocationListener,
         appContext: Context
     ) {
-        loggingService.logDebugEvent(TAG, "Location retrieved: $location")
-        if (location == null) {
+        loggingService.logDebugEvent(TAG, "Location retrieved: $coordinate")
+        if (coordinate == null) {
             loggingService.logError(TAG, "Location is null after successful callback")
             locationListener.onDeviceGeoLocationFail(appContext.getString(R.string.geo_resolution_failed))
         } else {
-            locationListener.onDeviceGeoLocationSuccess(location)
+            locationListener.onDeviceGeoLocationSuccess(coordinate)
         }
     }
 

@@ -1,6 +1,5 @@
 package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel
 
-import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +29,7 @@ import javax.inject.Inject
  * 1. **Permission Handling**: Manages the lifecycle of location permissions (Requested, Denied, PermanentlyDenied)
  *    using [permissionRequests] counter to detect permanent denials.
  * 2. **Hardware Location**: Delegates raw GPS/Network location retrieval to [DeviceLocationProvider].
- * 3. **Reverse Geocoding**: Converts [Location] coordinates to a human-readable city name
+ * 3. **Reverse Geocoding**: Converts [Coordinate] coordinates to a human-readable city name
  *    using [Geolocator].
  *
  * The ViewModel emits various events via [SharedFlow]s to notify the UI layer (or Coordinators)
@@ -75,10 +74,10 @@ class GeoLocationViewModel @Inject constructor(
         loggingService.logInfoEvent(TAG, "defineDeviceGeoLocation called")
         statusStateHolder.updateInfoStatus(R.string.geo_detecting)
         geoLocator.defineDeviceLocation(object : GeoLocationListener {
-            override fun onDeviceGeoLocationSuccess(location: Location) {
+            override fun onDeviceGeoLocationSuccess(coordinate: Coordinate) {
                 loggingService.logError(TAG, "Device geo location success")
                 statusStateHolder.updateInfoStatus(R.string.geo_success)
-                defineCityNameByLocation(location)
+                defineCityNameByLocation(coordinate)
             }
 
             override fun onDeviceGeoLocationFail(errorMessage: String) {
@@ -154,19 +153,19 @@ class GeoLocationViewModel @Inject constructor(
     }
 
     /**
-     * Defines a city name that matches given [location]
+     * Defines a city name that matches given [coordinate]
      */
-    fun defineCityNameByLocation(location: Location) {
+    fun defineCityNameByLocation(coordinate: Coordinate) {
         viewModelScope.launch(exceptionHandler) {
-            val city = geoLocationHelper.defineCityNameByLocation(location)
+            val city = geoLocationHelper.defineCityNameByLocation(coordinate)
             loggingService.logDebugEvent(
                 TAG,
-                "City defined successfully by location = $location, city = $city"
+                "City defined successfully by location = $coordinate, city = $city"
             )
             val cityModel =
                 CityLocationModel(
                     city,
-                    Coordinate(location.latitude, location.longitude)
+                    Coordinate(coordinate.latitude, coordinate.longitude)
                 )
             dialogController.showLocationDefined(
                 city = cityModel.city,
