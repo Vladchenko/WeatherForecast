@@ -20,7 +20,6 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCi
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
@@ -63,7 +62,6 @@ import javax.inject.Inject
  * @see CitySelectionEvent
  * @see StatusStateHolder
  */
-@FlowPreview
 @HiltViewModel
 class CitySearchViewModel @Inject constructor(
     private val loggingService: LoggingService,
