@@ -13,7 +13,7 @@ import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Success
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor
@@ -58,9 +58,6 @@ import javax.inject.Inject
  * @property statusStateHolder Manages and broadcasts UI status updates (loading, errors, info)
  * @property citySearchInteractor Handles domain logic for fetching and filtering city names
  * @property recentCitiesInteractor Manages recently searched cities persistence and loading
- *
- * @see CitySelectionEvent
- * @see StatusStateHolder
  */
 @HiltViewModel
 class CitySearchViewModel @Inject constructor(
@@ -88,7 +85,7 @@ class CitySearchViewModel @Inject constructor(
      *
      * Null until first successful search.
      */
-    val cityPredictions: StateFlow<WeatherUiState<ImmutableList<CityDomainModel>>?>
+    val cityPredictions: StateFlow<WeatherUiState<ImmutableList<CityModel>>?>
         get() = _cityPredictions
 
     /**
@@ -110,7 +107,7 @@ class CitySearchViewModel @Inject constructor(
 
     private val _cityMaskStateFlow = MutableStateFlow("")
     private val _cityPredictions =
-        MutableStateFlow<WeatherUiState<ImmutableList<CityDomainModel>>?>(null)
+        MutableStateFlow<WeatherUiState<ImmutableList<CityModel>>?>(null)
     private val _recentCitiesNamesFlow = MutableStateFlow<WeatherUiState<RecentCities>?>(null)
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->

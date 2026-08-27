@@ -42,10 +42,6 @@ class ResponseProcessor @Inject constructor() {
      * @param city to inform user in case of error which city weather forecast failed for
      * @param response the Retrofit [Response] to process; must not be null
      * @return [DataResult.Success] with body if successful and non-null, [DataResult.Error] otherwise
-     *
-     * @see Response.isSuccessful
-     * @see Response.body
-     * @see Response.code
      */
     fun <T> processResponse(city: String, response: Response<T>): DataResult<T> {
         return try {

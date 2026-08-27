@@ -20,7 +20,7 @@ class CurrentWeatherLocalDataSourceImpl @Inject constructor(
 
     override suspend fun loadWeather(city: String): CurrentWeatherEntity {
         val entry = dao.findCityForecast(city) ?: throw NoSuchDatabaseEntryException(city)
-        loggingService.logDebugEvent(TAG, "${entry.city} city forecast loaded successfully")
+        loggingService.logDebugEvent(TAG, "${entry.city} city local forecast loaded successfully")
         return entry
     }
 

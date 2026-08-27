@@ -19,10 +19,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.mo
  * 1. Attempt to load fresh data from the network
  * 2. If remote loading fails, try to load cached data
  * 3. If both fail, return an error with details
- *
- * @see LoadResult
- * @see ForecastError
- * @see CurrentWeather
  */
 interface CurrentWeatherRepository {
 

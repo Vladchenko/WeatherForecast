@@ -1,6 +1,9 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.data.model
 
 import androidx.room.Entity
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper.RecentCitiesMapper
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
 
 /**
  * Database entity representing a recently searched city.
@@ -11,7 +14,7 @@ import androidx.room.Entity
  *
  * This entity is used by [RecentCitiesDataSource] for local persistence and should
  * only be accessed through data source interfaces. Conversion to/from domain models
- * ([CityDomainModel]) is handled by [RecentCitiesMapper] in the repository layer.
+ * ([CityModel]) is handled by [RecentCitiesMapper] in the repository layer.
  *
  * @property name The name of the city (e.g., "London")
  * @property country The country code or name (e.g., "GB", "United Kingdom")
@@ -20,10 +23,6 @@ import androidx.room.Entity
  * @property lon Longitude coordinate for weather API requests
  * @property lastUsed Timestamp (in milliseconds) when this city was last used,
  *                   used for ordering recent cities (most recent first)
- *
- * @see RecentCitiesDataSource
- * @see RecentCitiesMapper
- * @see CityDomainModel
  */
 @Entity(
     tableName = "recentCitiesNames",

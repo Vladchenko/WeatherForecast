@@ -17,13 +17,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 
 @Composable
 fun CitySuggestionItem(
-    city: CityDomainModel,
+    city: CityModel,
     mainContentColor: Color,
-    onItemClick: (CityDomainModel) -> Unit
+    onItemClick: (CityModel) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -47,7 +47,7 @@ fun CitySuggestionItem(
 @Preview(showBackground = true)
 @Composable
 private fun CitySuggestionItemPreview() {
-    val city = CityDomainModel(
+    val city = CityModel(
         name = "San Francisco",
         state = "CA",
         country = "US",

@@ -25,19 +25,15 @@ import javax.inject.Singleton
 /**
  * Dagger Hilt module that provides geolocation-related dependencies for the application.
  *
- * This module is installed in the [dagger.hilt.components.SingletonComponent], ensuring that all provided instances
+ * This module is installed in the [SingletonComponent], ensuring that all provided instances
  * are scoped to the application lifecycle.
  *
  * It supplies:
- * - A [io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider] instance for handling location permission checks and requests
+ * - A [DeviceLocationProvider] instance for handling location permission checks and requests
  * - A [Geolocator] implementation ([GeolocatorImpl]) for retrieving device location via GPS/network
  *
- * Dependencies require the application context and, in the case of [Geolocator], a [io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers]
+ * Dependencies require the application context and, in the case of [Geolocator], a [CoroutineDispatchers]
  * instance for performing asynchronous location operations.
- *
- * @see io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
- * @see Geolocator
- * @see GeolocatorImpl
  */
 @Module
 @InstallIn(SingletonComponent::class)

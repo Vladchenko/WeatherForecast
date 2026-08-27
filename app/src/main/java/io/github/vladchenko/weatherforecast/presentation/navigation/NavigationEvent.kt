@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.presentation.navigation
 
 import androidx.navigation.NavOptions
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 
 /**
  * Sealed interface representing navigation events in the application.
@@ -50,7 +50,7 @@ sealed interface NavigationEvent {
      *
      * @param city The domain model of the selected city containing its details.
      */
-    data class ShowWeatherFor(val city: CityDomainModel) : NavigationEvent
+    data class ShowWeatherFor(val city: CityModel) : NavigationEvent
 
     /**
      * Closes the application.

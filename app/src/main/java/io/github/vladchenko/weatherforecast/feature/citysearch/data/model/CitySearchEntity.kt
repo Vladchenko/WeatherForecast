@@ -15,9 +15,6 @@ import androidx.room.PrimaryKey
  * @property state Optional state or province name (e.g., "Île-de-France").
  * @property latitude Latitude coordinate of the city's location.
  * @property longitude Longitude coordinate of the city's location.
- *
- * @see Entity for Room database mapping.
- * @see PrimaryKey Indicates that `id` is the primary key with auto-increment enabled.
  */
 @Entity(tableName = "citiesNames")
 data class CitySearchEntity(

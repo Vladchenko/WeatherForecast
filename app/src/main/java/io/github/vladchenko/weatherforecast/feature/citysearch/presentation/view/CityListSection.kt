@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 
 /**
@@ -32,7 +32,7 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.Re
 fun CityListSection(
     citiesState: WeatherUiState<RecentCities>?,
     mainContentColor: Color,
-    onItemClick: (CityDomainModel) -> Unit,
+    onItemClick: (CityModel) -> Unit,
     emptyText: String = "No cities found"
 ) {
     when (citiesState) {

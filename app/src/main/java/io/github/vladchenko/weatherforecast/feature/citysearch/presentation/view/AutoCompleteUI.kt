@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -72,11 +72,11 @@ fun AutoCompleteUI(
     useOutlined: Boolean = false,
     mainContentColor: Color,
     onQueryChanged: (String) -> Unit,
-    predictions: WeatherUiState<ImmutableList<CityDomainModel>>?,
+    predictions: WeatherUiState<ImmutableList<CityModel>>?,
     recentCities: WeatherUiState<RecentCities>?,
     onDoneActionClick: () -> Unit = {},
     onClearClick: () -> Unit = {},
-    onItemClick: (CityDomainModel) -> Unit,
+    onItemClick: (CityModel) -> Unit,
     onFirstFocus: () -> Unit,
     onRecentsDelete: () -> Unit
 ) {
@@ -193,14 +193,14 @@ private fun AutoCompleteUINoRecentPreview() {
 private fun AutoCompleteUIRecentPreview() {
     val recentCities = RecentCities(
         cities = listOf(
-            CityDomainModel(
+            CityModel(
                 name = "Berlin",
                 state = "BE",
                 country = "DE",
                 lat = 52.5200,
                 lon = 13.4050
             ),
-            CityDomainModel(
+            CityModel(
                 name = "Madrid",
                 state = "MD",
                 country = "ES",
@@ -231,14 +231,14 @@ private fun AutoCompleteUIRecentPreview() {
 private fun AutoCompleteUISearchPreview() {
     val predictions = WeatherUiState.Success(
         listOf(
-            CityDomainModel(
+            CityModel(
                 name = "Chicago",
                 state = "IL",
                 country = "US",
                 lat = 41.8781,
                 lon = -87.6298
             ),
-            CityDomainModel(
+            CityModel(
                 name = "Chisinau",
                 state = "MC",
                 country = "MD",

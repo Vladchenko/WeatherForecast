@@ -1,23 +1,18 @@
 package io.github.vladchenko.weatherforecast.core.ui.constants
 
-import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Companion.fromSubtitle
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Large
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Normal
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize.Small
 
-
 /**
  * Represents the logical size of a subtitle text, independent of platform-specific units.
  *
- * This enum is used to decouple UI logic (e.g., determining font size in `sp`) from business or presentation logic,
- * allowing components like [AppBarStateConverter] to remain free of Android/Compose dependencies.
+ * This enum is used to decouple UI logic (e.g., determining font size in `sp`) from business or presentation logic.
  *
  * The size is determined based on the length of the subtitle text:
  * - [Small]: for long subtitles (more than 50 characters)
  * - [Normal]: for medium-length subtitles (31–50 characters)
  * - [Large]: for short subtitles (30 characters or fewer)
- *
- * @see fromSubtitle — companion function to derive size from actual text
  */
 enum class SubtitleSize {
     /** Small font size, intended for long subtitles that may need to fit in limited space. */

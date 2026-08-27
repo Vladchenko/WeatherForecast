@@ -11,8 +11,6 @@ import kotlinx.collections.immutable.toPersistentList
  * Transforms the API response into a structured format suitable for local storage.
  * Extracts city metadata and maps each hourly forecast item into [HourlyWeatherItemEntity].
  * Uses persistent collections for efficient immutability and performance in Jetpack Compose.
- *
- * @see toEntity for the main transformation function
  */
 class HourlyWeatherDtoMapper {
 

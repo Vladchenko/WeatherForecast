@@ -28,10 +28,6 @@ import javax.inject.Singleton
  * By providing these as Hilt `@Singleton` bindings, the module enables loose coupling
  * between ViewModels/Coordinators and concrete dialog implementations, improving testability
  * and adhering to the Single Responsibility Principle.
- *
- * @see WeatherDialogFactory
- * @see WeatherDialogController
- * @see WeatherDialogControllerImpl
  */
 @Module
 @InstallIn(SingletonComponent::class)

@@ -18,10 +18,6 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.domain.util.Valid
  * for token validation before fetching city data.
  *
  * @property citySearchRepository provides domain-layer data access for city search operations
- *
- * @see ValidationUtils
- * @see CitySearchRepository
- * @see CitySearch
  */
 class CitySearchInteractor(private val citySearchRepository: CitySearchRepository) {
 

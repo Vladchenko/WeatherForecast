@@ -33,8 +33,6 @@ class AlertDialogHelper @Inject constructor(
      * @param context Optional context for dialog creation. If null, uses the injected context.
      *                Use Activity context (e.g., this@Activity) for AppCompat themes.
      * @return Fully configured [AlertDialog] instance, ready to be shown
-     *
-     * @see AlertDialogDelegate for defining dialog content and behavior
      */
     fun createDialog(delegate: AlertDialogDelegate, context: Context? = null): AlertDialog {
         val dialogContext = context ?: this.context
@@ -53,8 +51,6 @@ class AlertDialogHelper @Inject constructor(
      * @param delegate The delegate defining the dialog's content and actions
      * @param context Optional context for dialog creation. If null, uses the injected context.
      *                Use Activity context (e.g., this@Activity) for AppCompat themes.
-     *
-     * @see createDialog for creating without immediate show
      */
     fun showDialog(delegate: AlertDialogDelegate, context: Context? = null) {
         createDialog(delegate, context).show()

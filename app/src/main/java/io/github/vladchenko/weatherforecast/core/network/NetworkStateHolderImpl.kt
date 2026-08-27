@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.network
 
+import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -12,9 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
  * The initial state is set to `true` (connected) by default. External components,
  * such as [NetworkStatusCoordinator], call [updateState] to notify this holder
  * about connectivity changes observed from system-level events.
- *
- * @see NetworkStateHolder
- * @see NetworkStatusCoordinator
  */
 class NetworkStateHolderImpl : NetworkStateHolder {
 

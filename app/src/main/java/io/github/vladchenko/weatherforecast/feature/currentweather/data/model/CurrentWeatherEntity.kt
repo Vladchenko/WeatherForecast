@@ -30,10 +30,6 @@ import androidx.room.PrimaryKey
  * @property sunset Sunset time, Unix timestamp (seconds)
  * @property timezoneOffset Shift in seconds from UTC
  * @property cityId Unique identifier assigned by OpenWeather API
- *
- * @see androidx.room.Entity
- * @see androidx.room.PrimaryKey
- * @see androidx.room.TypeConverters
  */
 @Entity(tableName = "citiesForecasts")
 data class CurrentWeatherEntity(

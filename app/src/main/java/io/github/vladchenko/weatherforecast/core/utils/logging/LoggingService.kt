@@ -26,8 +26,6 @@ import io.github.vladchenko.weatherforecast.BuildConfig
  *
  * ## Thread Safety
  * This class delegates to [Log], which is thread-safe. Safe to call from any thread, including coroutines on IO dispatcher.
- *
- * @see Log
  */
 class LoggingService {
 

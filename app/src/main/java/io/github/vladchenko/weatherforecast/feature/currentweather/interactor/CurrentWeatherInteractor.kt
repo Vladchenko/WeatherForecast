@@ -30,8 +30,6 @@ class CurrentWeatherInteractor(
      * @return A [LoadResult] that wraps the result of the operation:
      *         - [LoadResult.Success] with [CurrentWeather] data if successful.
      *         - [LoadResult.Error] with an error description if the operation failed.
-     *
-     * @see CurrentWeatherRepository.refreshWeatherForLocation
      */
     suspend fun loadWeatherForLocation(
         city: String,

@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.domain
 
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 
 /**
@@ -39,7 +39,7 @@ class RecentCitiesInteractor(private val recentCitiesRepository: RecentCitiesRep
      *
      * @param city The name of the city to add or update
      */
-    suspend fun addCityToRecents(city: CityDomainModel) {
+    suspend fun addCityToRecents(city: CityModel) {
         recentCitiesRepository.addCityToRecents(city)
     }
 

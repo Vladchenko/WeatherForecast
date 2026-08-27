@@ -11,8 +11,6 @@ package io.github.vladchenko.weatherforecast.presentation.navigation
  *
  * This design decouples the navigation source from the navigation implementation,
  * making it easier to test and maintain navigation logic.
- *
- * @see NavigationEvent
  */
 interface NavigationEventDispatcher {
     /**

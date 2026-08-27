@@ -12,13 +12,13 @@ import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 
 @Composable
 fun CityPredictionsSection(
-    predictions: WeatherUiState<List<CityDomainModel>>?,
+    predictions: WeatherUiState<List<CityModel>>?,
     mainContentColor: Color,
-    onItemClick: (CityDomainModel) -> Unit
+    onItemClick: (CityModel) -> Unit
 ) {
     when (predictions) {
         is WeatherUiState.Loading -> {
@@ -63,8 +63,8 @@ fun CityPredictionsSection(
 @Composable
 private fun CityPredictionsSectionSuccessPreview() {
     val predictions = listOf(
-        CityDomainModel(name = "London", state = "England", country = "GB", lat = 51.5074, lon = -0.1278),
-        CityDomainModel(name = "Los Angeles", state = "CA", country = "US", lat = 34.0522, lon = -118.2437)
+        CityModel(name = "London", state = "England", country = "GB", lat = 51.5074, lon = -0.1278),
+        CityModel(name = "Los Angeles", state = "CA", country = "US", lat = 34.0522, lon = -118.2437)
     )
     CityPredictionsSection(
         predictions = WeatherUiState.Success(data = predictions, DataSource.LOCAL),

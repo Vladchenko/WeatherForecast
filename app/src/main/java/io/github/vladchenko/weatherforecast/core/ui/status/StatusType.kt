@@ -11,8 +11,6 @@ package io.github.vladchenko.weatherforecast.core.ui.status
  * - [Error]: Critical issues that prevent an operation from completing.
  * - [Info]: Neutral informational messages about successful operations or progress.
  * - [Warning]: Non-critical issues that require user attention but don't block the flow.
- *
- * @see StatusStateHolder
  */
 sealed class StatusType {
     /**

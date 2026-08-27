@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper
 
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
 import kotlinx.collections.immutable.persistentListOf
 
@@ -16,7 +16,7 @@ class CitySearchEntityMapper {
 
     /**
      * Converts a list of [CitySearchEntity] into a [CitySearch] object containing
-     * an immutable list of [CityDomainModel] items.
+     * an immutable list of [CityModel] items.
      *
      * Currently, the `error` field is initialized as an empty string,
      * indicating no error — however, this may be updated in future implementations
@@ -29,8 +29,8 @@ class CitySearchEntityMapper {
         return CitySearch(cities = cities, error = "")
     }
 
-    private fun toDomainItem(entity: CitySearchEntity): CityDomainModel =
-        CityDomainModel(
+    private fun toDomainItem(entity: CitySearchEntity): CityModel =
+        CityModel(
             name = entity.city,
             lat = entity.latitude,
             lon = entity.longitude,

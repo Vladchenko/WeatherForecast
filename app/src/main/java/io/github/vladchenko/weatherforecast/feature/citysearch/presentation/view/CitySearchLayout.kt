@@ -27,7 +27,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
@@ -64,7 +64,7 @@ fun CitySearchLayout(
     navigationDispatcher: NavigationEventDispatcher,
     onCitySelectionEvent: (CitySelectionEvent) -> Unit,
     recentCitiesNamesUiState: WeatherUiState<RecentCities>?,
-    cityPredictionsUiState: WeatherUiState<ImmutableList<CityDomainModel>>?,
+    cityPredictionsUiState: WeatherUiState<ImmutableList<CityModel>>?,
 ) {
     val statusColor = rememberResolvedColorAttr(appBarUiState.subtitleColorAttr)
 

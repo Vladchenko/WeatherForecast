@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper
 
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import kotlinx.collections.immutable.toPersistentList
@@ -14,22 +14,18 @@ import kotlinx.collections.immutable.toPersistentList
  *
  * Supports:
  * - Mapping lists of entities to immutable [RecentCities] collections
- * - Converting individual [CityDomainModel] instances to [RecentCitiesEntity]
+ * - Converting individual [CityModel] instances to [RecentCitiesEntity]
  *   for persistence with current timestamp
  *
  * Maintains consistency in data format across layers and enables clean separation
  * between domain logic and data storage concerns.
- *
- * @see RecentCitiesEntity - source/sink entity from/to Room database
- * @see RecentCities - target domain model representing a collection of recent cities
- * @see CityDomainModel - simplified domain representation of a city
  */
 class RecentCitiesMapper {
 
     /**
      * Maps a list of [RecentCitiesEntity] to a [RecentCities] domain object.
      *
-     * Each entity is transformed into a [CityDomainModel] preserving:
+     * Each entity is transformed into a [CityModel] preserving:
      * - City name
      * - Country and state (if available)
      * - Geographic coordinates (lat/lon)
@@ -41,7 +37,7 @@ class RecentCitiesMapper {
      */
     fun toDomain(entities: List<RecentCitiesEntity>): RecentCities {
         val cities = entities.map { entity ->
-            CityDomainModel(
+            CityModel(
                 name = entity.name,
                 country = entity.country,
                 state = entity.state,
@@ -54,7 +50,7 @@ class RecentCitiesMapper {
     }
 
     /**
-     * Maps a [CityDomainModel] to a [RecentCitiesEntity] for database storage.
+     * Maps a [CityModel] to a [RecentCitiesEntity] for database storage.
      *
      * Converts domain representation of a city into a persistent entity with:
      * - Name, country, state, and coordinates copied directly
@@ -65,7 +61,7 @@ class RecentCitiesMapper {
      * @param city The domain model to persist
      * @return A [RecentCitiesEntity] ready for database insertion
      */
-    fun toEntity(city: CityDomainModel): RecentCitiesEntity {
+    fun toEntity(city: CityModel): RecentCitiesEntity {
         return RecentCitiesEntity(
             name = city.name,
             country = city.country,

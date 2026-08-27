@@ -13,10 +13,6 @@ import kotlin.math.roundToInt
  * Applies temperature unit conversion based on the user's preference ([TemperatureType]).
  * Formats raw Kelvin values from the database into Celsius, Fahrenheit, or Kelvin with proper rounding.
  * Includes logic to attach the correct temperature unit symbol (e.g. °C, °F) in the result.
- *
- * @see toDomain for main transformation function
- * @see formatTemperature for unit-specific formatting
- * @see getTemperatureSign for unit symbol lookup
  */
 class CurrentWeatherEntityMapper {
 

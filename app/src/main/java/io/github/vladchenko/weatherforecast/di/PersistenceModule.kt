@@ -32,12 +32,6 @@ import javax.inject.Singleton
  *
  * The database is initialized via [WeatherForecastDatabase.getInstance], which ensures a single instance
  * across the app and supports proper dependency injection.
- *
- * @see WeatherForecastDatabase
- * @see CurrentWeatherDAO
- * @see HourlyWeatherDAO
- * @see CitySearchDAO
- * @see SharedPreferences
  */
 @Module
 @InstallIn(SingletonComponent::class)

@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.feature.recentcities.data.repositor
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper.RecentCitiesMapper
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesRepository
@@ -42,7 +42,7 @@ class RecentCitiesRepositoryImpl(
             )
         }
 
-    override suspend fun addCityToRecents(city: CityDomainModel) =
+    override suspend fun addCityToRecents(city: CityModel) =
         withContext(coroutineDispatchers.io) {
             return@withContext recentCitiesDataSource.addCityToRecents(
                 recentCitiesMapper.toEntity(city)

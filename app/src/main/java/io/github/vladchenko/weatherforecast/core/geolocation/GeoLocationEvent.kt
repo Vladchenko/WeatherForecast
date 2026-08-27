@@ -18,8 +18,6 @@ import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
  *
  * This design improves extensibility and reduces boilerplate, as new event types can be added
  * without breaking existing implementations (thanks to sealed interface exhaustiveness).
- *
- * @see GeoLocationEvent for available event types
  */
 fun interface GeoLocationCallback {
     /**

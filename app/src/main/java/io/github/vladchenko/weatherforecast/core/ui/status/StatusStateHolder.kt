@@ -13,9 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
  * Typical usage pattern:
  * 1. Business logic (ViewModels/Interactors) calls [updateStatus] to broadcast a new state.
  * 2. UI layer observes [statusStateFlow] to display snackbars, dialogs, or in-app notifications.
- *
- * @see StatusType
- * @see StatusStateHolderImpl
  */
 interface StatusStateHolder {
 

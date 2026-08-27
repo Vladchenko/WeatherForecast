@@ -16,8 +16,6 @@ import javax.net.ssl.SSLException
  * - [Remote]: Successfully loaded from a network API (fresh data).
  * - [Local]: Loaded from a local cache/database because the remote request failed (stale data).
  * - [Error]: Failed to load data from both remote and local sources.
- *
- * @see ForecastError
  */
 sealed interface LoadResult<out T> {
 

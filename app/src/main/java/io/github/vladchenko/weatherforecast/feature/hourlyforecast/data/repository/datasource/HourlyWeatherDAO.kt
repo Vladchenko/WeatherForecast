@@ -13,8 +13,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.Ho
  * Designed to store time-series forecast data for cities, allowing efficient lookups by city name.
  *
  * All operations are suspend functions and must be called from a coroutine context.
- *
- * @see HourlyWeatherEntity
  */
 @Dao
 interface HourlyWeatherDAO {

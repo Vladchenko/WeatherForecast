@@ -18,11 +18,7 @@ import kotlin.math.roundToInt
  *
  * Uses [java.text.SimpleDateFormat] to extract and format the hour and minute from Unix timestamps.
  * Converts temperature from Kelvin to Celsius, Fahrenheit, or keeps in Kelvin with proper rounding.
- * Ensures immutability by using [kotlinx.collections.immutable.persistentListOf] for the forecast list.
- *
- * @see toDomain for the main transformation function
- * @see convertTemperature for unit-specific formatting
- * @see getUnitSymbol for temperature unit symbol lookup
+ * Ensures immutability by using [persistentListOf] for the forecast list.
  */
 class HourlyWeatherEntityMapper {
 
@@ -36,7 +32,7 @@ class HourlyWeatherEntityMapper {
      * Maps each [HourlyWeatherEntity.hourlyForecasts] item into a [HourlyItemDomainModel], applying:
      * - Temperature conversion using [convertTemperature]
      * - Timestamp formatting via [timeFormat]
-     * - Immutable list creation using [kotlinx.collections.immutable.persistentListOf]
+     * - Immutable list creation using [persistentListOf]
      *
      * The resulting [HourlyWeather] contains the city name and a list of formatted hourly items,
      * ready for presentation in the UI.
@@ -44,9 +40,6 @@ class HourlyWeatherEntityMapper {
      * @param entity The database entity containing hourly weather data.
      * @param temperatureType The preferred temperature unit (Celsius, Fahrenheit, Kelvin).
      * @return A fully populated [HourlyWeather] with formatted temperatures and times.
-     *
-     * @see convertTemperature
-     * @see getUnitSymbol
      */
     fun toDomain(
         entity: HourlyWeatherEntity,

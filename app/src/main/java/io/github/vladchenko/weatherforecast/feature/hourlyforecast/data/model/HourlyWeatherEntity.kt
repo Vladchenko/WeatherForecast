@@ -24,11 +24,6 @@ import kotlinx.collections.immutable.ImmutableList
  * @property timezoneOffset Shift in seconds from UTC
  * @property lastUpdated Timestamp (ms) when this data was last fetched or stored
  * @property hourlyForecasts Immutable list of [HourlyWeatherItemEntity] objects, each representing one hour
- *
- * @see Entity
- * @see PrimaryKey
- * @see TypeConverters
- * @see HourlyWeatherTypeConverters
  */
 @Entity(tableName = "hourlyForecasts")
 @TypeConverters(HourlyWeatherTypeConverters::class)
@@ -63,8 +58,6 @@ data class HourlyWeatherEntity(
  * @property windDegrees Wind direction in degrees (meteorological)
  * @property windGust Optional wind gust speed in meters per second
  * @property dateText Formatted date-time string (e.g., "2023-10-05 12:00:00")
- *
- * @see HourlyWeatherTypeConverters for serialization logic
  */
 @TypeConverters(HourlyWeatherTypeConverters::class)
 data class HourlyWeatherItemEntity(

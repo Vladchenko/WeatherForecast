@@ -9,9 +9,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.Cu
  * Handles the transformation of API response data into a format suitable for local storage.
  * Safely extracts weather condition details using [dto.weather.firstOrNull], and provides
  * a fallback entity in case no weather data is available.
- *
- * @see toEntity for the main mapping function
- * @see fallbackEntity for default values when weather information is missing
  */
 class CurrentWeatherDtoMapper {
 

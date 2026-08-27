@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.domain
 
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 
 /**
@@ -34,7 +34,7 @@ interface RecentCitiesRepository {
      * @param city The name of the city to add or update
      * @return The row ID of the inserted or updated record; -1 if the operation failed
      */
-    suspend fun addCityToRecents(city: CityDomainModel): Long
+    suspend fun addCityToRecents(city: CityModel): Long
 
     /**
      * Deletes all recent cities from persistent storage.

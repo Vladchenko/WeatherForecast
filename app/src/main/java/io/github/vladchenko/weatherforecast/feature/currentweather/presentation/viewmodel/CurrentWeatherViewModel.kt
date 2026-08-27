@@ -142,9 +142,6 @@ class CurrentWeatherViewModel @Inject constructor(
      * If [isPullToRefresh] is true, sets the refreshing state to true to indicate
      * a manual pull-to-refresh action (UI can show refresh indicator).
      *
-     * No-op if no city is currently saved (chosenCityStateFlow is null).
-     * In this case, user should first select a city via city search.
-     *
      * @param isPullToRefresh true when triggered by user pull-to-refresh gesture
      */
     fun refreshWeather(isPullToRefresh: Boolean) {

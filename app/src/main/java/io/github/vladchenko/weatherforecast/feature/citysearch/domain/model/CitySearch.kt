@@ -11,7 +11,7 @@ import javax.annotation.concurrent.Immutable
  */
 @Immutable
 data class CitySearch(
-    val cities: ImmutableList<CityDomainModel>,
+    val cities: ImmutableList<CityModel>,
     val error: String
 )
 
@@ -24,7 +24,7 @@ data class CitySearch(
  * @property country that city located in
  * @property state that city located in
  */
-data class CityDomainModel(
+data class CityModel(
     val name: String,
     val lat: Double,
     val lon: Double,

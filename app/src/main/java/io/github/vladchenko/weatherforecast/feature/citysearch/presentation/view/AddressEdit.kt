@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityDomainModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
@@ -42,7 +42,7 @@ fun AddressEdit(
     recentCities: WeatherUiState<RecentCities>?,
     navigationDispatcher: NavigationEventDispatcher,
     onCitySelectionEvent: (CitySelectionEvent) -> Unit,
-    cityMaskPredictions: WeatherUiState<ImmutableList<CityDomainModel>>?
+    cityMaskPredictions: WeatherUiState<ImmutableList<CityModel>>?
 ) {
     Column(modifier = modifier.padding(top = 8.dp)) {
         AutoCompleteUI(
@@ -65,7 +65,7 @@ fun AddressEdit(
                 navigationDispatcher.navigate(
                     event =
                         NavigationEvent.ShowWeatherFor(
-                            CityDomainModel(
+                            CityModel(
                                 name = selectedCity.name,
                                 state = selectedCity.state,
                                 country = selectedCity.country,

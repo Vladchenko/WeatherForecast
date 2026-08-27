@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.network
 
+import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -11,9 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * The state is updated externally via [updateState], typically by presentation-layer components
  * (e.g., [NetworkStatusCoordinator]) that monitor system-level connectivity events.
- *
- * @see ConnectivityObserver
- * @see NetworkStatusCoordinator
  */
 interface NetworkStateHolder {
 
