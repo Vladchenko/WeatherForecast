@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -127,10 +128,12 @@ class CurrentWeatherModule {
     @Provides
     fun provideWeatherResponseHandler(
         loggingService: LoggingService,
+        cityErrorEventBus: CityErrorEventBus,
         statusStateHolder: StatusStateHolder,
     ): WeatherResponseHandler {
         return WeatherResponseHandler(
             loggingService,
+            cityErrorEventBus,
             statusStateHolder,
         )
     }

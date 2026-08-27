@@ -4,6 +4,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
@@ -20,10 +21,12 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
  * should be persisted as the user's "chosen city".
  *
  * @property loggingService Service for recording debug and error events.
+ * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
  * @property statusStateHolder Component for broadcasting UI status updates (snackbars, dialogs, etc.).
  */
 class WeatherResponseHandler(
     private val loggingService: LoggingService,
+    private val cityErrorEventBus: CityErrorEventBus,
     private val statusStateHolder: StatusStateHolder,
 ) {
 
@@ -70,7 +73,6 @@ class WeatherResponseHandler(
             }
 
             is LoadResult.Error -> {
-                var cityError: CityErrorEvent? = null
                 var errorMessage: Int = Integer.MIN_VALUE
                 when (val error = loadResult.error) {
                     is ForecastError.ApiKeyInvalid -> {
@@ -81,7 +83,7 @@ class WeatherResponseHandler(
                     is ForecastError.CityNotFound -> {
                         errorMessage = R.string.city_not_found
                         statusStateHolder.updateWarningStatus(errorMessage, error.city)
-                        cityError = CityErrorEvent.CityNotFound(error.city)
+                        cityErrorEventBus.send(CityErrorEvent.CityNotFound(error.city))
                     }
 
                     is ForecastError.LocalDataCorrupted -> {
@@ -130,7 +132,6 @@ class WeatherResponseHandler(
                 }
                 return WeatherResponseHandlerResult(
                     errorToShow = errorMessage,
-                    cityError = cityError,
                 )
             }
         }

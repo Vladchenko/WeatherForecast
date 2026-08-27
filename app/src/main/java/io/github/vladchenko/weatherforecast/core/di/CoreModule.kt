@@ -14,6 +14,8 @@ import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManagerImpl
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBusImpl
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
@@ -107,5 +109,11 @@ class CoreModule {
     @Provides
     fun provideGeoLocationStateHolder(): GeoLocationEventBus {
         return GeoLocationEventBusImpl()
+    }
+
+    @Singleton
+    @Provides
+    fun provideCityErrorEventBus(): CityErrorEventBus {
+        return CityErrorEventBusImpl()
     }
 }

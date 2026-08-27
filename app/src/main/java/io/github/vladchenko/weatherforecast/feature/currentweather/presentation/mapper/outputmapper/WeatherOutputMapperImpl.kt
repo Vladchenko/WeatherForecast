@@ -10,7 +10,6 @@ import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toWeatherIconR
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.WeatherResponseHandler
 
 /**
@@ -39,7 +38,6 @@ class WeatherOutputMapperImpl(
             cityModel = cityModel,
             loadResult = loadResult,
         )
-        var cityError: CityErrorEvent? = null
         var uiState: WeatherUiState<CurrentWeatherUi>? = null
         processedResponse.let { response ->
             response.remoteWeatherToShow?.let {
@@ -59,16 +57,12 @@ class WeatherOutputMapperImpl(
                     city = cityModel.city, message = null, messageId = it
                 )
             }
-            response.cityError?.let {
-                cityError = it
-            }
             if (response.isLoading == true) {
                 uiState = WeatherUiState.Loading()
             }
         }
         return WeatherProcessingResult(
-            uiState = uiState,
-            cityError = cityError
+            uiState = uiState
         )
     }
 

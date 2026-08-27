@@ -6,6 +6,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationCallback
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
@@ -36,22 +37,22 @@ import kotlinx.coroutines.launch
  *
  * @property onGotoCitySelection Callback triggered when the user needs to manually select a city.
  * @property statusStateHolder Manages and broadcasts UI status updates (info, warnings, errors).
- * @property dialogController Manages the presentation of selection and error dialogs.
- * @property forecastViewModel Source of city selection events (not found, blank input).
+ * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
  * @property geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
+ * @property dialogController Manages the presentation of selection and error dialogs.
  */
 class CitySelectionCoordinator(
     private val onGotoCitySelection: () -> Unit,
     private val statusStateHolder: StatusStateHolder,
-    private val dialogController: WeatherDialogController,
-    private val forecastViewModel: CurrentWeatherViewModel,
+    private val cityErrorEventBus: CityErrorEventBus,
     private val geoLocationEventBus: GeoLocationEventBus,
+    private val dialogController: WeatherDialogController,
 ) {
 
     /**
      * Starts observing city-related flows from [CurrentWeatherViewModel] and reacting to events.
      *
-     * Launches collection of [CurrentWeatherViewModel.cityErrorEventFlow] flow for handling missing
+     * Launches collection of [cityErrorEventBus.cityErrorEventFlow] flow for handling missing
      * city input or unknown city names.
      *
      * All observation occurs within [Lifecycle.State.STARTED] to ensure lifecycle safety
@@ -63,7 +64,7 @@ class CitySelectionCoordinator(
     fun startObserving(scope: CoroutineScope, lifecycle: Lifecycle) {
         scope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { collectCityErrorEventFlow(forecastViewModel.cityErrorEventFlow) }
+                launch { collectCityErrorEventFlow(cityErrorEventBus.cityErrorEventFlow) }
             }
         }
     }
@@ -110,21 +111,21 @@ class CitySelectionCoordinator(
          *
          * @param callback Interface for sending geolocation events to the UI.
          * @param statusStateHolder Manages and broadcasts UI status updates.
+         * @param cityErrorEventBus Unified event bus for broadcasting city-related events.
          * @param geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
          * @param dialogController Manages presentation of alert dialogs.
-         * @param forecastViewModel Source of city selection events (not found, blank input).
          * @return A fully initialized [CitySelectionCoordinator] instance.
          */
         fun create(
             callback: GeoLocationCallback,
             statusStateHolder: StatusStateHolder,
+            cityErrorEventBus: CityErrorEventBus,
             geoLocationEventBus: GeoLocationEventBus,
             dialogController: WeatherDialogController,
-            forecastViewModel: CurrentWeatherViewModel,
         ): CitySelectionCoordinator {
             return CitySelectionCoordinator(
                 dialogController = dialogController,
-                forecastViewModel = forecastViewModel,
+                cityErrorEventBus = cityErrorEventBus,
                 statusStateHolder = statusStateHolder,
                 geoLocationEventBus = geoLocationEventBus,
                 onGotoCitySelection = { callback.onEvent(GeoLocationEvent.GotoCitySelection) }

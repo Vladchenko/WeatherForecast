@@ -20,6 +20,7 @@ import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigationBar
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setLightStatusBars
@@ -81,6 +82,9 @@ class WeatherActivity : AppCompatActivity() {
     @Inject
     lateinit var geoLocationEventBus: GeoLocationEventBus
 
+    @Inject
+    lateinit var cityErrorEventBus: CityErrorEventBus
+
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()
     private val weatherViewModel: CurrentWeatherViewModel by viewModels()
@@ -100,8 +104,8 @@ class WeatherActivity : AppCompatActivity() {
         CitySelectionCoordinator.Factory().create(
             callback = geoLocationCallback,
             dialogController = dialogController,
-            forecastViewModel = weatherViewModel,
             statusStateHolder = statusStateHolder,
+            cityErrorEventBus = cityErrorEventBus,
             geoLocationEventBus = geoLocationEventBus
         )
     }

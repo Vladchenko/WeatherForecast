@@ -11,6 +11,7 @@ import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -22,9 +23,8 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,6 +46,7 @@ import javax.inject.Inject
  *
  * @property loggingService Centralized service for structured application logging
  * @property resourceManager Provides access to Android string resources for UI messages
+ * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
  * @property statusStateHolder Manages and broadcasts UI status messages (info, warnings, errors)
  * @property networkStateHolder Manages network connectivity (connect or disconnect)
  * @property preferencesManager Manages user preferences (e.g., temperature unit: Celsius/Fahrenheit)
@@ -57,6 +58,7 @@ import javax.inject.Inject
 class CurrentWeatherViewModel @Inject constructor(
     private val loggingService: LoggingService,
     private val resourceManager: ResourceManager,
+    private val cityErrorEventBus: CityErrorEventBus,
     private val statusStateHolder: StatusStateHolder,
     private val networkStateHolder: NetworkStateHolder,
     private val preferencesManager: PreferencesManager,
@@ -73,18 +75,6 @@ class CurrentWeatherViewModel @Inject constructor(
     val weatherStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>>
         get() = _weatherStateFlow
 
-    /**
-     * SharedFlow that emits city-related error events when the requested city cannot be loaded.
-     *
-     * Used to notify the UI layer about failures to resolve or fetch the selected city.
-     * Emits [CityErrorEvent] instances indicating either a missing city input or a city that could not be found.
-     */
-    val cityErrorEventFlow: SharedFlow<CityErrorEvent>
-        get() = _cityErrorEventFlow
-
-    private val _cityErrorEventFlow = MutableSharedFlow<CityErrorEvent>(
-        extraBufferCapacity = 1
-    )
     private val _weatherStateFlow =
         MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Idle)
     //endregion flows
@@ -117,6 +107,10 @@ class CurrentWeatherViewModel @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        scope.cancel()
+    }
+
     /**
      * Launches weather forecast download, using the provided [cityModel].
      * If blank, attempts to load the last saved city from [chosenCityInteractor].
@@ -129,7 +123,7 @@ class CurrentWeatherViewModel @Inject constructor(
             val model = if (cityModel.city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
                 if (savedModel.city.isBlank()) {
-                    _cityErrorEventFlow.tryEmit(CityErrorEvent.CityBlank)
+                    cityErrorEventBus.send(CityErrorEvent.CityBlank)
                     return@launch
                 }
                 savedModel
@@ -214,9 +208,6 @@ class CurrentWeatherViewModel @Inject constructor(
                 }
 
                 null -> {}
-            }
-            response.cityError?.let {
-                _cityErrorEventFlow.tryEmit(it)
             }
         }
     }
