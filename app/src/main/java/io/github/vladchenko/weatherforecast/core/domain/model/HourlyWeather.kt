@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model
+package io.github.vladchenko.weatherforecast.core.domain.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList

@@ -57,11 +57,12 @@ import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
+import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
@@ -88,9 +89,9 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
  *
  * ## Key events
  * - Toggling hourly forecast triggers [onLoadHourlyWeather] with resolved city location (via [CityLocationModel])
- * - Pull-to-refresh fires [CurrentWeatherEvent.RefreshWeather]
- * - City click fires [CurrentWeatherEvent.NavigateToCitySelection]
- * - Back button fires [CurrentWeatherEvent.NavigateUp]
+ * - Pull-to-refresh fires [weatherViewModel.refreshWeather]
+ * - City click fires [NavigationEvent.NavigateToCitySelection]
+ * - Back button fires [NavigationEvent.NavigateUp]
  *
  * @param appBarUiState The app bar UI state (title, subtitle, colors, visibility).
  * @param onRefreshWeather Handler for refresh events.

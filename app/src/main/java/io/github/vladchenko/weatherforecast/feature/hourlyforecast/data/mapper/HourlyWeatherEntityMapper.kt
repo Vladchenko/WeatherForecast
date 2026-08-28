@@ -1,10 +1,10 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper
 
+import io.github.vladchenko.weatherforecast.core.domain.model.HourlyItemDomainModel
+import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.utils.TemperatureConversionUtils
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyItemDomainModel
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import kotlinx.collections.immutable.persistentListOf
 import java.text.SimpleDateFormat
 import java.util.Locale

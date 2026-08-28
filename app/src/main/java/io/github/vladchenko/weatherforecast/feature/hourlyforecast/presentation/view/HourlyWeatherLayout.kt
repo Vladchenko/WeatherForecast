@@ -35,9 +35,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.HourlyItemDomainModel
+import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyItemDomainModel
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.model.HourlyWeather
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
