@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper
 
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
 import kotlinx.collections.immutable.persistentListOf
 
@@ -32,8 +32,8 @@ class CitySearchEntityMapper {
     private fun toDomainItem(entity: CitySearchEntity): CityModel =
         CityModel(
             name = entity.city,
-            lat = entity.latitude,
-            lon = entity.longitude,
+            latitude = entity.latitude,
+            longitude = entity.longitude,
             country = entity.country,
             state = entity.state
         )

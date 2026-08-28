@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.data.model
 
 import androidx.room.Entity
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper.RecentCitiesMapper
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
 

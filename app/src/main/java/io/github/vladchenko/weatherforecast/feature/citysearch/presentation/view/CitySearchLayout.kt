@@ -24,10 +24,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState

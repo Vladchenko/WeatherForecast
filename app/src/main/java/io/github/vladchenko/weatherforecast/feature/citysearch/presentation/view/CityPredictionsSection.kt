@@ -9,10 +9,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.ui.component.ProgressBar
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 
 @Composable
 fun CityPredictionsSection(
@@ -63,8 +63,8 @@ fun CityPredictionsSection(
 @Composable
 private fun CityPredictionsSectionSuccessPreview() {
     val predictions = listOf(
-        CityModel(name = "London", state = "England", country = "GB", lat = 51.5074, lon = -0.1278),
-        CityModel(name = "Los Angeles", state = "CA", country = "US", lat = 34.0522, lon = -118.2437)
+        CityModel(name = "London", state = "England", country = "GB", latitude = 51.5074, longitude = -0.1278),
+        CityModel(name = "Los Angeles", state = "CA", country = "US", latitude = 34.0522, longitude = -118.2437)
     )
     CityPredictionsSection(
         predictions = WeatherUiState.Success(data = predictions, DataSource.LOCAL),

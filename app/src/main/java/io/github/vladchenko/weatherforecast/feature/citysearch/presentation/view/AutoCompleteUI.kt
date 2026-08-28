@@ -29,9 +29,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -197,15 +197,15 @@ private fun AutoCompleteUIRecentPreview() {
                 name = "Berlin",
                 state = "BE",
                 country = "DE",
-                lat = 52.5200,
-                lon = 13.4050
+                latitude = 52.5200,
+                longitude = 13.4050
             ),
             CityModel(
                 name = "Madrid",
                 state = "MD",
                 country = "ES",
-                lat = 40.4168,
-                lon = -3.7038
+                latitude = 40.4168,
+                longitude = -3.7038
             )
         )
     )
@@ -235,15 +235,15 @@ private fun AutoCompleteUISearchPreview() {
                 name = "Chicago",
                 state = "IL",
                 country = "US",
-                lat = 41.8781,
-                lon = -87.6298
+                latitude = 41.8781,
+                longitude = -87.6298
             ),
             CityModel(
                 name = "Chisinau",
                 state = "MC",
                 country = "MD",
-                lat = 47.0167,
-                lon = 28.8489
+                latitude = 47.0167,
+                longitude = 28.8489
             )
         ).toImmutableList(),
         source = DataSource.LOCAL

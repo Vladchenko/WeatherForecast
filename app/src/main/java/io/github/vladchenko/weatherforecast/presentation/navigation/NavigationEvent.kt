@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.presentation.navigation
 
 import androidx.navigation.NavOptions
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 
 /**
  * Sealed interface representing navigation events in the application.

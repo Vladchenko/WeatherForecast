@@ -16,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 
 @Composable
 fun CitySuggestionItem(
@@ -51,8 +51,8 @@ private fun CitySuggestionItemPreview() {
         name = "San Francisco",
         state = "CA",
         country = "US",
-        lat = 37.7749,
-        lon = -122.4194
+        latitude = 37.7749,
+        longitude = -122.4194
     )
     CitySuggestionItem(
         city = city,

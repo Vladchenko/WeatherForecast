@@ -40,8 +40,8 @@ class NavigationEventDispatcherImpl(
                             event.city.name,
                             event.city.state,
                             event.city.country).urlEncode(),
-                        lat = event.city.lat,
-                        lon = event.city.lon
+                        lat = event.city.latitude,
+                        lon = event.city.longitude
                     )
                 )
             }

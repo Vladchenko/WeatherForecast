@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
@@ -13,7 +14,6 @@ import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Success
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesInteractor

@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
@@ -69,8 +69,8 @@ fun AddressEdit(
                                 name = selectedCity.name,
                                 state = selectedCity.state,
                                 country = selectedCity.country,
-                                lat = selectedCity.lat,
-                                lon = selectedCity.lon
+                                latitude = selectedCity.latitude,
+                                longitude = selectedCity.longitude
                             )
                         )
                 )

@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper
 
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import kotlinx.collections.immutable.toPersistentList
@@ -41,8 +41,8 @@ class RecentCitiesMapper {
                 name = entity.name,
                 country = entity.country,
                 state = entity.state,
-                lat = entity.lat,
-                lon = entity.lon
+                latitude = entity.lat,
+                longitude = entity.lon
             )
         }.toPersistentList()
 
@@ -66,8 +66,8 @@ class RecentCitiesMapper {
             name = city.name,
             country = city.country,
             state = city.state.orEmpty(),
-            lat = city.lat,
-            lon = city.lon,
+            lat = city.latitude,
+            lon = city.longitude,
             lastUsed = System.currentTimeMillis()
         )
     }

@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.domain
 
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 
 /**

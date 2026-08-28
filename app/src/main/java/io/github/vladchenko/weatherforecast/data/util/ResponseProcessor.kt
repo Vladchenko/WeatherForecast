@@ -3,7 +3,6 @@ package io.github.vladchenko.weatherforecast.data.util
 import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import retrofit2.Response
-import javax.inject.Inject
 
 /**
  * Utility class responsible for processing raw [Response] objects from Retrofit
@@ -28,7 +27,7 @@ import javax.inject.Inject
  * This class is stateless and can be safely injected and used across multiple threads.
  * Typically used within data sources running on IO dispatcher.
  */
-class ResponseProcessor @Inject constructor() {
+class ResponseProcessor() {
 
     /**
      * Processes a Retrofit [Response] and converts it into a [DataResult].

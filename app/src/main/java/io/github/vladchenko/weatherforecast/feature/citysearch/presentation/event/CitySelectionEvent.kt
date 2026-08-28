@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event
 
-import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 
 /**
