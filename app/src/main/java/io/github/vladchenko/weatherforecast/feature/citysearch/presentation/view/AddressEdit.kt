@@ -74,6 +74,7 @@ fun AddressEdit(
                             )
                         )
                 )
+                onCitySelectionEvent(CitySelectionEvent.SaveCityToRecents(selectedCity))
                 onCitySelectionEvent(CitySelectionEvent.ClearQuery)
             },
             onRecentsDelete = onRecentsDelete

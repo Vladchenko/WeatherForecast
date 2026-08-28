@@ -1,5 +1,8 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event
 
+import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
+
 /**
  * Sealed interface representing user actions in the city selection screen.
  *
@@ -19,12 +22,12 @@ sealed interface CitySelectionEvent {
      * Clears the city search input (mask) and hides city suggestions.
      * Should be used when user clears input or selects a city.
      */
-    data object ClearQuery : CitySelectionEvent
+    object ClearQuery : CitySelectionEvent
 
     /**
      * Loads set of cities searched recently
      */
-    data object LoadRecentCities : CitySelectionEvent
+    object LoadRecentCities : CitySelectionEvent
 
     /**
      * The user has updated the city search query.
@@ -43,4 +46,13 @@ sealed interface CitySelectionEvent {
      * Should reset recent cities list and persist the change.
      */
     object ClearRecentCities : CitySelectionEvent
+
+    /**
+     * Represents the action to save a selected city to the recently used cities list.
+     *
+     * Triggered when the user selects a city from the search results.
+     *
+     * @property cityModel The [CityModel] of the selected city to be saved.
+     */
+    data class SaveCityToRecents(val cityModel: CityModel) : CitySelectionEvent
 }

@@ -20,6 +20,7 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCi
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
@@ -131,6 +132,7 @@ class CitySearchViewModel @Inject constructor(
      *
      * Ensures efficient use of resources by minimizing unnecessary lookups.
      */
+    @OptIn(FlowPreview::class)
     private fun startDebouncedSearch() {
         viewModelScope.launch(exceptionHandler) {
             _cityMaskStateFlow
@@ -170,6 +172,12 @@ class CitySearchViewModel @Inject constructor(
                 }
             }
 
+            is CitySelectionEvent.SaveCityToRecents -> {
+                viewModelScope.launch {
+                    recentCitiesInteractor.addCityToRecents(event.cityModel)
+                }
+            }
+
             is CitySelectionEvent.ClearRecentCities -> {
                 deleteRecents()
             }
@@ -201,7 +209,7 @@ class CitySearchViewModel @Inject constructor(
     /**
      * Fetches cities matching the given query from the interactor layer.
      *
-     * Executes suspended call to [citySearchInteractor.loadCitiesNames].
+     * Executes suspended call to [CitySearchInteractor.loadCitiesNames].
      * Updates [_cityPredictions] with result.
      * Shows error via [statusStateHolder] if response contains an error message.
      *
