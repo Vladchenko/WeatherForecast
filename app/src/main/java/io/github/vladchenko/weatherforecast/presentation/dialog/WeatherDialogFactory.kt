@@ -45,7 +45,7 @@ class WeatherDialogFactory @Inject constructor(
     ): AlertDialogDelegate {
         return baseDialogFactory.createInfoDialog(
             title = resourceManager.getString(R.string.forecast_no_data_for_city, city),
-            message = resourceManager.getString(R.string.forecast_no_data_message),
+            message = resourceManager.getString(R.string.forecast_no_data_message, city),
             onConfirm = onPositive
         )
     }
