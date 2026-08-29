@@ -5,7 +5,7 @@ import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException

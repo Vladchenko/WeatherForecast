@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
 
 /**
  * Weather hourly forecast repository. Provides domain-layer data.

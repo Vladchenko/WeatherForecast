@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.interactor
 
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 
 /**
