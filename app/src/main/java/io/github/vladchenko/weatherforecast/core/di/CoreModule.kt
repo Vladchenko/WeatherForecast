@@ -9,6 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBusImpl
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBusImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManagerImpl
@@ -115,5 +117,11 @@ class CoreModule {
     @Provides
     fun provideCityErrorEventBus(): CityErrorEventBus {
         return CityErrorEventBusImpl()
+    }
+
+    @Singleton
+    @Provides
+    fun provideNavigationEventBus(): NavigationEventBus {
+        return NavigationEventBusImpl()
     }
 }

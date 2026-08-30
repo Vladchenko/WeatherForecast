@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchScreen
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.CurrentWeatherScreen
@@ -37,7 +38,7 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  *
  * @param navController Navigation controller for screen routing
  * @param modifier Compose modifier
- * @param navigationDispatcher Navigation event dispatcher
+ * @param navigationEventBus The event bus for dispatching navigation events
  * @param appBarViewModel Shared view model for app bar state
  * @param hourlyViewModel Shared view model for hourly forecast
  * @param citySearchViewModel Shared view model for city search
@@ -48,7 +49,7 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 fun WeatherAppNavHost(
     navController: NavController,
     modifier: Modifier = Modifier,
-    navigationDispatcher: NavigationEventDispatcher,
+    navigationEventBus: NavigationEventBus,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     hourlyViewModel: HourlyWeatherViewModel = hiltViewModel(),
     citySearchViewModel: CitySearchViewModel = hiltViewModel(),
@@ -76,15 +77,15 @@ fun WeatherAppNavHost(
                 appBarViewModel = appBarViewModel,
                 hourlyViewModel = hourlyViewModel,
                 weatherViewModel = weatherViewModel,
-                navigationEventDispatcher = navigationDispatcher
+                navigationEventBus = navigationEventBus
             )
         }
 
         composable(route = CITY_SEARCH) {
             CitySearchScreen(
                 appBarViewModel = appBarViewModel,
-                citySearchViewModel = citySearchViewModel,
-                navigationEventDispatcher = navigationDispatcher
+                navigationEventBus = navigationEventBus,
+                citySearchViewModel = citySearchViewModel
             )
         }
     }

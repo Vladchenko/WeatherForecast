@@ -58,6 +58,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
@@ -67,7 +68,6 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 
 /**
  * Main weather screen layout.
@@ -99,7 +99,7 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
  * @param onLoadHourlyWeather Callback invoked when the hourly forecast is toggled on;
  *                            receives the resolved city location.
  * @param hourlyWeatherUiState The hourly forecast UI state (can be null during initial load).
- * @param navigationEventDispatcher Dispatcher for handling navigation events.
+ * @param navigationEventBus The event bus for dispatching navigation events
  */
 @ExperimentalMaterial3Api
 @Composable
@@ -107,10 +107,10 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
 fun CurrentWeatherLayout(
     appBarUiState: AppBarUiState,
     onRefreshWeather: () -> Unit,
+    navigationEventBus: NavigationEventBus,
     weatherUiState: WeatherUiState<CurrentWeatherUi>,
     onLoadHourlyWeather: (CityLocationModel) -> Unit,
-    hourlyWeatherUiState: WeatherUiState<HourlyWeather>?,
-    navigationEventDispatcher: NavigationEventDispatcher
+    hourlyWeatherUiState: WeatherUiState<HourlyWeather>?
 ) {
     val refreshState = rememberPullToRefreshState()
     var showHourlyForecast by remember { mutableStateOf(false) }
@@ -161,7 +161,9 @@ fun CurrentWeatherLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navigationEventDispatcher.navigate(NavigationEvent.CloseApp) }) {
+                    IconButton(onClick = {
+                        navigationEventBus.send(NavigationEvent.CloseApp)
+                    }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
@@ -292,7 +294,7 @@ fun CurrentWeatherLayout(
                                             innerPadding = PaddingValues(),
                                             mainContentTextColor = MaterialTheme.colorScheme.onSurface,
                                             onCityClick = {
-                                                navigationEventDispatcher.navigate(
+                                                navigationEventBus.send(
                                                     NavigationEvent.NavigateToCitySelection(
                                                         fadeNavOptions()
                                                     )

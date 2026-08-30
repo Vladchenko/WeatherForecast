@@ -1,9 +1,7 @@
 package io.github.vladchenko.weatherforecast.presentation.navigation
 
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
-import androidx.navigation.navOptions
-import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.urlEncode
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
@@ -17,19 +15,19 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.Route.weathe
  * This class processes four types of navigation events:
  * - [NavigationEvent.ShowWeatherFor]: Navigates to the weather screen for a specific city
  * - [NavigationEvent.NavigateUp]: Pops the current destination from the back stack
- * - [NavigationEvent.CloseApp]: Calls the [onCloseApp] callback to close the application
+ * - [NavigationEvent.CloseApp]: Dispatches an event to close the app
  * - [NavigationEvent.NavigateToCitySelection]: Navigates to city search screen,
  *   clearing the back stack up to and including the city search destination
  *
  * The navigation operations are executed synchronously when [navigate] is called,
  * making this a straightforward imperative navigation dispatcher.
  *
- * @param navController The [NavController] used to perform navigation operations
- * @param onCloseApp A callback that handles application closure logic
+ * @property navController The [NavController] used to perform navigation operations
+ * @property navigationEventBus The event bus for dispatching navigation events
  */
 class NavigationEventDispatcherImpl(
-    val navController: NavController,
-    val onCloseApp: () -> Unit
+    private val navController: NavController,
+    private val navigationEventBus: NavigationEventBus
 ) : NavigationEventDispatcher {
     override fun navigate(event: NavigationEvent) {
         when (event) {
@@ -37,11 +35,11 @@ class NavigationEventDispatcherImpl(
                 navController.navigate(
                     route = weather(
                         city = formatFullCityName(
-                            event.city.name,
-                            event.city.state,
-                            event.city.country).urlEncode(),
-                        lat = event.city.latitude,
-                        lon = event.city.longitude
+                            event.cityModel.name,
+                            event.cityModel.state,
+                            event.cityModel.country).urlEncode(),
+                        lat = event.cityModel.latitude,
+                        lon = event.cityModel.longitude
                     )
                 )
             }
@@ -51,7 +49,7 @@ class NavigationEventDispatcherImpl(
             }
 
             is NavigationEvent.CloseApp -> {
-                onCloseApp()
+                navigationEventBus.send(NavigationEvent.CloseApp)
             }
 
             is NavigationEvent.NavigateToCitySelection -> {

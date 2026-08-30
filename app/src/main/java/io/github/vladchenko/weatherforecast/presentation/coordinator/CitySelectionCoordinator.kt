@@ -3,14 +3,16 @@ package io.github.vladchenko.weatherforecast.presentation.coordinator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationCallback
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -35,16 +37,16 @@ import kotlinx.coroutines.launch
  * All flow observation is scoped to [Lifecycle.State.STARTED] to prevent memory leaks
  * and unnecessary work while the UI is not visible.
  *
- * @property onGotoCitySelection Callback triggered when the user needs to manually select a city.
  * @property statusStateHolder Manages and broadcasts UI status updates (info, warnings, errors).
  * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
+ * @property navigationEventBus Unified event bus for broadcasting navigation events.
  * @property geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
  * @property dialogController Manages the presentation of selection and error dialogs.
  */
 class CitySelectionCoordinator(
-    private val onGotoCitySelection: () -> Unit,
     private val statusStateHolder: StatusStateHolder,
     private val cityErrorEventBus: CityErrorEventBus,
+    private val navigationEventBus: NavigationEventBus,
     private val geoLocationEventBus: GeoLocationEventBus,
     private val dialogController: WeatherDialogController,
 ) {
@@ -92,44 +94,14 @@ class CitySelectionCoordinator(
                         R.string.forecast_no_data_for_city, value.name
                     )
                     dialogController.showChosenCityNotFound(value.name) {
-                        onGotoCitySelection()
+                        navigationEventBus.send(
+                            NavigationEvent.NavigateToCitySelection(
+                                fadeNavOptions()
+                            )
+                        )
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Factory class for creating configured instances of [CitySelectionCoordinator].
-     *
-     * Encapsulates dependency injection logic and ensures proper wiring of internal components,
-     * promoting loose coupling and testability.
-     */
-    class Factory {
-        /**
-         * Creates and returns a fully configured [CitySelectionCoordinator] instance.
-         *
-         * @param callback Interface for sending geolocation events to the UI.
-         * @param statusStateHolder Manages and broadcasts UI status updates.
-         * @param cityErrorEventBus Unified event bus for broadcasting city-related events.
-         * @param geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
-         * @param dialogController Manages presentation of alert dialogs.
-         * @return A fully initialized [CitySelectionCoordinator] instance.
-         */
-        fun create(
-            callback: GeoLocationCallback,
-            statusStateHolder: StatusStateHolder,
-            cityErrorEventBus: CityErrorEventBus,
-            geoLocationEventBus: GeoLocationEventBus,
-            dialogController: WeatherDialogController,
-        ): CitySelectionCoordinator {
-            return CitySelectionCoordinator(
-                dialogController = dialogController,
-                cityErrorEventBus = cityErrorEventBus,
-                statusStateHolder = statusStateHolder,
-                geoLocationEventBus = geoLocationEventBus,
-                onGotoCitySelection = { callback.onEvent(GeoLocationEvent.GotoCitySelection) }
-            )
         }
     }
 }

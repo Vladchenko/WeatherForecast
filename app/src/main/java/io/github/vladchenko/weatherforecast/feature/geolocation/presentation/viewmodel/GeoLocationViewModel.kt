@@ -75,7 +75,7 @@ class GeoLocationViewModel @Inject constructor(
         statusStateHolder.updateInfoStatus(R.string.geo_detecting)
         geoLocator.defineDeviceLocation(object : GeoLocationListener {
             override fun onDeviceGeoLocationSuccess(coordinate: Coordinate) {
-                loggingService.logError(TAG, "Device geo location success")
+                loggingService.logInfoEvent(TAG, "Device geo location success")
                 statusStateHolder.updateInfoStatus(R.string.geo_success)
                 defineCityNameByLocation(coordinate)
             }

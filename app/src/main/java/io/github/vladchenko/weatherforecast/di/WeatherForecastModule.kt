@@ -4,7 +4,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
+import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
+import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelectionCoordinator
+import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import javax.inject.Singleton
 
 /**
@@ -25,5 +31,23 @@ class WeatherForecastModule {
     @Provides
     fun provideResponseProcessor(): ResponseProcessor {
         return ResponseProcessor()
+    }
+
+    @Singleton
+    @Provides
+    fun provideCitySelectionCoordinator(
+        statusStateHolder: StatusStateHolder,
+        cityErrorEventBus: CityErrorEventBus,
+        navigationEventBus: NavigationEventBus,
+        geoLocationEventBus: GeoLocationEventBus,
+        dialogController: WeatherDialogController,
+    ): CitySelectionCoordinator {
+        return CitySelectionCoordinator(
+            statusStateHolder,
+            cityErrorEventBus,
+            navigationEventBus,
+            geoLocationEventBus,
+            dialogController
+        )
     }
 }

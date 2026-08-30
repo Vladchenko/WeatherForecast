@@ -8,11 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import kotlinx.collections.immutable.ImmutableList
 
 /**
@@ -26,11 +26,11 @@ import kotlinx.collections.immutable.ImmutableList
  * @param queryLabel The label text displayed in the search field
  * @param modifier The modifier to be applied to the container
  * @param mainContentColor The primary UI color used for styling
- * @param cityMaskPredictions The current list of prediction results, wrapped in [WeatherUiState]
- * @param recentCities The current recent cities data, wrapped in [WeatherUiState]
  * @param onRecentsDelete Callback invoked when the user requests deletion of all recent cities
- * @param navigationDispatcher Dispatcher for navigation events
+ * @param navigationEventBus The event bus for dispatching navigation events
+ * @param recentCities The current recent cities data, wrapped in [WeatherUiState]
  * @param onCitySelectionEvent Callback for dispatching city selection events
+ * @param cityMaskPredictions The current list of prediction results, wrapped in [WeatherUiState]
  */
 @Composable
 fun AddressEdit(
@@ -39,8 +39,8 @@ fun AddressEdit(
     modifier: Modifier,
     mainContentColor: Color,
     onRecentsDelete: () -> Unit,
+    navigationEventBus: NavigationEventBus,
     recentCities: WeatherUiState<RecentCities>?,
-    navigationDispatcher: NavigationEventDispatcher,
     onCitySelectionEvent: (CitySelectionEvent) -> Unit,
     cityMaskPredictions: WeatherUiState<ImmutableList<CityModel>>?
 ) {
@@ -62,7 +62,7 @@ fun AddressEdit(
             onDoneActionClick = { /* handled inside */ },
             onFirstFocus = { onCitySelectionEvent(CitySelectionEvent.LoadRecentCities) },
             onItemClick = { selectedCity ->
-                navigationDispatcher.navigate(
+                navigationEventBus.send(
                     event =
                         NavigationEvent.ShowWeatherFor(
                             CityModel(

@@ -45,12 +45,12 @@ sealed interface NavigationEvent {
      * Navigates to the weather forecast screen for the specified city.
      *
      * This event is triggered when the user selects a city from the search results
-     * or recent cities list. The [city] parameter contains all the necessary data
+     * or recent cities list. The [cityModel] parameter contains all the necessary data
      * (name, state, country, coordinates) to display the weather for that location.
      *
-     * @param city The domain model of the selected city containing its details.
+     * @param cityModel The domain model of the selected city containing its details.
      */
-    data class ShowWeatherFor(val city: CityModel) : NavigationEvent
+    data class ShowWeatherFor(val cityModel: CityModel) : NavigationEvent
 
     /**
      * Closes the application.

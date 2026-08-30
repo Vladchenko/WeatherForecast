@@ -9,6 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
@@ -31,8 +32,8 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  * via the [NavigationEventDispatcher].
  *
  * @param cityModel Represents data for city to provide a weather forecast on
+ * @param navigationEventBus The event bus for dispatching navigation events
  * @param appBarViewModel The toolbar state provider. Default: Hilt-provided instance.
- * @param navigationEventDispatcher Dispatcher for handling navigation events.
  * @param hourlyViewModel The hourly forecast state manager. Default: Hilt-provided instance.
  * @param weatherViewModel The current weather state manager. Default: Hilt-provided instance.
  */
@@ -40,8 +41,8 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 @Composable
 fun CurrentWeatherScreen(
     cityModel: CityLocationModel,
+    navigationEventBus: NavigationEventBus,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
-    navigationEventDispatcher: NavigationEventDispatcher,
     hourlyViewModel: HourlyWeatherViewModel = hiltViewModel(),
     weatherViewModel: CurrentWeatherViewModel = hiltViewModel(),
 ) {
@@ -58,8 +59,8 @@ fun CurrentWeatherScreen(
     CurrentWeatherLayout(
         appBarUiState = appBarUiState,
         weatherUiState = weatherUiState,
+        navigationEventBus = navigationEventBus,
         hourlyWeatherUiState = hourlyWeatherUiState,
-        navigationEventDispatcher = navigationEventDispatcher,
         onRefreshWeather = { weatherViewModel.refreshWeather(true) },
         onLoadHourlyWeather = { data -> hourlyViewModel.loadHourlyWeatherForLocation(data) }
     )

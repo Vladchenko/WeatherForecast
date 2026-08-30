@@ -14,9 +14,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationCallback
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
@@ -34,14 +34,13 @@ import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelecti
 import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcherImpl
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -85,30 +84,17 @@ class WeatherActivity : AppCompatActivity() {
     @Inject
     lateinit var cityErrorEventBus: CityErrorEventBus
 
+    @Inject
+    lateinit var navigationEventBus: NavigationEventBus
+
+    @Inject
+    lateinit var citySelectionCoordinator: CitySelectionCoordinator
+
     private val appBarViewModel: AppBarViewModel by viewModels()
     private val citySearchViewModel: CitySearchViewModel by viewModels()
     private val weatherViewModel: CurrentWeatherViewModel by viewModels()
     private val geoLocationViewModel: GeoLocationViewModel by viewModels()
     private val hourlyWeatherViewModel: HourlyWeatherViewModel by viewModels()
-
-    private val geoCitySelectionCoordinatorRef: CitySelectionCoordinator by lazy {
-        val geoLocationCallback = GeoLocationCallback { event ->
-            when (event) {
-                is GeoLocationEvent.GotoCitySelection -> {
-                    navigationDispatcher.navigate(NavigationEvent.NavigateToCitySelection())
-                }
-
-                else -> {}
-            }
-        }
-        CitySelectionCoordinator.Factory().create(
-            callback = geoLocationCallback,
-            dialogController = dialogController,
-            statusStateHolder = statusStateHolder,
-            cityErrorEventBus = cityErrorEventBus,
-            geoLocationEventBus = geoLocationEventBus
-        )
-    }
 
     private lateinit var navigationDispatcher: NavigationEventDispatcher
 
@@ -122,6 +108,7 @@ class WeatherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         collectGeoLocationEvents()
+        collectNavigationEvents()
 
         // Connect permission resolver to activity result launcher
         permissionResolver.connect(
@@ -138,9 +125,8 @@ class WeatherActivity : AppCompatActivity() {
             val navController = rememberNavController()
             navigationDispatcher = NavigationEventDispatcherImpl(
                 navController,
-                {
-                    this.finishAffinity()
-                })
+                navigationEventBus
+            )
             // Initialize coordinators after navController is set
             WeatherForecastTheme {
                 Surface(
@@ -151,10 +137,38 @@ class WeatherActivity : AppCompatActivity() {
                         navController = navController,
                         appBarViewModel = appBarViewModel,
                         weatherViewModel = weatherViewModel,
+                        navigationEventBus = navigationEventBus,
                         hourlyViewModel = hourlyWeatherViewModel,
-                        citySearchViewModel = citySearchViewModel,
-                        navigationDispatcher = navigationDispatcher
+                        citySearchViewModel = citySearchViewModel
                     )
+                }
+            }
+        }
+    }
+
+    private fun collectNavigationEvents() {
+        lifecycleScope.launch {
+            navigationEventBus.navigationEventFlow.collect { event ->
+                when (event) {
+                    is NavigationEvent.NavigateUp -> {
+                        navigationDispatcher.navigate(NavigationEvent.NavigateUp)
+                    }
+
+                    is NavigationEvent.NavigateToCitySelection -> {
+                        navigationDispatcher.navigate(
+                            NavigationEvent.NavigateToCitySelection(
+                                fadeNavOptions()
+                            )
+                        )
+                    }
+
+                    is NavigationEvent.ShowWeatherFor -> {
+                        navigationDispatcher.navigate(NavigationEvent.ShowWeatherFor(event.cityModel))
+                    }
+
+                    is NavigationEvent.CloseApp -> {
+                        finishAffinity()
+                    }
                 }
             }
         }
@@ -169,8 +183,7 @@ class WeatherActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val scope = CoroutineScope(SupervisorJob())
-        geoCitySelectionCoordinatorRef.startObserving(scope, lifecycle)
+        citySelectionCoordinator.startObserving(lifecycleScope, lifecycle)
     }
 
     override fun onStop() {

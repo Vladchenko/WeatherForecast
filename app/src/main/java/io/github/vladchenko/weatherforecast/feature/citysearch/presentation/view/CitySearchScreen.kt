@@ -7,8 +7,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
 /**
@@ -18,15 +18,15 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  * using data from the provided view models.
  *
  * @param appBarViewModel The shared toolbar state provider. Default: Hilt-provided instance.
- * @param navigationEventDispatcher The dispatcher for handling navigation events.
+ * @param navigationEventBus The event bus for dispatching navigation events
  * @param citySearchViewModel The view model that handles search logic and state management.
  *                            Default: Hilt-provided instance.
  */
 @ExperimentalMaterial3Api
 @Composable
 fun CitySearchScreen(
+    navigationEventBus: NavigationEventBus,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
-    navigationEventDispatcher: NavigationEventDispatcher,
     citySearchViewModel: CitySearchViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -37,8 +37,8 @@ fun CitySearchScreen(
     CitySearchLayout(
         cityUiState = cityMaskUiState,
         appBarUiState = appBarUiState,
+        navigationEventBus = navigationEventBus,
         cityPredictionsUiState = cityPredictionsUiState,
-        navigationDispatcher = navigationEventDispatcher,
         recentCitiesNamesUiState = recentCitiesNamesUiState,
         queryLabel = context.getString(R.string.city_typing_begin),
         citySelectionTitle = context.getString(R.string.city_selection_hint),
