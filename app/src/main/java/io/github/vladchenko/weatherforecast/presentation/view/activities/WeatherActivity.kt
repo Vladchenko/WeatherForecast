@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.presentation.view.activities
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
