@@ -8,19 +8,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -34,104 +26,16 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun CurrentWeatherSkeleton(
-    modifier: Modifier = Modifier,
     shimmerColors: ShimmerColors = ShimmerDefaults.colors()
 ) {
     val shimmerBrush = rememberShimmerBrush(shimmerColors = shimmerColors)
-
-    Column(
-        modifier = modifier
+    ShimmerBox(
+        modifier = Modifier
             .fillMaxSize()
-            .padding(top = 50.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Date and time
-        ShimmerBox(
-            modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .height(18.dp),
-            brush = shimmerBrush,
-            shape = RoundedCornerShape(4.dp)
-        )
-
-        // City (largest element)
-        ShimmerBox(
-            modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .padding(top = 28.dp)
-                .height(30.dp),
-            brush = shimmerBrush,
-            shape = RoundedCornerShape(4.dp)
-        )
-        ShimmerBox(
-            modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .padding(top = 10.dp)
-                .height(30.dp),
-            brush = shimmerBrush,
-            shape = RoundedCornerShape(4.dp)
-        )
-
-        // Temperature and weather icon
-        Row(
-            modifier = Modifier
-                .padding(top = 32.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                verticalAlignment = Alignment.Top
-            ) {
-                // Temperature (reduced size)
-                ShimmerBox(
-                    modifier = Modifier
-                        .width(60.dp)
-                        .height(60.dp),
-                    brush = shimmerBrush,
-                    shape = RoundedCornerShape(4.dp)
-                )
-
-                // Degree symbol
-                ShimmerBox(
-                    modifier = Modifier
-                        .width(10.dp)
-                        .height(6.dp)
-                        .padding(start = 4.dp),
-                    brush = shimmerBrush,
-                    shape = RoundedCornerShape(4.dp)
-                )
-
-                // "C" or "F" placeholder
-                ShimmerBox(
-                    modifier = Modifier
-                        .width(30.dp)
-                        .height(30.dp)
-                        .padding(start = 4.dp),
-                    brush = shimmerBrush,
-                    shape = RoundedCornerShape(4.dp)
-                )
-            }
-
-            // Weather icon placeholder
-            ShimmerBox(
-                modifier = Modifier
-                    .size(60.dp)
-                    .padding(start = 16.dp),
-                brush = shimmerBrush,
-                shape = RoundedCornerShape(4.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Weather description
-        ShimmerBox(
-            modifier = Modifier
-                .fillMaxWidth(0.4f)
-                .height(14.dp),
-            brush = shimmerBrush,
-            shape = RoundedCornerShape(4.dp)
-        )
-    }
+            .padding(16.dp),
+        brush = shimmerBrush,
+        shape = RoundedCornerShape(4.dp)
+    )
 }
 
 /**
@@ -186,12 +90,12 @@ private fun rememberShimmerBrush(
             shimmerColors.baseColor
         ),
         start = androidx.compose.ui.geometry.Offset(
-            x = shimmerProgress * 500f - 30f,
-            y = shimmerProgress * 500f - 60f
+            x = shimmerProgress * 1500f - 500f,
+            y = shimmerProgress * 1500f - 160f
         ),
         end = androidx.compose.ui.geometry.Offset(
-            x = shimmerProgress * 500f + 30f,
-            y = shimmerProgress * 500f + 60f
+            x = shimmerProgress * 1500f + 50f,
+            y = shimmerProgress * 1500f + 160f
         )
     )
 }
@@ -246,7 +150,5 @@ object ShimmerDefaults {
 )
 @Composable
 private fun CurrentWeatherSkeletonPreview() {
-    CurrentWeatherSkeleton(
-        modifier = Modifier.padding(16.dp)
-    )
+    CurrentWeatherSkeleton()
 }
