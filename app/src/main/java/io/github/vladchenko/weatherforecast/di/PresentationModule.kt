@@ -4,7 +4,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog.LocationDialogFactory
@@ -36,12 +35,10 @@ object PresentationModule {
     /**
      * Provides the [WeatherDialogFactory] used to create weather-related dialog instances.
      *
-     * Combines the base [AlertDialogFactory], location-specific dialogs via [LocationDialogFactory],
-     * and localized strings from [ResourceManager] into a single factory.
+     * Combines the base [AlertDialogFactory], location-specific dialogs via [LocationDialogFactory].
      *
      * @param baseDialogFactory Base dialog factory for standard alert dialogs.
      * @param locationDialogFactory Factory for location/geolocation-specific dialogs.
-     * @param resourceManager Provides localized string resources for dialog content.
      * @return A fully configured [WeatherDialogFactory] instance.
      */
     @Provides
@@ -49,11 +46,9 @@ object PresentationModule {
     fun provideWeatherDialogFactory(
         baseDialogFactory: AlertDialogFactory,
         locationDialogFactory: LocationDialogFactory,
-        resourceManager: ResourceManager
     ): WeatherDialogFactory = WeatherDialogFactory(
         baseDialogFactory,
-        locationDialogFactory,
-        resourceManager
+        locationDialogFactory
     )
 
     /**

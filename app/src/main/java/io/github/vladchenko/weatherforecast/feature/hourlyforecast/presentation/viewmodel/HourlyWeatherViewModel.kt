@@ -9,7 +9,6 @@ import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Error
@@ -37,7 +36,6 @@ import javax.inject.Inject
  * and communicates status updates to the UI layer via [StatusStateHolder].
  *
  * @property loggingService Centralized service for application logging.
- * @property resourceManager Provides access to Android string resources.
  * @property statusStateHolder Manages and broadcasts UI status messages (info, warnings, errors).
  * @property preferencesManager Manages user preferences such as temperature unit (Celsius/Fahrenheit).
  * @property hourlyWeatherInteractor Domain-level interactor responsible for loading hourly weather data.
@@ -45,7 +43,6 @@ import javax.inject.Inject
 @HiltViewModel
 class HourlyWeatherViewModel @Inject constructor(
     private val loggingService: LoggingService,
-    private val resourceManager: ResourceManager,
     private val statusStateHolder: StatusStateHolder,
     private val preferencesManager: PreferencesManager,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,

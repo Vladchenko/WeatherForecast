@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
 
 /**
@@ -13,13 +12,11 @@ import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
  * to choose another city.
  *
  * @property city to point what city geo location has defined.
- * @property resourceManager to get strings from resources
  * @property onPositiveClick ok button click callback
  * @property onNegativeClick cancel button click callback
  */
 class GeoLocationAlertDialogDelegate(
     private val city: String,
-    private val resourceManager: ResourceManager,
     private val onPositiveClick: (String) -> Unit,
     private val onNegativeClick: () -> Unit
 ) : AlertDialogDelegate {
@@ -29,8 +26,8 @@ class GeoLocationAlertDialogDelegate(
      */
     override fun createAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(resourceManager.getString(R.string.geo_title))
-        builder.setMessage(resourceManager.getString(R.string.geo_confirm_message, city))
+        builder.setTitle(R.string.geo_title)
+        builder.setMessage(context.getString(R.string.geo_confirm_message, city))
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

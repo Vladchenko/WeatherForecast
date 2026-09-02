@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
 
 /**
@@ -13,12 +12,10 @@ import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
  * Informs the user that location access is disabled and must be manually enabled
  * in system settings. Offers options to open settings or cancel and use manual input.
  *
- * @property resourceManager Helper to retrieve localized strings from resources
  * @property onPositiveClick Callback triggered when "OK" is tapped (typically opens app settings)
  * @property onNegativeClick Callback triggered when "Cancel" is tapped
  */
 class NoLocationPermissionPermanentlyAlertDialogDelegate(
-    private val resourceManager: ResourceManager,
     private val onPositiveClick: (String) -> Unit,
     private val onNegativeClick: () -> Unit
 ): AlertDialogDelegate {
@@ -34,8 +31,8 @@ class NoLocationPermissionPermanentlyAlertDialogDelegate(
      */
     override fun createAlertDialogBuilder(context: Context): AlertDialog.Builder {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(resourceManager.getString(R.string.geo_permission_denied))
-        builder.setMessage(resourceManager.getString(R.string.geo_permission_denied_permanently))
+        builder.setTitle(R.string.geo_permission_denied)
+        builder.setMessage(R.string.geo_permission_denied_permanently)
         builder.setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
             positiveButtonClick(
                 dialogInterface

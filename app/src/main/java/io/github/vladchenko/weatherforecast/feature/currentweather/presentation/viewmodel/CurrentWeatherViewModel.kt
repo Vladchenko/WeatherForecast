@@ -10,7 +10,6 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -45,7 +44,6 @@ import javax.inject.Inject
  * 3. If both fail, displays an appropriate error message
  *
  * @property loggingService Centralized service for structured application logging
- * @property resourceManager Provides access to Android string resources for UI messages
  * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
  * @property statusStateHolder Manages and broadcasts UI status messages (info, warnings, errors)
  * @property networkStateHolder Manages network connectivity (connect or disconnect)
@@ -57,7 +55,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
     private val loggingService: LoggingService,
-    private val resourceManager: ResourceManager,
     private val cityErrorEventBus: CityErrorEventBus,
     private val statusStateHolder: StatusStateHolder,
     private val networkStateHolder: NetworkStateHolder,

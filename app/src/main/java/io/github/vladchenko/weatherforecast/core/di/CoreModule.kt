@@ -98,8 +98,7 @@ class CoreModule {
     @Singleton
     fun provideLocationDialogFactory(
         alertDialogFactory: AlertDialogFactory,
-        resourceManager: ResourceManager
-    ): LocationDialogFactory = LocationDialogFactory(alertDialogFactory, resourceManager)
+    ): LocationDialogFactory = LocationDialogFactory(alertDialogFactory)
 
     @Singleton
     @Provides

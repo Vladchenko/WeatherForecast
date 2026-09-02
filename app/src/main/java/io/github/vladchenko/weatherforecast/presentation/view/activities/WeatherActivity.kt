@@ -20,7 +20,6 @@ import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigationBar
@@ -63,9 +62,6 @@ class WeatherActivity : AppCompatActivity() {
 
     @Inject
     lateinit var connectivityObserver: ConnectivityObserver
-
-    @Inject
-    lateinit var resourceManager: ResourceManager
 
     @Inject
     lateinit var permissionResolver: PermissionResolver

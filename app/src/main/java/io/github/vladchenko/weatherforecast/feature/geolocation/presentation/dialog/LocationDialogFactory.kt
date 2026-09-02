@@ -1,7 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog
 
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import javax.inject.Inject
@@ -12,8 +11,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class LocationDialogFactory @Inject constructor(
-    private val baseDialogFactory: AlertDialogFactory,
-    private val resourceManager: ResourceManager
+    private val baseDialogFactory: AlertDialogFactory
 ) {
 
     /**
@@ -24,8 +22,8 @@ class LocationDialogFactory @Inject constructor(
         onNegative: () -> Unit
     ): AlertDialogDelegate {
         return baseDialogFactory.createBasicDialog(
-            title = resourceManager.getString(R.string.geo_permission_denied),
-            message = resourceManager.getString(R.string.geo_permission_request_message),
+            titleResId = R.string.geo_permission_denied,
+            messageResId = R.string.geo_permission_request_message,
             onPositive = onPositive,
             onNegative = onNegative
         )
@@ -39,8 +37,8 @@ class LocationDialogFactory @Inject constructor(
         onNegative: () -> Unit
     ): AlertDialogDelegate {
         return baseDialogFactory.createCustomButtonsDialog(
-            title = resourceManager.getString(R.string.geo_permission_denied),
-            message = resourceManager.getString(R.string.geo_permission_denied_permanently),
+            titleResId = R.string.geo_permission_denied,
+            messageResId = R.string.geo_permission_denied_permanently,
             positiveButtonTextRes = android.R.string.ok,
             negativeButtonTextRes = android.R.string.cancel,
             onPositive = onPositive,
@@ -57,8 +55,9 @@ class LocationDialogFactory @Inject constructor(
         onNegative: () -> Unit
     ): AlertDialogDelegate {
         return baseDialogFactory.createBasicDialog(
-            title = resourceManager.getString(R.string.geo_title),
-            message = resourceManager.getString(R.string.geo_confirm_message, city),
+            args = arrayOf(city),
+            titleResId = R.string.geo_title,
+            messageResId = R.string.geo_confirm_message,
             onPositive = { onPositive(city) },
             onNegative = onNegative
         )
@@ -72,8 +71,8 @@ class LocationDialogFactory @Inject constructor(
         onNegative: () -> Unit
     ): AlertDialogDelegate {
         return baseDialogFactory.createBasicDialog(
-            title = resourceManager.getString(R.string.geo_fail_title),
-            message = resourceManager.getString(R.string.geo_fail_subtitle),
+            titleResId = R.string.geo_fail_title,
+            messageResId = R.string.geo_fail_subtitle,
             onPositive = onPositive,
             onNegative = onNegative
         )

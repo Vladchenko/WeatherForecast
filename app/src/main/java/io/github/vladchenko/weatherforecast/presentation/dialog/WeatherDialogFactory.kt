@@ -1,7 +1,6 @@
 package io.github.vladchenko.weatherforecast.presentation.dialog
 
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog.LocationDialogFactory
@@ -16,17 +15,13 @@ import javax.inject.Singleton
  * It wraps a base [AlertDialogFactory] and delegates some dialog creation to [LocationDialogFactory]
  * to promote reuse across features.
  *
- * Strings are resolved via [ResourceManager] to support localization and testing.
- *
  * @property baseDialogFactory Factory for general-purpose alert dialogs
  * @property locationDialogFactory Reusable component for location-related dialogs (shared with other modules)
- * @property resourceManager Provides access to localized string resources
  */
 @Singleton
 class WeatherDialogFactory @Inject constructor(
     private val baseDialogFactory: AlertDialogFactory,
     private val locationDialogFactory: LocationDialogFactory,
-    private val resourceManager: ResourceManager
 ) {
 
     /**
@@ -44,8 +39,9 @@ class WeatherDialogFactory @Inject constructor(
         onPositive: () -> Unit
     ): AlertDialogDelegate {
         return baseDialogFactory.createInfoDialog(
-            title = resourceManager.getString(R.string.forecast_no_data_for_city, city),
-            message = resourceManager.getString(R.string.forecast_no_data_message, city),
+            args = arrayOf(city),
+            titleResId = R.string.forecast_no_data_for_city,
+            messageResId = R.string.forecast_no_data_message,
             onConfirm = onPositive
         )
     }
