@@ -16,7 +16,7 @@ class GeoLocationEventBusImpl : GeoLocationEventBus {
         get() = _geoLocationEventsFlow
 
     private val _geoLocationEventsFlow =
-        MutableSharedFlow<GeoLocationEvent>(extraBufferCapacity = 1, replay = 1)
+        MutableSharedFlow<GeoLocationEvent>(extraBufferCapacity = 1)
 
     override fun send(event: GeoLocationEvent) {
         _geoLocationEventsFlow.tryEmit(event)

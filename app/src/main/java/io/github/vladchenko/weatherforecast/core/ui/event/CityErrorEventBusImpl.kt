@@ -16,7 +16,7 @@ class CityErrorEventBusImpl : CityErrorEventBus {
         get() = _cityErrorEventFlow
 
     private val _cityErrorEventFlow =
-        MutableSharedFlow<CityErrorEvent>(extraBufferCapacity = 1, replay = 1)
+        MutableSharedFlow<CityErrorEvent>(extraBufferCapacity = 1)
 
     override fun send(event: CityErrorEvent) {
         _cityErrorEventFlow.tryEmit(event)
