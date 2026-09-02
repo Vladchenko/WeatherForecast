@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +48,7 @@ import kotlinx.collections.immutable.ImmutableList
  * Delegates all interactions (search, selection, navigation, history management) to [onCitySelectionEvent].
  *
  * @param queryLabel Hint text for the search input field
- * @param cityUiState Currently typed or selected city name (user input or saved city)
+ * @param cityMask Currently typed or selected city name (user input or saved city)
  * @param citySelectionTitle Label displayed above the search field
  * @param appBarUiState Toolbar state including title, subtitle, and styling
  * @param navigationEventBus The event bus for dispatching navigation events
@@ -58,8 +59,8 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 @ExperimentalMaterial3Api
 fun CitySearchLayout(
+    cityMask: String,
     queryLabel: String,
-    cityUiState: String,
     citySelectionTitle: String,
     appBarUiState: AppBarUiState,
     navigationEventBus: NavigationEventBus,
@@ -77,7 +78,7 @@ fun CitySearchLayout(
                     Column {
                         Text(
                             modifier = Modifier.padding(top = 4.dp),
-                            text = appBarUiState.title,
+                            text = stringResource(appBarUiState.titleStringId),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
@@ -122,7 +123,7 @@ fun CitySearchLayout(
                     )
                     AddressEdit(
                         modifier = Modifier,
-                        cityName = cityUiState,
+                        cityMask = cityMask,
                         queryLabel = queryLabel,
                         recentCities = recentCitiesNamesUiState,
                         navigationEventBus = navigationEventBus,

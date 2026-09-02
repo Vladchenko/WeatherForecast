@@ -35,7 +35,7 @@ fun CitySearchScreen(
     val cityPredictionsUiState by citySearchViewModel.cityPredictions.collectAsStateWithLifecycle()
     val recentCitiesNamesUiState by citySearchViewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
     CitySearchLayout(
-        cityUiState = cityMaskUiState,
+        cityMask = cityMaskUiState,
         appBarUiState = appBarUiState,
         navigationEventBus = navigationEventBus,
         cityPredictionsUiState = cityPredictionsUiState,

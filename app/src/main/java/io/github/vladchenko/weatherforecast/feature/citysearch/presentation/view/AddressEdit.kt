@@ -22,7 +22,7 @@ import kotlinx.collections.immutable.ImmutableList
  * It automatically triggers loading of recent cities when the input field receives focus
  * for the first time.
  *
- * @param cityName The current city name or search query text
+ * @param cityMask The current city mask to search for
  * @param queryLabel The label text displayed in the search field
  * @param modifier The modifier to be applied to the container
  * @param mainContentColor The primary UI color used for styling
@@ -34,7 +34,7 @@ import kotlinx.collections.immutable.ImmutableList
  */
 @Composable
 fun AddressEdit(
-    cityName: String,
+    cityMask: String,
     queryLabel: String,
     modifier: Modifier,
     mainContentColor: Color,
@@ -46,10 +46,10 @@ fun AddressEdit(
 ) {
     Column(modifier = modifier.padding(top = 8.dp)) {
         AutoCompleteUI(
-            modifier = Modifier.fillMaxWidth(),
-            query = cityName,
-            queryLabel = queryLabel,
+            query = cityMask,
             useOutlined = true,
+            queryLabel = queryLabel,
+            modifier = Modifier.fillMaxWidth(),
             mainContentColor = mainContentColor,
             onQueryChanged = { updatedCityMask ->
                 if (updatedCityMask.isNotBlank()) {

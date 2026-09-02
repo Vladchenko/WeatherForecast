@@ -59,14 +59,3 @@ class NavigationEventDispatcherImpl(
         }
     }
 }
-
-fun fadeNavOptions(): NavOptions = navOptions {
-    anim {
-        enter = R.anim.fade_in
-        exit = R.anim.fade_out
-        popEnter = R.anim.fade_in
-        popExit = R.anim.fade_out
-    }
-    launchSingleTop = true
-    restoreState = true
-}
