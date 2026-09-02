@@ -2,12 +2,9 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.presentation
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
@@ -46,15 +43,9 @@ fun CurrentWeatherScreen(
     hourlyViewModel: HourlyWeatherViewModel = hiltViewModel(),
     weatherViewModel: CurrentWeatherViewModel = hiltViewModel(),
 ) {
-    val context = LocalContext.current
     val weatherUiState by weatherViewModel.weatherStateFlow.collectAsStateWithLifecycle()
     val appBarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
     val hourlyWeatherUiState by hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
-
-    LaunchedEffect(cityModel) {
-        appBarViewModel.updateTitle(context.getString(R.string.app_name))
-        weatherViewModel.launchWeatherForecast(cityModel)
-    }
 
     CurrentWeatherLayout(
         appBarUiState = appBarUiState,

@@ -148,7 +148,7 @@ fun CurrentWeatherLayout(
                     Column {
                         Text(
                             modifier = Modifier.padding(top = 4.dp),
-                            text = appBarUiState.title,
+                            text = stringResource(appBarUiState.titleResId),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
@@ -261,7 +261,6 @@ fun CurrentWeatherLayout(
                             when (state) {
                                 is WeatherUiState.Loading -> {
                                     CurrentWeatherSkeleton(
-                                        modifier = Modifier.fillMaxSize(),
                                         shimmerColors = ShimmerDefaults.colors(
                                             baseColor = Color.White.copy(alpha = 0.03f),
                                             highlightColor = Color.White.copy(alpha = 0.35f),

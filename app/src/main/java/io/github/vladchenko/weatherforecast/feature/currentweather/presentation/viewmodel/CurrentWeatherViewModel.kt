@@ -24,7 +24,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -64,27 +67,34 @@ class CurrentWeatherViewModel @Inject constructor(
     private val forecastInteractor: CurrentWeatherInteractor,
 ) : ViewModel() {
 
-    //region flows
-    /**
-     * Public read-only flow that emits the current UI state of the weather forecast.
-     * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
-     */
-    val weatherStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>>
-        get() = _weatherStateFlow
-
-    private val _weatherStateFlow =
-        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Idle)
-    //endregion flows
-
-    private var currentJob: Job? = null
-
-    private lateinit var temperatureType: TemperatureType
-
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         loggingService.logError(TAG, "Unexpected error in weather forecast loading", throwable)
         statusStateHolder.updateErrorStatus(throwable.message.toString())
     }
-    val scope = CoroutineScope(viewModelScope.coroutineContext + exceptionHandler)
+
+    //region flows
+    private val scope = CoroutineScope(viewModelScope.coroutineContext + exceptionHandler)
+
+    private val _weatherStateFlow =
+        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Idle)
+
+    /**
+     * Public read-only flow that emits the current UI state of the weather forecast.
+     * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
+     */
+    val weatherStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>> = _weatherStateFlow
+            .onStart {
+                val city = chosenCityInteractor.loadChosenCity()
+                loadRemoteForecastForLocation(city)
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(5000L),
+                WeatherUiState.Loading()
+            )
+
+    //endregion flows
+
+    private var currentJob: Job? = null
+    private lateinit var temperatureType: TemperatureType
 
     init {
         scope.launch {

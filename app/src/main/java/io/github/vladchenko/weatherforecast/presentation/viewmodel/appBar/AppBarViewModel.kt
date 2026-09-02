@@ -41,7 +41,8 @@ class AppBarViewModel @Inject constructor(
     val appBarUiStateFlow: StateFlow<AppBarUiState>
         get() = _appBarUiStateFlow.asStateFlow()
 
-    private val _appBarUiStateFlow = MutableStateFlow(AppBarUiState())
+    private val _appBarUiStateFlow =
+        MutableStateFlow(AppBarUiState(titleResId = R.string.app_name))
 
     init {
         viewModelScope.launch {
@@ -65,11 +66,11 @@ class AppBarViewModel @Inject constructor(
     }
 
     /**
-     * Update title with [titleText]
+     * Update title string resource with [titleResId]
      */
-    fun updateTitle(titleText: String) {
+    fun updateTitleResId(titleResId: Int) {
         _appBarUiStateFlow.update {
-            it.copy(title = titleText)
+            it.copy(titleResId = titleResId)
         }
     }
 
@@ -78,7 +79,7 @@ class AppBarViewModel @Inject constructor(
             it.copy(
                 subtitle = text,
                 subtitleColorAttr = colorAttr
-            ) // ← Сохраняем атрибут, не цвет
+            )
         }
     }
 }

@@ -78,7 +78,7 @@ fun CitySearchLayout(
                     Column {
                         Text(
                             modifier = Modifier.padding(top = 4.dp),
-                            text = stringResource(appBarUiState.titleStringId),
+                            text = stringResource(appBarUiState.titleResId),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(

@@ -8,7 +8,7 @@ import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
 /**
  * Model for the app bar ui state.
  *
- * @property title of the app bar
+ * @property titleResId string resource id for the title
  * @property subtitle of the app bar
  * @property subtitleSize of the app bar
  * @property titleColorAttr for the title of the app bar
@@ -19,7 +19,7 @@ import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
  */
 @Immutable
 data class AppBarUiState(
-    val title: String = "",
+    val titleResId: Int,
     val subtitle: String = "",
     val subtitleSize: SubtitleSize = SubtitleSize.Normal,
     @param:AttrRes val titleColorAttr: Int = R.attr.colorInfo,
