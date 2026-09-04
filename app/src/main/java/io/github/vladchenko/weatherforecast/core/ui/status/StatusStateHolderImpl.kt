@@ -1,7 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.ui.status
 
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -14,12 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
  * for observation by UI components.
  *
  * The initial status is set to [StatusType.Info] with an empty message.
- *
- * @property resourceManager provides access to application string resources
  */
-class StatusStateHolderImpl(
-    private val resourceManager: ResourceManager
-) : StatusStateHolder {
+class StatusStateHolderImpl() : StatusStateHolder {
 
     override val statusStateFlow: StateFlow<StatusData>
         get() = _statusStateFlow
@@ -28,7 +23,7 @@ class StatusStateHolderImpl(
         _statusStateFlow.tryEmit(
             StatusData(
                 message = TextType.ResId(stringId, args),
-                messageColor = resourceManager.getThemeColorRes(R.attr.colorError)  // TODO Replace with colorResId
+                messageColorAttr = R.attr.colorError
             )
         )
     }
@@ -37,7 +32,7 @@ class StatusStateHolderImpl(
         _statusStateFlow.tryEmit(
             StatusData(
                 message = TextType.Text(message),
-                messageColor = resourceManager.getThemeColorRes(R.attr.colorError)
+                messageColorAttr = R.attr.colorError
             )
         )
     }
@@ -46,7 +41,7 @@ class StatusStateHolderImpl(
         _statusStateFlow.tryEmit(
             StatusData(
                 message = TextType.ResId(stringId, args),
-                messageColor = resourceManager.getThemeColorRes(R.attr.colorInfo)
+                messageColorAttr = R.attr.colorInfo
             )
         )
     }
@@ -55,7 +50,7 @@ class StatusStateHolderImpl(
         _statusStateFlow.tryEmit(
             StatusData(
                 message = TextType.ResId(stringId, args),
-                messageColor = resourceManager.getThemeColorRes(R.attr.colorWarning)
+                messageColorAttr = R.attr.colorWarning
             )
         )
     }
@@ -64,7 +59,7 @@ class StatusStateHolderImpl(
         MutableStateFlow(
             StatusData(
                 message = TextType.Empty,
-                messageColor = 0
+                messageColorAttr = 0
             )
         )
 }

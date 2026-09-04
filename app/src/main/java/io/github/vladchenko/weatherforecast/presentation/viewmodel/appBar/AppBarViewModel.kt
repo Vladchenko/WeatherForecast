@@ -51,7 +51,7 @@ class AppBarViewModel @Inject constructor(
             stateHolder.statusStateFlow.collect { statusState ->
                 updateSubtitle(
                     subtitle = statusState.message,
-                    colorAttr = statusState.messageColor
+                    colorAttr = statusState.messageColorAttr
                 )
             }
         }

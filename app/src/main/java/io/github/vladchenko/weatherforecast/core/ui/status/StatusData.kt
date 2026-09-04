@@ -7,9 +7,9 @@ import androidx.annotation.AttrRes
  *
  * @property message Text content to display, which can be either a plain string ([TextType.Text])
  *   or a string resource ID with optional formatting arguments ([TextType.ResId]).
- * @property messageColor Color resource or ARGB integer for rendering the status message text.
+ * @property messageColorAttr Color resource or ARGB integer for rendering the status message text.
  */
 data class StatusData(
     val message: TextType,
-    @param:AttrRes val messageColor: Int
+    @param:AttrRes val messageColorAttr: Int
 )

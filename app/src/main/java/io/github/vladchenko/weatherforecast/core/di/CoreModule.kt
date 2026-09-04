@@ -12,8 +12,6 @@ import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBusImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManagerImpl
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
@@ -36,7 +34,6 @@ import javax.inject.Singleton
  * - [CoroutineDispatchers] and [CoroutineScope] for background operations
  * - [PreferencesManager] for persistent key-value storage
  * - [LoggingService] for consistent logging throughout the app
- * - [ResourceManager] for accessing app resources (strings, colors, etc.)
  * - Factories and helpers for common UI dialogs ([AlertDialogFactory], [LocationDialogFactory])
  * - [DataErrorToForecastErrorMapper] for converting data-layer errors to domain errors
  *
@@ -72,13 +69,6 @@ class CoreModule {
         return LoggingService()
     }
 
-
-    @Singleton
-    @Provides
-    fun provideResourceManager(@ApplicationContext context: Context): ResourceManager {
-        return ResourceManagerImpl(context)
-    }
-
     @Provides
     @Singleton
     fun provideAlertDialogFactory(): AlertDialogFactory = AlertDialogFactory()
@@ -102,9 +92,7 @@ class CoreModule {
 
     @Singleton
     @Provides
-    fun provideWeatherStateHolder(
-        resourceManager: ResourceManager
-    ): StatusStateHolder = StatusStateHolderImpl(resourceManager)
+    fun provideWeatherStateHolder(): StatusStateHolder = StatusStateHolderImpl()
 
     @Singleton
     @Provides
