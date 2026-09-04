@@ -22,7 +22,6 @@ class CitySearchRemoteDataSourceImpl @Inject constructor(
     private val responseProcessor: ResponseProcessor
 ) : CitySearchRemoteDataSource {
 
-
     override suspend fun loadCitiesNames(token: String): DataResult<List<CitySearchResultDto>> {
         return runCatching {
             val response = apiService.searchCities(token)

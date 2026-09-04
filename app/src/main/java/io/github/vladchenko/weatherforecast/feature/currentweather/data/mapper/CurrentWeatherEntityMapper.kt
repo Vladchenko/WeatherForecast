@@ -24,9 +24,6 @@ class CurrentWeatherEntityMapper {
      * - Rounds to nearest integer
      * - Attaches appropriate unit symbol via [getTemperatureSign]
      *
-     * The [serverError] field is initialized as an empty string, indicating no error at this stage.
-     * All other fields are mapped directly or derived from the entity.
-     *
      * @param entity The database entity containing current weather data.
      * @param temperatureType The preferred temperature unit (Celsius, Fahrenheit, Kelvin).
      *
@@ -47,8 +44,7 @@ class CurrentWeatherEntityMapper {
             temperature = formattedTemp,
             iconCode = entity.weatherIcon,
             weatherType = entity.weatherDescription,
-            temperatureType = tempSign,
-            serverError = ""
+            temperatureType = tempSign
         )
     }
 

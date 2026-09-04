@@ -21,8 +21,6 @@ import androidx.compose.runtime.Immutable
  * @property iconCode identifier string for the weather icon to be displayed.
  * @property weatherType description of the current weather condition (e.g., "Rain", "Clear Sky").
  * @property temperatureType unit of temperature measurement (e.g., "C", "F", "K").
- * @property serverError error message returned by the remote server if the request fails.
- *                      Empty or null if the request was successful.
  */
 data class CurrentWeather(
     val requestedCity: City? = null,
@@ -34,10 +32,9 @@ data class CurrentWeather(
     val iconCode: String,
     val weatherType: String,
     val temperatureType: String,
-    val serverError: String
 ) {
     override fun toString(): String {
-        return "WeatherForecast(city='$city', coordinate=$coordinate, date='$dateTime', temperature='$temperature', weatherType='$weatherType', temperatureType='$temperatureType', serverError='$serverError')"
+        return "WeatherForecast(city='$city', coordinate=$coordinate, date='$dateTime', temperature='$temperature', weatherType='$weatherType', temperatureType='$temperatureType')"
     }
 }
 

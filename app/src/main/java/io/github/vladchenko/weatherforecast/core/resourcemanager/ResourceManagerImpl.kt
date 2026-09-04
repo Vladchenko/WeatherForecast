@@ -17,10 +17,6 @@ class ResourceManagerImpl @Inject constructor(
     private val context: Context
 ): ResourceManager {
 
-    override fun getString(@StringRes resId: Int): String {
-        return context.getString(resId)
-    }
-
     override fun getString(@StringRes resId: Int, vararg formatArgs: Any): String {
         return context.getString(resId, *formatArgs)
     }

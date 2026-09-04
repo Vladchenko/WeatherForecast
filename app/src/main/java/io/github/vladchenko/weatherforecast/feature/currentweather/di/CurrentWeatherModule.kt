@@ -6,7 +6,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
-import io.github.vladchenko.weatherforecast.core.resourcemanager.ResourceManager
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
@@ -141,12 +140,10 @@ class CurrentWeatherModule {
     @Singleton
     @Provides
     fun provideWeatherOutputMapper(
-        resourceManager: ResourceManager,
         weatherResponseHandler: WeatherResponseHandler,
         weatherDomainToUiMapper: WeatherDomainToUiMapper,
     ): WeatherOutputMapper {
         return WeatherOutputMapperImpl(
-            resourceManager,
             weatherResponseHandler,
             weatherDomainToUiMapper
         )

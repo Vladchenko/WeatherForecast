@@ -16,7 +16,6 @@ import androidx.compose.runtime.Immutable
  * @property temperature Current temperature as a formatted string
  * @property weatherType Description of the weather condition (e.g., "clear sky", "light rain")
  * @property temperatureType Unit of temperature measurement (e.g., "°C", "°F")
- * @property serverError Error message from the API; empty if no error occurred
  */
 @Immutable
 data class CurrentWeatherUi(
@@ -27,10 +26,9 @@ data class CurrentWeatherUi(
     val temperature: String,
     val weatherType: String,
     val temperatureType: String,
-    val serverError: String
 ) {
     override fun toString(): String {
-        return "WeatherForecastUi(city='$city', coordinate=$coordinate, date='$dateTime', temperature='$temperature', weatherType='$weatherType', temperatureType='$temperatureType', serverError='$serverError')"
+        return "WeatherForecastUi(city='$city', coordinate=$coordinate, date='$dateTime', temperature='$temperature', weatherType='$weatherType', temperatureType='$temperatureType')"
     }
 }
 

@@ -1,6 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper
 
 import io.github.vladchenko.weatherforecast.core.ui.constants.UiConstants.UI_DATE_FORMAT
+import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toWeatherIconRes
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.Coordinate
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
@@ -12,24 +13,19 @@ import java.util.Locale
 /**
  * Implementation of [WeatherDomainToUiMapper]
  */
-class WeatherDomainToUiMapperImpl: WeatherDomainToUiMapper {
+class WeatherDomainToUiMapperImpl : WeatherDomainToUiMapper {
 
     private val formatter: DateTimeFormatter = DateTimeFormatter
         .ofPattern(UI_DATE_FORMAT)
         .withLocale(Locale.getDefault())
 
-    override fun toCurrentWeatherUi(model: CurrentWeather,
-                                    defaultErrorMessage: String,
-                                    toWeatherIconRes: (String) -> Int
+    override fun toCurrentWeatherUi(
+        model: CurrentWeather
     ): CurrentWeatherUi {
-        val displayDate = try {
-            val instant = Instant.ofEpochSecond(model.dateTime.toLong())
-            val zone = ZoneOffset.ofTotalSeconds(model.timezone.toInt())
-            val localDateTime = instant.atOffset(zone)
-            formatter.format(localDateTime)
-        } catch (_: Exception) {
-            defaultErrorMessage
-        }
+        val instant = Instant.ofEpochSecond(model.dateTime.toLong())
+        val zone = ZoneOffset.ofTotalSeconds(model.timezone.toInt())
+        val localDateTime = instant.atOffset(zone)
+        val displayDate = formatter.format(localDateTime)
         val iconId = toWeatherIconRes(model.iconCode)
         return CurrentWeatherUi(
             city = model.city,
@@ -39,7 +35,6 @@ class WeatherDomainToUiMapperImpl: WeatherDomainToUiMapper {
             temperature = model.temperature,
             weatherType = model.weatherType,
             temperatureType = model.temperatureType,
-            serverError = model.serverError,
         )
     }
 }

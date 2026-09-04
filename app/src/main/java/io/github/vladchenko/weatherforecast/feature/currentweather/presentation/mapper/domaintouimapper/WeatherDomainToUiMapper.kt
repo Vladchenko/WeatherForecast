@@ -8,11 +8,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
  */
 interface WeatherDomainToUiMapper {
 
-    /**
-     * Convert domain [model] to ui model, having [defaultErrorMessage] to define a default
-     * message when date is incorrect and [toWeatherIconRes] to get weather icon id
-     */
-    fun toCurrentWeatherUi(model: CurrentWeather,
-                           defaultErrorMessage: String,
-                           toWeatherIconRes: (String) -> Int): CurrentWeatherUi
+    /** Convert domain [model] to ui model */
+    fun toCurrentWeatherUi(model: CurrentWeather): CurrentWeatherUi
 }
