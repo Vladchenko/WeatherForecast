@@ -127,7 +127,7 @@ class WeatherResponseHandler(
                     is ForecastError.UncategorizedError -> {
                         val error = error.cause ?: error.message
                         loggingService.logError(TAG, "Uncategorized error: $error")
-                        statusStateHolder.updateErrorStatus(error.toString(), cityModel.city)
+                        statusStateHolder.updateErrorStatus(error.toString())
                     }
                 }
                 return WeatherResponseHandlerResult(

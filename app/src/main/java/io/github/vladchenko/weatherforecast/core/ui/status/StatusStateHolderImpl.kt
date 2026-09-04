@@ -27,17 +27,17 @@ class StatusStateHolderImpl(
     override fun updateErrorStatus(stringId: Int, vararg args: Any) {
         _statusStateFlow.tryEmit(
             StatusData(
-            resourceManager.getString(stringId, *args),
-            resourceManager.getThemeColorRes(R.attr.colorError)
+                message = TextType.ResId(stringId, args),
+                messageColor = resourceManager.getThemeColorRes(R.attr.colorError)  // TODO Replace with colorResId
             )
         )
     }
 
-    override fun updateErrorStatus(message: String, vararg args: Any) {
+    override fun updateErrorStatus(message: String) {
         _statusStateFlow.tryEmit(
             StatusData(
-                message,
-                resourceManager.getThemeColorRes(R.attr.colorError)
+                message = TextType.Text(message),
+                messageColor = resourceManager.getThemeColorRes(R.attr.colorError)
             )
         )
     }
@@ -45,8 +45,8 @@ class StatusStateHolderImpl(
     override fun updateInfoStatus(stringId: Int, vararg args: Any) {
         _statusStateFlow.tryEmit(
             StatusData(
-                resourceManager.getString(stringId, *args),
-                resourceManager.getThemeColorRes(R.attr.colorInfo)
+                message = TextType.ResId(stringId, args),
+                messageColor = resourceManager.getThemeColorRes(R.attr.colorInfo)
             )
         )
     }
@@ -54,12 +54,17 @@ class StatusStateHolderImpl(
     override fun updateWarningStatus(stringId: Int, vararg args: Any) {
         _statusStateFlow.tryEmit(
             StatusData(
-                resourceManager.getString(stringId, *args),
-                resourceManager.getThemeColorRes(R.attr.colorWarning)
+                message = TextType.ResId(stringId, args),
+                messageColor = resourceManager.getThemeColorRes(R.attr.colorWarning)
             )
         )
     }
 
     private val _statusStateFlow =
-        MutableStateFlow<StatusData>(StatusData("", 0))
+        MutableStateFlow(
+            StatusData(
+                message = TextType.Empty,
+                messageColor = 0
+            )
+        )
 }

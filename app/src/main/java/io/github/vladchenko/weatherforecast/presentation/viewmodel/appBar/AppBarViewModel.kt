@@ -1,12 +1,14 @@
 package io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar
 
 import androidx.annotation.AttrRes
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
+import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,7 +49,10 @@ class AppBarViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             stateHolder.statusStateFlow.collect { statusState ->
-                updateSubtitle(statusState.message, statusState.messageColor)
+                updateSubtitle(
+                    subtitle = statusState.message,
+                    colorAttr = statusState.messageColor
+                )
             }
         }
         viewModelScope.launch {
@@ -68,16 +73,19 @@ class AppBarViewModel @Inject constructor(
     /**
      * Update title string resource with [titleResId]
      */
-    fun updateTitleResId(titleResId: Int) {
+    fun updateTitle(@StringRes titleResId: Int) {
         _appBarUiStateFlow.update {
             it.copy(titleResId = titleResId)
         }
     }
 
-    private fun updateSubtitle(text: String, @AttrRes colorAttr: Int) {
+    private fun updateSubtitle(
+        subtitle: TextType,
+        @AttrRes colorAttr: Int
+    ) {
         _appBarUiStateFlow.update {
             it.copy(
-                subtitle = text,
+                subtitle = subtitle,
                 subtitleColorAttr = colorAttr
             )
         }

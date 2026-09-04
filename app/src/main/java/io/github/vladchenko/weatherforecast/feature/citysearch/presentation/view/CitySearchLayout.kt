@@ -28,6 +28,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
@@ -82,7 +83,13 @@ fun CitySearchLayout(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = appBarUiState.subtitle,
+                            text = when (appBarUiState.subtitle) {
+                                is TextType.Text -> appBarUiState.subtitle.value
+                                is TextType.ResId -> {
+                                    stringResource(appBarUiState.subtitle.id, *appBarUiState.subtitle.args)
+                                }
+                                is TextType.Empty -> ""
+                            },
                             color = statusColor,
                             fontSize = appBarUiState.subtitleSize.toToolbarSubtitleFontSize(),
                             maxLines = 1,

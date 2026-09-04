@@ -60,6 +60,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
+import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
@@ -89,7 +90,7 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
  *
  * ## Key events
  * - Toggling hourly forecast triggers [onLoadHourlyWeather] with resolved city location (via [CityLocationModel])
- * - Pull-to-refresh fires [weatherViewModel.refreshWeather]
+ * - Pull-to-refresh fires [CurrentWeatherViewModel.refreshWeather]
  * - City click fires [NavigationEvent.NavigateToCitySelection]
  * - Back button fires [NavigationEvent.NavigateUp]
  *
@@ -152,7 +153,16 @@ fun CurrentWeatherLayout(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = appBarUiState.subtitle,
+                            text = when (appBarUiState.subtitle) {
+                                is TextType.Text -> appBarUiState.subtitle.value
+                                is TextType.ResId -> {
+                                    stringResource(
+                                        appBarUiState.subtitle.id,
+                                        *appBarUiState.subtitle.args
+                                    )
+                                }
+                                is TextType.Empty -> ""
+                            },
                             color = statusColor,
                             fontSize = appBarUiState.subtitleSize.toToolbarSubtitleFontSize(),
                             maxLines = 1,
