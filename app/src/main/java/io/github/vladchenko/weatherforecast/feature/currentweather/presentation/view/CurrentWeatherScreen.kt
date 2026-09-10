@@ -2,6 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.presentation
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,6 +47,10 @@ fun CurrentWeatherScreen(
     val weatherUiState by weatherViewModel.weatherStateFlow.collectAsStateWithLifecycle()
     val appBarUiState by appBarViewModel.appBarUiStateFlow.collectAsStateWithLifecycle()
     val hourlyWeatherUiState by hourlyViewModel.hourlyWeatherStateFlow.collectAsStateWithLifecycle()
+
+    LaunchedEffect(cityModel) {
+        weatherViewModel.launchWeatherForecast(cityModel)
+    }
 
     CurrentWeatherLayout(
         appBarUiState = appBarUiState,
