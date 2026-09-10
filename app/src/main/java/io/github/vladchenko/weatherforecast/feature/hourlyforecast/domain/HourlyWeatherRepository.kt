@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 
 /**
  * Weather hourly forecast repository. Provides domain-layer data.
@@ -15,7 +15,7 @@ interface HourlyWeatherRepository {
      */
     suspend fun loadCachedWeather(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         remoteError: ForecastError
     ): LoadResult<HourlyWeather>
 
@@ -24,7 +24,7 @@ interface HourlyWeatherRepository {
      */
     suspend fun refreshWeatherForLocation(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         latitude: Double,
         longitude: Double
     ): LoadResult<HourlyWeather>

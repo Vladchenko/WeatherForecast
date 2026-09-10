@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,21 +33,21 @@ class PreferencesManager @Inject constructor(
 ) {
     /**
      * Flow of user's preferred temperature unit. Emits current value immediately.
-     * Default: [TemperatureType.CELSIUS].
+     * Default: [TemperatureUnit.CELSIUS].
      */
-    val temperatureTypeStateFlow: StateFlow<TemperatureType> = context.dataStore.data
+    val temperatureUnit: StateFlow<TemperatureUnit> = context.dataStore.data
         .map { preferences ->
             when (preferences[TEMPERATURE_UNIT]) {
-                "KELVIN" -> TemperatureType.KELVIN
-                "FAHRENHEIT" -> TemperatureType.FAHRENHEIT
-                "CELSIUS" -> TemperatureType.CELSIUS
-                else -> TemperatureType.CELSIUS
+                "KELVIN" -> TemperatureUnit.KELVIN
+                "FAHRENHEIT" -> TemperatureUnit.FAHRENHEIT
+                "CELSIUS" -> TemperatureUnit.CELSIUS
+                else -> TemperatureUnit.CELSIUS
             }
         }
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = TemperatureType.CELSIUS
+            initialValue = TemperatureUnit.CELSIUS
         )
 
     companion object {

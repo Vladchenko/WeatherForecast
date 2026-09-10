@@ -86,7 +86,7 @@ class HourlyWeatherViewModel @Inject constructor(
         _hourlyWeatherStateFlow.value = Loading(false)
         currentJob?.cancel()
         currentJob = viewModelScope.launch(exceptionHandler) {
-            val temperatureType = preferencesManager.temperatureTypeStateFlow.first()
+            val temperatureType = preferencesManager.temperatureUnit.first()
             val result = hourlyWeatherInteractor.loadHourlyWeatherForLocation(
                 cityModel.city,
                 temperatureType,

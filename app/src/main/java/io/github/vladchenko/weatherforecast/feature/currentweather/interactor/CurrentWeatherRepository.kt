@@ -2,7 +2,8 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.interactor
 
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 
 /**
@@ -25,20 +26,20 @@ interface CurrentWeatherRepository {
     /**
      * Retrieves weather data for the specified [city] and coordinates.
      *
-     * 1. Fetches data from [currentWeatherRemoteDataSource].
+     * 1. Fetches data from [CurrentWeatherRemoteDataSource].
      * 2. On success: saves the result to the local cache and returns [LoadResult.Remote].
      * 3. On failure: tries to load cached data. If available, returns [LoadResult.Local] with the original error context.
      * 4. If both fail: returns [LoadResult.Error] with the appropriate [ForecastError].
      *
      * @param city the city name to fetch weather for.
-     * @param temperatureType the unit for temperature (e.g., Celsius, Fahrenheit).
+     * @param temperatureUnit the unit for temperature (e.g., Celsius, Fahrenheit).
      * @param latitude geographical latitude for the request.
      * @param longitude geographical longitude for the request.
      * @return [LoadResult] indicating the source of data (Remote, Local) or an error.
      */
     suspend fun refreshWeatherForLocation(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         latitude: Double,
         longitude: Double
     ): LoadResult<CurrentWeather>

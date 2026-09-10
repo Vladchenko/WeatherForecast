@@ -19,7 +19,7 @@ import java.util.Locale
 /**
  * Worker to systematically download weather forecast from network.
  *
- * This worker runs periodically via [WorkManager] to refresh the current weather data
+ * This worker runs periodically via [androidx.work.WorkManager] to refresh the current weather data
  * for the chosen city. It uses the latest temperature unit preference and logs execution time.
  *
  * @property context to create a worker for WorkManager
@@ -41,12 +41,12 @@ class WeatherWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result =
         try {
-            val tempType = preferencesManager.temperatureTypeStateFlow.first()
+            val tempType = preferencesManager.temperatureUnit.first()
             val coordinate = chosenCityRepository.loadChosenCity().coordinate
             val weatherResponse =
                 currentWeatherRepository.refreshWeatherForLocation(
                     city = chosenCityRepository.loadChosenCity().city,
-                    temperatureType = tempType,
+                    temperatureUnit = tempType,
                     latitude = coordinate.latitude,
                     longitude = coordinate.longitude
                 )

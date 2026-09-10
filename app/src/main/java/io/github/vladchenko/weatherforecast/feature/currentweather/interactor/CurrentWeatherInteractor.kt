@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.interactor
 
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 
 /**
@@ -24,7 +24,7 @@ class CurrentWeatherInteractor(
      * the network or fall back to cached data depending on implementation and availability.
      *
      * @param city The name of the city for which weather is requested.
-     * @param temperatureType The unit type for temperature (e.g., Celsius, Fahrenheit).
+     * @param temperatureUnit The unit type for temperature (e.g., Celsius, Fahrenheit).
      * @param latitude The geographical latitude of the location.
      * @param longitude The geographical longitude of the location.
      * @return A [LoadResult] that wraps the result of the operation:
@@ -33,13 +33,13 @@ class CurrentWeatherInteractor(
      */
     suspend fun loadWeatherForLocation(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         latitude: Double,
         longitude: Double
     ): LoadResult<CurrentWeather> {
         return currentWeatherRepository.refreshWeatherForLocation(
             city,
-            temperatureType,
+            temperatureUnit,
             latitude,
             longitude
         )

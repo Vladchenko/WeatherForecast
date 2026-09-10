@@ -2,7 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain
 
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 
 /**
  * Weather forecast interactor.
@@ -13,10 +13,10 @@ class HourlyWeatherInteractor(private val weatherForecastRepository: HourlyWeath
 
     suspend fun loadHourlyWeatherForLocation(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         latitude: Double,
         longitude: Double
     ): LoadResult<HourlyWeather> {
-        return weatherForecastRepository.refreshWeatherForLocation(city, temperatureType, latitude, longitude)
+        return weatherForecastRepository.refreshWeatherForLocation(city, temperatureUnit, latitude, longitude)
     }
 }

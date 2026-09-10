@@ -1,10 +1,12 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.data.repository
 
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
+import io.github.vladchenko.weatherforecast.core.data.model.DataError
+import io.github.vladchenko.weatherforecast.core.data.model.DataError.ResponseNoBodyError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
@@ -42,7 +44,7 @@ import kotlinx.coroutines.withContext
  *
  * ## Error Handling
  * All errors originate in the data layer as [DataError] and are mapped to meaningful [ForecastError] instances:
- * - [DataError.NetworkError] → [ForecastError.NoInternet]
+ * - [DataError.NetworkError] → [ForecastError.NetworkError.NoInternet]
  * - [DataError.RequestFailError] → [ForecastError.CityNotFound]
  * - [DataError.ServerError], [DataError.ApiKeyInvalid], [ResponseNoBodyError] → [ForecastError.NoDataAvailable]
  * - [DataError.DatabaseError] → [ForecastError.LocalDataCorrupted]
@@ -78,7 +80,7 @@ class CurrentWeatherRepositoryImpl(
 
     override suspend fun refreshWeatherForLocation(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         latitude: Double,
         longitude: Double
     ): LoadResult<CurrentWeather> =
@@ -88,13 +90,13 @@ class CurrentWeatherRepositoryImpl(
 
             when (result) {
                 is DataResult.Success -> {
-                    fetchAndSave(result.data, city, temperatureType)
+                    fetchAndSave(result.data, city, temperatureUnit)
                 }
 
                 is DataResult.Error -> {
                     loadCachedWeatherForLocationOrError(
                         city,
-                        temperatureType,
+                        temperatureUnit,
                         errorMapper.map(result.error)
                     )
                 }
@@ -104,12 +106,12 @@ class CurrentWeatherRepositoryImpl(
     private suspend fun fetchAndSave(
         dto: CurrentWeatherDto,
         city: String,
-        temperatureType: TemperatureType
+        temperatureUnit: TemperatureUnit
     ): LoadResult<CurrentWeather> {
         return try {
             val entity = dtoMapper.toEntity(dto, city)
             saveWeather(entity)
-            val domainModel = entityMapper.toDomain(entity, temperatureType)
+            val domainModel = entityMapper.toDomain(entity, temperatureUnit)
             LoadResult.Remote(domainModel)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to map or save weather data: $ex", ex)
@@ -122,11 +124,11 @@ class CurrentWeatherRepositoryImpl(
 
     private suspend fun loadCachedWeatherForLocationOrError(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         remoteError: ForecastError
     ): LoadResult<CurrentWeather> {
         return try {
-            loadCachedWeatherForLocation(city, temperatureType, remoteError)
+            loadCachedWeatherForLocation(city, temperatureUnit, remoteError)
         } catch (ex: Exception) {
             loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex", ex)
             LoadResult.Error(
@@ -138,13 +140,13 @@ class CurrentWeatherRepositoryImpl(
 
     private suspend fun loadCachedWeatherForLocation(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         remoteError: ForecastError
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
             try {
                 val localModel = currentWeatherLocalDataSource.loadWeather(city)
-                val domainModel = entityMapper.toDomain(localModel, temperatureType)
+                val domainModel = entityMapper.toDomain(localModel, temperatureUnit)
                 LoadResult.Local(domainModel, remoteError)
             } catch (_: NoSuchDatabaseEntryException) {
                 loggingService.logDebugEvent(TAG, "No cached weather data found for city: $city")

@@ -5,7 +5,7 @@ import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureType
+import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
@@ -63,7 +63,7 @@ class HourlyWeatherRepositoryImpl(
 
     override suspend fun refreshWeatherForLocation(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         latitude: Double,
         longitude: Double
     ): LoadResult<HourlyWeather> =
@@ -71,19 +71,19 @@ class HourlyWeatherRepositoryImpl(
             when (val result =
                 remoteDataSource.loadHourlyWeatherForLocation(city, latitude, longitude)) {
                 is DataResult.Success -> {
-                    handleSuccessResponse(result.data, city, temperatureType)
+                    handleSuccessResponse(result.data, city, temperatureUnit)
                 }
 
                 is DataResult.Error -> {
                     val forecastError = errorMapper.map(result.error)
-                    loadCachedWeather(city, temperatureType, forecastError)
+                    loadCachedWeather(city, temperatureUnit, forecastError)
                 }
             }
         }
 
     override suspend fun loadCachedWeather(
         city: String,
-        temperatureType: TemperatureType,
+        temperatureUnit: TemperatureUnit,
         remoteError: ForecastError
     ): LoadResult<HourlyWeather> =
         withContext(dispatchers.io) {
@@ -93,7 +93,7 @@ class HourlyWeatherRepositoryImpl(
                         city = city,
                         error = ForecastError.NoDataAvailable("No cached data found for city: $city")
                     )
-                val domainModel = entityMapper.toDomain(entity, temperatureType)
+                val domainModel = entityMapper.toDomain(entity, temperatureUnit)
                 loggingService.logDebugEvent(
                     TAG,
                     "Loaded hourly weather from cache for city: $city"
@@ -120,12 +120,12 @@ class HourlyWeatherRepositoryImpl(
     private suspend fun handleSuccessResponse(
         dto: HourlyWeatherDto,
         city: String,
-        temperatureType: TemperatureType
+        temperatureUnit: TemperatureUnit
     ): LoadResult<HourlyWeather> {
         return try {
             val entity = dtoMapper.toEntity(dto)
             localDataSource.saveHourlyWeather(entity)
-            val domainModel = entityMapper.toDomain(entity, temperatureType)
+            val domainModel = entityMapper.toDomain(entity, temperatureUnit)
             loggingService.logDebugEvent(TAG, "Saved and mapped hourly weather for city: $city")
             LoadResult.Remote(domainModel)
         } catch (e: Exception) {
