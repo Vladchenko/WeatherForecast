@@ -20,6 +20,7 @@ import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
+import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigationBar
@@ -85,6 +86,9 @@ class WeatherActivity : AppCompatActivity() {
     lateinit var navigationEventBus: NavigationEventBus
 
     @Inject
+    lateinit var preferencesManager: PreferencesManager
+
+    @Inject
     lateinit var citySelectionCoordinator: CitySelectionCoordinator
 
     private val appBarViewModel: AppBarViewModel by viewModels()
@@ -134,6 +138,7 @@ class WeatherActivity : AppCompatActivity() {
                         navController = navController,
                         appBarViewModel = appBarViewModel,
                         weatherViewModel = weatherViewModel,
+                        preferencesManager = preferencesManager,
                         navigationEventBus = navigationEventBus,
                         hourlyViewModel = hourlyWeatherViewModel,
                         citySearchViewModel = citySearchViewModel
@@ -165,6 +170,10 @@ class WeatherActivity : AppCompatActivity() {
 
                     is NavigationEvent.CloseApp -> {
                         finishAffinity()
+                    }
+
+                    is NavigationEvent.NavigateToSettings -> {
+                        navigationDispatcher.navigate(NavigationEvent.NavigateToSettings)
                     }
                 }
             }

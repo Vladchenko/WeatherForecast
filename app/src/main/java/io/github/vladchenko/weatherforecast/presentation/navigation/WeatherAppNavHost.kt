@@ -13,15 +13,18 @@ import androidx.navigation.navArgument
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchScreen
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.CurrentWeatherScreen
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
+import io.github.vladchenko.weatherforecast.feature.settings.SettingsScreen
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_PARAM
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_SEARCH
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LATITUDE_PARAM
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LONGITUDE_PARAM
+import io.github.vladchenko.weatherforecast.presentation.navigation.Route.SETTINGS
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.WEATHER
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
@@ -39,6 +42,7 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  * @param navController Navigation controller for screen routing
  * @param modifier Compose modifier
  * @param navigationEventBus The event bus for dispatching navigation events
+ * @param preferencesManager The preferences manager for storing user preferences
  * @param appBarViewModel Shared view model for app bar state
  * @param hourlyViewModel Shared view model for hourly forecast
  * @param citySearchViewModel Shared view model for city search
@@ -50,6 +54,7 @@ fun WeatherAppNavHost(
     navController: NavController,
     modifier: Modifier = Modifier,
     navigationEventBus: NavigationEventBus,
+    preferencesManager: PreferencesManager,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     hourlyViewModel: HourlyWeatherViewModel = hiltViewModel(),
     citySearchViewModel: CitySearchViewModel = hiltViewModel(),
@@ -73,7 +78,7 @@ fun WeatherAppNavHost(
             val lon = backStackEntry.arguments?.getFloat(LONGITUDE_PARAM)?.toDouble() ?: .0
 
             CurrentWeatherScreen(
-                cityModel = CityLocationModel (city, Coordinate(lat, lon)),
+                cityModel = CityLocationModel(city, Coordinate(lat, lon)),
                 appBarViewModel = appBarViewModel,
                 hourlyViewModel = hourlyViewModel,
                 weatherViewModel = weatherViewModel,
@@ -86,6 +91,14 @@ fun WeatherAppNavHost(
                 appBarViewModel = appBarViewModel,
                 navigationEventBus = navigationEventBus,
                 citySearchViewModel = citySearchViewModel
+            )
+        }
+
+        composable(route = SETTINGS) {
+            SettingsScreen(
+                appBarViewModel = appBarViewModel,
+                preferencesManager = preferencesManager,
+                navigationEventBus = navigationEventBus
             )
         }
     }

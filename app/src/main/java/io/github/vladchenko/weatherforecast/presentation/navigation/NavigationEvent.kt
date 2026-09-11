@@ -59,4 +59,13 @@ sealed interface NavigationEvent {
      * typically from a system-level action or a dedicated "Exit" button.
      */
     data object CloseApp : NavigationEvent
+
+    /**
+     * Navigates to the settings screen.
+     *
+     * This event instructs the UI to open the application settings screen,
+     * allowing the user to adjust preferences such as temperature unit.
+     * Typically triggered from a "Settings" button or action in the toolbar.
+     */
+    data object NavigateToSettings : NavigationEvent
 }

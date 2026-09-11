@@ -7,7 +7,6 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
-import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
@@ -94,14 +93,8 @@ class CurrentWeatherViewModel @Inject constructor(
     //endregion flows
 
     private var currentJob: Job? = null
-    private lateinit var temperatureUnit: TemperatureUnit
 
     init {
-        scope.launch {
-            preferencesManager.temperatureUnit.collect { tempType ->
-                temperatureUnit = tempType
-            }
-        }
         scope.launch {
             networkStateHolder.networkStateFlow.collect { state ->
                 when (state) {
@@ -125,6 +118,7 @@ class CurrentWeatherViewModel @Inject constructor(
      * @param cityModel to provide a weather for
      */
     fun launchWeatherForecast(cityModel: CityLocationModel) {
+        currentJob?.cancel()
         scope.launch {
             showLoadingStatusFor(cityModel.city)
             val model = if (cityModel.city.isBlank()) {
@@ -167,7 +161,7 @@ class CurrentWeatherViewModel @Inject constructor(
         currentJob = scope.launch {
             val result = forecastInteractor.loadWeatherForLocation(
                 cityModel.city,
-                temperatureUnit,
+                preferencesManager.temperatureUnit.value,
                 cityModel.coordinate.latitude,
                 cityModel.coordinate.longitude
             )

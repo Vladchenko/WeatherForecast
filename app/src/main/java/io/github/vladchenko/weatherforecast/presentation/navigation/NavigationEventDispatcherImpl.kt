@@ -1,11 +1,14 @@
 package io.github.vladchenko.weatherforecast.presentation.navigation
 
 import androidx.navigation.NavController
+import androidx.navigation.navOptions
+import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.urlEncode
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_SEARCH
+import io.github.vladchenko.weatherforecast.presentation.navigation.Route.SETTINGS
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.weather
 
 /**
@@ -32,6 +35,14 @@ class NavigationEventDispatcherImpl(
     override fun navigate(event: NavigationEvent) {
         when (event) {
             is NavigationEvent.ShowWeatherFor -> {
+                val navOptions = navOptions {
+                    anim {
+                        enter = R.anim.fade_in
+                        exit = R.anim.fade_out
+                        popEnter = R.anim.fade_in
+                        popExit = R.anim.fade_out
+                    }
+                }
                 navController.navigate(
                     route = weather(
                         city = formatFullCityName(
@@ -40,7 +51,8 @@ class NavigationEventDispatcherImpl(
                             event.cityModel.country).urlEncode(),
                         lat = event.cityModel.latitude,
                         lon = event.cityModel.longitude
-                    )
+                    ),
+                    navOptions = navOptions
                 )
             }
 
@@ -55,6 +67,10 @@ class NavigationEventDispatcherImpl(
             is NavigationEvent.NavigateToCitySelection -> {
                 val navOptions = event.navOptions ?: fadeNavOptions()
                 navController.navigate(CITY_SEARCH, navOptions)
+            }
+
+            is NavigationEvent.NavigateToSettings -> {
+                navController.navigate(SETTINGS)
             }
         }
     }

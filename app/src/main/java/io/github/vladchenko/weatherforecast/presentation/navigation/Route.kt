@@ -32,6 +32,11 @@ object Route {
     const val CITY_SEARCH: String = "city_search"
 
     /**
+     * Route for the settings screen.
+     */
+    const val SETTINGS: String = "settings"
+
+    /**
      * Parameter name for city name in weather route.
      */
     const val CITY_PARAM = "city"
