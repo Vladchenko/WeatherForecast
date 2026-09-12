@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
@@ -34,7 +33,6 @@ import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubti
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.collections.immutable.ImmutableList
 
@@ -50,9 +48,10 @@ import kotlinx.collections.immutable.ImmutableList
  *
  * @param queryLabel Hint text for the search input field
  * @param cityMask Currently typed or selected city name (user input or saved city)
+ * @param onNavigateUp Callback for back navigation
  * @param citySelectionTitle Label displayed above the search field
  * @param appBarUiState Toolbar state including title, subtitle, and styling
- * @param navigationEventBus The event bus for dispatching navigation events
+ * @param onCitySelected Callback for city selection
  * @param onCitySelectionEvent Callback for user actions: navigation, city selection, recent cities management
  * @param recentCitiesNamesUiState Recent cities data (optional)
  * @param cityPredictionsUiState City search suggestions (optional)
@@ -62,9 +61,10 @@ import kotlinx.collections.immutable.ImmutableList
 fun CitySearchLayout(
     cityMask: String,
     queryLabel: String,
+    onNavigateUp: () -> Unit,
     citySelectionTitle: String,
     appBarUiState: AppBarUiState,
-    navigationEventBus: NavigationEventBus,
+    onCitySelected: (CityModel) -> Unit,
     onCitySelectionEvent: (CitySelectionEvent) -> Unit,
     recentCitiesNamesUiState: WeatherUiState<RecentCities>?,
     cityPredictionsUiState: WeatherUiState<ImmutableList<CityModel>>?,
@@ -98,7 +98,7 @@ fun CitySearchLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navigationEventBus.send(NavigationEvent.NavigateUp) }) {
+                    IconButton(onClick = onNavigateUp) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
@@ -133,7 +133,7 @@ fun CitySearchLayout(
                         cityMask = cityMask,
                         queryLabel = queryLabel,
                         recentCities = recentCitiesNamesUiState,
-                        navigationEventBus = navigationEventBus,
+                        onCitySelected = onCitySelected,
                         onCitySelectionEvent = onCitySelectionEvent,
                         cityMaskPredictions = cityPredictionsUiState,
                         mainContentColor = MaterialTheme.colorScheme.onSurface,

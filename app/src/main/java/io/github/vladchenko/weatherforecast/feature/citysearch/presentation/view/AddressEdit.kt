@@ -8,11 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 import kotlinx.collections.immutable.ImmutableList
 
 /**
@@ -27,7 +25,7 @@ import kotlinx.collections.immutable.ImmutableList
  * @param modifier The modifier to be applied to the container
  * @param mainContentColor The primary UI color used for styling
  * @param onRecentsDelete Callback invoked when the user requests deletion of all recent cities
- * @param navigationEventBus The event bus for dispatching navigation events
+ * @param onCitySelected Callback for handling city selection event
  * @param recentCities The current recent cities data, wrapped in [WeatherUiState]
  * @param onCitySelectionEvent Callback for dispatching city selection events
  * @param cityMaskPredictions The current list of prediction results, wrapped in [WeatherUiState]
@@ -39,7 +37,7 @@ fun AddressEdit(
     modifier: Modifier,
     mainContentColor: Color,
     onRecentsDelete: () -> Unit,
-    navigationEventBus: NavigationEventBus,
+    onCitySelected: (CityModel) -> Unit,
     recentCities: WeatherUiState<RecentCities>?,
     onCitySelectionEvent: (CitySelectionEvent) -> Unit,
     cityMaskPredictions: WeatherUiState<ImmutableList<CityModel>>?
@@ -61,22 +59,7 @@ fun AddressEdit(
             onClearClick = { onCitySelectionEvent(CitySelectionEvent.ClearQuery) },
             onDoneActionClick = { /* handled inside */ },
             onFirstFocus = { onCitySelectionEvent(CitySelectionEvent.LoadRecentCities) },
-            onItemClick = { selectedCity ->
-                navigationEventBus.send(
-                    event =
-                        NavigationEvent.ShowWeatherFor(
-                            CityModel(
-                                name = selectedCity.name,
-                                state = selectedCity.state,
-                                country = selectedCity.country,
-                                latitude = selectedCity.latitude,
-                                longitude = selectedCity.longitude
-                            )
-                        )
-                )
-                onCitySelectionEvent(CitySelectionEvent.SaveCityToRecents(selectedCity))
-                onCitySelectionEvent(CitySelectionEvent.ClearQuery)
-            },
+            onItemClick = onCitySelected,
             onRecentsDelete = onRecentsDelete
         )
     }

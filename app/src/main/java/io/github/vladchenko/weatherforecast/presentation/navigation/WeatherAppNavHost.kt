@@ -14,6 +14,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchScreen
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.CurrentWeatherScreen
@@ -27,6 +28,7 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LATITU
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LONGITUDE_PARAM
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.SETTINGS
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.WEATHER
+import io.github.vladchenko.weatherforecast.presentation.view.activities.WeatherActivity
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
 /**
@@ -114,6 +116,18 @@ fun WeatherAppNavHost(
 
         composable(route = CITY_SEARCH) {
             CitySearchScreen(
+                onNavigateUp = { navigationEventBus.send(NavigationEvent.NavigateUp) },
+                onCitySelected = { selectedCity ->
+                    navigationEventBus.send(
+                        NavigationEvent.ShowWeatherFor(selectedCity)
+                    )
+                    citySearchViewModel.onCitySelectionEvent(
+                        CitySelectionEvent.SaveCityToRecents(
+                            selectedCity
+                        )
+                    )
+                    citySearchViewModel.onCitySelectionEvent(CitySelectionEvent.ClearQuery)
+                },
                 appBarViewModel = appBarViewModel,
                 navigationEventBus = navigationEventBus,
                 citySearchViewModel = citySearchViewModel
