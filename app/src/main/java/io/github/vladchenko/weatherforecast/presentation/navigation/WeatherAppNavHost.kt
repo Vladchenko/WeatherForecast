@@ -136,9 +136,9 @@ fun WeatherAppNavHost(
 
         composable(route = SETTINGS) {
             SettingsScreen(
+                onNavigateUp = { navigationEventBus.send(NavigationEvent.NavigateUp) },
                 appBarViewModel = appBarViewModel,
-                preferencesManager = preferencesManager,
-                navigationEventBus = navigationEventBus
+                preferencesManager = preferencesManager
             )
         }
     }

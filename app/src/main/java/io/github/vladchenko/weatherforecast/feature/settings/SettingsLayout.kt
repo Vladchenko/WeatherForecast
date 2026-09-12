@@ -39,14 +39,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 
 /**
  * Settings screen layout.
@@ -59,14 +57,14 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEv
  * - Top app bar with back navigation
  *
  * @param appBarUiState The app bar UI state (title, subtitle, colors, visibility)
- * @param navigationEventBus The event bus for dispatching navigation events
+ * @param onNavigateUp Callback to navigate up in the navigation hierarchy
  * @param preferencesManager Manages user preferences (e.g., temperature unit)
  */
 @ExperimentalMaterial3Api
 @Composable
 fun SettingsLayout(
+    onNavigateUp: () -> Unit,
     appBarUiState: AppBarUiState,
-    navigationEventBus: NavigationEventBus,
     preferencesManager: PreferencesManager,
 ) {
     val statusColor = rememberResolvedColorAttr(appBarUiState.subtitleColorAttr)
@@ -102,7 +100,7 @@ fun SettingsLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navigationEventBus.send(NavigationEvent.NavigateUp) }) {
+                    IconButton(onClick = onNavigateUp) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             stringResource(R.string.back_button),
