@@ -8,7 +8,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
@@ -21,7 +20,6 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  * @param onNavigateUp Callback to navigate up in the navigation hierarchy.
  * @param onCitySelected Callback to handle city selection events.
  * @param appBarViewModel The shared toolbar state provider. Default: Hilt-provided instance.
- * @param navigationEventBus The event bus for dispatching navigation events
  * @param citySearchViewModel The view model that handles search logic and state management.
  *                            Default: Hilt-provided instance.
  */
@@ -30,7 +28,6 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 fun CitySearchScreen(
     onNavigateUp: () -> Unit,
     onCitySelected: (CityModel) -> Unit,
-    navigationEventBus: NavigationEventBus,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     citySearchViewModel: CitySearchViewModel = hiltViewModel(),
 ) {

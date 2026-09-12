@@ -129,7 +129,6 @@ fun WeatherAppNavHost(
                     citySearchViewModel.onCitySelectionEvent(CitySelectionEvent.ClearQuery)
                 },
                 appBarViewModel = appBarViewModel,
-                navigationEventBus = navigationEventBus,
                 citySearchViewModel = citySearchViewModel
             )
         }
