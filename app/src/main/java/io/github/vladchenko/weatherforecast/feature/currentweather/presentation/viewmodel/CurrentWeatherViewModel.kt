@@ -25,7 +25,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -82,13 +81,10 @@ class CurrentWeatherViewModel @Inject constructor(
      * Observers receive updates as [WeatherUiState.Loading], [WeatherUiState.Success], or error states.
      */
     val weatherStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>> = _weatherStateFlow
-            .onStart {
-                val city = chosenCityInteractor.loadChosenCity()
-                loadRemoteForecastForLocation(city)
-            }
-            .stateIn(scope, SharingStarted.WhileSubscribed(5000L),
-                WeatherUiState.Loading()
-            )
+        .stateIn(
+            scope, SharingStarted.WhileSubscribed(5000L),
+            WeatherUiState.Idle
+        )
 
     //endregion flows
 
