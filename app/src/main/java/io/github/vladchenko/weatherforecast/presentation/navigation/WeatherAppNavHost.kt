@@ -20,6 +20,7 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.settings.SettingsScreen
+import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_PARAM
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_SEARCH
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LATITUDE_PARAM
@@ -31,22 +32,37 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 /**
  * Navigation host for the Weather Forecast app.
  *
- * Defines the navigation graph with two screens:
- * - [WEATHER] - Current weather screen with city details
- * - [CITY_SEARCH] - City search screen
+ * Defines the navigation graph with three screens:
+ * - [WEATHER] - Current weather screen with city details and path parameters
+ * - [CITY_SEARCH] - City search screen for selecting a new location
+ * - [SETTINGS] - User preferences screen
  *
- * Navigation routes:
- * - Weather: weather/{city}/{lat}/{lon}
- * - City Search: city_search
+ * ## Navigation Routes
+ * - Weather: `current_weather/{city}/{lat}/{lon}` — city name (URL-encoded), latitude, longitude
+ * - City Search: `city_search`
+ * - Settings: `settings`
  *
- * @param navController Navigation controller for screen routing
- * @param modifier Compose modifier
- * @param navigationEventBus The event bus for dispatching navigation events
- * @param preferencesManager The preferences manager for storing user preferences
- * @param appBarViewModel Shared view model for app bar state
- * @param hourlyViewModel Shared view model for hourly forecast
- * @param citySearchViewModel Shared view model for city search
- * @param weatherViewModel Shared view model for current weather
+ * ## Navigation Architecture
+ * All navigation actions are dispatched through [NavigationEventBus], which broadcasts
+ * events to [WeatherActivity.collectNavigationEvents()]. The activity then delegates
+ * to [NavigationEventDispatcher] for actual NavController operations. This provides
+ * a single source of truth for navigation logic.
+ *
+ * ## City Selection Flow
+ * 1. User selects a city in [CitySearchScreen]
+ * 2. [NavigationEvent.ShowWeatherFor] is sent via [NavigationEventBus]
+ * 3. [WeatherActivity] receives the event and calls [NavigationEventDispatcher]
+ * 4. NavController navigates to the weather route with new city parameters
+ * 5. [CurrentWeatherScreen] receives the new [CityLocationModel] and triggers weather fetch
+ *
+ * @param navController Navigation controller for screen routing.
+ * @param modifier Compose modifier for the NavHost.
+ * @param navigationEventBus The event bus for dispatching navigation events.
+ * @param preferencesManager The preferences manager for storing user preferences.
+ * @param appBarViewModel Shared view model for app bar state.
+ * @param hourlyViewModel Shared view model for hourly forecast.
+ * @param citySearchViewModel Shared view model for city search.
+ * @param weatherViewModel Shared view model for current weather.
  */
 @ExperimentalMaterial3Api
 @Composable
@@ -82,7 +98,17 @@ fun WeatherAppNavHost(
                 appBarViewModel = appBarViewModel,
                 hourlyViewModel = hourlyViewModel,
                 weatherViewModel = weatherViewModel,
-                navigationEventBus = navigationEventBus
+                onCloseApp = { navigationEventBus.send(NavigationEvent.CloseApp) },
+                onNavigateToSettings = {
+                    navigationEventBus.send(NavigationEvent.NavigateToSettings)
+                },
+                onNavigateToCitySelection = {
+                    navigationEventBus.send(
+                        NavigationEvent.NavigateToCitySelection(
+                            fadeNavOptions()
+                        )
+                    )
+                }
             )
         }
 

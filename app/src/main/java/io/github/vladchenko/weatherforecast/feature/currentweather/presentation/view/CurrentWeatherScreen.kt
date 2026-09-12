@@ -10,27 +10,38 @@ import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
 /**
  * The root composable for the main weather forecast screen.
  *
- * This function loads and displays current weather data based on the provided
- * [cityModel] parameter. It handles navigation events from [CurrentWeatherViewModel]
- * and provides lifecycle-safe data flow.
+ * This function loads and displays current weather data based on the [cityModel]
+ * parameter passed from the navigation graph. When the [cityModel] changes
+ * (e.g., user selects a different city from search), [LaunchedEffect] triggers
+ * [CurrentWeatherViewModel.launchWeatherForecast] to fetch and display weather
+ * for the new location.
+ *
+ * ## Navigation
+ * All navigation actions are delegated via callback functions provided by
+ * [WeatherAppNavHost], which forwards them to [NavigationEventBus]. This keeps
+ * the screen decoupled from navigation implementation details.
+ *
+ * ## Data Flow
+ * 1. [CurrentWeatherViewModel] manages weather state via [CurrentWeatherViewModel.weatherStateFlow]
+ * 2. On composition, [LaunchedEffect(cityModel)] triggers initial weather load
+ * 3. User actions (refresh, navigate to city/settings) are passed as callbacks to [CurrentWeatherLayout]
  *
  * ## Supported Features
- * - Automatic initial data loading on composition start
+ * - Automatic weather loading on city change via [LaunchedEffect]
  * - Pull-to-refresh functionality for manual data reload
  * - Hourly forecast panel with lazy loading support
- * - App-level actions (close app, navigate to city search)
+ * - Navigation to city search and settings screens
  *
- * The UI is rendered using [CurrentWeatherLayout], and navigation is delegated
- * via the [NavigationEventDispatcher].
- *
- * @param cityModel Represents data for city to provide a weather forecast on
- * @param navigationEventBus The event bus for dispatching navigation events
+ * @param onCloseApp Callback for closing the app (back button).
+ * @param cityModel Represents data for the city to display weather for.
+ *                  Changes to this parameter trigger a new weather fetch.
+ * @param onNavigateToSettings Callback for navigating to settings screen.
+ * @param onNavigateToCitySelection Callback for navigating to city selection screen.
  * @param appBarViewModel The toolbar state provider. Default: Hilt-provided instance.
  * @param hourlyViewModel The hourly forecast state manager. Default: Hilt-provided instance.
  * @param weatherViewModel The current weather state manager. Default: Hilt-provided instance.
@@ -38,8 +49,10 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
 @ExperimentalMaterial3Api
 @Composable
 fun CurrentWeatherScreen(
+    onCloseApp: () -> Unit,
     cityModel: CityLocationModel,
-    navigationEventBus: NavigationEventBus,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToCitySelection: () -> Unit,
     appBarViewModel: AppBarViewModel = hiltViewModel(),
     hourlyViewModel: HourlyWeatherViewModel = hiltViewModel(),
     weatherViewModel: CurrentWeatherViewModel = hiltViewModel(),
@@ -53,10 +66,12 @@ fun CurrentWeatherScreen(
     }
 
     CurrentWeatherLayout(
+        onCloseApp = onCloseApp,
         appBarUiState = appBarUiState,
         weatherUiState = weatherUiState,
-        navigationEventBus = navigationEventBus,
+        onNavigateToSettings = onNavigateToSettings,
         hourlyWeatherUiState = hourlyWeatherUiState,
+        onNavigateToCitySelection = onNavigateToCitySelection,
         onRefreshWeather = { weatherViewModel.refreshWeather(true) },
         onLoadHourlyWeather = { data -> hourlyViewModel.loadHourlyWeatherForLocation(data) }
     )

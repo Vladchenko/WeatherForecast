@@ -58,58 +58,61 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 
 /**
  * Main weather screen layout.
  *
- * Displays current weather with optional hourly forecast panel, pull-to-refresh.
+ * Displays current weather with optional hourly forecast panel, pull-to-refresh,
+ * and app bar with navigation actions. This is a **pure presentational composable**
+ * that has no dependencies on ViewModels, StateFlow, or navigation logic.
  *
  * ## Architecture
- * - Accepts **immutable** `appBarUiState`, `weatherUiState`, `refreshingState` — recomposes only when *new instances* are passed
+ * - Accepts **immutable** state objects — recomposes only when *new instances* are passed
  * - **No ViewModel or StateFlow dependency** — fully decoupled from business logic
- * - Delegates events to [CurrentWeatherViewModel] via [onRefreshWeather] and [onLoadHourlyWeather]
+ * - Delegates all actions to callback functions provided by the parent composable
  * - Uses `AnimatedContent` with staggered enter/exit for smooth state transitions
  *
  * ## State behavior
- * - All UI states (`appBarUiState`, `weatherUiState`, `refreshingState`, `hourlyWeatherUiState`) are collected by parent (`WeatherFragment`)
+ * - All UI states (`appBarUiState`, `weatherUiState`, `hourlyWeatherUiState`) are collected
+ *   and passed down by the parent (`CurrentWeatherScreen`)
  * - `CurrentWeatherLayout` receives plain immutable objects, making it:
  *   - Fully testable without ViewModel mocking
  *   - Lifecycle-agnostic (works in `Fragment`, `Dialog`, `ModalBottomSheet`)
  *   - Optimised for recomposition (Compose skips re-render if reference unchanged)
  *
  * ## Key events
+ * - Pull-to-refresh fires [onRefreshWeather]
  * - Toggling hourly forecast triggers [onLoadHourlyWeather] with resolved city location (via [CityLocationModel])
- * - Pull-to-refresh fires [CurrentWeatherViewModel.refreshWeather]
- * - City click fires [NavigationEvent.NavigateToCitySelection]
- * - Back button fires [NavigationEvent.NavigateUp]
+ * - City click fires [onNavigateToCitySelection]
+ * - Back button fires [onCloseApp]
  *
+ * @param onCloseApp Handler for closing the app (back button in toolbar).
  * @param appBarUiState The app bar UI state (title, subtitle, colors, visibility).
  * @param onRefreshWeather Handler for refresh events.
+ * @param onNavigateToSettings Handler for navigating to settings.
+ * @param onNavigateToCitySelection Handler for navigating to city selection.
  * @param weatherUiState The current weather UI state (success/loading/error with data).
  * @param onLoadHourlyWeather Callback invoked when the hourly forecast is toggled on;
  *                            receives the resolved city location.
  * @param hourlyWeatherUiState The hourly forecast UI state (can be null during initial load).
- * @param navigationEventBus The event bus for dispatching navigation events
  */
 @ExperimentalMaterial3Api
 @Composable
 @NonSkippableComposable
 fun CurrentWeatherLayout(
+    onCloseApp: () -> Unit,
     appBarUiState: AppBarUiState,
     onRefreshWeather: () -> Unit,
-    navigationEventBus: NavigationEventBus,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToCitySelection: () -> Unit,
     weatherUiState: WeatherUiState<CurrentWeatherUi>,
     onLoadHourlyWeather: (CityLocationModel) -> Unit,
     hourlyWeatherUiState: WeatherUiState<HourlyWeather>?
@@ -172,9 +175,7 @@ fun CurrentWeatherLayout(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navigationEventBus.send(NavigationEvent.CloseApp)
-                    }) {
+                    IconButton(onClick = onCloseApp) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             "backIcon",
@@ -190,11 +191,7 @@ fun CurrentWeatherLayout(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    IconButton(onClick = {
-                        navigationEventBus.send(
-                            NavigationEvent.NavigateToSettings
-                        )
-                    }) {
+                    IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             Icons.Filled.Settings,
                             stringResource(R.string.go_to_settings),
@@ -314,13 +311,7 @@ fun CurrentWeatherLayout(
                                         MainContent(
                                             innerPadding = PaddingValues(),
                                             mainContentTextColor = MaterialTheme.colorScheme.onSurface,
-                                            onCityClick = {
-                                                navigationEventBus.send(
-                                                    NavigationEvent.NavigateToCitySelection(
-                                                        fadeNavOptions()
-                                                    )
-                                                )
-                                            },
+                                            onCityClick = onNavigateToCitySelection,
                                             uiState = state
                                         )
                                         AnimatedVisibility(visible = showHourlyForecast) {
