@@ -25,6 +25,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -92,7 +93,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
     init {
         scope.launch {
-            networkStateHolder.networkStateFlow.collect { state ->
+            networkStateHolder.networkStateFlow.drop(1).collect { state ->
                 when (state) {
                     false -> {} // Do nothing
                     true -> {
