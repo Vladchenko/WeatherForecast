@@ -16,7 +16,7 @@ import retrofit2.Response
  * - Returns a [DataResult.Success] with body if response is valid, or [DataResult.Error] otherwise
  *
  * ## Error Mapping Strategy
- * - `404 Not Found` → [DataError.RequestFailError] with extracted city name
+ * - `404 Not Found` → [DataError.CityNotFound] with extracted city name
  * - `401 Unauthorized` → [DataError.ApiKeyInvalid]
  * - `5xx Server Error` → [DataError.ServerError]
  * - Non-200 successful codes (e.g. 204) → mapped based on code
@@ -35,7 +35,7 @@ class ResponseProcessor() {
      * Performs the following checks in order:
      * 1. If response is not successful (4xx, 5xx), returns [DataError.ServerError]
      * 2. If response body is null, returns [DataError.ResponseNoBodyError]
-     * 3. If status code is not 200, maps to specific [DataError] (e.g. 404 → RequestFailError)
+     * 3. If status code is not 200, maps to specific [DataError] (e.g. 404 → CityNotFound)
      * 4. Otherwise, wraps the body in [DataResult.Success]
      *
      * @param city to inform user in case of error which city weather forecast failed for
@@ -61,8 +61,8 @@ class ResponseProcessor() {
 
             return if (code != 200) {
                 val error = when (code) {
-                    404 -> DataError.RequestFailError(
-                        query = extractCityFromUrl(response),
+                    404 -> DataError.CityNotFound(
+                        city = extractCityFromUrl(response),
                         message = message
                     )
                     401 -> DataError.ApiKeyInvalid(message)
@@ -92,7 +92,7 @@ class ResponseProcessor() {
     /**
      * Extracts the last path segment from the request URL, typically representing the city name.
      *
-     * Used to provide context in [DataError.RequestFailError] when a city is not found.
+     * Used to provide context in [DataError.CityNotFound] when a city is not found.
      *
      * @param response the response whose request URL is analyzed
      * @return the last path segment or "Unknown city" if not available

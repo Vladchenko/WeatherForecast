@@ -1,6 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models
 
 import androidx.compose.runtime.Immutable
+import io.github.vladchenko.weatherforecast.core.domain.model.City
 
 /**
  * Data model representing a weather forecast response.
@@ -51,15 +52,5 @@ data class Coordinate(
 ) {
     override fun toString(): String {
         return "Coordinate(latitude=$latitude, longitude=$longitude)"
-    }
-}
-
-@Immutable
-data class City(val name: String,
-                val latitude: Double,
-                val longitude: Double,)
-{
-    override fun toString(): String {
-        return "City(name='$name', latitude=$latitude, longitude=$longitude)"
     }
 }

@@ -44,66 +44,79 @@ sealed interface DataResult<out T> {
  * - [NetworkError]: Connectivity issues (e.g., timeout, no internet).
  * - [ServerError]: HTTP 5xx or invalid server responses.
  * - [ResponseNoBodyError]: Successful HTTP response but empty body.
- * - [RequestFailError]: Client-side failure (e.g., 404 City Not Found).
+ * - [CityNotFound]: Client-side failure (e.g., 404 City Not Found).
  * - [ApiKeyInvalid]: Authentication failure due to invalid or missing API key.
  * - [DatabaseError]: Local database operation failed (e.g., query, insert).
  *
  * This sealed hierarchy ensures exhaustive handling within the data layer and supports future extensibility.
  */
+
+/**
+ * Represents recoverable errors that can occur during data operations.
+ *
+ * Data-layer specific errors must be mapped to domain-layer [ForecastError]
+ * before crossing the data/domain boundary.
+ */
 sealed interface DataError {
+
     /**
      * API key is invalid or missing.
+     */
+    data class ApiKeyInvalid(
+        val message: String
+    ) : DataError
+
+    /**
+     * The requested city could not be found by the remote service.
+     */
+    data class CityNotFound(
+        val city: String,
+        val message: String
+    ) : DataError
+
+    /**
+     * A network operation failed.
      *
-     * @param message error description from server
+     * The original Throwable is kept in the data layer because it is
+     * an implementation detail of the networking stack.
      */
-    data class ApiKeyInvalid(val message: String) : DataError
+    data class NetworkError(
+        val cause: Throwable
+    ) : DataError
 
     /**
-     * Local database operation failed (e.g., query, insert, delete).
+     * The remote response could not be parsed.
      */
-    object DatabaseError : DataError
+    data class ParsingError(
+        val message: String,
+        val cause: Throwable? = null
+    ) : DataError
 
     /**
-     * Network-related error occurred (e.g., timeout, connection lost).
-     *
-     * @param cause underlying exception
+     * The server returned an error response.
      */
-    data class NetworkError(val cause: Throwable) : DataError
+    data class ServerError(
+        val code: Int,
+        val message: String
+    ) : DataError
 
     /**
-     * Failed to parse the response (e.g., invalid JSON, missing required fields).
-     *
-     * @param message description of parsing issue
-     * @param cause original exception (e.g., [kotlinx.serialization.SerializationException])
+     * A local database/storage operation failed.
      */
-    data class ParsingError(val message: String, val cause: Throwable? = null) : DataError
+    data class DatabaseError(
+        val message: String,
+        val cause: Throwable? = null
+    ) : DataError
 
     /**
-     * The API response was successful (2xx), but the body was null.
+     * The response was successful but contained no body.
      */
-    object ResponseNoBodyError : DataError
+    data object ResponseNoBodyError : DataError
 
     /**
-     * Request failed due to invalid input (e.g., city not found).
-     *
-     * @param query the value used in the request (e.g., city name)
-     * @param message server-provided error message
+     * An unexpected error occurred.
      */
-    data class RequestFailError(val query: String,
-                                val message: String) : DataError
-
-    /**
-     * Server returned an error response (e.g., 500 Internal Server Error).
-     *
-     * @param code HTTP status code
-     * @param message server-provided message
-     */
-    data class ServerError(val code: Int, val message: String) : DataError
-
-    /**
-     * An unexpected or unknown error occurred (e.g., parsing, memory, runtime).
-     *
-     * @param cause original exception
-     */
-    data class UncategorizedError(val cause: Throwable) : DataError
+    data class UncategorizedError(
+        val cause: Throwable
+    ) : DataError
 }

@@ -127,18 +127,22 @@ class HourlyWeatherViewModel @Inject constructor(
 
     private fun getErrorMessage(result: LoadResult.Error): Int =
         when (val error = result.error) {
-            is ForecastError.NetworkError -> when (error.type) {
-                ForecastError.NetworkError.Type.ConnectionFailed -> R.string.connection_refused
-                ForecastError.NetworkError.Type.NoInternet -> R.string.network_disconnected
-                ForecastError.NetworkError.Type.Timeout -> R.string.request_timeout
-                ForecastError.NetworkError.Type.SecurityError -> R.string.ssl_error
-                else -> R.string.network_error_generic
-            }
+            is ForecastError.NetworkError ->
+                when (error.type) {
+                    ForecastError.NetworkError.Type.ConnectionFailed -> R.string.connection_refused
+                    ForecastError.NetworkError.Type.NoInternet -> R.string.network_disconnected
+                    ForecastError.NetworkError.Type.Timeout -> R.string.request_timeout
+                    ForecastError.NetworkError.Type.SecurityError -> R.string.ssl_error
+                    ForecastError.NetworkError.Type.Other -> R.string.network_error_generic
+                }
             is ForecastError.ApiKeyInvalid -> R.string.api_key_invalid
             is ForecastError.CityNotFound -> R.string.city_not_found
             is ForecastError.NoDataAvailable -> R.string.no_weather_data_available
             is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
-            is ForecastError.UncategorizedError -> R.string.uncategorized_error
+            is ForecastError.DataParsingError -> R.string.data_parsing_error
+            is ForecastError.LocalStorageError -> R.string.local_storage_error
+            is ForecastError.ServerError -> R.string.server_error
+            is ForecastError.UncategorizedError -> R.string.unexpected_error
         }
 
     companion object {

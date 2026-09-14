@@ -67,4 +67,9 @@
     <string name="back_button">back button</string>
     <string name="hourly_forecast">Hourly Forecast</string>
     <string name="go_to_settings">Go to settings</string>
+
+    <string name="data_parsing_error">Failed to process weather data</string>
+    <string name="local_storage_error">Failed to access saved weather data</string>
+    <string name="server_error">Weather service is temporarily unavailable</string>
+    <string name="unexpected_error">Something went wrong. Please try again later</string>
 </resources>

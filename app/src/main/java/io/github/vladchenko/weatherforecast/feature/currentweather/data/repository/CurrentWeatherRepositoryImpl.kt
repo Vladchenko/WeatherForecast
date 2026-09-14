@@ -2,7 +2,6 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.data.reposit
 
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.data.model.DataError
-import io.github.vladchenko.weatherforecast.core.data.model.DataError.ResponseNoBodyError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
@@ -44,10 +43,13 @@ import kotlinx.coroutines.withContext
  *
  * ## Error Handling
  * All errors originate in the data layer as [DataError] and are mapped to meaningful [ForecastError] instances:
- * - [DataError.NetworkError] → [ForecastError.NetworkError.NoInternet]
- * - [DataError.RequestFailError] → [ForecastError.CityNotFound]
- * - [DataError.ServerError], [DataError.ApiKeyInvalid], [ResponseNoBodyError] → [ForecastError.NoDataAvailable]
- * - [DataError.DatabaseError] → [ForecastError.LocalDataCorrupted]
+ * - [DataError.NetworkError] → [ForecastError.NetworkError] (classified by exception type)
+ * - [DataError.CityNotFound] → [ForecastError.CityNotFound]
+ * - [DataError.ServerError] → [ForecastError.ServerError]
+ * - [DataError.ApiKeyInvalid] → [ForecastError.ApiKeyInvalid]
+ * - [DataError.ResponseNoBodyError] → [ForecastError.NoDataAvailable]
+ * - [DataError.DatabaseError] → [ForecastError.LocalStorageError]
+ * - [DataError.ParsingError] → [ForecastError.DataParsingError]
  *
  * This ensures clean separation between layers and prevents data-layer types from leaking into the domain.
  *
@@ -117,7 +119,7 @@ class CurrentWeatherRepositoryImpl(
             loggingService.logError(TAG, "Failed to map or save weather data: $ex", ex)
             LoadResult.Error(
                 city = city,
-                error = ForecastError.UncategorizedError(ex.message.toString(), ex)
+                error = ForecastError.UncategorizedError(ex.message.toString())
             )
         }
     }

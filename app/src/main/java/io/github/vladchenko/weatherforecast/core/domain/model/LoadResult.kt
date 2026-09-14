@@ -1,11 +1,5 @@
 package io.github.vladchenko.weatherforecast.core.domain.model
 
-import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.City
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-import javax.net.ssl.SSLException
-
 /**
  * Represents the result of a data loading operation, including source and error context.
  *
@@ -61,105 +55,84 @@ sealed interface LoadResult<out T> {
 }
 
 /**
- * Sealed interface representing domain-specific errors that can occur during data fetching.
+ * Represents domain-level errors that can occur while loading weather data.
  *
- * This hierarchy ensures exhaustive handling in UI and domain logic, improving robustness
- * and allowing meaningful error messages for the user.
+ * This hierarchy contains only information meaningful to the domain and
+ * presentation layers and does not depend on data-layer implementation details.
  */
 sealed interface ForecastError {
+
     /**
      * API key is invalid or missing.
-     *
-     * @param message error description from server
      */
-    data class ApiKeyInvalid(val message: String) : ForecastError
+    data class ApiKeyInvalid(
+        val message: String
+    ) : ForecastError
 
     /**
-     * Requested city was not found in the weather service.
-     *
-     * @param city name of the city that was not found
-     * @param message detailed error message from API
+     * The requested city could not be found.
      */
-    data class CityNotFound(val city: String, val message: String) : ForecastError
+    data class CityNotFound(
+        val city: String,
+        val message: String
+    ) : ForecastError
 
     /**
-     * Local cached data is corrupted or cannot be parsed.
-     *
-     * @param message description of the corruption or parsing issue
-     */
-    data class LocalDataCorrupted(val message: String) : ForecastError
-
-    /**
-     * Network-related error occurred (e.g., timeout, connection lost, SSL handshake failure).
-     *
-     * @param cause The underlying [Throwable] that caused the network error (e.g., [ConnectException]).
-     * @param type The specific type of network error (nullable).
+     * A network operation failed.
      */
     data class NetworkError(
-        val cause: Throwable,
-        val type: Type? = null
+        val type: Type
     ) : ForecastError {
-        /**
-         * Represents the type of network error.
-         */
+
         enum class Type {
-            /** No network connectivity available */
             NoInternet,
-
-            /** Request took too long to complete */
             Timeout,
-
-            /** Connection was refused or reset */
             ConnectionFailed,
-
-            /** SSL/TLS handshake failed */
             SecurityError,
-
-            /** Generic network issue not covered above */
             Other
-        }
-
-        companion object {
-            /**
-             * Factory method to create a [NetworkError] from a generic [Throwable].
-             *
-             * Analyzes the exception type to determine the specific [Type] of network error.
-             *
-             * @param cause The underlying throwable to wrap and classify.
-             * @return A new [NetworkError] with the appropriate [Type].
-             */
-            fun fromThrowable(cause: Throwable): NetworkError {
-                val type = when (cause) {
-                    is ConnectException -> Type.ConnectionFailed
-                    is UnknownHostException -> Type.NoInternet
-                    is SocketTimeoutException -> Type.Timeout
-                    is SSLException -> Type.SecurityError
-                    else -> Type.Other
-                }
-                return NetworkError(cause, type)
-            }
         }
     }
 
     /**
-     * No data is available from any source.
-     *
-     * This error is used when the API returns no data or an empty response.
-     *
-     * @param message description of the data absence
+     * The server returned an error response.
      */
-    data class NoDataAvailable(val message: String) : ForecastError
+    data class ServerError(
+        val code: Int,
+        val message: String
+    ) : ForecastError
 
     /**
-     * An error that does not fall into any of the predefined categories.
-     *
-     * Used as a fallback for unexpected exceptions not covered by specific error types.
-     *
-     * @param message description of the error
-     * @param cause optional original exception for debugging (nullable)
+     * The received data could not be parsed.
+     */
+    data class DataParsingError(
+        val message: String
+    ) : ForecastError
+
+    /**
+     * A local storage operation failed.
+     */
+    data class LocalStorageError(
+        val message: String
+    ) : ForecastError
+
+    /**
+     * Cached/local data is corrupted or invalid.
+     */
+    data class LocalDataCorrupted(
+        val message: String
+    ) : ForecastError
+
+    /**
+     * No weather data is available.
+     */
+    data class NoDataAvailable(
+        val message: String
+    ) : ForecastError
+
+    /**
+     * An unexpected error occurred.
      */
     data class UncategorizedError(
-        val message: String,
-        val cause: Throwable? = null
+        val message: String
     ) : ForecastError
 }

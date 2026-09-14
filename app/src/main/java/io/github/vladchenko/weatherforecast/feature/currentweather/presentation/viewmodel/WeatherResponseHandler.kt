@@ -9,6 +9,7 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.WeatherResponseHandlerResult
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent.CityNotFound
 
 /**
  * A handler responsible for processing raw weather data loading results and mapping them
@@ -73,7 +74,7 @@ class WeatherResponseHandler(
             }
 
             is LoadResult.Error -> {
-                var errorMessage: Int = Integer.MIN_VALUE
+                var errorMessage: Int
                 when (val error = loadResult.error) {
                     is ForecastError.ApiKeyInvalid -> {
                         errorMessage = R.string.api_key_invalid
@@ -83,11 +84,15 @@ class WeatherResponseHandler(
                     is ForecastError.CityNotFound -> {
                         errorMessage = R.string.city_not_found
                         statusStateHolder.updateWarningStatus(errorMessage, error.city)
-                        cityErrorEventBus.send(CityErrorEvent.CityNotFound(error.city))
+                        cityErrorEventBus.send(CityNotFound(error.city))
                     }
 
                     is ForecastError.LocalDataCorrupted -> {
                         errorMessage = R.string.local_data_corrupted
+                        loggingService.logError(
+                            TAG,
+                            "Local weather data is corrupted: ${error.message}"
+                        )
                         statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
                     }
 
@@ -95,27 +100,42 @@ class WeatherResponseHandler(
                         when (error.type) {
                             ForecastError.NetworkError.Type.ConnectionFailed -> {
                                 errorMessage = R.string.connection_refused
-                                statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                                statusStateHolder.updateErrorStatus(
+                                    errorMessage,
+                                    cityModel.city
+                                )
                             }
 
                             ForecastError.NetworkError.Type.NoInternet -> {
                                 errorMessage = R.string.network_disconnected
-                                statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                                statusStateHolder.updateErrorStatus(
+                                    errorMessage,
+                                    cityModel.city
+                                )
                             }
 
                             ForecastError.NetworkError.Type.Timeout -> {
                                 errorMessage = R.string.request_timeout
-                                statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                                statusStateHolder.updateErrorStatus(
+                                    errorMessage,
+                                    cityModel.city
+                                )
                             }
 
                             ForecastError.NetworkError.Type.SecurityError -> {
                                 errorMessage = R.string.ssl_error
-                                statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                                statusStateHolder.updateErrorStatus(
+                                    errorMessage,
+                                    cityModel.city
+                                )
                             }
 
-                            else -> {
+                            ForecastError.NetworkError.Type.Other -> {
                                 errorMessage = R.string.network_error_generic
-                                statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                                statusStateHolder.updateErrorStatus(
+                                    errorMessage,
+                                    cityModel.city
+                                )
                             }
                         }
 
@@ -124,10 +144,34 @@ class WeatherResponseHandler(
                         statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
                     }
 
+                    is ForecastError.DataParsingError -> {
+                        errorMessage = R.string.data_parsing_error
+                        loggingService.logError(TAG, "Failed to parse weather response: ${error.message}")
+                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                    }
+
+                    is ForecastError.LocalStorageError -> {
+                        errorMessage = R.string.local_storage_error
+                        loggingService.logError(TAG, "Local storage error: ${error.message}")
+                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                    }
+
+                    is ForecastError.ServerError -> {
+                        errorMessage = R.string.server_error
+                        loggingService.logError(
+                            TAG,
+                            "Weather server error: code=${error.code}, message=${error.message}"
+                        )
+                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                    }
+
                     is ForecastError.UncategorizedError -> {
-                        val error = error.cause ?: error.message
-                        loggingService.logError(TAG, "Uncategorized error: $error")
-                        statusStateHolder.updateErrorStatus(error.toString())
+                        loggingService.logError(
+                            TAG,
+                            "Uncategorized error: ${error.message}"
+                        )
+                        errorMessage = R.string.unexpected_error
+                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
                     }
                 }
                 return WeatherResponseHandlerResult(
