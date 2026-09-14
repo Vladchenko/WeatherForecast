@@ -24,28 +24,20 @@ class GeolocatorImpl(
 
     override suspend fun defineCityNameByLocation(coordinate: Coordinate): String =
         withContext(coroutineDispatchers.io) {
-            try {
-                val response = nominatimApi.reverse(
-                    lat = coordinate.latitude,
-                    lon = coordinate.longitude
-                )
-                response.address.getCityOrLocality()
-            } catch (e: Exception) {
-                throw GeoLocationException(e)
-            }
+            val response = nominatimApi.reverse(
+                lat = coordinate.latitude,
+                lon = coordinate.longitude
+            )
+            response.address.getCityOrLocality()
         }
 
     override suspend fun defineLocationByCity(city: String): Coordinate =
         withContext(coroutineDispatchers.io) {
-            try {
-                val results = nominatimApi.search(query = city)
-                if (results.isNotEmpty()) {
-                    results[0].toCoordinate()
-                } else {
-                    throw GeoLocationException(RuntimeException("City not found: $city"))
-                }
-            } catch (e: Exception) {
-                throw GeoLocationException(e)
+            val results = nominatimApi.search(query = city)
+            if (results.isNotEmpty()) {
+                results[0].toCoordinate()
+            } else {
+                throw GeoLocationException(RuntimeException("City not found: $city"))
             }
         }
 }

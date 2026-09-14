@@ -11,7 +11,6 @@ import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
-import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationException
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationListener
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel.Companion.GEO_LOCATING_ATTEMPTS
@@ -44,6 +43,7 @@ import javax.inject.Inject
  * @property loggingService Centralized service for application logging.
  * @property geoLocator Hardware service for retrieving current device location.
  * @property statusStateHolder Manages and broadcasts UI status messages (errors, warnings, info).
+ * @property dialogController Manages dialogs for user interactions (e.g., location permission requests).
  * @property geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
  */
 @HiltViewModel
@@ -60,13 +60,7 @@ class GeoLocationViewModel @Inject constructor(
     private var geoLocatingAttempts = 0
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        loggingService.logError(TAG, throwable.message.orEmpty())
-        loggingService.logError(TAG, throwable.stackTraceToString())
-
-        if (throwable is GeoLocationException) {
-            // TODO Bad to retry from exceptionHandler, replace with using try-catch when needed
-            retryGeoLocationOrGotoCitySelectionScreen()
-        }
+        loggingService.logError(TAG, "${throwable.message}: ${throwable.stackTraceToString()}")
         statusStateHolder.updateErrorStatus(throwable.message.toString())
     }
 
@@ -157,26 +151,30 @@ class GeoLocationViewModel @Inject constructor(
      */
     fun defineCityNameByLocation(coordinate: Coordinate) {
         viewModelScope.launch(exceptionHandler) {
-            val city = geoLocationHelper.defineCityNameByLocation(coordinate)
-            loggingService.logDebugEvent(
-                TAG,
-                "City defined successfully by location = $coordinate, city = $city"
-            )
-            val cityModel =
-                CityLocationModel(
-                    city,
-                    Coordinate(coordinate.latitude, coordinate.longitude)
+            try {
+                val city = geoLocationHelper.defineCityNameByLocation(coordinate)
+                loggingService.logDebugEvent(
+                    TAG,
+                    "City defined successfully by location = $coordinate, city = $city"
                 )
-            dialogController.showLocationDefined(
-                city = cityModel.city,
-                onPositiveClick = {
-                    geoLocationEventBus.send(GeoLocationEvent.OnForecastLoadForLocation(cityModel))
-                },
-                onNegativeClick = {
-                    statusStateHolder.updateInfoStatus(R.string.city_selection_title)
-                    geoLocationEventBus.send(GeoLocationEvent.GotoCitySelection)
-                }
-            )
+                val cityModel =
+                    CityLocationModel(
+                        city,
+                        Coordinate(coordinate.latitude, coordinate.longitude)
+                    )
+                dialogController.showLocationDefined(
+                    city = cityModel.city,
+                    onPositiveClick = {
+                        geoLocationEventBus.send(GeoLocationEvent.OnForecastLoadForLocation(cityModel))
+                    },
+                    onNegativeClick = {
+                        statusStateHolder.updateInfoStatus(R.string.city_selection_title)
+                        geoLocationEventBus.send(GeoLocationEvent.GotoCitySelection)
+                    }
+                )
+            } catch (_: Exception) {
+                retryGeoLocationOrGotoCitySelectionScreen()
+            }
         }
     }
 
