@@ -32,13 +32,8 @@ import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelectionCoordinator
-import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcher
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEventDispatcherImpl
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
@@ -50,10 +45,11 @@ import javax.inject.Inject
  * Hosts navigation graph and manages system UI appearance.
  *
  * Key features:
- * Manages [WeatherAppNavHost] for screen navigation
- * Coordinates network connectivity via [NetworkStatusCoordinator]
- * Provides shared view models for weather, forecast, and city search
- * Configures status and navigation bars appearance
+ * - Manages [WeatherAppNavHost] for screen navigation
+ * - Coordinates geolocation via [GeoLocationViewModel] and [GeoLocationEventBus]
+ * - Handles location permissions via [PermissionResolver]
+ * - Provides shared view models for weather, forecast, and city search
+ * - Configures status and navigation bars appearance
  */
 @AndroidEntryPoint
 class WeatherActivity : AppCompatActivity() {
@@ -97,8 +93,6 @@ class WeatherActivity : AppCompatActivity() {
     private val geoLocationViewModel: GeoLocationViewModel by viewModels()
     private val hourlyWeatherViewModel: HourlyWeatherViewModel by viewModels()
 
-    private lateinit var navigationDispatcher: NavigationEventDispatcher
-
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             permissionResolver.handlePermissionResult(isGranted)
@@ -109,7 +103,6 @@ class WeatherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         collectGeoLocationEvents()
-        collectNavigationEvents()
 
         // Connect permission resolver to activity result launcher
         permissionResolver.connect(
@@ -124,11 +117,6 @@ class WeatherActivity : AppCompatActivity() {
 
         setContent {
             val navController = rememberNavController()
-            navigationDispatcher = NavigationEventDispatcherImpl(
-                navController,
-                navigationEventBus
-            )
-            // Initialize coordinators after navController is set
             WeatherForecastTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -141,40 +129,8 @@ class WeatherActivity : AppCompatActivity() {
                         preferencesManager = preferencesManager,
                         navigationEventBus = navigationEventBus,
                         hourlyViewModel = hourlyWeatherViewModel,
-                        citySearchViewModel = citySearchViewModel
+                        citySearchViewModel = citySearchViewModel,
                     )
-                }
-            }
-        }
-    }
-
-    private fun collectNavigationEvents() {
-        lifecycleScope.launch {
-            navigationEventBus.navigationEventFlow.collect { event ->
-                when (event) {
-                    is NavigationEvent.NavigateUp -> {
-                        navigationDispatcher.navigate(NavigationEvent.NavigateUp)
-                    }
-
-                    is NavigationEvent.NavigateToCitySelection -> {
-                        navigationDispatcher.navigate(
-                            NavigationEvent.NavigateToCitySelection(
-                                fadeNavOptions()
-                            )
-                        )
-                    }
-
-                    is NavigationEvent.ShowWeatherFor -> {
-                        navigationDispatcher.navigate(NavigationEvent.ShowWeatherFor(event.cityModel))
-                    }
-
-                    is NavigationEvent.CloseApp -> {
-                        finishAffinity()
-                    }
-
-                    is NavigationEvent.NavigateToSettings -> {
-                        navigationDispatcher.navigate(NavigationEvent.NavigateToSettings)
-                    }
                 }
             }
         }

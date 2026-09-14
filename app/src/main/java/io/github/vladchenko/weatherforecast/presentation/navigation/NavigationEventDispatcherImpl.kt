@@ -1,9 +1,9 @@
 package io.github.vladchenko.weatherforecast.presentation.navigation
 
+import android.app.Activity
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.formatFullCityName
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.urlEncode
 import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
@@ -12,26 +12,31 @@ import io.github.vladchenko.weatherforecast.presentation.navigation.Route.SETTIN
 import io.github.vladchenko.weatherforecast.presentation.navigation.Route.weather
 
 /**
- * Implementation of [NavigationEventDispatcher] that handles navigation events
- * by directly interacting with the [NavController].
+ * Default implementation of [NavigationEventDispatcher] that handles navigation
+ * events by directly interacting with the [NavController].
  *
- * This class processes four types of navigation events:
- * - [NavigationEvent.ShowWeatherFor]: Navigates to the weather screen for a specific city
- * - [NavigationEvent.NavigateUp]: Pops the current destination from the back stack
- * - [NavigationEvent.CloseApp]: Dispatches an event to close the app
- * - [NavigationEvent.NavigateToCitySelection]: Navigates to city search screen,
- *   clearing the back stack up to and including the city search destination
+ * This class processes five types of navigation events:
+ * - [NavigationEvent.ShowWeatherFor]: Navigates to the weather screen for the
+ *   specified city. The route is built from the full city name
+ *   (via `formatFullCityName`) that is URL-encoded, together with latitude
+ *   and longitude. A fade animation is applied.
+ * - [NavigationEvent.NavigateUp]: Pops the current destination from the back stack.
+ * - [NavigationEvent.CloseApp]: Finishes the hosting activity via
+ *   `Activity.finishAffinity()`, resolved from [NavController.сontext].
+ * - [NavigationEvent.NavigateToCitySelection]: Navigates to the [CITY_SEARCH]
+ *   destination using the `navOptions` carried by the event, or the default
+ *   `fadeNavOptions()` when none are provided.
+ * - [NavigationEvent.NavigateToSettings]: Navigates to the [SETTINGS] destination.
  *
  * The navigation operations are executed synchronously when [navigate] is called,
  * making this a straightforward imperative navigation dispatcher.
  *
- * @property navController The [NavController] used to perform navigation operations
- * @property navigationEventBus The event bus for dispatching navigation events
+ * @property navController The [NavController] used to perform navigation operations.
  */
 class NavigationEventDispatcherImpl(
     private val navController: NavController,
-    private val navigationEventBus: NavigationEventBus
 ) : NavigationEventDispatcher {
+
     override fun navigate(event: NavigationEvent) {
         when (event) {
             is NavigationEvent.ShowWeatherFor -> {
@@ -61,7 +66,7 @@ class NavigationEventDispatcherImpl(
             }
 
             is NavigationEvent.CloseApp -> {
-                navigationEventBus.send(NavigationEvent.CloseApp)
+                (navController.context as? Activity)?.finishAffinity()
             }
 
             is NavigationEvent.NavigateToCitySelection -> {
