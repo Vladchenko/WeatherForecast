@@ -116,7 +116,7 @@ class CurrentWeatherViewModel @Inject constructor(
      */
     fun launchWeatherForecast(cityModel: CityLocationModel) {
         currentJob?.cancel()
-        scope.launch {
+        currentJob = scope.launch {
             showLoadingStatusFor(cityModel.city)
             val model = if (cityModel.city.isBlank()) {
                 val savedModel = chosenCityInteractor.loadChosenCity()
@@ -128,8 +128,7 @@ class CurrentWeatherViewModel @Inject constructor(
             } else {
                 cityModel
             }
-
-            loadRemoteForecastForLocation(model)
+            loadForecastForLocation(model)
         }
     }
 
@@ -153,17 +152,14 @@ class CurrentWeatherViewModel @Inject constructor(
     /**
      * Loads remote forecast for [cityModel].
      */
-    private fun loadRemoteForecastForLocation(cityModel: CityLocationModel) {
-        currentJob?.cancel()
-        currentJob = scope.launch {
-            val result = forecastInteractor.loadWeatherForLocation(
-                cityModel.city,
-                preferencesManager.temperatureUnit.value,
-                cityModel.coordinate.latitude,
-                cityModel.coordinate.longitude
-            )
-            processServerResponse(cityModel, result)
-        }
+    private suspend fun loadForecastForLocation(cityModel: CityLocationModel) {
+        val result = forecastInteractor.loadWeatherForLocation(
+            cityModel.city,
+            preferencesManager.temperatureUnit.value,
+            cityModel.coordinate.latitude,
+            cityModel.coordinate.longitude
+        )
+        processServerResponse(cityModel, result)
     }
 
     /**

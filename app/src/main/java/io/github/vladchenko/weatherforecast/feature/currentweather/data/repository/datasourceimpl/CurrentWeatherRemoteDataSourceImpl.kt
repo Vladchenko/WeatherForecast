@@ -2,12 +2,14 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.data.reposit
 
 import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
+import io.github.vladchenko.weatherforecast.core.di.DiConstants.API_TIMEOUT_MS
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.core.utils.toDataError
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiService
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherRemoteDataSource
+import kotlinx.coroutines.withTimeout
 import retrofit2.Response
 
 /**
@@ -34,8 +36,10 @@ class CurrentWeatherRemoteDataSourceImpl(
         longitude: Double
     ): DataResult<CurrentWeatherDto> {
         return runCatching {
-            val response = apiService.loadCurrentWeatherForLocation(latitude, longitude)
-            handleResponse(response, "lat=$latitude, lon=$longitude", city)
+            withTimeout(API_TIMEOUT_MS) {
+                val response = apiService.loadCurrentWeatherForLocation(latitude, longitude)
+                handleResponse(response, "lat=$latitude, lon=$longitude", city)
+            }
         }.getOrElse { throwable ->
             loggingService.logError(TAG, "Unexpected error during API call for $city", throwable)
             DataResult.Error(city, throwable.toDataError())
