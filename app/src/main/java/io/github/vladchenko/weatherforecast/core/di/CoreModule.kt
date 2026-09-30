@@ -9,8 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBusImpl
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBusImpl
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventBusImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper

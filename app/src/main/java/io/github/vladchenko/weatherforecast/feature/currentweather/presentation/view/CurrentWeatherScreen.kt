@@ -7,9 +7,10 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
+import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
 /**

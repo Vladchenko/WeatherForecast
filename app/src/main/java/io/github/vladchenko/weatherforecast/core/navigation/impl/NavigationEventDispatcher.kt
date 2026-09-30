@@ -1,4 +1,6 @@
-package io.github.vladchenko.weatherforecast.presentation.navigation
+package io.github.vladchenko.weatherforecast.core.navigation.impl
+
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEvent
 
 /**
  * Dispatches navigation events to the navigation controller.

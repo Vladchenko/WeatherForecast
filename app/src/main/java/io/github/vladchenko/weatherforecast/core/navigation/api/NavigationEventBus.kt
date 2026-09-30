@@ -1,6 +1,5 @@
-package io.github.vladchenko.weatherforecast.core.navigation
+package io.github.vladchenko.weatherforecast.core.navigation.api
 
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavigationEvent
 import kotlinx.coroutines.flow.SharedFlow
 
 /**

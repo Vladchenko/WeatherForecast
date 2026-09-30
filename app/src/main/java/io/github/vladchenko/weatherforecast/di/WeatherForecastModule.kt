@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor

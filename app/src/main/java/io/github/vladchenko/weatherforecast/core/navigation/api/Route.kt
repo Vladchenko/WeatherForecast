@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.navigation
+package io.github.vladchenko.weatherforecast.core.navigation.api
 
 /**
  * Navigation routes for the app.

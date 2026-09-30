@@ -5,31 +5,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEvent
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.Route.CITY_PARAM
+import io.github.vladchenko.weatherforecast.core.navigation.api.Route.CITY_SEARCH
+import io.github.vladchenko.weatherforecast.core.navigation.api.Route.LATITUDE_PARAM
+import io.github.vladchenko.weatherforecast.core.navigation.api.Route.LONGITUDE_PARAM
+import io.github.vladchenko.weatherforecast.core.navigation.api.Route.SETTINGS
+import io.github.vladchenko.weatherforecast.core.navigation.api.Route.WEATHER
+import io.github.vladchenko.weatherforecast.core.navigation.impl.NavAnimationUtils
+import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventDispatcher
+import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventDispatcherImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchScreen
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.CurrentWeatherScreen
-import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.settings.SettingsScreen
-import io.github.vladchenko.weatherforecast.presentation.navigation.NavAnimationUtils.fadeNavOptions
-import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_PARAM
-import io.github.vladchenko.weatherforecast.presentation.navigation.Route.CITY_SEARCH
-import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LATITUDE_PARAM
-import io.github.vladchenko.weatherforecast.presentation.navigation.Route.LONGITUDE_PARAM
-import io.github.vladchenko.weatherforecast.presentation.navigation.Route.SETTINGS
-import io.github.vladchenko.weatherforecast.presentation.navigation.Route.WEATHER
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
 /**
  * Navigation host for the Weather Forecast app.
@@ -64,10 +62,6 @@ import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBar
  * @param navController Navigation controller for screen routing.
  * @param navigationEventBus The event bus for dispatching navigation events.
  * @param preferencesManager The preferences manager for storing user preferences.
- * @param appBarViewModel Shared view model for app bar state.
- * @param hourlyViewModel Shared view model for hourly forecast.
- * @param citySearchViewModel Shared view model for city search.
- * @param weatherViewModel Shared view model for current weather.
  */
 @ExperimentalMaterial3Api
 @Composable
@@ -76,18 +70,16 @@ fun WeatherAppNavHost(
     navController: NavHostController,
     navigationEventBus: NavigationEventBus,
     preferencesManager: PreferencesManager,
-    appBarViewModel: AppBarViewModel = hiltViewModel(),
-    hourlyViewModel: HourlyWeatherViewModel = hiltViewModel(),
-    citySearchViewModel: CitySearchViewModel = hiltViewModel(),
-    weatherViewModel: CurrentWeatherViewModel = hiltViewModel(),
 ) {
     val navigationDispatcher = remember(navController) {
         NavigationEventDispatcherImpl(navController)
     }
+
     NavigationEventHandler(
         navigationEventBus = navigationEventBus,
         navigationDispatcher = navigationDispatcher
     )
+
     NavHost(
         navController = navController,
         startDestination = "$WEATHER/Moscow/55.7558/37.6173",
@@ -107,9 +99,6 @@ fun WeatherAppNavHost(
 
             CurrentWeatherScreen(
                 cityModel = CityLocationModel(city, Coordinate(lat, lon)),
-                appBarViewModel = appBarViewModel,
-                hourlyViewModel = hourlyViewModel,
-                weatherViewModel = weatherViewModel,
                 onCloseApp = { navigationEventBus.send(NavigationEvent.CloseApp) },
                 onNavigateToSettings = {
                     navigationEventBus.send(NavigationEvent.NavigateToSettings)
@@ -117,7 +106,7 @@ fun WeatherAppNavHost(
                 onNavigateToCitySelection = {
                     navigationEventBus.send(
                         NavigationEvent.NavigateToCitySelection(
-                            fadeNavOptions()
+                            NavAnimationUtils.fadeNavOptions()
                         )
                     )
                 }
@@ -129,28 +118,42 @@ fun WeatherAppNavHost(
                 onNavigateUp = { navigationEventBus.send(NavigationEvent.NavigateUp) },
                 onCitySelected = { selectedCity ->
                     navigationEventBus.send(
-                        NavigationEvent.ShowWeatherFor(selectedCity)
-                    )
-                    citySearchViewModel.onCitySelectionEvent(
-                        CitySelectionEvent.SaveCityToRecents(
-                            selectedCity
+                        NavigationEvent.ShowWeatherFor(
+                            city = formatFullCityNameForRoute(selectedCity),
+                            lat = selectedCity.latitude.toFloat(),
+                            lon = selectedCity.longitude.toFloat()
                         )
                     )
-                    citySearchViewModel.onCitySelectionEvent(CitySelectionEvent.ClearQuery)
-                },
-                appBarViewModel = appBarViewModel,
-                citySearchViewModel = citySearchViewModel
+                }
             )
         }
 
         composable(route = SETTINGS) {
             SettingsScreen(
                 onNavigateUp = { navigationEventBus.send(NavigationEvent.NavigateUp) },
-                appBarViewModel = appBarViewModel,
                 preferencesManager = preferencesManager
             )
         }
     }
+}
+
+/**
+ * Formats a full city name for the navigation route.
+ *
+ * Combines city name, state, and country into a URL-safe format.
+ *
+ * @param city The selected city model
+ * @return Formatted city string for route parameter
+ */
+private fun formatFullCityNameForRoute(city: CityModel): String {
+    val fullCity = buildString {
+        append(city.name)
+        if (!city.state.isNullOrBlank()) {
+            append(", ${city.state}")
+        }
+        append(", ${city.country}")
+    }
+    return fullCity.replace(" ", "%20")
 }
 
 @Composable

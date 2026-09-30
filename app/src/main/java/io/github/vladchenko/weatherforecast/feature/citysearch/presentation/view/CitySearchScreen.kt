@@ -8,6 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
@@ -36,11 +37,16 @@ fun CitySearchScreen(
     val cityMaskUiState by citySearchViewModel.cityMaskStateFlow.collectAsStateWithLifecycle()
     val cityPredictionsUiState by citySearchViewModel.cityPredictions.collectAsStateWithLifecycle()
     val recentCitiesNamesUiState by citySearchViewModel.recentCitiesNamesFlow.collectAsStateWithLifecycle()
+
     CitySearchLayout(
         cityMask = cityMaskUiState,
         onNavigateUp = onNavigateUp,
         appBarUiState = appBarUiState,
-        onCitySelected = onCitySelected,
+        onCitySelected = { city ->
+            citySearchViewModel.onCitySelectionEvent(CitySelectionEvent.SaveCityToRecents(city))
+            citySearchViewModel.onCitySelectionEvent(CitySelectionEvent.ClearQuery)
+            onCitySelected(city)
+        },
         cityPredictionsUiState = cityPredictionsUiState,
         recentCitiesNamesUiState = recentCitiesNamesUiState,
         queryLabel = context.getString(R.string.city_typing_begin),

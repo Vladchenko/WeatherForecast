@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.navigation
+package io.github.vladchenko.weatherforecast.core.navigation.impl
 
 import androidx.navigation.NavOptions
 import androidx.navigation.navOptions

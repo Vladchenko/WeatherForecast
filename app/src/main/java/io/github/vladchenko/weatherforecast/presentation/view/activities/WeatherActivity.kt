@@ -17,7 +17,7 @@ import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
-import io.github.vladchenko.weatherforecast.core.navigation.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
@@ -26,17 +26,14 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigationBar
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setLightStatusBars
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setTransparentSystemBars
-import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelectionCoordinator
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,7 +45,7 @@ import javax.inject.Inject
  * - Manages [WeatherAppNavHost] for screen navigation
  * - Coordinates geolocation via [GeoLocationViewModel] and [GeoLocationEventBus]
  * - Handles location permissions via [PermissionResolver]
- * - Provides shared view models for weather, forecast, and city search
+ * - Triggers weather forecast loading via [CurrentWeatherViewModel] on geolocation events
  * - Configures status and navigation bars appearance
  */
 @AndroidEntryPoint
@@ -87,11 +84,8 @@ class WeatherActivity : AppCompatActivity() {
     @Inject
     lateinit var citySelectionCoordinator: CitySelectionCoordinator
 
-    private val appBarViewModel: AppBarViewModel by viewModels()
-    private val citySearchViewModel: CitySearchViewModel by viewModels()
     private val weatherViewModel: CurrentWeatherViewModel by viewModels()
     private val geoLocationViewModel: GeoLocationViewModel by viewModels()
-    private val hourlyWeatherViewModel: HourlyWeatherViewModel by viewModels()
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -124,12 +118,8 @@ class WeatherActivity : AppCompatActivity() {
                 ) {
                     WeatherAppNavHost(
                         navController = navController,
-                        appBarViewModel = appBarViewModel,
-                        weatherViewModel = weatherViewModel,
                         preferencesManager = preferencesManager,
                         navigationEventBus = navigationEventBus,
-                        hourlyViewModel = hourlyWeatherViewModel,
-                        citySearchViewModel = citySearchViewModel,
                     )
                 }
             }

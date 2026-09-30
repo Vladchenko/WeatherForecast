@@ -1,7 +1,8 @@
-package io.github.vladchenko.weatherforecast.presentation.navigation
+package io.github.vladchenko.weatherforecast.core.navigation.api
 
 import androidx.navigation.NavOptions
-import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventDispatcher
+import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventDispatcherImpl
 
 /**
  * Sealed interface representing navigation events in the application.
@@ -45,12 +46,18 @@ sealed interface NavigationEvent {
      * Navigates to the weather forecast screen for the specified city.
      *
      * This event is triggered when the user selects a city from the search results
-     * or recent cities list. The [cityModel] parameter contains all the necessary data
-     * (name, state, country, coordinates) to display the weather for that location.
+     * or recent cities list. The [city] parameter is a URL-encoded full city name
+     * (formatted as "name, state, country"), along with [lat] and [lon] coordinates.
      *
-     * @param cityModel The domain model of the selected city containing its details.
+     * @param city URL-encoded full city name (e.g., "Moscow,RU")
+     * @param lat Latitude of the city
+     * @param lon Longitude of the city
      */
-    data class ShowWeatherFor(val cityModel: CityModel) : NavigationEvent
+    data class ShowWeatherFor(
+        val city: String,
+        val lat: Float,
+        val lon: Float
+    ) : NavigationEvent
 
     /**
      * Closes the application.
