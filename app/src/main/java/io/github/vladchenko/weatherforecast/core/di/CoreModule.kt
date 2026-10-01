@@ -14,6 +14,10 @@ import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEvent
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
+import io.github.vladchenko.weatherforecast.core.ui.dialog.LocationDialogFactory
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogController
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogControllerImpl
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBusImpl
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -21,7 +25,7 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchersImpl
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog.LocationDialogFactory
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
@@ -34,7 +38,7 @@ import javax.inject.Singleton
  * - [CoroutineDispatchers] and [CoroutineScope] for background operations
  * - [PreferencesManager] for persistent key-value storage
  * - [LoggingService] for consistent logging throughout the app
- * - Factories and helpers for common UI dialogs ([AlertDialogFactory], [LocationDialogFactory])
+ * - Factories and helpers for common UI dialogs ([AlertDialogFactory], [LocationDialogFactory], [WeatherDialogFactory])
  * - [DataErrorToForecastErrorMapper] for converting data-layer errors to domain errors
  *
  * All bindings are scoped to [SingletonComponent], ensuring single instances
@@ -89,6 +93,23 @@ class CoreModule {
     fun provideLocationDialogFactory(
         alertDialogFactory: AlertDialogFactory,
     ): LocationDialogFactory = LocationDialogFactory(alertDialogFactory)
+
+    @Provides
+    @Singleton
+    fun provideWeatherDialogFactory(
+        baseDialogFactory: AlertDialogFactory,
+        locationDialogFactory: LocationDialogFactory,
+    ): WeatherDialogFactory = WeatherDialogFactory(
+        baseDialogFactory,
+        locationDialogFactory
+    )
+
+    @Provides
+    @Singleton
+    fun provideWeatherDialogController(
+        dialogFactory: WeatherDialogFactory,
+        dialogHelper: AlertDialogHelper
+    ): WeatherDialogController = WeatherDialogControllerImpl(dialogFactory, dialogHelper)
 
     @Singleton
     @Provides

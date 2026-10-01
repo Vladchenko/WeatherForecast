@@ -21,6 +21,8 @@ import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventB
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogController
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogControllerImpl
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigationBar
@@ -30,8 +32,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
 import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelectionCoordinator
-import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
-import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogControllerImpl
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import kotlinx.coroutines.launch

@@ -8,13 +8,13 @@ import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.DeviceLocationProvider
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.GeoLocationListener
 import io.github.vladchenko.weatherforecast.feature.geolocation.domain.Geolocator
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel.Companion.GEO_LOCATING_ATTEMPTS
-import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow

@@ -1,9 +1,6 @@
-package io.github.vladchenko.weatherforecast.presentation.dialog
+package io.github.vladchenko.weatherforecast.core.ui.dialog
 
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogDelegate
-import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
-import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.dialog.LocationDialogFactory
 import javax.inject.Inject
 import javax.inject.Singleton
 

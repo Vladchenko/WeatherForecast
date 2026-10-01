@@ -7,11 +7,11 @@ import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEvent
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CityErrorEvent
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
-import io.github.vladchenko.weatherforecast.presentation.dialog.WeatherDialogController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch

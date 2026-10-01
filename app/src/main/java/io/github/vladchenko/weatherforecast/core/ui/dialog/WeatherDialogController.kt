@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.dialog
+package io.github.vladchenko.weatherforecast.core.ui.dialog
 
 /**
  * Controller interface for displaying weather-related dialogs.

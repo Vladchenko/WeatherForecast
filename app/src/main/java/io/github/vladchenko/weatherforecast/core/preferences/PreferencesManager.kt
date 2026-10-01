@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Manages app preferences using DataStore.
@@ -25,8 +23,7 @@ import javax.inject.Singleton
  * @property context for DataStore access
  * @property coroutineScope for flow collection
  */
-@Singleton
-class PreferencesManager @Inject constructor(
+class PreferencesManager(
     private val context: Context,
     private val coroutineScope: CoroutineScope
 ) {

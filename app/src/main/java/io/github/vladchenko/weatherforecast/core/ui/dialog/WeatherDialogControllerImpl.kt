@@ -1,9 +1,8 @@
-package io.github.vladchenko.weatherforecast.presentation.dialog
+package io.github.vladchenko.weatherforecast.core.ui.dialog
 
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import javax.inject.Inject
 
 /**
