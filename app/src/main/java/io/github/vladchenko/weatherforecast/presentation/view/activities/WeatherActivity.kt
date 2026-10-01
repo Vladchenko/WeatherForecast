@@ -29,10 +29,10 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.systembars.hideBottomNavigationBar
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setLightStatusBars
 import io.github.vladchenko.weatherforecast.core.ui.systembars.setTransparentSystemBars
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.CityErrorCoordinator
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
-import io.github.vladchenko.weatherforecast.presentation.coordinator.CitySelectionCoordinator
 import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
 import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
 import kotlinx.coroutines.launch
@@ -83,7 +83,7 @@ class WeatherActivity : AppCompatActivity() {
     lateinit var preferencesManager: PreferencesManager
 
     @Inject
-    lateinit var citySelectionCoordinator: CitySelectionCoordinator
+    lateinit var cityErrorCoordinator: CityErrorCoordinator
 
     private val geoLocationViewModel: GeoLocationViewModel by viewModels()
 
@@ -135,7 +135,7 @@ class WeatherActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        citySelectionCoordinator.startObserving(lifecycleScope, lifecycle)
+        cityErrorCoordinator.startObserving(lifecycleScope, lifecycle)
     }
 
     override fun onStop() {

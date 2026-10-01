@@ -6,6 +6,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
@@ -146,6 +149,24 @@ class CurrentWeatherModule {
         return WeatherOutputMapperImpl(
             weatherResponseHandler,
             weatherDomainToUiMapper
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideCityErrorCoordinator(
+        statusStateHolder: StatusStateHolder,
+        cityErrorEventBus: CityErrorEventBus,
+        navigationEventBus: NavigationEventBus,
+        geoLocationEventBus: GeoLocationEventBus,
+        dialogController: WeatherDialogController,
+    ): io.github.vladchenko.weatherforecast.feature.currentweather.presentation.CityErrorCoordinator {
+        return io.github.vladchenko.weatherforecast.feature.currentweather.presentation.CityErrorCoordinator(
+            statusStateHolder,
+            cityErrorEventBus,
+            navigationEventBus,
+            geoLocationEventBus,
+            dialogController
         )
     }
 }

@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.coordinator
+package io.github.vladchenko.weatherforecast.feature.currentweather.presentation
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -19,9 +19,9 @@ import kotlinx.coroutines.launch
 /**
  * Coordinates user actions and fallback strategies related to city selection.
  *
- * This class acts as an intermediary between [CurrentWeatherViewModel] and the UI layer,
- * handling edge cases where city selection fails or input is missing. It provides
- * a clean separation between navigation logic and city selection resolution.
+ * Handles edge cases where city selection fails or input is missing by coordinating
+ * between event buses and the UI layer. It provides a clean separation between
+ * error handling logic and the [CurrentWeatherViewModel].
  *
  * ## Key Scenarios
  * 1. **City Not Found**: When the user searches for a city that doesn't exist in the weather API database.
@@ -30,11 +30,7 @@ import kotlinx.coroutines.launch
  *
  * 2. **Blank City Input**: When the user attempts to load weather without providing a city name,
  *    and no previously saved city exists.
- *    - Automatically triggers geolocation via [GeoLocationCoordinator] as a fallback strategy.
- *
- * ## Lifecycle Awareness
- * All flow observation is scoped to [Lifecycle.State.STARTED] to prevent memory leaks
- * and unnecessary work while the UI is not visible.
+ *    - Automatically triggers geolocation via [GeoLocationEventBus] as a fallback strategy.
  *
  * @property statusStateHolder Manages and broadcasts UI status updates (info, warnings, errors).
  * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
@@ -42,7 +38,7 @@ import kotlinx.coroutines.launch
  * @property geoLocationEventBus Unified event bus for broadcasting geolocation-related events.
  * @property dialogController Manages the presentation of selection and error dialogs.
  */
-class CitySelectionCoordinator(
+class CityErrorCoordinator(
     private val statusStateHolder: StatusStateHolder,
     private val cityErrorEventBus: CityErrorEventBus,
     private val navigationEventBus: NavigationEventBus,
@@ -51,13 +47,7 @@ class CitySelectionCoordinator(
 ) {
 
     /**
-     * Starts observing city-related flows from [CurrentWeatherViewModel] and reacting to events.
-     *
-     * Launches collection of [cityErrorEventBus.cityErrorEventFlow] flow for handling missing
-     * city input or unknown city names.
-     *
-     * All observation occurs within [Lifecycle.State.STARTED] to ensure lifecycle safety
-     * and prevent memory leaks.
+     * Starts collecting city error events from [cityErrorEventBus] and reacting to them.
      *
      * @param scope The coroutine scope (typically provided by the Activity/Fragment) for launching collectors.
      * @param lifecycle The lifecycle of the UI component to bind observation to.
