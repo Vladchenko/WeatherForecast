@@ -17,6 +17,7 @@ import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEvent
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEvent
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
@@ -84,7 +85,6 @@ class WeatherActivity : AppCompatActivity() {
     @Inject
     lateinit var citySelectionCoordinator: CitySelectionCoordinator
 
-    private val weatherViewModel: CurrentWeatherViewModel by viewModels()
     private val geoLocationViewModel: GeoLocationViewModel by viewModels()
 
     private val requestPermissionLauncher =
@@ -163,8 +163,12 @@ class WeatherActivity : AppCompatActivity() {
                     }
 
                     is GeoLocationEvent.OnForecastLoadForLocation -> {
-                        weatherViewModel.launchWeatherForecast(
-                            event.locationModel
+                        navigationEventBus.send(
+                            NavigationEvent.ShowWeatherFor(
+                                city = event.locationModel.city,
+                                lat = event.locationModel.coordinate.latitude.toFloat(),
+                                lon = event.locationModel.coordinate.longitude.toFloat()
+                            )
                         )
                     }
 
