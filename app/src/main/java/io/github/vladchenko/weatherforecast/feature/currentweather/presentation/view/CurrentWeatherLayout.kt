@@ -65,7 +65,7 @@ import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolv
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
-import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
+import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
 
 /**
  * Main weather screen layout.

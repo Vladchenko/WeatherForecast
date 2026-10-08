@@ -44,7 +44,7 @@ import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
+import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
 
 /**
  * Settings screen layout.

@@ -32,7 +32,7 @@ import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolv
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
-import io.github.vladchenko.weatherforecast.models.presentation.AppBarUiState
+import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
 import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.collections.immutable.ImmutableList
 
