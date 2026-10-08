@@ -3,8 +3,8 @@ package io.github.vladchenko.weatherforecast.presentation
 import android.app.Application
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
+import io.github.vladchenko.weatherforecast.core.coordinator.NetworkStatusCoordinator
 import io.github.vladchenko.weatherforecast.core.workmanager.WorkerStarter
-import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import javax.inject.Inject
 
 /**

@@ -7,13 +7,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.BuildConfig
+import io.github.vladchenko.weatherforecast.core.coordinator.NetworkStatusCoordinator
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserverImpl
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
-import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

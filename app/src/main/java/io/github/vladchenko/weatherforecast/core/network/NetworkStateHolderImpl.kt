@@ -1,6 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.network
 
-import io.github.vladchenko.weatherforecast.presentation.coordinator.NetworkStatusCoordinator
+import io.github.vladchenko.weatherforecast.core.coordinator.NetworkStatusCoordinator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

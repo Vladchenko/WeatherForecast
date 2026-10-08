@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.coordinator
+package io.github.vladchenko.weatherforecast.core.coordinator
 
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
