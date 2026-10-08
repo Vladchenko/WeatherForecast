@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.di
+package io.github.vladchenko.weatherforecast.data.di
 
 import android.content.Context
 import android.content.SharedPreferences

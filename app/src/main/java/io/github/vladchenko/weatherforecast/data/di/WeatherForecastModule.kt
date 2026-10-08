@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.di
+package io.github.vladchenko.weatherforecast.data.di
 
 import dagger.Module
 import dagger.Provides
