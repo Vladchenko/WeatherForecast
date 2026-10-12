@@ -4,9 +4,9 @@ import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.datasource.RecentCitiesDataSource
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.mapper.RecentCitiesMapper
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDataSource
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCitiesRepository
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
 import kotlinx.coroutines.withContext

@@ -9,11 +9,11 @@ import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.local.HourlyWeatherLocalDataSource
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.remote.HourlyWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherLocalDataSource
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import kotlinx.coroutines.withContext
 
@@ -30,7 +30,7 @@ import kotlinx.coroutines.withContext
  * - Handles errors uniformly using [io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper] and provides meaningful [ForecastError] instances.
  *
  * ## Data Flow Strategy
- * 1. Try to fetch fresh data from [io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherRemoteDataSource].
+ * 1. Try to fetch fresh data from [HourlyWeatherRemoteDataSource].
  * 2. If successful:
  *    - Map DTO to entity and save in [HourlyWeatherLocalDataSource].
  *    - Return [LoadResult.Remote] with domain model.

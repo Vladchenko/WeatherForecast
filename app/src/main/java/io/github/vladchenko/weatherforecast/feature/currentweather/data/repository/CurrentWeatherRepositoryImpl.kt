@@ -1,7 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.data.repository
 
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
-import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
@@ -9,12 +8,12 @@ import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.local.CurrentWeatherLocalDataSource
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.remote.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
-import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherLocalDataSource
-import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import kotlinx.coroutines.withContext
@@ -29,7 +28,7 @@ import kotlinx.coroutines.withContext
  * - On remote fetch failure, attempts to load previously cached data as fallback.
  * - Maps data between layers:
  *   - Network DTO ([CurrentWeatherDto]) → Database Entity ([CurrentWeatherEntity]) → Domain Model ([CurrentWeather])
- * - Handles errors uniformly by converting [DataError] (data layer) to [ForecastError] (domain layer) using [DataErrorToForecastErrorMapper].
+ * - Handles errors uniformly by converting [io.github.vladchenko.weatherforecast.core.data.model.DataError] (data layer) to [ForecastError] (domain layer) using [DataErrorToForecastErrorMapper].
  *
  * ## Data Flow Strategy
  * 1. Try to fetch fresh data from [CurrentWeatherRemoteDataSource].
@@ -42,14 +41,14 @@ import kotlinx.coroutines.withContext
  * 4. If no cache exists or reading fails — return [LoadResult.Error].
  *
  * ## Error Handling
- * All errors originate in the data layer as [DataError] and are mapped to meaningful [ForecastError] instances:
- * - [DataError.NetworkError] → [ForecastError.NetworkError] (classified by exception type)
- * - [DataError.CityNotFound] → [ForecastError.CityNotFound]
- * - [DataError.ServerError] → [ForecastError.ServerError]
- * - [DataError.ApiKeyInvalid] → [ForecastError.ApiKeyInvalid]
- * - [DataError.ResponseNoBodyError] → [ForecastError.NoDataAvailable]
- * - [DataError.DatabaseError] → [ForecastError.LocalStorageError]
- * - [DataError.ParsingError] → [ForecastError.DataParsingError]
+ * All errors originate in the data layer as [io.github.vladchenko.weatherforecast.core.data.model.DataError] and are mapped to meaningful [ForecastError] instances:
+ * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.NetworkError] → [ForecastError.NetworkError] (classified by exception type)
+ * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.CityNotFound] → [ForecastError.CityNotFound]
+ * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ServerError] → [ForecastError.ServerError]
+ * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ApiKeyInvalid] → [ForecastError.ApiKeyInvalid]
+ * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ResponseNoBodyError] → [ForecastError.NoDataAvailable]
+ * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.DatabaseError] → [ForecastError.LocalStorageError]
+ * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ParsingError] → [ForecastError.DataParsingError]
  *
  * This ensures clean separation between layers and prevents data-layer types from leaking into the domain.
  *
@@ -66,7 +65,7 @@ import kotlinx.coroutines.withContext
  * @property dtoMapper Mapper for converting [CurrentWeatherDto] to [CurrentWeatherEntity].
  * @property entityMapper Mapper for converting [CurrentWeatherEntity] to [CurrentWeather].
  * @property coroutineDispatchers Dispatcher provider for background execution.
- * @property errorMapper Converts data-layer [DataError] into domain-level [ForecastError].
+ * @property errorMapper Converts data-layer [io.github.vladchenko.weatherforecast.core.data.model.DataError] into domain-level [ForecastError].
  * @property currentWeatherLocalDataSource Data source for persistent storage and retrieval of weather data.
  * @property currentWeatherRemoteDataSource Data source for fetching data from the remote API.
  */

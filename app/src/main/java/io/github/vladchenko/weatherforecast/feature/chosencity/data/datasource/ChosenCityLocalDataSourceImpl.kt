@@ -1,0 +1,51 @@
+package io.github.vladchenko.weatherforecast.feature.chosencity.data.datasource
+
+import android.content.SharedPreferences
+import androidx.core.content.edit
+import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
+import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
+
+/**
+ * [ChosenCityDataSource] implementation
+ *
+ * @property sharedPreferences local storage.
+ */
+class ChosenCityLocalDataSourceImpl(private val sharedPreferences: SharedPreferences) :
+    ChosenCityDataSource {
+
+    override suspend fun loadCity(): CityLocationModel {
+        return CityLocationModel(
+            sharedPreferences.getString(SAVED_CITY_ARGUMENT_KEY, "").orEmpty(),
+            loadChosenCityLocationLocally()
+        )
+    }
+
+    override suspend fun saveCity(cityModel: CityLocationModel) {
+        sharedPreferences.edit {
+            putString(SAVED_CITY_ARGUMENT_KEY, cityModel.city)
+            putString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, cityModel.coordinate.latitude.toString())
+            putString(SAVED_CITY_LONGITUDE_ARGUMENT_KEY, cityModel.coordinate.longitude.toString())
+        }
+    }
+
+    override suspend fun removeCity() {
+        sharedPreferences.edit { clear() }
+    }
+
+    private fun loadChosenCityLocationLocally(): Coordinate {
+        return Coordinate(
+            sharedPreferences.getString(SAVED_CITY_LATITUDE_ARGUMENT_KEY, "0d")
+                ?.toDouble()
+                ?: 0.0,
+            sharedPreferences.getString(SAVED_CITY_LONGITUDE_ARGUMENT_KEY, "0d")
+                ?.toDouble()
+                ?: 0.0
+        )
+    }
+
+    companion object {
+        const val SAVED_CITY_ARGUMENT_KEY = "Saved_city_argument"
+        const val SAVED_CITY_LATITUDE_ARGUMENT_KEY = "Saved_city_latitude_argument"
+        const val SAVED_CITY_LONGITUDE_ARGUMENT_KEY = "Saved_city_longitude_argument"
+    }
+}

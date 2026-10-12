@@ -5,10 +5,10 @@ import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.local.CitySearchLocalDataSource
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.remote.CitySearchRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchDtoMapper
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchEntityMapper
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchLocalDataSource
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.remote.CitySearchRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchRepository
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.model.CitySearch
 import kotlinx.coroutines.withContext

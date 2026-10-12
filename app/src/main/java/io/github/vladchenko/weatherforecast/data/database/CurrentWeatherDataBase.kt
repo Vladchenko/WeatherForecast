@@ -4,14 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.datasource.local.CitySearchDAO
+import io.github.vladchenko.weatherforecast.feature.currentweather.data.dao.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
-import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.dao.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO
+import io.github.vladchenko.weatherforecast.feature.recentcities.data.dao.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.RecentCitiesEntity
-import io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO
 
 /**
  * Main Room database for the weather forecast application.
@@ -42,21 +42,21 @@ abstract class WeatherForecastDatabase : RoomDatabase() {
     /**
      * Provides access to current weather forecast data operations.
      *
-     * @return An implementation of [io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.datasource.CurrentWeatherDAO]
+     * @return An implementation of [CurrentWeatherDAO]
      */
     abstract fun getWeatherForecastInstance(): CurrentWeatherDAO
 
     /**
      * Provides access to hourly weather forecast data operations.
      *
-     * @return An implementation of [io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherDAO]
+     * @return An implementation of [HourlyWeatherDAO]
      */
     abstract fun getHourlyForecastInstance(): HourlyWeatherDAO
 
     /**
      * Provides a list of cities, recently provided forecast for
      *
-     * @return An implementation of [io.github.vladchenko.weatherforecast.feature.recentcities.data.repository.datasource.RecentCitiesDAO]
+     * @return An implementation of [RecentCitiesDAO]
      */
     abstract fun getRecentCitiesDao(): RecentCitiesDAO
 

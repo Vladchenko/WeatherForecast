@@ -2,7 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.chosencity.data.repository
 
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.datasource.ChosenCityDataSource
+import io.github.vladchenko.weatherforecast.feature.chosencity.data.datasource.ChosenCityDataSource
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
 import kotlinx.coroutines.withContext
 

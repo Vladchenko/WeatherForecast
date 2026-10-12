@@ -3,7 +3,7 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.datasource.HourlyWeatherTypeConverters
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.dao.HourlyWeatherTypeConverters
 import kotlinx.collections.immutable.ImmutableList
 
 /**
