@@ -142,6 +142,8 @@ class HourlyWeatherViewModel @Inject constructor(
             is ForecastError.DataParsingError -> R.string.data_parsing_error
             is ForecastError.LocalStorageError -> R.string.local_storage_error
             is ForecastError.ServerError -> R.string.server_error
+            is ForecastError.AccessDenied -> R.string.error_access_denied
+            is ForecastError.RateLimitExceeded -> R.string.error_rate_limit
             is ForecastError.UncategorizedError -> R.string.unexpected_error
         }
 

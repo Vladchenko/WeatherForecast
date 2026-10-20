@@ -9,12 +9,12 @@ import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.local.HourlyWeatherLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.remote.HourlyWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import kotlinx.coroutines.withContext
 
 /**
@@ -61,11 +61,21 @@ class HourlyWeatherRepositoryImpl(
     private val remoteDataSource: HourlyWeatherRemoteDataSource,
 ) : HourlyWeatherRepository {
 
+    /**
+     * Refreshes hourly weather data for a location by fetching from remote source
+     * and caching the result locally.
+     *
+     * @param city name of the city
+     * @param latitude geographic latitude of the location
+     * @param longitude geographic longitude of the location
+     * @param temperatureUnit temperature unit for the response
+     * @return [LoadResult] containing either remote or cached local weather data, or an error
+     */
     override suspend fun refreshWeatherForLocation(
         city: String,
-        temperatureUnit: TemperatureUnit,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        temperatureUnit: TemperatureUnit
     ): LoadResult<HourlyWeather> =
         withContext(dispatchers.io) {
             when (val result =
@@ -81,6 +91,14 @@ class HourlyWeatherRepositoryImpl(
             }
         }
 
+    /**
+     * Loads cached hourly weather data when remote fetch fails.
+     *
+     * @param city name of the city to load cached data for
+     * @param temperatureUnit temperature unit for the response
+     * @param remoteError error that occurred during remote data fetch, attached to local result
+     * @return [LoadResult] containing cached weather data or an error if cache is empty or corrupted
+     */
     override suspend fun loadCachedWeather(
         city: String,
         temperatureUnit: TemperatureUnit,
@@ -117,6 +135,15 @@ class HourlyWeatherRepositoryImpl(
             }
         }
 
+    /**
+     * Handles a successful response from the remote data source.
+     * Maps DTO to entity, saves to local cache, and converts to domain model.
+     *
+     * @param dto weather data received from the remote API
+     * @param city name of the city for logging and domain model
+     * @param temperatureUnit temperature unit for the domain model
+     * @return [LoadResult.Remote] with the domain model on success, or [LoadResult.Error] on failure
+     */
     private suspend fun handleSuccessResponse(
         dto: HourlyWeatherDto,
         city: String,

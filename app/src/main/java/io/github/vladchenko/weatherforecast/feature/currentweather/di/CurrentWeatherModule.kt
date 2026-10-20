@@ -14,6 +14,7 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
+import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiService
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.dao.CurrentWeatherDAO
@@ -25,7 +26,6 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.C
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.CurrentWeatherRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
-import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
@@ -36,12 +36,12 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * Dagger module for providing dependencies related to the Current Weather feature.
+ * Hilt module for providing dependencies for the current weather feature.
  *
- * This module defines how components such as data sources, mappers, repository,
- * interactor, and view model factory are created and injected within the application.
- * All bindings are scoped to the SingletonComponent to ensure single instances
- * across the app lifecycle.
+ * Defines how components such as data sources,
+ * mappers, repository, interactor, and view model factory are created and injected.
+ * All bindings are tied to SingletonComponent, ensuring single instances
+ * throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)

@@ -39,11 +39,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Main activity serving as the app's entry point.
- * Hosts navigation graph and manages system UI appearance.
+ * Main activity serving as the entry point to the application.
+ *
+ * Hosts the navigation graph and manages the system UI appearance.
  *
  * Key features:
- * - Manages [WeatherAppNavHost] for screen navigation
+ * - Manages [WeatherAppNavHost] for navigation between screens
  * - Coordinates geolocation via [GeoLocationViewModel] and [GeoLocationEventBus]
  * - Handles location permissions via [PermissionResolver]
  * - Triggers weather forecast loading via [CurrentWeatherViewModel] on geolocation events
@@ -164,10 +165,10 @@ class WeatherActivity : AppCompatActivity() {
 
                     is GeoLocationEvent.OnForecastLoadForLocation -> {
                         navigationEventBus.send(
-                            NavigationEvent.ShowWeatherFor(
+                            event = NavigationEvent.ShowWeatherFor(
                                 city = event.locationModel.city,
-                                lat = event.locationModel.coordinate.latitude.toFloat(),
-                                lon = event.locationModel.coordinate.longitude.toFloat()
+                                latitude = event.locationModel.coordinate.latitude.toFloat(),
+                                longitude = event.locationModel.coordinate.longitude.toFloat()
                             )
                         )
                     }

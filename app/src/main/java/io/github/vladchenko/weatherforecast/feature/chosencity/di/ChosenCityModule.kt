@@ -5,21 +5,22 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.datasource.ChosenCityDataSource
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.datasource.ChosenCityLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.ChosenCityRepositoryImpl
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
+import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractorImpl
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
 import javax.inject.Singleton
 
 /**
- * Dagger module for providing dependencies related to the Chosen City feature.
+ * Hilt module for providing dependencies for the chosen city feature.
  *
- * This module defines how components such as data sources, repository,
- * and interactor are created and injected within the application. All bindings
- * are scoped to the SingletonComponent to ensure single instances across the app lifecycle.
+ * Defines how components such as data sources,
+ * repository, and interactor are created and injected. All bindings are tied to SingletonComponent,
+ * to ensure single instances throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,6 +47,6 @@ class ChosenCityModule {
         loggingService: LoggingService,
         chosenCityRepository: ChosenCityRepository
     ): ChosenCityInteractor {
-        return ChosenCityInteractor(loggingService, chosenCityRepository)
+        return ChosenCityInteractorImpl(loggingService, chosenCityRepository)
     }
 }

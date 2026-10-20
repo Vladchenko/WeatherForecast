@@ -1,22 +1,22 @@
 package io.github.vladchenko.weatherforecast.core.navigation.api
 
 /**
- * Navigation routes for the app.
+ * Navigation routes for the application.
  *
  * Used to avoid hardcoding string literals when navigating between screens.
- * Follows the pattern: `{screen_name}` for simple routes, or `{screen_name}/{params}` for routes with parameters.
+ * Follows the pattern: `{screen_name}` for simple routes or `{screen_name}/{params}` for parameterized routes.
  *
  * ## Examples
- * - `Route.Weather` → `current_weather`
- * - `Route.WeatherWithParams.format()` → `current_weather/Moscow/55.7558/37.6173`
- * - `Route.CitySearch` → `city_search`
+ * - `Route.WEATHER` → `current_weather`
+ * - `Route.weather()` → `current_weather/Moscow/55.7558/37.6173`
+ * - `Route.CITY_SEARCH` → `city_search`
  */
 object Route {
     /**
      * Route for the current weather screen.
      *
      * Accepts path parameters:
-     * - `{city}`: City name (URL-encoded)
+     * - `{city}`: City name (in URL-encoded format)
      * - `{lat}`: Latitude
      * - `{lon}`: Longitude
      *
@@ -37,24 +37,29 @@ object Route {
     const val SETTINGS: String = "settings"
 
     /**
-     * Parameter name for city name in weather route.
+     * Parameter name for city name in the weather route.
      */
     const val CITY_PARAM = "city"
 
     /**
-     * Parameter name for latitude in weather route.
+     * Parameter name for latitude in the weather route.
      */
     const val LATITUDE_PARAM = "lat"
 
     /**
-     * Parameter name for longitude in weather route.
+     * Parameter name for longitude in the weather route.
      */
     const val LONGITUDE_PARAM = "lon"
 
     /**
-     * Format a weather route with path parameters.
+     * Route for the AI weather summary screen.
+     */
+    const val AI_WEATHER_SUMMARY = "ai_weather_summary"
+
+    /**
+     * Formats the weather route with path parameters.
      *
-     * @param city City name (should be URL-encoded)
+     * @param city City name (must be in URL-encoded format)
      * @param lat Latitude
      * @param lon Longitude
      * @return Formatted route string, e.g., "current_weather/Moscow/55.7558/37.6173"

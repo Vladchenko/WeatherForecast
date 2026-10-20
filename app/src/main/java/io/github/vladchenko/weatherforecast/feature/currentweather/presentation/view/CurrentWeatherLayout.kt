@@ -7,6 +7,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,8 +24,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,43 +72,46 @@ import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubti
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
 import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
+import io.github.vladchenko.weatherforecast.presentation.view.CurrentWeatherSkeleton
+import io.github.vladchenko.weatherforecast.presentation.view.ShimmerDefaults
 
 /**
  * Main weather screen layout.
  *
- * Displays current weather with optional hourly forecast panel, pull-to-refresh,
- * and app bar with navigation actions. This is a **pure presentational composable**
- * that has no dependencies on ViewModels, StateFlow, or navigation logic.
+ * Displays current weather with an optional hourly forecast panel, pull-to-refresh,
+ * and a top bar with navigation actions. This is a **pure presentation composable**
+ * that does not depend on ViewModels, StateFlow, or navigation logic.
  *
  * ## Architecture
  * - Accepts **immutable** state objects — recomposes only when *new instances* are passed
- * - **No ViewModel or StateFlow dependency** — fully decoupled from business logic
- * - Delegates all actions to callback functions provided by the parent composable
- * - Uses `AnimatedContent` with staggered enter/exit for smooth state transitions
+ * - **Does not depend on ViewModel or StateFlow** — completely decoupled from business logic
+ * - All actions are delegated to callback functions provided by parent composables
+ * - Uses `AnimatedContent` with sequential enter/exit animations for smooth transitions
  *
- * ## State behavior
+ * ## State Behavior
  * - All UI states (`appBarUiState`, `weatherUiState`, `hourlyWeatherUiState`) are collected
- *   and passed down by the parent (`CurrentWeatherScreen`)
- * - `CurrentWeatherLayout` receives plain immutable objects, making it:
- *   - Fully testable without ViewModel mocking
- *   - Lifecycle-agnostic (works in `Fragment`, `Dialog`, `ModalBottomSheet`)
- *   - Optimised for recomposition (Compose skips re-render if reference unchanged)
+ *   and passed down by the parent component (`CurrentWeatherScreen`)
+ * - `CurrentWeatherLayout` receives simple immutable objects, making it:
+ *   - Fully testable without mocking ViewModel
+ *   - Lifecycle-independent (works in `Fragment`, `Dialog`, `ModalBottomSheet`)
+ *   - Optimized for recomposition (Compose skips redraw if reference hasn't changed)
  *
- * ## Key events
- * - Pull-to-refresh fires [onRefreshWeather]
+ * ## Key Events
+ * - Pull-to-refresh triggers [onRefreshWeather]
  * - Toggling hourly forecast triggers [onLoadHourlyWeather] with resolved city location (via [CityLocationModel])
- * - City click fires [onNavigateToCitySelection]
- * - Back button fires [onCloseApp]
+ * - City tap triggers [onNavigateToCitySelection]
+ * - "Back" button triggers [onCloseApp]
  *
- * @param onCloseApp Handler for closing the app (back button in toolbar).
- * @param appBarUiState The app bar UI state (title, subtitle, colors, visibility).
- * @param onRefreshWeather Handler for refresh events.
- * @param onNavigateToSettings Handler for navigating to settings.
- * @param onNavigateToCitySelection Handler for navigating to city selection.
- * @param weatherUiState The current weather UI state (success/loading/error with data).
- * @param onLoadHourlyWeather Callback invoked when the hourly forecast is toggled on;
- *                            receives the resolved city location.
- * @param hourlyWeatherUiState The hourly forecast UI state (can be null during initial load).
+ * @param onCloseApp app close handler ("Back" button in the bar)
+ * @param appBarUiState top bar UI state (title, subtitle, colors, visibility)
+ * @param onRefreshWeather refresh event handler
+ * @param onNavigateToSettings settings navigation handler
+ * @param onNavigateToAiSummary AI analysis navigation handler
+ * @param onNavigateToCitySelection city selection navigation handler
+ * @param weatherUiState current weather UI state (success/loading/error with data)
+ * @param onLoadHourlyWeather callback triggered when hourly forecast is enabled;
+ *                            accepts resolved city location
+ * @param hourlyWeatherUiState hourly forecast UI state (may be null on initial load)
  */
 @ExperimentalMaterial3Api
 @Composable
@@ -112,6 +121,7 @@ fun CurrentWeatherLayout(
     appBarUiState: AppBarUiState,
     onRefreshWeather: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToAiSummary: () -> Unit,
     onNavigateToCitySelection: () -> Unit,
     weatherUiState: WeatherUiState<CurrentWeatherUi>,
     onLoadHourlyWeather: (CityLocationModel) -> Unit,
@@ -184,19 +194,78 @@ fun CurrentWeatherLayout(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showHourlyForecast = !showHourlyForecast }) {
-                        Icon(
-                            Icons.Filled.Timeline,
-                            stringResource(R.string.hourly_forecast),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            Icons.Filled.Settings,
-                            stringResource(R.string.go_to_settings),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                    var expanded by remember { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = "More options",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        DropdownMenu(
+                            modifier = Modifier
+                                .background(Color.Transparent)
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface),
+                            expanded = expanded,
+                            tonalElevation = 0.dp,
+                            shadowElevation = 0.dp,
+                            onDismissRequest = { expanded = false },
+                            containerColor = Color.Transparent,
+                            border = null,
+                        ) {
+                            DropdownMenuItem(
+                                modifier = Modifier
+                                    .background(Color.Transparent),
+                                onClick = { showHourlyForecast = !showHourlyForecast },
+                                text = {
+                                    Text(stringResource(R.string.hourly_forecast))
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Filled.Timeline,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                modifier = Modifier
+                                    .background(Color.Transparent),
+                                onClick = {
+                                    expanded = false
+                                    onNavigateToSettings()
+                                },
+                                text = {
+                                    Text(stringResource(R.string.go_to_settings))
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Filled.Settings,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                modifier = Modifier
+                                    .background(Color.Transparent),
+                                onClick = {
+                                    expanded = false
+                                    onNavigateToAiSummary()
+                                },
+                                text = {
+                                    Text(stringResource(R.string.ai_go_to_summary))
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Filled.AutoAwesome,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -326,7 +395,7 @@ fun CurrentWeatherLayout(
                                     }
                                 }
 
-                                WeatherUiState.Idle -> {
+                                is WeatherUiState.Idle -> {
                                     // Do nothing
                                 }
                             }
@@ -339,14 +408,14 @@ fun CurrentWeatherLayout(
 }
 
 /**
- * Displays the main weather information: city, time, temperature, and weather condition.
+ * Displays main weather information: city, time, temperature, and weather conditions.
  *
- * The city name is clickable and triggers [onCityClick].
+ * City name is clickable and triggers [onCityClick].
  *
- * @param innerPadding Padding from the scaffold to prevent system UI overlap
- * @param mainContentTextColor Color applied to all text elements
- * @param onCityClick Callback triggered when the user taps the city name
- * @param uiState Success state containing the current weather data
+ * @param innerPadding inner padding from scaffold to prevent system UI overlap
+ * @param mainContentTextColor color applied to all text elements
+ * @param onCityClick callback triggered when city name is clicked
+ * @param uiState success state containing current weather data
  */
 @Composable
 private fun MainContent(

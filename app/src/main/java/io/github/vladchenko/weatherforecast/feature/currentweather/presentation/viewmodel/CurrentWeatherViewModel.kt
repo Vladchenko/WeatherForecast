@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
@@ -13,7 +14,6 @@ import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
@@ -31,28 +31,28 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel responsible for managing the current weather forecast UI and business logic.
+ * ViewModel responsible for managing UI and business logic of the current weather forecast.
  *
- * This ViewModel orchestrates the complete weather data lifecycle:
- * - Loading weather data from remote API with local cache fallback
+ * This ViewModel manages the full lifecycle of weather data:
+ * - Loading weather data from remote API with fallback to local cache
  * - Managing UI state transitions (Loading → Success/Error)
- * - Handling city selection and persistence
- * - Processing various error scenarios (network, API, local data corruption)
+ * - Processing city selection and saving
+ * - Handling various error scenarios (network, API, local data corruption)
  * - Supporting temperature unit preferences (Celsius/Fahrenheit)
  *
- * The ViewModel implements a "remote-first, cache-fallback" strategy:
+ * The ViewModel implements a "remote first, fallback cache" strategy:
  * 1. Attempts to fetch fresh data from the remote API
- * 2. If remote fetch fails, loads cached data and shows a warning
- * 3. If both fail, displays an appropriate error message
+ * 2. On remote fetch failure, loads cached data and shows a warning
+ * 3. On both methods failing, displays the appropriate error message
  *
- * @property loggingService Centralized service for structured application logging
- * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
- * @property statusStateHolder Manages and broadcasts UI status messages (info, warnings, errors)
- * @property networkStateHolder Manages network connectivity (connect or disconnect)
- * @property preferencesManager Manages user preferences (e.g., temperature unit: Celsius/Fahrenheit)
- * @property weatherOutputMapper Processes raw weather data loading results and maps them to a UI-ready structure
- * @property chosenCityInteractor Handles persistence and retrieval of the selected city
- * @property forecastInteractor Loads weather data from the remote API with local cache fallback
+ * @property loggingService centralized service for structured application logging
+ * @property cityErrorEventBus unified event bus for transmitting city-related errors
+ * @property statusStateHolder manages and transmits UI status messages (info, warnings, errors)
+ * @property networkStateHolder manages network connectivity (connected or disconnected)
+ * @property preferencesManager manages user preferences (e.g., temperature unit)
+ * @property weatherOutputMapper processes raw weather data load results and renders them into UI-ready structure
+ * @property chosenCityInteractor handles saving and retrieving the chosen city
+ * @property forecastInteractor loads weather data from remote API with fallback to local cache
  */
 @HiltViewModel
 class CurrentWeatherViewModel @Inject constructor(
@@ -75,7 +75,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val scope = CoroutineScope(viewModelScope.coroutineContext + exceptionHandler)
 
     private val _weatherStateFlow =
-        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Idle)
+        MutableStateFlow<WeatherUiState<CurrentWeatherUi>>(WeatherUiState.Loading(false))
 
     /**
      * Public read-only flow that emits the current UI state of the weather forecast.
@@ -84,7 +84,7 @@ class CurrentWeatherViewModel @Inject constructor(
     val weatherStateFlow: StateFlow<WeatherUiState<CurrentWeatherUi>> = _weatherStateFlow
         .stateIn(
             scope, SharingStarted.WhileSubscribed(5000L),
-            WeatherUiState.Idle
+            WeatherUiState.Loading(false)
         )
 
     //endregion flows
@@ -155,9 +155,9 @@ class CurrentWeatherViewModel @Inject constructor(
     private suspend fun loadForecastForLocation(cityModel: CityLocationModel) {
         val result = forecastInteractor.loadWeatherForLocation(
             cityModel.city,
-            preferencesManager.temperatureUnit.value,
             cityModel.coordinate.latitude,
-            cityModel.coordinate.longitude
+            cityModel.coordinate.longitude,
+            preferencesManager.temperatureUnit.value
         )
         processServerResponse(cityModel, result)
     }

@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view
+package io.github.vladchenko.weatherforecast.presentation.view
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -9,11 +9,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -21,27 +23,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
- * Skeleton loader for the main content of CurrentWeatherLayout with shimmer effect.
+ * Loading skeleton indicator for the main content of CurrentWeatherLayout with shimmer effect.
+ *
+ * Displays an animated gradient shimmer effect used
+ * as a placeholder during content loading.
+ *
+ * @param modifier Modifier to apply to the component.
+ * @param shimmerColors Shimmer effect color configuration.
  */
 @Composable
 fun CurrentWeatherSkeleton(
+    modifier: Modifier = Modifier,
     shimmerColors: ShimmerColors = ShimmerDefaults.colors()
 ) {
     val shimmerBrush = rememberShimmerBrush(shimmerColors = shimmerColors)
     ShimmerBox(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize(),
         brush = shimmerBrush,
-        shape = RoundedCornerShape(4.dp)
+        shape = RoundedCornerShape(8.dp)
     )
 }
 
 /**
- * Base component for displaying a shimmer effect.
+ * Base component for displaying the shimmer effect.
  *
- * @param modifier The modifier to apply to the box.
- * @param brush The brush used for the shimmer gradient.
- * @param shape The shape of the shimmer box (rounded corners by default).
+ * @param modifier Modifier to apply to the box.
+ * @param brush Brush used for the shimmer gradient.
+ * @param shape Shape of the shimmer box (rounded corners by default).
  */
 @Composable
 private fun ShimmerBox(
@@ -58,10 +67,10 @@ private fun ShimmerBox(
 }
 
 /**
- * Creates a brush with a shimmer animation effect.
+ * Creates a brush with animated shimmer effect.
  *
- * @param shimmerColors The color configuration for the shimmer effect.
- * @return A linear gradient brush animated to simulate shimmer.
+ * @param shimmerColors Shimmer effect color configuration.
+ * @return Linear gradient brush animated to simulate shimmer.
  */
 @Composable
 private fun rememberShimmerBrush(
@@ -87,11 +96,11 @@ private fun rememberShimmerBrush(
             shimmerColors.highlightColor,
             shimmerColors.baseColor
         ),
-        start = androidx.compose.ui.geometry.Offset(
+        start = Offset(
             x = shimmerProgress * 1500f - 500f,
             y = shimmerProgress * 1500f - 160f
         ),
-        end = androidx.compose.ui.geometry.Offset(
+        end = Offset(
             x = shimmerProgress * 1500f + 50f,
             y = shimmerProgress * 1500f + 160f
         )
@@ -101,8 +110,8 @@ private fun rememberShimmerBrush(
 /**
  * Configuration class for shimmer effect colors and animation duration.
  *
- * @property baseColor The base background color of the shimmer.
- * @property highlightColor The highlighted color that sweeps across.
+ * @property baseColor Base background shimmer color.
+ * @property highlightColor Highlight color passing across the surface.
  * @property durationMs Duration of one shimmer cycle in milliseconds.
  */
 data class ShimmerColors(
@@ -112,16 +121,16 @@ data class ShimmerColors(
 )
 
 /**
- * Default shimmer color configurations.
+ * Object with default shimmer color configurations.
  */
 object ShimmerDefaults {
     /**
-     * Provides default shimmer colors with optional overrides.
+     * Provides default shimmer colors with override capability.
      *
-     * @param baseColor Background color of the shimmer (default: light gray with low alpha).
-     * @param highlightColor The moving highlight color (default: white with medium alpha).
+     * @param baseColor Background shimmer color (default: light gray with low alpha).
+     * @param highlightColor Highlight color passing across the surface (default: white with medium alpha).
      * @param durationMs Animation duration in milliseconds.
-     * @return Configured [ShimmerColors] instance.
+     * @return Configured instance of [ShimmerColors].
      */
     @Composable
     fun colors(
@@ -138,8 +147,9 @@ object ShimmerDefaults {
 }
 
 /**
- * Preview of the [CurrentWeatherSkeleton] composable.
- * Displays the shimmer loading state with dark background for contrast.
+ * Preview for [CurrentWeatherSkeleton] component.
+ *
+ * Displays the loading state with shimmer effect on a dark background for contrast.
  */
 @Preview(
     name = "CurrentWeatherSkeleton Preview",
@@ -148,5 +158,8 @@ object ShimmerDefaults {
 )
 @Composable
 private fun CurrentWeatherSkeletonPreview() {
-    CurrentWeatherSkeleton()
+    CurrentWeatherSkeleton(
+        modifier = Modifier
+            .padding(16.dp),
+    )
 }

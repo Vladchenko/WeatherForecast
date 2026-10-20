@@ -2,46 +2,48 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.interactor
 
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
+import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 
 /**
- * Interactor responsible for handling business logic related to current weather data.
+ * Interactor responsible for processing business logic related to current weather data.
  *
  * Acts as an intermediary between the presentation layer (ViewModel) and the repository layer,
- * encapsulating the use case of loading current weather for a specific location.
+ * encapsulating the current weather loading scenario for a specific location.
  *
- * @property currentWeatherRepository The repository responsible for providing weather data
- *                                   from remote or local sources.
+ * @property currentWeatherRepository repository responsible for providing weather data
+ *                                   from remote or local sources
  */
 class CurrentWeatherInteractor(
     private val currentWeatherRepository: CurrentWeatherRepository
 ) {
 
     /**
-     * Loads the current weather for a given geographic location.
+     * Loads current weather for the given geographic location.
      *
-     * This method triggers a refresh of weather data from the repository, which may fetch from
-     * the network or fall back to cached data depending on implementation and availability.
+     * This method initiates weather data update from the repository, which can fetch data
+     * from the network or fall back to cached data depending on implementation and availability.
      *
-     * @param city The name of the city for which weather is requested.
-     * @param temperatureUnit The unit type for temperature (e.g., Celsius, Fahrenheit).
-     * @param latitude The geographical latitude of the location.
-     * @param longitude The geographical longitude of the location.
-     * @return A [LoadResult] that wraps the result of the operation:
-     *         - [LoadResult.Success] with [CurrentWeather] data if successful.
-     *         - [LoadResult.Error] with an error description if the operation failed.
+     * @param city city name for which weather is requested
+     * @param latitude geographic latitude of the location
+     * @param longitude geographic longitude of the location
+     * @param temperatureUnit temperature unit (e.g., Celsius, Fahrenheit)
+     * @return [LoadResult] wrapping the operation result:
+     *         - [LoadResult.Remote] with [CurrentWeather] data on success
+     *         - [LoadResult.Local] with cached data on remote request failure
+     *         - [LoadResult.Error] with error description on failure
      */
     suspend fun loadWeatherForLocation(
         city: String,
-        temperatureUnit: TemperatureUnit,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        temperatureUnit: TemperatureUnit
     ): LoadResult<CurrentWeather> {
         return currentWeatherRepository.refreshWeatherForLocation(
             city,
-            temperatureUnit,
             latitude,
-            longitude
+            longitude,
+            temperatureUnit
         )
     }
 }

@@ -1,24 +1,24 @@
 package io.github.vladchenko.weatherforecast.feature.chosencity.domain
 
+import io.github.vladchenko.weatherforecast.core.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 
 /**
- * User chosen city interactor.
+ * Implementation of [ChosenCityInteractor] for managing the user's chosen city.
  *
- * @property chosenCityRepository provides data-layer data.
+ * @param loggingService service for structured logging.
+ * @param chosenCityRepository repository for working with chosen city data.
  */
-class ChosenCityInteractor(
+class ChosenCityInteractorImpl(
     private val loggingService: LoggingService,
     private val chosenCityRepository: ChosenCityRepository
-) {
+) : ChosenCityInteractor {
 
     /**
-     * Download model of city chosen by user, consisting its name and coordinate.
-     *
-     * @return data model for city
+     * Fetches the model of the user's chosen city, including name and coordinates.
      */
-    suspend fun loadChosenCity(): CityLocationModel {
+    override suspend fun loadChosenCity(): CityLocationModel {
         val city = chosenCityRepository.loadChosenCity()
         if (city.city.isBlank()) {
             loggingService.logDebugEvent(TAG, "City is empty")
@@ -29,16 +29,18 @@ class ChosenCityInteractor(
     }
 
     /**
-     * Save model of city chosen by user, consisting its name, i.e.[cityModel]
+     * Saves the user's chosen city model.
+     *
+     * @param cityModel city model to save.
      */
-    suspend fun saveChosenCity(cityModel: CityLocationModel) {
+    override suspend fun saveChosenCity(cityModel: CityLocationModel) {
         chosenCityRepository.saveChosenCity(cityModel)
     }
 
     /**
-     * Delete a city model from storage.
+     * Removes the city from storage.
      */
-    suspend fun removeCity() {
+    override suspend fun removeCity() {
         chosenCityRepository.removeCity()
     }
 

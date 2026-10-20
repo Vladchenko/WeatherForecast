@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryDAO
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.models.AISummaryEntity
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchEntity
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.dao.CurrentWeatherDAO
@@ -16,18 +18,19 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.data.model.Rece
 /**
  * Main Room database for the weather forecast application.
  *
- * This database holds data across these core entities:
+ * This database stores data for the following entities:
  * - [CurrentWeatherEntity]: stores current weather for cities
- * - [CitySearchEntity]: keeps track of previously searched cities
+ * - [CitySearchEntity]: tracks previously searched cities
  * - [HourlyWeatherEntity]: contains hourly forecast data
- * - [RecentCitiesEntity]: keeps recently used cities
+ * - [RecentCitiesEntity]: stores recently used cities
+ * - [AISummaryEntity]: stores AI weather summaries
  *
- * The database version is currently set to 8, with destructive migration enabled
- * to ensure schema updates do not cause crashes during development.
+ * Database version is set to 9, with destructive migration enabled,
+ * which allows schema updates without crashes during development.
  */
 @Database(
-    entities = [CurrentWeatherEntity::class, CitySearchEntity::class, HourlyWeatherEntity::class, RecentCitiesEntity::class],
-    version = 8,
+    entities = [CurrentWeatherEntity::class, CitySearchEntity::class, HourlyWeatherEntity::class, RecentCitiesEntity::class, AISummaryEntity::class],
+    version = 11,
     exportSchema = false
 )
 abstract class WeatherForecastDatabase : RoomDatabase() {
@@ -35,54 +38,64 @@ abstract class WeatherForecastDatabase : RoomDatabase() {
     /**
      * Provides access to city search data operations.
      *
-     * @return An implementation of [CitySearchDAO]
+     * @return implementation of [CitySearchDAO]
      */
     abstract fun getCitySearchInstance(): CitySearchDAO
 
     /**
      * Provides access to current weather forecast data operations.
      *
-     * @return An implementation of [CurrentWeatherDAO]
+     * @return implementation of [CurrentWeatherDAO]
      */
     abstract fun getWeatherForecastInstance(): CurrentWeatherDAO
 
     /**
-     * Provides access to hourly weather forecast data operations.
+     * Provides access to hourly weather forecast operations.
      *
-     * @return An implementation of [HourlyWeatherDAO]
+     * @return implementation of [HourlyWeatherDAO]
      */
     abstract fun getHourlyForecastInstance(): HourlyWeatherDAO
 
     /**
-     * Provides a list of cities, recently provided forecast for
+     * Provides access to recently used cities with forecast.
      *
-     * @return An implementation of [RecentCitiesDAO]
+     * @return implementation of [RecentCitiesDAO]
      */
     abstract fun getRecentCitiesDao(): RecentCitiesDAO
 
     /**
-     * Singleton instance holder for the [WeatherForecastDatabase].
+     * Provides access to AI weather summary data.
      *
-     * This companion object ensures that only one instance of the database is ever created,
-     * following the singleton pattern with thread-safe initialization using double-checked locking.
-     * The instance is retained across configuration changes and shared across all components
-     * that access the database.
+     * @return implementation of [AISummaryDAO]
+     */
+    abstract fun getAiDAO(): AISummaryDAO
+
+    /**
+     * Singleton holder for [WeatherForecastDatabase] instance.
+     *
+     * This companion object ensures that only one database instance is created,
+     * following the singleton pattern with thread-safe initialization via double-checked locking.
+     * The instance is preserved across configuration changes and shared among all components
+     * accessing the database.
      */
     companion object {
+        /**
+         * Holds the singleton database instance. Initialized lazily with thread safety.
+         */
         @Volatile
         private var INSTANCE: WeatherForecastDatabase? = null
 
         /**
-         * Returns the singleton instance of [WeatherForecastDatabase], creating it if necessary.
+         * Returns the singleton [WeatherForecastDatabase] instance, creating it if necessary.
          *
-         * Uses [Room.databaseBuilder] with the application context to ensure lifecycle independence.
+         * Uses [Room.databaseBuilder] with application context to ensure lifecycle independence.
          * Applies destructive migration as a development-friendly strategy — **not recommended for production**
-         * unless paired with proper migration scripts.
+         * without proper migration scripts.
          *
-         * Thread-safe via `synchronized` block and `@Volatile` annotation on the instance field.
+         * Thread safety is ensured through `synchronized` block and `@Volatile` annotation on the instance field.
          *
-         * @param context Application context used to build the database
-         * @return Singleton instance of [WeatherForecastDatabase]
+         * @param context application context used for creating the database
+         * @return singleton instance of [WeatherForecastDatabase]
          */
         fun getInstance(context: Context): WeatherForecastDatabase {
             return INSTANCE ?: synchronized(this) {

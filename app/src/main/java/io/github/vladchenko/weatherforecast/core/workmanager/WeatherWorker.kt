@@ -9,25 +9,26 @@ import dagger.assisted.AssistedInject
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
+import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
-import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
 import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
- * Worker to systematically download weather forecast from network.
+ * Worker for systematically loading weather forecast from the network.
  *
- * This worker runs periodically via [androidx.work.WorkManager] to refresh the current weather data
- * for the chosen city. It uses the latest temperature unit preference and logs execution time.
+ * This worker is triggered periodically via [androidx.work.WorkManager] to update
+ * current weather data for the chosen city. Uses the latest temperature unit setting
+ * and logs execution time.
  *
- * @property context to create a worker for WorkManager
- * @property params adjust the worker
+ * @property context context for creating the WorkManager worker
+ * @property params worker configuration parameters
  * @property loggingService centralized service for structured logging
- * @property preferencesManager to provide temperature type
- * @property chosenCityRepository to load the chosen city
- * @property currentWeatherRepository to perform downloading of forecast
+ * @property preferencesManager manager for retrieving temperature unit
+ * @property chosenCityRepository repository for loading the chosen city
+ * @property currentWeatherRepository repository for performing forecast loading
  */
 @HiltWorker
 class WeatherWorker @AssistedInject constructor(
@@ -39,6 +40,17 @@ class WeatherWorker @AssistedInject constructor(
     private val currentWeatherRepository: CurrentWeatherRepository,
 ) : CoroutineWorker(context, params) {
 
+    /**
+     * Main worker logic.
+     *
+     * Performs loading of up-to-date weather data for the chosen city:
+     * 1. Retrieves temperature unit from user settings.
+     * 2. Loads the chosen city from the repository.
+     * 3. Performs weather refresh via [CurrentWeatherRepository].
+     * 4. Logs execution time or error.
+     *
+     * @return [Result.success] on successful update, [Result.failure] on error.
+     */
     override suspend fun doWork(): Result =
         try {
             val tempType = preferencesManager.temperatureUnit.first()
@@ -64,8 +76,19 @@ class WeatherWorker @AssistedInject constructor(
         }
 
     companion object {
+        /**
+         * Tag for logging.
+         */
         private const val TAG = "WeatherWorker"
+
+        /**
+         * Log message prefix with execution time.
+         */
         private const val LOG_MESSAGE = "WeatherWorker ran at "
+
+        /**
+         * Time format for logging.
+         */
         private const val TIMESTAMP_PATTERN = "dd/MM/yyyy HH:mm:ss"
     }
 }

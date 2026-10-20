@@ -173,6 +173,16 @@ class WeatherResponseHandler(
                         errorMessage = R.string.unexpected_error
                         statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
                     }
+
+                    is ForecastError.AccessDenied -> {
+                        errorMessage = R.string.error_access_denied
+                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                    }
+
+                    is ForecastError.RateLimitExceeded -> {
+                        errorMessage = R.string.error_rate_limit
+                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
+                    }
                 }
                 return WeatherResponseHandlerResult(
                     errorToShow = errorMessage,

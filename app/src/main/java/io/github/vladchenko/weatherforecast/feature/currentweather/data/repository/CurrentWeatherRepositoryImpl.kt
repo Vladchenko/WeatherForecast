@@ -8,13 +8,13 @@ import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
+import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.local.CurrentWeatherLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.remote.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
-import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import kotlinx.coroutines.withContext
 
@@ -79,11 +79,23 @@ class CurrentWeatherRepositoryImpl(
     private val currentWeatherRemoteDataSource: CurrentWeatherRemoteDataSource
 ) : CurrentWeatherRepository {
 
+    /**
+     * Refreshes weather data for the specified location.
+     *
+     * Attempts to fetch fresh data from the remote API. On success, saves it to cache.
+     * On failure, attempts to load cached data. If cache is absent, returns an error.
+     *
+     * @param city city name
+     * @param latitude geographic latitude of the location
+     * @param longitude geographic longitude of the location
+     * @param temperatureUnit temperature unit (Celsius/Fahrenheit)
+     * @return [LoadResult] with weather data (remote, local, or error)
+     */
     override suspend fun refreshWeatherForLocation(
         city: String,
-        temperatureUnit: TemperatureUnit,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        temperatureUnit: TemperatureUnit
     ): LoadResult<CurrentWeather> =
         withContext(coroutineDispatchers.io) {
             val result =
@@ -104,6 +116,14 @@ class CurrentWeatherRepositoryImpl(
             }
         }
 
+    /**
+     * Fetches data from DTO, saves it to the database, and converts to domain model.
+     *
+     * @param dto weather data from the network response
+     * @param city city name
+     * @param temperatureUnit temperature unit
+     * @return [LoadResult.Remote] with domain model or [LoadResult.Error] on failure
+     */
     private suspend fun fetchAndSave(
         dto: CurrentWeatherDto,
         city: String,
@@ -123,6 +143,14 @@ class CurrentWeatherRepositoryImpl(
         }
     }
 
+    /**
+     * Loads cached weather data or returns an error.
+     *
+     * @param city city name
+     * @param temperatureUnit temperature unit
+     * @param remoteError remote request error that will be passed to [LoadResult.Local]
+     * @return [LoadResult.Local] with cached data or [LoadResult.Error]
+     */
     private suspend fun loadCachedWeatherForLocationOrError(
         city: String,
         temperatureUnit: TemperatureUnit,
@@ -139,6 +167,14 @@ class CurrentWeatherRepositoryImpl(
         }
     }
 
+    /**
+     * Loads cached weather data from the local source.
+     *
+     * @param city city name
+     * @param temperatureUnit temperature unit
+     * @param remoteError remote request error that will be passed to [LoadResult.Local]
+     * @return [LoadResult.Local] with cached data, [LoadResult.Error] on cache miss or error
+     */
     private suspend fun loadCachedWeatherForLocation(
         city: String,
         temperatureUnit: TemperatureUnit,
@@ -168,6 +204,11 @@ class CurrentWeatherRepositoryImpl(
             }
         }
 
+    /**
+     * Saves weather data to the local database.
+     *
+     * @param response weather entity to save
+     */
     private suspend fun saveWeather(response: CurrentWeatherEntity) =
         withContext(coroutineDispatchers.io) {
             currentWeatherLocalDataSource.saveWeather(response)

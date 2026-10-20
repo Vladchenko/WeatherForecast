@@ -63,13 +63,62 @@
     <string name="uncategorized_error">An uncategorized error occurred.</string>
     <string name="recent_cities_loading">Recent cities loading…</string>
     <string name="temperature_unit">Temperature unit:</string>
-    <string name="choose_unit">Choose unit:</string>
+    <string name="choose_unit">Choose unit</string>
     <string name="back_button">back button</string>
     <string name="hourly_forecast">Hourly Forecast</string>
-    <string name="go_to_settings">Go to settings</string>
+    <string name="go_to_settings">Settings</string>
 
     <string name="data_parsing_error">Failed to process weather data</string>
     <string name="local_storage_error">Failed to access saved weather data</string>
     <string name="server_error">Weather service is temporarily unavailable</string>
     <string name="unexpected_error">Something went wrong. Please try again later</string>
+
+    <!-- AI Weather Summary -->
+    <string name="ai_system_prompt">You are an experienced meteorology assistant. Analyze the provided weather data and give practical recommendations to the user. Reply in Russian. Provide a brief overview of current weather, forecasts for the next hours, and practical advice: what to wear, whether to carry an umbrella, when it is best to be outdoors, etc.</string>
+    <string name="ai_current_weather_title">== CURRENT WEATHER ==</string>
+    <string name="ai_hourly_forecast_title">== HOURLY FORECAST ==</string>
+    <string name="ai_data_unavailable">Data unavailable</string>
+    <string name="ai_no_detailed_forecast">No detailed forecast available</string>
+    <string name="ai_city_label">City</string>
+    <string name="ai_time_label">Time</string>
+    <string name="ai_temperature_label">Temperature</string>
+    <string name="ai_conditions_label">Conditions</string>
+    <string name="ai_timezone_label">Timezone</string>
+    <string name="ai_feels_like_label">Feels like</string>
+    <string name="ai_humidity_label">Humidity</string>
+    <string name="ai_wind_label">Wind</string>
+    <string name="ai_forecast_separator"> |</string>
+    <string name="ai_weather_summary_title">AI Recommendations</string>
+    <string name="ai_weather_summary_local_title">AI Recommendations (Cached), %1$s</string>
+    <string name="ai_weather_summary_local_title_no_timestamp">AI Recommendations (Cached)</string>
+    <string name="ai_go_to_summary">AI weather summary</string>
+    <string name="choose_ai_model">Choose AI Model</string>
+    <string name="ai_model">AI Model:</string>
+    <string name="update">Update</string>
+    <string name="share">Share</string>
+    <string name="weather_summary_cached_fetched">Cached summary on %1$s provided</string>
+    <string name="weather_summary_fetched">Summary on %1$s provided</string>
+    <string name="date_format_pattern">YYYY-MM-dd hh:mm</string>
+    <string name="loading">AI weather summary is loading</string>
+
+    <string name="error_api_key_invalid">Invalid API key. Please check configuration.</string>
+    <string name="error_city_not_found">City %1$s not found.</string>
+    <string name="error_no_internet">No internet connection. Check your network settings.</string>
+    <string name="error_timeout">Request timed out. Please try again.</string>
+    <string name="error_connection_failed">Connection failed. Please try again.</string>
+    <string name="error_security">Secure connection failed. Check system date or network.</string>
+    <string name="error_network">Network error occurred. Please try again.</string>
+    <string name="error_parsing">Failed to process AI response.</string>
+    <string name="error_server">Server error occurred. Please try again later.</string>
+    <string name="error_access_denied">AI service is unavailable from your location. Please check your network configuration.</string>
+    <string name="error_rate_limit">Too many requests. Please wait a moment and try again.</string>
+    <string name="error_no_data">No data available.</string>
+    <string name="error_unknown">An unexpected error occurred.</string>
+    <string name="error_api_unreachable">AI service is unreachable. Check your VPN connection.</string>
+    <string name="error_no_cached_data">No cached summary available for %1$s.</string>
+    <string name="error_network_and_cache">Network error: %1$s. %2$s</string>
+    <string name="error_schema_mismatch">Database schema mismatch. Please update the app.</string>
+    <string name="error_no_cached_summary">No cached summary available</string>
+    <string name="error_empty_response">AI response was empty</string>
+    <string name="error_database">Database error occurred</string>
 </resources>

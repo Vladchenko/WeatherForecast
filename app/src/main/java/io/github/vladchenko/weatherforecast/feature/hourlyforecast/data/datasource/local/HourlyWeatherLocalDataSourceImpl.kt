@@ -6,9 +6,9 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.dao.Hour
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
 
 /**
- * [io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.remote.HourlyWeatherRemoteDataSource] implementation.
+ * Implementation of [HourlyWeatherLocalDataSource] for working with the local database.
  *
- * @property dao of Retrofit library to download weather forecast data
+ * @property dao Room DAO for accessing hourly weather data
  * @property loggingService centralized service for structured logging
  */
 class HourlyWeatherLocalDataSourceImpl(

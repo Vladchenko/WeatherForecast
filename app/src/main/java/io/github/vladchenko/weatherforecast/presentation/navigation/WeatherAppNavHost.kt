@@ -15,6 +15,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEvent
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.navigation.api.Route.AI_WEATHER_SUMMARY
 import io.github.vladchenko.weatherforecast.core.navigation.api.Route.CITY_PARAM
 import io.github.vladchenko.weatherforecast.core.navigation.api.Route.CITY_SEARCH
 import io.github.vladchenko.weatherforecast.core.navigation.api.Route.LATITUDE_PARAM
@@ -25,17 +26,18 @@ import io.github.vladchenko.weatherforecast.core.navigation.impl.NavAnimationUti
 import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventDispatcher
 import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventDispatcherImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.presentation.WeatherSummaryScreen
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view.CitySearchScreen
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view.CurrentWeatherScreen
 import io.github.vladchenko.weatherforecast.feature.settings.SettingsScreen
 
 /**
- * Navigation host for the Weather Forecast app.
+ * Navigation host for the Weather Forecast application.
  *
  * Defines the navigation graph with three screens:
- * - [WEATHER] - Current weather screen with city details and path parameters
- * - [CITY_SEARCH] - City search screen for selecting a new location
- * - [SETTINGS] - User preferences screen
+ * - [WEATHER] — current weather screen with city details and path parameters
+ * - [CITY_SEARCH] — city search screen for selecting a new location
+ * - [SETTINGS] — user settings screen
  *
  * ## Navigation Routes
  * - Weather: `current_weather/{city}/{lat}/{lon}` — city name (URL-encoded),
@@ -45,23 +47,23 @@ import io.github.vladchenko.weatherforecast.feature.settings.SettingsScreen
  * - Settings: `settings`
  *
  * ## Navigation Architecture
- * All navigation actions are dispatched through [NavigationEventBus], which emits
- * events collected by [NavigationEventHandler] (via `LaunchedEffect`) and delegated
- * to [NavigationEventDispatcher] for actual [NavHostController] operations.
- * This provides a single source of truth for navigation logic, keeping composables
- * decoupled from the [NavHostController].
+ * All navigation actions are sent through [NavigationEventBus], which generates
+ * events collected by [NavigationEventHandler] (via `LaunchedEffect`) and passed
+ * to [NavigationEventDispatcher] to perform actual [NavHostController] operations.
+ * This ensures a single source of truth for navigation logic while keeping composables
+ * independent of [NavHostController].
  *
- * ## City Selection Flow
+ * ## City Selection Process
  * 1. User selects a city in [CitySearchScreen].
- * 2. [NavigationEvent.ShowWeatherFor] is sent via [NavigationEventBus].
- * 3. [NavigationEventHandler] receives the event and forwards it to [NavigationEventDispatcher].
- * 4. [NavHostController] navigates to the weather route with the new city parameters.
- * 5. [CurrentWeatherScreen] receives the new [CityLocationModel] and triggers a weather fetch.
+ * 2. [NavigationEvent.ShowWeatherFor] is sent through [NavigationEventBus].
+ * 3. [NavigationEventHandler] receives the event and passes it to [NavigationEventDispatcher].
+ * 4. [NavHostController] navigates to the weather route with new city parameters.
+ * 5. [CurrentWeatherScreen] receives the new [CityLocationModel] and triggers weather fetching.
  *
- * @param modifier Compose modifier for the NavHost.
- * @param navController Navigation controller for screen routing.
- * @param navigationEventBus The event bus for dispatching navigation events.
- * @param preferencesManager The preferences manager for storing user preferences.
+ * @param modifier Compose modifier for NavHost.
+ * @param navController Navigation controller for routing screens.
+ * @param navigationEventBus Event bus for sending navigation events.
+ * @param preferencesManager Preferences manager for storing user settings.
  */
 @ExperimentalMaterial3Api
 @Composable
@@ -93,20 +95,29 @@ fun WeatherAppNavHost(
                 navArgument(LONGITUDE_PARAM) { type = NavType.FloatType },
             )
         ) { backStackEntry ->
-            val city = backStackEntry.arguments?.getString(CITY_PARAM).orEmpty()
-            val lat = backStackEntry.arguments?.getFloat(LATITUDE_PARAM)?.toDouble() ?: .0
-            val lon = backStackEntry.arguments?.getFloat(LONGITUDE_PARAM)?.toDouble() ?: .0
-
             CurrentWeatherScreen(
-                cityModel = CityLocationModel(city, Coordinate(lat, lon)),
+                cityModel = CityLocationModel(
+                    city = backStackEntry.arguments?.getString(CITY_PARAM)?.replace("%20", " ").orEmpty(),
+                    coordinate = Coordinate(
+                        latitude = backStackEntry.arguments?.getFloat(LATITUDE_PARAM)?.toDouble() ?: .0,
+                        longitude = backStackEntry.arguments?.getFloat(LONGITUDE_PARAM)?.toDouble() ?: .0
+                    )
+                ),
                 onCloseApp = { navigationEventBus.send(NavigationEvent.CloseApp) },
                 onNavigateToSettings = {
                     navigationEventBus.send(NavigationEvent.NavigateToSettings)
                 },
                 onNavigateToCitySelection = {
                     navigationEventBus.send(
-                        NavigationEvent.NavigateToCitySelection(
-                            NavAnimationUtils.fadeNavOptions()
+                        event = NavigationEvent.NavigateToCitySelection(
+                            navOptions = NavAnimationUtils.fadeNavOptions()
+                        )
+                    )
+                },
+                onNavigateToAiSummary = {
+                    navigationEventBus.send(
+                        event = NavigationEvent.NavigateToAiSummary(
+                            navOptions = NavAnimationUtils.fadeNavOptions()
                         )
                     )
                 }
@@ -120,8 +131,8 @@ fun WeatherAppNavHost(
                     navigationEventBus.send(
                         NavigationEvent.ShowWeatherFor(
                             city = formatFullCityNameForRoute(selectedCity),
-                            lat = selectedCity.latitude.toFloat(),
-                            lon = selectedCity.longitude.toFloat()
+                            latitude = selectedCity.latitude.toFloat(),
+                            longitude = selectedCity.longitude.toFloat()
                         )
                     )
                 }
@@ -134,15 +145,22 @@ fun WeatherAppNavHost(
                 preferencesManager = preferencesManager
             )
         }
+
+        composable(route = AI_WEATHER_SUMMARY) {
+            WeatherSummaryScreen(
+                onShare = {},   // TODO: Implement sharing
+                onNavigateUp = { navigationEventBus.send(NavigationEvent.NavigateUp) },
+            )
+        }
     }
 }
 
 /**
- * Formats a full city name for the navigation route.
+ * Formats the full city name for the navigation route.
  *
  * Combines city name, state, and country into a URL-safe format.
  *
- * @param city The selected city model
+ * @param city Selected city model
  * @return Formatted city string for route parameter
  */
 private fun formatFullCityNameForRoute(city: CityModel): String {
@@ -156,6 +174,15 @@ private fun formatFullCityNameForRoute(city: CityModel): String {
     return fullCity.replace(" ", "%20")
 }
 
+/**
+ * Component for processing navigation events from the event bus.
+ *
+ * Collects the navigation event flow from [NavigationEventBus] and passes them
+ * to [NavigationEventDispatcher] for performing navigation operations.
+ *
+ * @param navigationEventBus Event bus for receiving navigation events.
+ * @param navigationDispatcher Dispatcher for performing navigation operations.
+ */
 @Composable
 private fun NavigationEventHandler(
     navigationEventBus: NavigationEventBus,

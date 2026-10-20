@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -44,21 +46,22 @@ import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.models.AiModel
 import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
 
 /**
- * Settings screen layout.
+ * App settings screen layout.
  *
- * Displays the settings UI with current preferences (temperature unit)
- * and allows the user to modify them.
+ * Displays the settings interface with the user's current preferences
+ * (temperature unit) and allows modifying them.
  *
  * ## Supported Features
  * - Temperature unit selection (Celsius/Fahrenheit)
  * - Top app bar with back navigation
  *
- * @param appBarUiState The app bar UI state (title, subtitle, colors, visibility)
- * @param onNavigateUp Callback to navigate up in the navigation hierarchy
- * @param preferencesManager Manages user preferences (e.g., temperature unit)
+ * @param onNavigateUp Callback for navigating up in the navigation hierarchy.
+ * @param appBarUiState Top bar UI state (title, subtitle, colors, visibility).
+ * @param preferencesManager User preferences manager (e.g., temperature unit).
  */
 @ExperimentalMaterial3Api
 @Composable
@@ -69,6 +72,7 @@ fun SettingsLayout(
 ) {
     val statusColor = rememberResolvedColorAttr(appBarUiState.subtitleColorAttr)
     val temperatureUnit by preferencesManager.temperatureUnit.collectAsStateWithLifecycle()
+    val aiModel by preferencesManager.aiModel.collectAsStateWithLifecycle()
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -130,6 +134,7 @@ fun SettingsLayout(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         SettingsDropdownMenu(
+                            textFieldLabel = stringResource(R.string.choose_unit),
                             selectedItem = temperatureUnit.name,
                             itemsNamesList = TemperatureUnit.entries.map { it.name },
                             clickedItem = {
@@ -138,16 +143,47 @@ fun SettingsLayout(
                                 )
                             })
                     }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            modifier = Modifier.padding(end = 16.dp),
+                            text = stringResource(R.string.ai_model),
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        SettingsDropdownMenu(
+                            textFieldLabel = stringResource(R.string.choose_ai_model),
+                            selectedItem = aiModel.displayName,
+                            itemsNamesList = AiModel.all.map { it.displayName },
+                            clickedItem = { displayName ->
+                                val model = AiModel.all.first { it.displayName == displayName }
+                                preferencesManager.setAiModel(model)
+                            })
+                    }
                 }
             }
         }
     )
 }
 
+/**
+ * Dropdown menu for settings selection.
+ *
+ * Implements an expandable menu with a text field and list of options,
+ * using ExposedDropdownMenu from Material 3.
+ *
+ * @param selectedItem Currently selected item displayed in the text field.
+ * @param textFieldLabel Label for the text field.
+ * @param itemsNamesList List of item names to display in the menu.
+ * @param clickedItem Callback triggered when an item with the selected value is chosen.
+ */
 @ExperimentalMaterial3Api
 @Composable
 fun SettingsDropdownMenu(
     selectedItem: String,
+    textFieldLabel: String,
     itemsNamesList: List<String>,
     clickedItem: (String) -> Unit
 ) {
@@ -167,7 +203,7 @@ fun SettingsDropdownMenu(
             onValueChange = {},
             label = {
                 Text(
-                    text = stringResource(R.string.choose_unit),
+                    text = textFieldLabel,
                     fontSize = 8.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )

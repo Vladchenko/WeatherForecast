@@ -3,10 +3,6 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasou
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
 
 /**
- * Local data source interface
- */
-
-/**
  * Interface for local data source providing access to cached hourly weather data.
  *
  * Implemented by Room database via DAO.
