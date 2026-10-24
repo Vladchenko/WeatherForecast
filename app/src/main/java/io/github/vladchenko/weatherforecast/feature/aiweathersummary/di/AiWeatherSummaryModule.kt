@@ -10,6 +10,7 @@ import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.AI_SUMMARY_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.data.MarkdownParser
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.AISummaryApiService
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryDAO
@@ -140,21 +141,29 @@ class AiWeatherSummaryModule {
 
     @Singleton
     @Provides
+    fun provideMarkdownParser(): MarkdownParser {
+        return MarkdownParser()
+    }
+
+    @Singleton
+    @Provides
     fun provideWeatherSummaryRepository(
+        markdownParser: MarkdownParser,
         localDataSource: AISummaryLocalDataSource,
-        remoteDataSource: AISummaryRemoteDataSource,
         coroutineDispatchers: CoroutineDispatchers,
+        remoteDataSource: AISummaryRemoteDataSource,
         errorMapper: DataErrorToAiSummaryErrorMapper
     ): WeatherSummaryRepository {
         return WeatherSummaryRepositoryImpl(
-            coroutineDispatchers = coroutineDispatchers,
+            errorMapper = errorMapper,
+            markdownParser = markdownParser,
             localDataSource = localDataSource,
             remoteDataSource = remoteDataSource,
-            errorMapper = errorMapper
+            coroutineDispatchers = coroutineDispatchers
         )
     }
 
-    /**
+/**
  * Creates interactor for AI weather summary business logic.
  * Integrates prompt builder, repository, and weather data sources.
  */

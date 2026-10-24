@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.domain.model.MarkdownSegment
 import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
@@ -241,7 +242,7 @@ fun WeatherSummaryLayout(
 private fun Summary(
     llm: String,
     title: String,
-    summary: String,
+    summary: List<MarkdownSegment>,
     onShare: () -> Unit,
     onRefresh: () -> Unit
 ) {
@@ -328,7 +329,7 @@ private fun Summary(
             verticalArrangement = Arrangement.Top
         ) {
             MarkdownText(
-                markdown = summary,
+                segments = summary,
                 lineHeight = 24.sp
             )
         }
@@ -377,7 +378,13 @@ private fun WeatherSummaryRemotePreview() {
                 subtitle = TextType.Text("Forecast for New York loaded")
             ),
             weatherSummaryUiState = WeatherSummaryUiState.Remote(
-                summary = "**Current Weather:**\n\nTemperature: 22°C\nConditions: Clear sky\n\n**Forecast:**\n\nThe weather will remain clear for the next 24 hours.",
+                summary = listOf(
+                    MarkdownSegment.Heading(1, "Current Weather"),
+                    MarkdownSegment.Paragraph("Temperature: 22°C"),
+                    MarkdownSegment.Paragraph("Conditions: Clear sky"),
+                    MarkdownSegment.Heading(2, "Forecast"),
+                    MarkdownSegment.Paragraph("The weather will remain clear for the next 24 hours.")
+                ),
                 llm = "Gemma 4 31B"
             )
         )
@@ -403,7 +410,11 @@ private fun WeatherSummaryLocalPreview() {
                 subtitle = TextType.Text("Outdated forecast for New York")
             ),
             weatherSummaryUiState = WeatherSummaryUiState.Local(
-                summary = "**Cached Summary:**\n\nTemperature: 20°C\nConditions: Cloudy",
+                summary = listOf(
+                    MarkdownSegment.Heading(1, "Cached Summary"),
+                    MarkdownSegment.Paragraph("Temperature: 20°C"),
+                    MarkdownSegment.Paragraph("Conditions: Cloudy")
+                ),
                 llm = "MiniMax M3.1 Flash",
                 timeStamp = System.currentTimeMillis() - 3600000,
                 networkError = "Network unavailable"
@@ -432,7 +443,7 @@ private fun WeatherSummaryErrorPreview() {
             ),
             weatherSummaryUiState = WeatherSummaryUiState.Error(
                 city = "Nizhny Novgorod",
-                messageId = R.string.error_api_unreachable
+                messageId = R.string.error_host_unreachable
             )
         )
     }

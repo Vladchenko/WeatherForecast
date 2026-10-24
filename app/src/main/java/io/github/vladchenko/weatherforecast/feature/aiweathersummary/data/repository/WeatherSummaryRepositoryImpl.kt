@@ -2,6 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.repos
 
 import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
+import io.github.vladchenko.weatherforecast.data.MarkdownParser
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.AISummaryRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.ApiHttpException
@@ -21,12 +22,14 @@ import java.net.UnknownHostException
  * First attempts to fetch data from the remote AI service. On error, attempts
  * to retrieve saved data from the local database.
  *
+ * @param markdownParser parser for converting markdown to segments.
  * @param localDataSource data source from local database.
  * @param remoteDataSource data source from remote API.
  * @param coroutineDispatchers Coroutines dispatchers for managing execution threads.
  * @param errorMapper mapper for converting data-layer errors to domain-level errors.
  */
 class WeatherSummaryRepositoryImpl(
+    private val markdownParser: MarkdownParser,
     private val localDataSource: AISummaryLocalDataSource,
     private val remoteDataSource: AISummaryRemoteDataSource,
     private val coroutineDispatchers: CoroutineDispatchers,
@@ -73,7 +76,7 @@ class WeatherSummaryRepositoryImpl(
                     latitude = latitude,
                     longitude = longitude,
                     llm = response.model,
-                    summary = summaryText,
+                    summary = markdownParser.parse(summaryText),
                 )
             )
         } catch (ex: Exception) {
@@ -98,7 +101,7 @@ class WeatherSummaryRepositoryImpl(
                             latitude = latitude,
                             longitude = longitude,
                             llm = localSummary.llm,
-                            summary = localSummary.summary,
+                            summary = markdownParser.parse(localSummary.summary),
                             timeStamp = localSummary.timestamp
                         ),
                         networkError = ex.message.toString()
