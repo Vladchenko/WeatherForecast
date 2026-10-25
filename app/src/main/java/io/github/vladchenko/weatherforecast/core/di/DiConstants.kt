@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.core.di
 
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
-import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.AISummaryApiService
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.WeatherSummaryApiService
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.api.CitySearchApiService
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiService
 import kotlinx.coroutines.TimeoutCancellationException
@@ -23,9 +23,9 @@ object DiConstants {
     /**
      * Named binding for the Retrofit instance used with AI API.
      *
-     * Used for providing [AISummaryApiService].
+     * Used for providing [WeatherSummaryApiService].
      */
-    const val AI_SUMMARY_RETROFIT_NAME = "AiSummaryRetrofit"
+    const val WEATHER_SUMMARY_RETROFIT_NAME = "WeatherSummaryRetrofit"
 
     /**
      * Timeout in milliseconds for remote API requests.
@@ -36,4 +36,13 @@ object DiConstants {
      */
     const val API_TIMEOUT_MS = 10000L
 
+    /**
+     * HTTP header name for User-Agent.
+     */
+    const val HEADER_USER_AGENT = "User-Agent"
+
+    /**
+     * User-Agent value for HTTP requests.
+     */
+    const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
 }

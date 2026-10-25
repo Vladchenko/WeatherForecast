@@ -9,7 +9,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
  * Technical details from the data layer are interpreted here
  * and converted into domain-level concepts before crossing the data/domain boundary.
  */
-class DataErrorToAiSummaryErrorMapper {
+class DataErrorToSummaryErrorMapper {
 
     /**
      * Converts a [DataError] from the data layer into a corresponding [ForecastError] for the domain layer.

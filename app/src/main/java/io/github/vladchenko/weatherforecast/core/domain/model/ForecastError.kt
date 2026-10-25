@@ -1,24 +1,14 @@
 package io.github.vladchenko.weatherforecast.core.domain.model
 
+import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
+import io.github.vladchenko.weatherforecast.core.data.model.DataError
+
 /**
  * Sealed interface representing domain-level errors for weather forecast operations.
  *
- * These errors are the result of mapping data-layer [io.github.vladchenko.weatherforecast.core.data.model.DataError]
- * instances through [io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper].
+ * These errors are the result of mapping data-layer [DataError] instances through
+ * [DataErrorToForecastErrorMapper].
  * They represent clean-domain concepts that are independent of the underlying data source implementation.
- *
- * ## Error Types
- * - [ApiKeyInvalid]: Authentication failed due to invalid or missing API key.
- * - [CityNotFound]: The requested city could not be found.
- * - [NetworkError]: Connectivity issues (no internet, timeout, connection failed, security error).
- * - [DataParsingError]: Response could not be parsed correctly.
- * - [ServerError]: Server returned an error response with a specific HTTP code.
- * - [AccessDenied]: Access denied by the server (e.g., IP blocked, security policy).
- * - [RateLimitExceeded]: Rate limit exceeded — too many requests.
- * - [LocalStorageError]: Local database or storage operation failed.
- * - [LocalDataCorrupted]: Cached/local data is corrupted or invalid.
- * - [NoDataAvailable]: No data is available (empty response or no cached data).
- * - [UncategorizedError]: An unexpected error that doesn't fit other categories.
  */
 sealed interface ForecastError {
 

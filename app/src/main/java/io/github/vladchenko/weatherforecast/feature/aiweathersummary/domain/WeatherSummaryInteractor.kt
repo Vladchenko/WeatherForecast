@@ -15,16 +15,16 @@ import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.mode
  * Fetches current weather and hourly forecast, builds a prompt for the AI model,
  * then requests AI analysis through the repository.
  *
+ * @param promptBuilder prompt builder for AI requests.
  * @param summaryRepository repository for AI weather summaries.
  * @param hourlyWeatherRepository hourly forecast repository.
  * @param currentWeatherRepository current weather repository.
- * @param promptBuilder prompt builder for AI requests.
  */
 class WeatherSummaryInteractor(
+    val promptBuilder: WeatherPromptBuilder,
     val summaryRepository: WeatherSummaryRepository,
     val hourlyWeatherRepository: HourlyWeatherRepository,
-    val currentWeatherRepository: CurrentWeatherRepository,
-    val promptBuilder: WeatherPromptBuilder
+    val currentWeatherRepository: CurrentWeatherRepository
 ) {
     suspend fun fetchWeatherSummary(
         city: String,

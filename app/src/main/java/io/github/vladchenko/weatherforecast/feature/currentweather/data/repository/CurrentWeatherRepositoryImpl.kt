@@ -40,16 +40,6 @@ import kotlinx.coroutines.withContext
  *    - Attempt to load cached data via [loadCachedWeatherForLocation], returning [LoadResult.Local] if available.
  * 4. If no cache exists or reading fails — return [LoadResult.Error].
  *
- * ## Error Handling
- * All errors originate in the data layer as [io.github.vladchenko.weatherforecast.core.data.model.DataError] and are mapped to meaningful [ForecastError] instances:
- * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.NetworkError] → [ForecastError.NetworkError] (classified by exception type)
- * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.CityNotFound] → [ForecastError.CityNotFound]
- * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ServerError] → [ForecastError.ServerError]
- * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ApiKeyInvalid] → [ForecastError.ApiKeyInvalid]
- * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ResponseNoBodyError] → [ForecastError.NoDataAvailable]
- * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.DatabaseError] → [ForecastError.LocalStorageError]
- * - [io.github.vladchenko.weatherforecast.core.data.model.DataError.ParsingError] → [ForecastError.DataParsingError]
- *
  * This ensures clean separation between layers and prevents data-layer types from leaking into the domain.
  *
  * ## Caching Behavior

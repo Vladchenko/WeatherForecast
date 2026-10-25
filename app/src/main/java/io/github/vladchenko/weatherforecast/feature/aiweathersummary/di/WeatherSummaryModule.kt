@@ -8,17 +8,20 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.AI_SUMMARY_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.di.DiConstants.HEADER_USER_AGENT
+import io.github.vladchenko.weatherforecast.core.di.DiConstants.USER_AGENT
+import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_SUMMARY_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.data.MarkdownParser
 import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.AISummaryApiService
+import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
+import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.WeatherSummaryApiService
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryDAO
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSourceImpl
-import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.AISummaryRemoteDataSource
-import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.AISummaryRemoteDataSourceImpl
-import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.mapper.DataErrorToAiSummaryErrorMapper
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.WeatherSummaryRemoteDataSource
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.mapper.DataErrorToSummaryErrorMapper
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.repository.WeatherSummaryRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.DefaultWeatherPromptBuilder
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.WeatherPromptBuilder
@@ -44,7 +47,7 @@ import javax.inject.Singleton
  */
 @Module
 @InstallIn(SingletonComponent::class)
-class AiWeatherSummaryModule {
+class WeatherSummaryModule {
 
     @Provides
     @Singleton
@@ -54,13 +57,15 @@ class AiWeatherSummaryModule {
 
     @Singleton
     @Provides
-    fun provideAiApiService(@Named(AI_SUMMARY_RETROFIT_NAME) retrofit: Retrofit): AISummaryApiService {
-        return retrofit.create(AISummaryApiService::class.java)
+    fun provideAiApiService(
+        @Named(WEATHER_SUMMARY_RETROFIT_NAME) retrofit: Retrofit
+    ): WeatherSummaryApiService {
+        return retrofit.create(WeatherSummaryApiService::class.java)
     }
 
     @Singleton
     @Provides
-    @Named(AI_SUMMARY_RETROFIT_NAME)
+    @Named(WEATHER_SUMMARY_RETROFIT_NAME)
     fun provideAiRetrofit(): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
@@ -69,7 +74,7 @@ class AiWeatherSummaryModule {
 
         val userAgentInterceptor = Interceptor { chain ->
             val request = chain.request().newBuilder()
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .header(HEADER_USER_AGENT, USER_AGENT)
                 .build()
             chain.proceed(request)
         }
@@ -86,30 +91,18 @@ class AiWeatherSummaryModule {
             .build()
     }
 
-/**
- * Creates local data source for working with AI summary database.
- */
     @Singleton
     @Provides
-//    @Named(GEMMA_LOCAL_DATASOURCE_NAME)
     fun provideAiLocalDataSource(dao: AISummaryDAO): AISummaryLocalDataSource {
         return AISummaryLocalDataSourceImpl(dao)
     }
 
-    /**
- * Creates remote data source for working with OpenRouter AI API.
- */
     @Singleton
     @Provides
-//    @Named(GEMMA_REMOTE_DATASOURCE_NAME)
-    fun provideAiRemoteDataSource(apiService: AISummaryApiService): AISummaryRemoteDataSource {
+    fun provideAiRemoteDataSource(apiService: WeatherSummaryApiService): WeatherSummaryRemoteDataSource {
         return AISummaryRemoteDataSourceImpl(apiService)
     }
 
-    /**
- * Creates prompt builder for forming requests to the AI model.
- * Uses string resources for formatting request sections.
- */
     @Singleton
     @Provides
     fun provideWeatherPromptBuilder(@ApplicationContext context: Context): WeatherPromptBuilder {
@@ -135,8 +128,8 @@ class AiWeatherSummaryModule {
 
     @Singleton
     @Provides
-    fun provideDataErrorToAiSummaryErrorMapper(): DataErrorToAiSummaryErrorMapper {
-        return DataErrorToAiSummaryErrorMapper()
+    fun provideDataErrorToAiSummaryErrorMapper(): DataErrorToSummaryErrorMapper {
+        return DataErrorToSummaryErrorMapper()
     }
 
     @Singleton
@@ -150,9 +143,9 @@ class AiWeatherSummaryModule {
     fun provideWeatherSummaryRepository(
         markdownParser: MarkdownParser,
         localDataSource: AISummaryLocalDataSource,
+        errorMapper: DataErrorToSummaryErrorMapper,
         coroutineDispatchers: CoroutineDispatchers,
-        remoteDataSource: AISummaryRemoteDataSource,
-        errorMapper: DataErrorToAiSummaryErrorMapper
+        remoteDataSource: AISummaryRemoteDataSource
     ): WeatherSummaryRepository {
         return WeatherSummaryRepositoryImpl(
             errorMapper = errorMapper,
@@ -163,17 +156,13 @@ class AiWeatherSummaryModule {
         )
     }
 
-/**
- * Creates interactor for AI weather summary business logic.
- * Integrates prompt builder, repository, and weather data sources.
- */
     @Singleton
     @Provides
     fun provideWeatherSummaryInteractor(
         promptBuilder: WeatherPromptBuilder,
         summaryRepository: WeatherSummaryRepository,
-        currentWeatherRepository: io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository,
-        hourlyWeatherRepository: io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
+        hourlyWeatherRepository: HourlyWeatherRepository,
+        currentWeatherRepository: CurrentWeatherRepository
     ): WeatherSummaryInteractor {
         return WeatherSummaryInteractor(
             promptBuilder = promptBuilder,
