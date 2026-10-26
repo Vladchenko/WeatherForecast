@@ -120,7 +120,7 @@ class HourlyWeatherViewModel @Inject constructor(
             is LoadResult.Error -> {
                 statusStateHolder.updateErrorStatus(getErrorMessage(result), city)
                 _hourlyWeatherStateFlow.value =
-                    Error(city = city, messageId = getErrorMessage(result), message = null)
+                    Error(city = city, messageId = getErrorMessage(result))
             }
         }
     }
@@ -131,18 +131,23 @@ class HourlyWeatherViewModel @Inject constructor(
                 when (error.type) {
                     ForecastError.NetworkError.Type.ConnectionFailed -> R.string.connection_refused
                     ForecastError.NetworkError.Type.NoInternet -> R.string.network_disconnected
+                    ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable
                     ForecastError.NetworkError.Type.Timeout -> R.string.request_timeout
                     ForecastError.NetworkError.Type.SecurityError -> R.string.ssl_error
                     ForecastError.NetworkError.Type.Other -> R.string.network_error_generic
                 }
+            is ForecastError.NetworkAndCacheError -> R.string.error_network_and_cache_unavailable
             is ForecastError.ApiKeyInvalid -> R.string.api_key_invalid
             is ForecastError.CityNotFound -> R.string.city_not_found
             is ForecastError.NoDataAvailable -> R.string.no_weather_data_available
+            is ForecastError.ResourceNotFound -> R.string.error_resource_not_found
             is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
             is ForecastError.DataParsingError -> R.string.data_parsing_error
             is ForecastError.LocalStorageError -> R.string.local_storage_error
             is ForecastError.ServerError -> R.string.server_error
+            is ForecastError.ServerAndCacheError -> R.string.error_server_and_cache_unavailable
             is ForecastError.AccessDenied -> R.string.error_access_denied
+            is ForecastError.AccessDeniedAndCacheError -> R.string.error_access_denied_and_cache_unavailable
             is ForecastError.RateLimitExceeded -> R.string.error_rate_limit
             is ForecastError.UncategorizedError -> R.string.unexpected_error
         }

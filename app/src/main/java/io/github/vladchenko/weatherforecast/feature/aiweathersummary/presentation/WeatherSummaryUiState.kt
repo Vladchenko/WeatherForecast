@@ -39,10 +39,10 @@ sealed interface WeatherSummaryUiState {
      * Error when fetching the AI summary.
      *
      * @param city city name for which the forecast was requested.
-     * @param messageId resource ID of the error message (may be `null`).
+     * @param messageId resource ID of the error message.
      */
     data class Error(
         val city: String?,
-        val messageId: Int?,
+        val messageId: Int,
     ) : WeatherSummaryUiState
 }

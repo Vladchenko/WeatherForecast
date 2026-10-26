@@ -1,7 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.recentcities.data.repository
 
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
-import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.datasource.RecentCitiesDataSource
@@ -39,8 +38,7 @@ class RecentCitiesRepositoryImpl(
             LoadResult.Local(
                 data = recentCitiesMapper.toDomain(
                     recentCitiesDataSource.getRecentCities()
-                ),
-                ForecastError.UncategorizedError("No error actually")
+                )
             )
         }
 

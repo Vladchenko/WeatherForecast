@@ -56,16 +56,13 @@ sealed interface WeatherUiState<out T> {
      * Represents a failure during weather data retrieval.
      *
      * @property city The name of the city associated with the failed request (can be `null`, e.g., for location-based requests).
-     * @property message A human-readable message suitable for display in the UI
-     *                   (e.g. exception message).
      * @property messageId id of resource string suitable for display in the UI
      *                     (e.g. "City not found", "No internet connection").
      */
     @Immutable
     data class Error(
         val city: String?,
-        val message: String?,
-        val messageId: Int?,
+        val messageId: Int,
     ) : WeatherUiState<Nothing>
 }
 

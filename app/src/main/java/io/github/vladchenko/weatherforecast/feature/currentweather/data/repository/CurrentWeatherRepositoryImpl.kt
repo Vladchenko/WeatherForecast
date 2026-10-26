@@ -121,14 +121,18 @@ class CurrentWeatherRepositoryImpl(
     ): LoadResult<CurrentWeather> {
         return try {
             val entity = dtoMapper.toEntity(dto, city)
-            saveWeather(entity)
             val domainModel = entityMapper.toDomain(entity, temperatureUnit)
+            try {
+                saveWeather(entity)
+            } catch (e: Exception) {
+                loggingService.logError(TAG, "Failed to save weather to cache for city: $city", e)
+            }
             LoadResult.Remote(domainModel)
         } catch (ex: Exception) {
-            loggingService.logError(TAG, "Failed to map or save weather data: $ex", ex)
+            loggingService.logError(TAG, "Failed to map weather data for city: $city", ex)
             LoadResult.Error(
                 city = city,
-                error = ForecastError.UncategorizedError(ex.message.toString())
+                error = ForecastError.UncategorizedError(cause = ex)
             )
         }
     }
@@ -152,7 +156,7 @@ class CurrentWeatherRepositoryImpl(
             loggingService.logError(TAG, "Failed to load cached weather for city $city: $ex", ex)
             LoadResult.Error(
                 city = city,
-                error = ForecastError.LocalDataCorrupted("Failed to read from cache: ${ex.message}")
+                error = ForecastError.LocalStorageError
             )
         }
     }
@@ -179,7 +183,7 @@ class CurrentWeatherRepositoryImpl(
                 loggingService.logDebugEvent(TAG, "No cached weather data found for city: $city")
                 LoadResult.Error(
                     city = city,
-                    error = ForecastError.NoDataAvailable("No cached data for $city")
+                    error = ForecastError.NoDataAvailable
                 )
             } catch (ex: Exception) {
                 loggingService.logError(
@@ -189,7 +193,7 @@ class CurrentWeatherRepositoryImpl(
                 )
                 LoadResult.Error(
                     city = city,
-                    error = ForecastError.LocalDataCorrupted("Local database query failed: ${ex.message}")
+                    error = ForecastError.LocalStorageError
                 )
             }
         }

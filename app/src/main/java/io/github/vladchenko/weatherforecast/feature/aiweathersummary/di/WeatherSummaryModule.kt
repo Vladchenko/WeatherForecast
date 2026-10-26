@@ -21,6 +21,7 @@ import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.dataso
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.WeatherSummaryRemoteDataSource
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.WeatherSummaryRemoteDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.mapper.DataErrorToSummaryErrorMapper
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.repository.WeatherSummaryRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.DefaultWeatherPromptBuilder
@@ -100,7 +101,7 @@ class WeatherSummaryModule {
     @Singleton
     @Provides
     fun provideAiRemoteDataSource(apiService: WeatherSummaryApiService): WeatherSummaryRemoteDataSource {
-        return AISummaryRemoteDataSourceImpl(apiService)
+        return WeatherSummaryRemoteDataSourceImpl(apiService)
     }
 
     @Singleton
@@ -145,7 +146,7 @@ class WeatherSummaryModule {
         localDataSource: AISummaryLocalDataSource,
         errorMapper: DataErrorToSummaryErrorMapper,
         coroutineDispatchers: CoroutineDispatchers,
-        remoteDataSource: AISummaryRemoteDataSource
+        remoteDataSource: WeatherSummaryRemoteDataSource
     ): WeatherSummaryRepository {
         return WeatherSummaryRepositoryImpl(
             errorMapper = errorMapper,

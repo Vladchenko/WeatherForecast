@@ -74,121 +74,46 @@ class WeatherResponseHandler(
             }
 
             is LoadResult.Error -> {
-                var errorMessage: Int
-                when (val error = loadResult.error) {
-                    is ForecastError.ApiKeyInvalid -> {
-                        errorMessage = R.string.api_key_invalid
-                        statusStateHolder.updateErrorStatus(errorMessage)
-                    }
+                val error = loadResult.error
+                val messageId = defineErrorMessage(error)
 
-                    is ForecastError.CityNotFound -> {
-                        errorMessage = R.string.city_not_found
-                        statusStateHolder.updateWarningStatus(errorMessage, error.city)
-                        cityErrorEventBus.send(CityNotFound(error.city))
-                    }
-
-                    is ForecastError.LocalDataCorrupted -> {
-                        errorMessage = R.string.local_data_corrupted
-                        loggingService.logError(
-                            TAG,
-                            "Local weather data is corrupted: ${error.message}"
-                        )
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
-
-                    is ForecastError.NetworkError ->
-                        when (error.type) {
-                            ForecastError.NetworkError.Type.ConnectionFailed -> {
-                                errorMessage = R.string.connection_refused
-                                statusStateHolder.updateErrorStatus(
-                                    errorMessage,
-                                    cityModel.city
-                                )
-                            }
-
-                            ForecastError.NetworkError.Type.NoInternet -> {
-                                errorMessage = R.string.network_disconnected
-                                statusStateHolder.updateErrorStatus(
-                                    errorMessage,
-                                    cityModel.city
-                                )
-                            }
-
-                            ForecastError.NetworkError.Type.Timeout -> {
-                                errorMessage = R.string.request_timeout
-                                statusStateHolder.updateErrorStatus(
-                                    errorMessage,
-                                    cityModel.city
-                                )
-                            }
-
-                            ForecastError.NetworkError.Type.SecurityError -> {
-                                errorMessage = R.string.ssl_error
-                                statusStateHolder.updateErrorStatus(
-                                    errorMessage,
-                                    cityModel.city
-                                )
-                            }
-
-                            ForecastError.NetworkError.Type.Other -> {
-                                errorMessage = R.string.network_error_generic
-                                statusStateHolder.updateErrorStatus(
-                                    errorMessage,
-                                    cityModel.city
-                                )
-                            }
-                        }
-
-                    is ForecastError.NoDataAvailable -> {
-                        errorMessage = R.string.no_weather_data_available
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
-
-                    is ForecastError.DataParsingError -> {
-                        errorMessage = R.string.data_parsing_error
-                        loggingService.logError(TAG, "Failed to parse weather response: ${error.message}")
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
-
-                    is ForecastError.LocalStorageError -> {
-                        errorMessage = R.string.local_storage_error
-                        loggingService.logError(TAG, "Local storage error: ${error.message}")
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
-
-                    is ForecastError.ServerError -> {
-                        errorMessage = R.string.server_error
-                        loggingService.logError(
-                            TAG,
-                            "Weather server error: code=${error.code}, message=${error.message}"
-                        )
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
-
-                    is ForecastError.UncategorizedError -> {
-                        loggingService.logError(
-                            TAG,
-                            "Uncategorized error: ${error.message}"
-                        )
-                        errorMessage = R.string.unexpected_error
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
-
-                    is ForecastError.AccessDenied -> {
-                        errorMessage = R.string.error_access_denied
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
-
-                    is ForecastError.RateLimitExceeded -> {
-                        errorMessage = R.string.error_rate_limit
-                        statusStateHolder.updateErrorStatus(errorMessage, cityModel.city)
-                    }
+                if (error is ForecastError.CityNotFound) {
+                    statusStateHolder.updateWarningStatus(messageId, error.city)
+                    cityErrorEventBus.send(CityNotFound(error.city))
+                } else {
+                    statusStateHolder.updateErrorStatus(messageId, cityModel.city)
                 }
-                return WeatherResponseHandlerResult(
-                    errorToShow = errorMessage,
-                )
+
+                return WeatherResponseHandlerResult(errorToShow = messageId)
             }
         }
+    }
+
+    private fun defineErrorMessage(error: ForecastError): Int = when (error) {
+        is ForecastError.NetworkError -> mapNetworkErrorToMessageId(error)
+        is ForecastError.NetworkAndCacheError -> R.string.error_network_and_cache_unavailable
+        is ForecastError.ServerError -> R.string.server_error
+        is ForecastError.ServerAndCacheError -> R.string.error_server_and_cache_unavailable
+        is ForecastError.AccessDeniedAndCacheError -> R.string.error_access_denied_and_cache_unavailable
+        is ForecastError.AccessDenied -> R.string.error_access_denied
+        is ForecastError.RateLimitExceeded -> R.string.error_rate_limit
+        is ForecastError.LocalStorageError -> R.string.error_database
+        is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
+        is ForecastError.NoDataAvailable -> R.string.no_weather_data_available
+        is ForecastError.ResourceNotFound -> R.string.error_resource_not_found
+        is ForecastError.DataParsingError -> R.string.error_parsing
+        is ForecastError.UncategorizedError -> R.string.error_unknown
+        is ForecastError.ApiKeyInvalid -> R.string.api_key_invalid
+        is ForecastError.CityNotFound -> R.string.city_not_found
+    }
+
+    private fun mapNetworkErrorToMessageId(error: ForecastError.NetworkError): Int = when (error.type) {
+        is ForecastError.NetworkError.Type.ConnectionFailed -> R.string.connection_refused
+        is ForecastError.NetworkError.Type.NoInternet -> R.string.network_disconnected
+        is ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable
+        is ForecastError.NetworkError.Type.Timeout -> R.string.request_timeout
+        is ForecastError.NetworkError.Type.SecurityError -> R.string.ssl_error
+        is ForecastError.NetworkError.Type.Other -> R.string.network_error_generic
     }
 
     companion object {

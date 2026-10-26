@@ -56,7 +56,7 @@ class WeatherOutputMapperImpl(
                 }
                 response.errorToShow?.let {
                     uiState = WeatherUiState.Error(
-                        city = cityModel.city, message = null, messageId = it
+                        city = cityModel.city, messageId = it
                     )
                 }
                 if (response.isLoading == true) {
@@ -64,7 +64,7 @@ class WeatherOutputMapperImpl(
                 }
             } catch (_: DateTimeException) {
                 uiState = WeatherUiState.Error(
-                    city = cityModel.city, message = null, messageId = R.string.bad_date_format,
+                    city = cityModel.city, messageId = R.string.bad_date_format,
                 )
             }
         }

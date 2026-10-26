@@ -18,11 +18,11 @@ sealed interface WeatherSummary {
      * Response from local cache on network error.
      *
      * @param data saved AI summary.
-     * @param networkError network error description.
+     * @param networkError domain-level error describing the network issue.
      */
     data class Local(
         val data: WeatherSummaryResponse,
-        val networkError: String
+        val networkError: ForecastError
     ) : WeatherSummary
     
     /**

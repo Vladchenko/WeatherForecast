@@ -240,23 +240,11 @@ class CitySearchViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                val errorMessage = when (result.error) {
-                    is ForecastError.NoDataAvailable -> {
-                        // TODO Resolve error message without comparing with hardcoded string
-                        if (result.error.message.lowercase().contains("unable to resolve host")) {
-                            "Server doesn't respond"
-                        } else {
-                            result.error.message
-                        }
-                    }
-
-                    else -> result.error.toString()
-                }
-                showError(errorMessage)
+                val messageId = mapForecastErrorToMessageId(result.error)
+                showError(messageId)
                 _cityPredictions.value = Error(
                     city = city,
-                    message = errorMessage,
-                    messageId = null
+                    messageId = messageId
                 )
             }
         }
@@ -295,12 +283,32 @@ class CitySearchViewModel @Inject constructor(
         }
     }
 
+    private fun showError(errorResourceId: Int) {
+        statusStateHolder.updateErrorStatus(errorResourceId)
+    }
+
     private fun showError(errorMessage: String) {
         statusStateHolder.updateErrorStatus(errorMessage)
     }
 
     private fun showStatus(statusMessage: Int) {
         statusStateHolder.updateInfoStatus(statusMessage)
+    }
+
+    private fun mapForecastErrorToMessageId(error: ForecastError): Int = when (error) {
+        is ForecastError.NoDataAvailable -> R.string.error_no_data
+        is ForecastError.NetworkError -> mapNetworkErrorToMessageId(error)
+        is ForecastError.UncategorizedError -> R.string.error_unknown
+        else -> R.string.error_unknown
+    }
+
+    private fun mapNetworkErrorToMessageId(error: ForecastError.NetworkError): Int = when (error.type) {
+        is ForecastError.NetworkError.Type.NoInternet -> R.string.error_network
+        is ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable
+        is ForecastError.NetworkError.Type.Timeout -> R.string.error_timeout
+        is ForecastError.NetworkError.Type.ConnectionFailed -> R.string.error_connection_failed
+        is ForecastError.NetworkError.Type.SecurityError -> R.string.error_security
+        is ForecastError.NetworkError.Type.Other -> R.string.error_no_cities_match
     }
 
     companion object {

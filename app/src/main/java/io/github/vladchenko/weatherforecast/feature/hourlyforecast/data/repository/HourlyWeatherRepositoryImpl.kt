@@ -109,7 +109,7 @@ class HourlyWeatherRepositoryImpl(
                 val entity = localDataSource.loadHourlyWeather(city)
                     ?: return@withContext LoadResult.Error(
                         city = city,
-                        error = ForecastError.NoDataAvailable("No cached data found for city: $city")
+                        error = ForecastError.NoDataAvailable
                     )
                 val domainModel = entityMapper.toDomain(entity, temperatureUnit)
                 loggingService.logDebugEvent(
@@ -124,13 +124,13 @@ class HourlyWeatherRepositoryImpl(
                 )
                 LoadResult.Error(
                     city = city,
-                    error = ForecastError.NoDataAvailable("No cached data for $city")
+                    error = ForecastError.NoDataAvailable
                 )
             } catch (e: Exception) {
                 loggingService.logError(TAG, "Failed to load cached hourly weather for $city", e)
                 LoadResult.Error(
                     city = city,
-                    error = ForecastError.LocalDataCorrupted("Cache read failed: ${e.message}")
+                    error = ForecastError.LocalStorageError
                 )
             }
         }
@@ -151,15 +151,19 @@ class HourlyWeatherRepositoryImpl(
     ): LoadResult<HourlyWeather> {
         return try {
             val entity = dtoMapper.toEntity(dto)
-            localDataSource.saveHourlyWeather(entity)
             val domainModel = entityMapper.toDomain(entity, temperatureUnit)
-            loggingService.logDebugEvent(TAG, "Saved and mapped hourly weather for city: $city")
+            try {
+                localDataSource.saveHourlyWeather(entity)
+            } catch (e: Exception) {
+                loggingService.logError(TAG, "Failed to save hourly weather to cache for city: $city", e)
+            }
+            loggingService.logDebugEvent(TAG, "Loaded hourly weather for city: $city")
             LoadResult.Remote(domainModel)
         } catch (e: Exception) {
-            loggingService.logError(TAG, "Failed to map or save hourly weather for city: $city", e)
+            loggingService.logError(TAG, "Failed to map hourly weather for city: $city", e)
             LoadResult.Error(
                 city = city,
-                error = ForecastError.LocalDataCorrupted("Mapping or saving failed: ${e.message}")
+                error = ForecastError.UncategorizedError(cause = e)
             )
         }
     }

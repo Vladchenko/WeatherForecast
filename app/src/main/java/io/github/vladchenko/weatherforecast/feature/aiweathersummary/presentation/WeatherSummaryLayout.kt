@@ -216,7 +216,6 @@ fun WeatherSummaryLayout(
                         }
 
                         is WeatherSummaryUiState.Error -> {
-                            val message = state.messageId?.let { stringResource(id = it) } ?: ""
                             Text(
                                 modifier = Modifier.padding(
                                     top = 80.dp,
@@ -224,7 +223,7 @@ fun WeatherSummaryLayout(
                                     end = 32.dp,
                                     bottom = 32.dp
                                 ),
-                                text = message,
+                                text = stringResource(id = state.messageId),
                                 fontSize = 24.sp,
                                 color = statusColor,
                                 textAlign = TextAlign.Center,

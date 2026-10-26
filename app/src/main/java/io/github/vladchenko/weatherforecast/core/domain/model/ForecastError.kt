@@ -14,22 +14,16 @@ sealed interface ForecastError {
 
     /**
      * API key is invalid or missing.
-     *
-     * @param message description of the authentication failure.
      */
-    data class ApiKeyInvalid(
-        val message: String
-    ) : ForecastError
+    data object ApiKeyInvalid : ForecastError
 
     /**
      * The requested city could not be found.
      *
      * @param city the city name that was requested.
-     * @param message description of the error.
      */
     data class CityNotFound(
-        val city: String,
-        val message: String
+        val city: String
     ) : ForecastError
 
     /**
@@ -49,6 +43,11 @@ sealed interface ForecastError {
              * No internet connection available.
              */
             object NoInternet : Type()
+
+            /**
+             * Host cannot be resolved (DNS failure, host unavailable).
+             */
+            object HostUnreachable : Type()
 
             /**
              * Network request timed out.
@@ -73,76 +72,78 @@ sealed interface ForecastError {
     }
 
     /**
-     * Response parsing error.
+     * Network error combined with unavailable local cache.
      *
-     * @param message description of the parsing failure.
+     * Indicates that the network request failed AND no cached data was available.
      */
-    data class DataParsingError(
-        val message: String
+    data object NetworkAndCacheError : ForecastError
+
+    /**
+     * Server error combined with unavailable local cache.
+     *
+     * Indicates that the server returned an error AND no cached data was available.
+     *
+     * @param code the HTTP status code.
+     */
+    data class ServerAndCacheError(
+        val code: Int
     ) : ForecastError
+
+    /**
+     * Access denied combined with unavailable local cache.
+     *
+     * Indicates that access was denied AND no cached data was available.
+     */
+    data object AccessDeniedAndCacheError : ForecastError
+
+    /**
+     * Response parsing error.
+     */
+    data object DataParsingError : ForecastError
 
     /**
      * Server error with HTTP status code.
      *
      * @param code the HTTP status code.
-     * @param message description of the server error.
      */
     data class ServerError(
-        val code: Int,
-        val message: String
+        val code: Int
     ) : ForecastError
 
     /**
      * Access denied by the server (e.g., IP blocked, security policy).
-     *
-     * @param message description of the access denial.
      */
-    data class AccessDenied(
-        val message: String
-    ) : ForecastError
+    data object AccessDenied : ForecastError
 
     /**
      * Rate limit exceeded — too many requests.
-     *
-     * @param message description of the rate limit error.
      */
-    data class RateLimitExceeded(
-        val message: String
-    ) : ForecastError
+    data object RateLimitExceeded : ForecastError
 
     /**
      * Local storage (database) error.
-     *
-     * @param message description of the storage failure.
      */
-    data class LocalStorageError(
-        val message: String
-    ) : ForecastError
+    data object LocalStorageError : ForecastError
 
     /**
      * Cached/local data is corrupted or invalid.
-     *
-     * @param message description of the corruption.
      */
-    data class LocalDataCorrupted(
-        val message: String
-    ) : ForecastError
+    data object LocalDataCorrupted : ForecastError
 
     /**
      * No data is available for the requested operation.
-     *
-     * @param message description of why no data is available.
      */
-    data class NoDataAvailable(
-        val message: String
-    ) : ForecastError
+    data object NoDataAvailable : ForecastError
+
+    /**
+     * The requested resource was not found (HTTP 404).
+     */
+    data object ResourceNotFound : ForecastError
 
     /**
      * An unexpected error that doesn't fit other categories.
-     *
-     * @param message description of the unexpected error.
      */
     data class UncategorizedError(
-        val message: String
+        val cause: Throwable?
     ) : ForecastError
 }

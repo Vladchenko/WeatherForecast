@@ -30,7 +30,7 @@ class CitySearchInteractor(private val citySearchRepository: CitySearchRepositor
             .getOrElse {
                 LoadResult.Error(
                     city = token,
-                    error = ForecastError.UncategorizedError(it.message ?: "Invalid query")
+                    error = ForecastError.UncategorizedError(cause = it)
                 )
             }
     }

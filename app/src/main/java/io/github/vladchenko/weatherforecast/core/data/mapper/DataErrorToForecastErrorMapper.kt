@@ -25,29 +25,40 @@ class DataErrorToForecastErrorMapper {
         return when (dataError) {
 
             is DataError.ApiKeyInvalid ->
-                ForecastError.ApiKeyInvalid(message = dataError.message)
+                ForecastError.ApiKeyInvalid
 
             is DataError.CityNotFound ->
-                ForecastError.CityNotFound(city = dataError.city, message = dataError.message)
+                ForecastError.CityNotFound(city = dataError.city)
+
+            is DataError.ResourceNotFound ->
+                ForecastError.ResourceNotFound
+
+            is DataError.RateLimitExceeded ->
+                ForecastError.RateLimitExceeded
+
+            is DataError.AccessDenied ->
+                ForecastError.AccessDenied
+
+            is DataError.ServerError ->
+                ForecastError.ServerError(code = dataError.code)
+
+            is DataError.DatabaseError ->
+                ForecastError.LocalStorageError
+
+            is DataError.ParsingError ->
+                ForecastError.DataParsingError
+
+            is DataError.ResponseNoBodyError ->
+                ForecastError.NoDataAvailable
+
+            is DataError.NetworkAndCacheError ->
+                ForecastError.NetworkAndCacheError
 
             is DataError.NetworkError -> dataError.toForecastError()
 
-            is DataError.ParsingError ->
-                ForecastError.DataParsingError(message = dataError.message)
-
-            is DataError.ServerError ->
-                ForecastError.ServerError(code = dataError.code, message = dataError.message)
-
-            is DataError.DatabaseError ->
-                ForecastError.LocalStorageError(message = dataError.message)
-
-            DataError.ResponseNoBodyError ->
-                ForecastError.NoDataAvailable(message = "Empty response body")
-
             is DataError.UncategorizedError ->
                 ForecastError.UncategorizedError(
-                    message = dataError.cause.message
-                        ?: "An unexpected error occurred"
+                    cause = dataError.cause
                 )
         }
     }

@@ -16,8 +16,10 @@ import retrofit2.Response
  * - Returns a [DataResult.Success] with body if response is valid, or [DataResult.Error] otherwise
  *
  * ## Error Mapping Strategy
- * - `404 Not Found` → [DataError.CityNotFound] with extracted city name
+ * - `403 Forbidden` → [DataError.AccessDenied]
+ * - `404 Not Found` → [DataError.ResourceNotFound]
  * - `401 Unauthorized` → [DataError.ApiKeyInvalid]
+ * - `429 Too Many Requests` → [DataError.RateLimitExceeded]
  * - `5xx Server Error` → [DataError.ServerError]
  * - Non-200 successful codes (e.g. 204) → mapped based on code
  * - Empty body → [DataError.ResponseNoBodyError]
@@ -50,8 +52,7 @@ class ResponseProcessor() {
             if (!response.isSuccessful) {
                 return DataResult.Error(
                     city, DataError.ServerError(
-                        response.code(),
-                        "API call failed with code"
+                        response.code()
                     )
                 )
             }
@@ -61,12 +62,11 @@ class ResponseProcessor() {
 
             return if (code != 200) {
                 val error = when (code) {
-                    404 -> DataError.CityNotFound(
-                        city = extractCityFromUrl(response),
-                        message = message
-                    )
-                    401 -> DataError.ApiKeyInvalid(message)
-                    in 500..599 -> DataError.ServerError(code, message)
+                    401 -> DataError.ApiKeyInvalid
+                    403 -> DataError.AccessDenied
+                    404 -> DataError.ResourceNotFound
+                    429 -> DataError.RateLimitExceeded
+                    in 500..599 -> DataError.ServerError(code)
                     else -> DataError.NetworkError(Exception("HTTP $code: $message"))
                 }
                 DataResult.Error(city, error)
@@ -87,18 +87,6 @@ class ResponseProcessor() {
             // Остальные редкие случаи (OutOfMemory, parsing, etc.)
             DataResult.Error(city, DataError.UncategorizedError(e))
         }
-    }
-
-    /**
-     * Extracts the last path segment from the request URL, typically representing the city name.
-     *
-     * Used to provide context in [DataError.CityNotFound] when a city is not found.
-     *
-     * @param response the response whose request URL is analyzed
-     * @return the last path segment or "Unknown city" if not available
-     */
-    private fun extractCityFromUrl(response: Response<*>): String {
-        return response.raw().request.url.pathSegments.lastOrNull() ?: "Unknown city"
     }
 
     /**

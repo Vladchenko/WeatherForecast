@@ -23,17 +23,18 @@ sealed interface LoadResult<out T> {
     data class Remote<out T>(val data: T) : LoadResult<T>
 
     /**
-     * Data loaded from a local source (e.g., database) due to remote fetch failure.
+     * Data loaded from a local source (e.g., database).
      *
-     * Used when the app falls back to cached data. The original remote error is preserved
-     * in [remoteError] to inform the user or analytics about why local data is being shown.
+     * Used when the app falls back to cached data or when data is only available locally.
+     * The optional [remoteError] preserves the reason why the remote request failed,
+     * to inform the user or analytics about why local data is being shown.
      *
-     * @param data the cached domain model
-     * @param remoteError the reason why the remote request failed
+     * @param data the domain model
+     * @param remoteError the reason why the remote request failed (null if no remote source exists)
      */
     data class Local<out T>(
         val data: T,
-        val remoteError: ForecastError
+        val remoteError: ForecastError? = null
     ) : LoadResult<T>
 
     /**

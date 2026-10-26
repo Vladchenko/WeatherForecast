@@ -15,45 +15,60 @@ class DataErrorToSummaryErrorMapper {
      * Converts a [DataError] from the data layer into a corresponding [ForecastError] for the domain layer.
      *
      * @param dataError the data-layer error to map; must not be null
+     * @param cacheAvailable whether local cache was available; if false, errors are wrapped in cache-unavailable variants
      * @return the equivalent domain-level [ForecastError]
      */
-    fun map(dataError: DataError): ForecastError {
+    fun map(dataError: DataError, cacheAvailable: Boolean = true): ForecastError {
         return when (dataError) {
             is DataError.DatabaseError ->
-                ForecastError.LocalStorageError(message = dataError.message)
+                ForecastError.LocalStorageError
 
             is DataError.NetworkError ->
-                ForecastError.NetworkError(type = ForecastError.NetworkError.Type.NoInternet)
+                if (cacheAvailable)
+                    ForecastError.NetworkError(type = ForecastError.NetworkError.Type.NoInternet)
+                else
+                    ForecastError.NetworkAndCacheError
 
             is DataError.ParsingError ->
-                ForecastError.DataParsingError(message = dataError.message)
+                ForecastError.DataParsingError
 
             is DataError.ResponseNoBodyError ->
-                ForecastError.NoDataAvailable(message = "AI response was empty")
+                ForecastError.NoDataAvailable
 
             is DataError.UncategorizedError ->
                 ForecastError.UncategorizedError(
-                    message = dataError.cause.message ?: "An unexpected error occurred"
+                    cause = dataError.cause
                 )
 
             is DataError.ApiKeyInvalid ->
-                ForecastError.ApiKeyInvalid(message = dataError.message)
+                ForecastError.ApiKeyInvalid
 
             is DataError.CityNotFound ->
-                ForecastError.CityNotFound(city = dataError.city, message = dataError.message)
+                ForecastError.CityNotFound(city = dataError.city)
 
-            is DataError.ServerError -> mapServerError(dataError)
-        }
-    }
+            is DataError.ResourceNotFound ->
+                ForecastError.ResourceNotFound
 
-    /**
-     * Maps server errors to user-friendly domain errors based on HTTP status code.
-     */
-    private fun mapServerError(error: DataError.ServerError): ForecastError {
-        return when (error.code) {
-            403 -> ForecastError.AccessDenied(message = error.message)
-            429 -> ForecastError.RateLimitExceeded(message = error.message)
-            else -> ForecastError.ServerError(code = error.code, message = error.message)
+            is DataError.RateLimitExceeded ->
+                if (cacheAvailable)
+                    ForecastError.RateLimitExceeded
+                else
+                    ForecastError.ServerAndCacheError(code = 429)
+
+            is DataError.AccessDenied ->
+                if (cacheAvailable)
+                    ForecastError.AccessDenied
+                else
+                    ForecastError.AccessDeniedAndCacheError
+
+            is DataError.NetworkAndCacheError ->
+                ForecastError.NetworkAndCacheError
+
+            is DataError.ServerError ->
+                if (cacheAvailable)
+                    ForecastError.ServerError(code = dataError.code)
+                else
+                    ForecastError.ServerAndCacheError(code = dataError.code)
         }
     }
 }

@@ -358,14 +358,9 @@ fun CurrentWeatherLayout(
                                 }
 
                                 is WeatherUiState.Error -> {
-                                    val message = if (state.messageId != null) {
-                                        stringResource(id = state.messageId)
-                                    } else {
-                                        state.message
-                                    }
                                     Text(
                                         modifier = Modifier.padding(top = 80.dp),
-                                        text = message.toString(),
+                                        text = stringResource(id = state.messageId),
                                         fontSize = 32.sp,
                                         color = statusColor,
                                         textAlign = TextAlign.Center

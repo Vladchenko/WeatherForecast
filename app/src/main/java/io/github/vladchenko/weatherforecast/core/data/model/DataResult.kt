@@ -50,16 +50,13 @@ sealed interface DataError {
     /**
      * API key is invalid or missing.
      */
-    data class ApiKeyInvalid(
-        val message: String
-    ) : DataError
+    data object ApiKeyInvalid : DataError
 
     /**
      * The requested city could not be found by the remote service.
      */
     data class CityNotFound(
-        val city: String,
-        val message: String
+        val city: String
     ) : DataError
 
     /**
@@ -76,25 +73,42 @@ sealed interface DataError {
      * The remote response could not be parsed.
      */
     data class ParsingError(
-        val message: String,
         val cause: Throwable? = null
     ) : DataError
+
+    /**
+     * The requested resource was not found (HTTP 404).
+     */
+    data object ResourceNotFound : DataError
+
+    /**
+     * Rate limit exceeded — too many requests (HTTP 429).
+     */
+    data object RateLimitExceeded : DataError
+
+    /**
+     * Access denied by the server (HTTP 403).
+     */
+    data object AccessDenied : DataError
 
     /**
      * The server returned an error response.
      */
     data class ServerError(
-        val code: Int,
-        val message: String
+        val code: Int
     ) : DataError
 
     /**
      * A local database/storage operation failed.
      */
     data class DatabaseError(
-        val message: String,
         val cause: Throwable? = null
     ) : DataError
+
+    /**
+     * Network operation failed and no cached data is available.
+     */
+    data object NetworkAndCacheError : DataError
 
     /**
      * The response was successful but contained no body.

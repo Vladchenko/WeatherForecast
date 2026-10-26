@@ -81,91 +81,55 @@ class WeatherSummaryViewModel @Inject constructor(
                             R.string.weather_summary_cached_fetched,
                             cityModel.city
                         )
+                        val messageId = mapForecastErrorToMessageId(summary.networkError)
+                        statusStateHolder.updateWarningStatus(messageId, cityModel.city)
                         WeatherSummaryUiState.Local(
                             llm = summary.data.llm,
                             summary = summary.data.summary,
                             timeStamp = summary.data.timeStamp,
-                            networkError = summary.networkError
+                            networkError = messageId.toString()
                         )
                     }
 
                     is WeatherSummary.Error -> {
-                        val messageId = when (val error = summary.error) {
-                            is ForecastError.ApiKeyInvalid -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_api_key_invalid)
-                                R.string.error_api_key_invalid
-                            }
-                            is ForecastError.CityNotFound -> {
-                                statusStateHolder.updateErrorStatus(
-                                    R.string.error_city_not_found,
-                                    error.city
-                                )
-                                R.string.error_city_not_found
-                            }
-                            is ForecastError.NetworkError -> when (error.type) {
-                                is ForecastError.NetworkError.Type.NoInternet -> {
-                                    statusStateHolder.updateErrorStatus(R.string.error_no_internet)
-                                    R.string.error_no_internet
-                                }
-                                is ForecastError.NetworkError.Type.Timeout -> {
-                                    statusStateHolder.updateErrorStatus(R.string.error_timeout)
-                                    R.string.error_timeout
-                                }
-                                is ForecastError.NetworkError.Type.ConnectionFailed -> {
-                                    statusStateHolder.updateErrorStatus(R.string.error_connection_failed)
-                                    R.string.error_connection_failed
-                                }
-                                is ForecastError.NetworkError.Type.SecurityError -> {
-                                    statusStateHolder.updateErrorStatus(R.string.error_security)
-                                    R.string.error_security
-                                }
-                                is ForecastError.NetworkError.Type.Other -> {
-                                    statusStateHolder.updateErrorStatus(R.string.error_network)
-                                    R.string.error_network
-                                }
-                            }
-                            is ForecastError.DataParsingError -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_parsing)
-                                R.string.error_parsing
-                            }
-                            is ForecastError.ServerError -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_server)
-                                R.string.error_server
-                            }
-                            is ForecastError.AccessDenied -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_access_denied)
-                                R.string.error_access_denied
-                            }
-                            is ForecastError.RateLimitExceeded -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_rate_limit)
-                                R.string.error_rate_limit
-                            }
-                            is ForecastError.LocalStorageError -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_database)
-                                R.string.error_database
-                            }
-                            is ForecastError.LocalDataCorrupted -> {
-                                statusStateHolder.updateErrorStatus(R.string.local_data_corrupted)
-                                R.string.local_data_corrupted
-                            }
-                            is ForecastError.NoDataAvailable -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_no_data)
-                                R.string.error_no_data
-                            }
-                            is ForecastError.UncategorizedError -> {
-                                statusStateHolder.updateErrorStatus(R.string.error_unknown)
-                                R.string.error_unknown
-                            }
-                        }
+                        val messageId = mapForecastErrorToMessageId(summary.error)
+                        statusStateHolder.updateErrorStatus(messageId, cityModel.city)
                         WeatherSummaryUiState.Error(
                             city = cityModel.city,
                             messageId = messageId
                         )
                     }
                 }
-            } catch (e: Exception) {
-                WeatherSummaryUiState.Error(cityModel.city, null)
+            } catch (_: Exception) {
+                WeatherSummaryUiState.Error(cityModel.city, R.string.error_unknown)
             }
         }
+    }
+
+    private fun mapForecastErrorToMessageId(error: ForecastError): Int = when (error) {
+        is ForecastError.ApiKeyInvalid -> R.string.error_api_key_invalid
+        is ForecastError.CityNotFound -> R.string.error_city_not_found
+        is ForecastError.NetworkError -> mapNetworkErrorToMessageId(error)
+        is ForecastError.NetworkAndCacheError -> R.string.error_network_and_cache_unavailable
+        is ForecastError.DataParsingError -> R.string.error_parsing
+        is ForecastError.ServerError -> R.string.error_server
+        is ForecastError.ServerAndCacheError -> R.string.error_server_and_cache_unavailable
+        is ForecastError.AccessDenied -> R.string.error_access_denied
+        is ForecastError.AccessDeniedAndCacheError -> R.string.error_access_denied_and_cache_unavailable
+        is ForecastError.RateLimitExceeded -> R.string.error_rate_limit
+        is ForecastError.LocalStorageError -> R.string.error_database
+        is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
+        is ForecastError.NoDataAvailable -> R.string.error_no_data
+        is ForecastError.ResourceNotFound -> R.string.error_resource_not_found
+        is ForecastError.UncategorizedError -> R.string.error_unknown
+    }
+
+    private fun mapNetworkErrorToMessageId(error: ForecastError.NetworkError): Int = when (error.type) {
+        is ForecastError.NetworkError.Type.NoInternet -> R.string.error_no_internet
+        is ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable_no_cache
+        is ForecastError.NetworkError.Type.Timeout -> R.string.error_timeout
+        is ForecastError.NetworkError.Type.ConnectionFailed -> R.string.error_connection_failed
+        is ForecastError.NetworkError.Type.SecurityError -> R.string.error_security
+        is ForecastError.NetworkError.Type.Other -> R.string.error_network
     }
 }
