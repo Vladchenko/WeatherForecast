@@ -7,6 +7,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
+import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Error
@@ -59,13 +60,15 @@ import javax.inject.Inject
  * @property statusStateHolder Manages and broadcasts UI status updates (loading, errors, info)
  * @property citySearchInteractor Handles domain logic for fetching and filtering city names
  * @property recentCitiesInteractor Manages recently searched cities persistence and loading
+ * @property errorToMessageMapper Maps [ForecastError] to string resource IDs for display
  */
 @HiltViewModel
 class CitySearchViewModel @Inject constructor(
     private val loggingService: LoggingService,
     private val statusStateHolder: StatusStateHolder,
     private val citySearchInteractor: CitySearchInteractor,
-    private val recentCitiesInteractor: RecentCitiesInteractor
+    private val recentCitiesInteractor: RecentCitiesInteractor,
+    private val errorToMessageMapper: ForecastErrorToMessageIdMapper
 ) : ViewModel() {
 
     /**
@@ -240,7 +243,7 @@ class CitySearchViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                val messageId = mapForecastErrorToMessageId(result.error)
+                val messageId = errorToMessageMapper.map(result.error)
                 showError(messageId)
                 _cityPredictions.value = Error(
                     city = city,
@@ -293,22 +296,6 @@ class CitySearchViewModel @Inject constructor(
 
     private fun showStatus(statusMessage: Int) {
         statusStateHolder.updateInfoStatus(statusMessage)
-    }
-
-    private fun mapForecastErrorToMessageId(error: ForecastError): Int = when (error) {
-        is ForecastError.NoDataAvailable -> R.string.error_no_data
-        is ForecastError.NetworkError -> mapNetworkErrorToMessageId(error)
-        is ForecastError.UncategorizedError -> R.string.error_unknown
-        else -> R.string.error_unknown
-    }
-
-    private fun mapNetworkErrorToMessageId(error: ForecastError.NetworkError): Int = when (error.type) {
-        is ForecastError.NetworkError.Type.NoInternet -> R.string.error_network
-        is ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable
-        is ForecastError.NetworkError.Type.Timeout -> R.string.error_timeout
-        is ForecastError.NetworkError.Type.ConnectionFailed -> R.string.error_connection_failed
-        is ForecastError.NetworkError.Type.SecurityError -> R.string.error_security
-        is ForecastError.NetworkError.Type.Other -> R.string.error_no_cities_match
     }
 
     companion object {

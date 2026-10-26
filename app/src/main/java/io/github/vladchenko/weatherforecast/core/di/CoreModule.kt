@@ -12,6 +12,7 @@ import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.impl.NavigationEventBusImpl
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogFactory
 import io.github.vladchenko.weatherforecast.core.ui.dialog.AlertDialogHelper
 import io.github.vladchenko.weatherforecast.core.ui.dialog.LocationDialogFactory
@@ -25,7 +26,6 @@ import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchersImpl
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
@@ -87,6 +87,11 @@ class CoreModule {
     @Provides
     fun provideDataErrorToForecastErrorMapper(): DataErrorToForecastErrorMapper =
         DataErrorToForecastErrorMapper()
+
+    @Singleton
+    @Provides
+    fun provideForecastErrorToMessageIdMapper(): ForecastErrorToMessageIdMapper =
+        ForecastErrorToMessageIdMapper()
 
     @Provides
     @Singleton

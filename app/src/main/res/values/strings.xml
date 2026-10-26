@@ -68,11 +68,6 @@
     <string name="hourly_forecast">Hourly Forecast</string>
     <string name="go_to_settings">Settings</string>
 
-    <string name="data_parsing_error">Failed to process weather data</string>
-    <string name="local_storage_error">Failed to access saved weather data</string>
-    <string name="server_error">Weather service is temporarily unavailable</string>
-    <string name="unexpected_error">Something went wrong. Please try again later</string>
-
     <!-- AI Weather Summary -->
     <string name="ai_system_prompt">You are an experienced meteorology assistant. Analyze the provided weather data and give practical recommendations to the user. Reply in Russian. Provide a brief overview of current weather, forecasts for the next hours, and practical advice: what to wear, whether to carry an umbrella, when it is best to be outdoors, etc.</string>
     <string name="ai_current_weather_title">== CURRENT WEATHER ==</string>
@@ -101,29 +96,18 @@
     <string name="date_format_pattern">YYYY-MM-dd hh:mm</string>
     <string name="loading">AI weather summary is loading</string>
 
-    <string name="error_access_denied">AI service is unavailable from your location. Please check your network configuration.</string>
+    <string name="error_access_denied">Access denied. Please check your network configuration.</string>
     <string name="error_access_denied_and_cache_unavailable">Server access denied and local cache unavailable</string>
     <string name="error_api_key_invalid">Invalid API key. Please check configuration.</string>
     <string name="error_city_not_found">City %1$s not found.</string>
-    <string name="error_connection_failed">Connection failed. Please try again.</string>
-    <string name="error_database">Database error occurred</string>
-    <string name="error_empty_response">AI response was empty</string>
-    <string name="error_host_unreachable">Unable to connect to AI service. Check your VPN or firewall settings.</string>
-    <string name="error_host_unreachable_no_cache">Unable to connect to AI service. Check your VPN or firewall settings. No cached summary available for %1$s.</string>
-    <string name="error_network">Network error occurred. Please try again.</string>
+    <string name="error_database">Database error occurred.</string>
+    <string name="error_host_unreachable">Unable to connect to server. Check your VPN or firewall settings.</string>
     <string name="error_network_and_cache_unavailable">Network error and local cache unavailable</string>
-    <string name="error_no_cached_data">No cached summary available for %1$s.</string>
-    <string name="error_no_cached_summary">No cached summary available</string>
     <string name="error_no_cities_match">No cities match %1$s or no internet</string>
-    <string name="error_no_data">No data available.</string>
-    <string name="error_no_internet">No internet connection. Check your network settings.</string>
-    <string name="error_parsing">Failed to process AI response.</string>
+    <string name="error_parsing">Failed to process data.</string>
     <string name="error_rate_limit">Too many requests. Please wait a moment and try again.</string>
     <string name="error_resource_not_found">Resource not found. Please try again.</string>
-    <string name="error_schema_mismatch">Database schema mismatch. Please update the app.</string>
-    <string name="error_security">Secure connection failed. Check system date or network.</string>
     <string name="error_server">Server error occurred. Please try again later.</string>
     <string name="error_server_and_cache_unavailable">Server error and local cache unavailable</string>
-    <string name="error_timeout">Request timed out. Please try again.</string>
     <string name="error_unknown">An unexpected error occurred.</string>
 </resources>

@@ -8,6 +8,7 @@ import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecast
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
@@ -132,11 +133,13 @@ class CurrentWeatherModule {
         loggingService: LoggingService,
         cityErrorEventBus: CityErrorEventBus,
         statusStateHolder: StatusStateHolder,
+        errorToMessageMapper: ForecastErrorToMessageIdMapper,
     ): WeatherResponseHandler {
         return WeatherResponseHandler(
             loggingService,
             cityErrorEventBus,
             statusStateHolder,
+            errorToMessageMapper
         )
     }
 

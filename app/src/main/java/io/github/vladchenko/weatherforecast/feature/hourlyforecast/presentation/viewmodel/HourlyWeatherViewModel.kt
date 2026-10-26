@@ -9,6 +9,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.state.DataSource
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState.Error
@@ -39,6 +40,7 @@ import javax.inject.Inject
  * @property statusStateHolder Manages and broadcasts UI status messages (info, warnings, errors).
  * @property preferencesManager Manages user preferences such as temperature unit (Celsius/Fahrenheit).
  * @property hourlyWeatherInteractor Domain-level interactor responsible for loading hourly weather data.
+ * @property errorToMessageMapper Maps [ForecastError] to string resource IDs for display.
  */
 @HiltViewModel
 class HourlyWeatherViewModel @Inject constructor(
@@ -46,6 +48,7 @@ class HourlyWeatherViewModel @Inject constructor(
     private val statusStateHolder: StatusStateHolder,
     private val preferencesManager: PreferencesManager,
     private val hourlyWeatherInteractor: HourlyWeatherInteractor,
+    private val errorToMessageMapper: ForecastErrorToMessageIdMapper
 ) : ViewModel() {
 
     /**
@@ -118,39 +121,13 @@ class HourlyWeatherViewModel @Inject constructor(
             }
 
             is LoadResult.Error -> {
-                statusStateHolder.updateErrorStatus(getErrorMessage(result), city)
+                val messageId = errorToMessageMapper.map(result.error)
+                statusStateHolder.updateErrorStatus(messageId, city)
                 _hourlyWeatherStateFlow.value =
-                    Error(city = city, messageId = getErrorMessage(result))
+                    Error(city = city, messageId = messageId)
             }
         }
     }
-
-    private fun getErrorMessage(result: LoadResult.Error): Int =
-        when (val error = result.error) {
-            is ForecastError.NetworkError ->
-                when (error.type) {
-                    ForecastError.NetworkError.Type.ConnectionFailed -> R.string.connection_refused
-                    ForecastError.NetworkError.Type.NoInternet -> R.string.network_disconnected
-                    ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable
-                    ForecastError.NetworkError.Type.Timeout -> R.string.request_timeout
-                    ForecastError.NetworkError.Type.SecurityError -> R.string.ssl_error
-                    ForecastError.NetworkError.Type.Other -> R.string.network_error_generic
-                }
-            is ForecastError.NetworkAndCacheError -> R.string.error_network_and_cache_unavailable
-            is ForecastError.ApiKeyInvalid -> R.string.api_key_invalid
-            is ForecastError.CityNotFound -> R.string.city_not_found
-            is ForecastError.NoDataAvailable -> R.string.no_weather_data_available
-            is ForecastError.ResourceNotFound -> R.string.error_resource_not_found
-            is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
-            is ForecastError.DataParsingError -> R.string.data_parsing_error
-            is ForecastError.LocalStorageError -> R.string.local_storage_error
-            is ForecastError.ServerError -> R.string.server_error
-            is ForecastError.ServerAndCacheError -> R.string.error_server_and_cache_unavailable
-            is ForecastError.AccessDenied -> R.string.error_access_denied
-            is ForecastError.AccessDeniedAndCacheError -> R.string.error_access_denied_and_cache_unavailable
-            is ForecastError.RateLimitExceeded -> R.string.error_rate_limit
-            is ForecastError.UncategorizedError -> R.string.unexpected_error
-        }
 
     companion object {
         private const val TAG = "HourlyWeatherViewModel"

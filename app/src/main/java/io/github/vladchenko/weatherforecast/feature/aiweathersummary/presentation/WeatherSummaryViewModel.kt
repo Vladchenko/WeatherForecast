@@ -7,6 +7,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.WeatherSummaryInteractor
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.models.WeatherSummary
@@ -27,13 +28,15 @@ import javax.inject.Inject
  * @param preferencesManager app settings manager.
  * @param chosenCityInteractor interactor for the chosen city.
  * @param weatherSummaryInteractor interactor for AI summary business logic.
+ * @param errorToMessageMapper maps [ForecastError] to string resource IDs for display.
  */
 @HiltViewModel
 class WeatherSummaryViewModel @Inject constructor(
     private val statusStateHolder: StatusStateHolder,
     private val preferencesManager: PreferencesManager,
     private val chosenCityInteractor: ChosenCityInteractor,
-    private val weatherSummaryInteractor: WeatherSummaryInteractor
+    private val weatherSummaryInteractor: WeatherSummaryInteractor,
+    private val errorToMessageMapper: ForecastErrorToMessageIdMapper
 ) : ViewModel() {
 
     private val _weatherSummary =
@@ -81,7 +84,7 @@ class WeatherSummaryViewModel @Inject constructor(
                             R.string.weather_summary_cached_fetched,
                             cityModel.city
                         )
-                        val messageId = mapForecastErrorToMessageId(summary.networkError)
+                        val messageId = errorToMessageMapper.map(summary.networkError)
                         statusStateHolder.updateWarningStatus(messageId, cityModel.city)
                         WeatherSummaryUiState.Local(
                             llm = summary.data.llm,
@@ -92,7 +95,7 @@ class WeatherSummaryViewModel @Inject constructor(
                     }
 
                     is WeatherSummary.Error -> {
-                        val messageId = mapForecastErrorToMessageId(summary.error)
+                        val messageId = errorToMessageMapper.map(summary.error)
                         statusStateHolder.updateErrorStatus(messageId, cityModel.city)
                         WeatherSummaryUiState.Error(
                             city = cityModel.city,
@@ -106,30 +109,5 @@ class WeatherSummaryViewModel @Inject constructor(
         }
     }
 
-    private fun mapForecastErrorToMessageId(error: ForecastError): Int = when (error) {
-        is ForecastError.ApiKeyInvalid -> R.string.error_api_key_invalid
-        is ForecastError.CityNotFound -> R.string.error_city_not_found
-        is ForecastError.NetworkError -> mapNetworkErrorToMessageId(error)
-        is ForecastError.NetworkAndCacheError -> R.string.error_network_and_cache_unavailable
-        is ForecastError.DataParsingError -> R.string.error_parsing
-        is ForecastError.ServerError -> R.string.error_server
-        is ForecastError.ServerAndCacheError -> R.string.error_server_and_cache_unavailable
-        is ForecastError.AccessDenied -> R.string.error_access_denied
-        is ForecastError.AccessDeniedAndCacheError -> R.string.error_access_denied_and_cache_unavailable
-        is ForecastError.RateLimitExceeded -> R.string.error_rate_limit
-        is ForecastError.LocalStorageError -> R.string.error_database
-        is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
-        is ForecastError.NoDataAvailable -> R.string.error_no_data
-        is ForecastError.ResourceNotFound -> R.string.error_resource_not_found
-        is ForecastError.UncategorizedError -> R.string.error_unknown
-    }
 
-    private fun mapNetworkErrorToMessageId(error: ForecastError.NetworkError): Int = when (error.type) {
-        is ForecastError.NetworkError.Type.NoInternet -> R.string.error_no_internet
-        is ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable_no_cache
-        is ForecastError.NetworkError.Type.Timeout -> R.string.error_timeout
-        is ForecastError.NetworkError.Type.ConnectionFailed -> R.string.error_connection_failed
-        is ForecastError.NetworkError.Type.SecurityError -> R.string.error_security
-        is ForecastError.NetworkError.Type.Other -> R.string.error_network
-    }
 }

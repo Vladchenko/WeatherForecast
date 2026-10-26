@@ -4,6 +4,7 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
+import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -24,11 +25,13 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
  * @property loggingService Service for recording debug and error events.
  * @property cityErrorEventBus Unified event bus for broadcasting city-related errors.
  * @property statusStateHolder Component for broadcasting UI status updates (snackbars, dialogs, etc.).
+ * @property errorToMessageMapper Maps [ForecastError] to string resource IDs for display.
  */
 class WeatherResponseHandler(
     private val loggingService: LoggingService,
     private val cityErrorEventBus: CityErrorEventBus,
     private val statusStateHolder: StatusStateHolder,
+    private val errorToMessageMapper: ForecastErrorToMessageIdMapper
 ) {
 
     /**
@@ -75,7 +78,7 @@ class WeatherResponseHandler(
 
             is LoadResult.Error -> {
                 val error = loadResult.error
-                val messageId = defineErrorMessage(error)
+                val messageId = errorToMessageMapper.map(error)
 
                 if (error is ForecastError.CityNotFound) {
                     statusStateHolder.updateWarningStatus(messageId, error.city)
@@ -87,33 +90,6 @@ class WeatherResponseHandler(
                 return WeatherResponseHandlerResult(errorToShow = messageId)
             }
         }
-    }
-
-    private fun defineErrorMessage(error: ForecastError): Int = when (error) {
-        is ForecastError.NetworkError -> mapNetworkErrorToMessageId(error)
-        is ForecastError.NetworkAndCacheError -> R.string.error_network_and_cache_unavailable
-        is ForecastError.ServerError -> R.string.server_error
-        is ForecastError.ServerAndCacheError -> R.string.error_server_and_cache_unavailable
-        is ForecastError.AccessDeniedAndCacheError -> R.string.error_access_denied_and_cache_unavailable
-        is ForecastError.AccessDenied -> R.string.error_access_denied
-        is ForecastError.RateLimitExceeded -> R.string.error_rate_limit
-        is ForecastError.LocalStorageError -> R.string.error_database
-        is ForecastError.LocalDataCorrupted -> R.string.local_data_corrupted
-        is ForecastError.NoDataAvailable -> R.string.no_weather_data_available
-        is ForecastError.ResourceNotFound -> R.string.error_resource_not_found
-        is ForecastError.DataParsingError -> R.string.error_parsing
-        is ForecastError.UncategorizedError -> R.string.error_unknown
-        is ForecastError.ApiKeyInvalid -> R.string.api_key_invalid
-        is ForecastError.CityNotFound -> R.string.city_not_found
-    }
-
-    private fun mapNetworkErrorToMessageId(error: ForecastError.NetworkError): Int = when (error.type) {
-        is ForecastError.NetworkError.Type.ConnectionFailed -> R.string.connection_refused
-        is ForecastError.NetworkError.Type.NoInternet -> R.string.network_disconnected
-        is ForecastError.NetworkError.Type.HostUnreachable -> R.string.error_host_unreachable
-        is ForecastError.NetworkError.Type.Timeout -> R.string.request_timeout
-        is ForecastError.NetworkError.Type.SecurityError -> R.string.ssl_error
-        is ForecastError.NetworkError.Type.Other -> R.string.network_error_generic
     }
 
     companion object {
