@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.view
+package io.github.vladchenko.weatherforecast.core.ui.component
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
- * Loading skeleton indicator for the main content of CurrentWeatherLayout with shimmer effect.
+ * Loading skeleton indicator with shimmer effect.
  *
  * Displays an animated gradient shimmer effect used
  * as a placeholder during content loading.
@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
  * @param shimmerColors Shimmer effect color configuration.
  */
 @Composable
-fun CurrentWeatherSkeleton(
+fun SkeletonLoader(
     modifier: Modifier = Modifier,
     shimmerColors: ShimmerColors = ShimmerDefaults.colors()
 ) {
@@ -85,7 +85,7 @@ private fun rememberShimmerBrush(
                 durationMillis = shimmerColors.durationMs,
                 easing = LinearOutSlowInEasing
             ),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Reverse
         ),
         label = "shimmerProgress"
     )
@@ -147,18 +147,18 @@ object ShimmerDefaults {
 }
 
 /**
- * Preview for [CurrentWeatherSkeleton] component.
+ * Preview for [SkeletonLoader] component.
  *
  * Displays the loading state with shimmer effect on a dark background for contrast.
  */
 @Preview(
-    name = "CurrentWeatherSkeleton Preview",
+    name = "SkeletonLoader Preview",
     showBackground = true,
     backgroundColor = 0xFF1E1E1E
 )
 @Composable
-private fun CurrentWeatherSkeletonPreview() {
-    CurrentWeatherSkeleton(
+private fun SkeletonLoaderPreview() {
+    SkeletonLoader(
         modifier = Modifier
             .padding(16.dp),
     )

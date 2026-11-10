@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view
+﻿package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -26,14 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.presentation.AppBarViewModel
+import io.github.vladchenko.weatherforecast.core.presentation.models.AppBarUiState
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.recentcities.domain.model.RecentCities
-import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 import kotlinx.collections.immutable.ImmutableList
 
 /**

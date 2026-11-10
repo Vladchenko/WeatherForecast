@@ -1,9 +1,9 @@
-package io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.repository
+﻿package io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.repository
 
+import io.github.vladchenko.weatherforecast.core.data.mapper.MarkdownParser
 import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.data.MarkdownParser
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.remote.WeatherSummaryRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.mapper.DataErrorToSummaryErrorMapper
@@ -72,6 +72,7 @@ class WeatherSummaryRepositoryImpl(
                     latitude = latitude,
                     longitude = longitude,
                     llm = localSummary.llm,
+                    // It's an overhead to use Dispatchers.Default here
                     summary = markdownParser.parse(localSummary.summary),
                     timeStamp = localSummary.timestamp
                 ),

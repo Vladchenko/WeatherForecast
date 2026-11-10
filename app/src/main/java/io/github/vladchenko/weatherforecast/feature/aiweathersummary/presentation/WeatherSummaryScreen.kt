@@ -1,11 +1,11 @@
-package io.github.vladchenko.weatherforecast.feature.aiweathersummary.presentation
+﻿package io.github.vladchenko.weatherforecast.feature.aiweathersummary.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
+import io.github.vladchenko.weatherforecast.core.presentation.AppBarViewModel
 
 /**
  * Compose screen for displaying the AI weather forecast summary.

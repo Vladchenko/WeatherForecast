@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.data.di
+package io.github.vladchenko.weatherforecast.core.di
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -7,8 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesConstants.SHARED_PREFERENCES_KEY
-import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.dao.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.dao.HourlyWeatherDAO

@@ -3,7 +3,6 @@ package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
-import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
 
 /**
  * Weather forecast interactor.

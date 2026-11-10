@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.aiweathersummary.presentation
+﻿package io.github.vladchenko.weatherforecast.feature.aiweathersummary.presentation
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ContentTransform
@@ -49,16 +49,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.MarkdownSegment
+import io.github.vladchenko.weatherforecast.core.presentation.models.AppBarUiState
 import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
+import io.github.vladchenko.weatherforecast.core.ui.component.MarkdownText
+import io.github.vladchenko.weatherforecast.core.ui.component.ShimmerDefaults
+import io.github.vladchenko.weatherforecast.core.ui.component.SkeletonLoader
 import io.github.vladchenko.weatherforecast.core.ui.constants.SubtitleSize
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
-import io.github.vladchenko.weatherforecast.feature.aiweathersummary.presentation.view.MarkdownText
-import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
-import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
-import io.github.vladchenko.weatherforecast.presentation.view.CurrentWeatherSkeleton
-import io.github.vladchenko.weatherforecast.presentation.view.ShimmerDefaults
+import io.github.vladchenko.weatherforecast.ui.theme.WeatherForecastTheme
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -169,7 +169,7 @@ fun WeatherSummaryLayout(
                 ) { state ->
                     when (state) {
                         is WeatherSummaryUiState.Loading -> {
-                            CurrentWeatherSkeleton(
+                            SkeletonLoader(
                                 modifier = Modifier
                                     .padding(16.dp),
                                 shimmerColors = ShimmerDefaults.colors(

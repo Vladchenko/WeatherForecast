@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.view.activities
+﻿package io.github.vladchenko.weatherforecast.ui.view.activities
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -33,8 +33,8 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.geolocation.data.permission.PermissionResolver
 import io.github.vladchenko.weatherforecast.feature.geolocation.presentation.viewmodel.GeoLocationViewModel
-import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
-import io.github.vladchenko.weatherforecast.presentation.theme.WeatherForecastTheme
+import io.github.vladchenko.weatherforecast.ui.navigation.WeatherAppNavHost
+import io.github.vladchenko.weatherforecast.ui.theme.WeatherForecastTheme
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

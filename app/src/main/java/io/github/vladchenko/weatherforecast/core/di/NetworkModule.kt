@@ -1,6 +1,7 @@
 package io.github.vladchenko.weatherforecast.core.di
 
 import android.content.Context
+import androidx.work.WorkManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,6 +14,7 @@ import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserverImpl
+import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
@@ -87,4 +89,15 @@ class NetworkModule {
             connectivityObserver
         )
     }
+
+    @Singleton
+    @Provides
+    fun provideResponseProcessor(): ResponseProcessor {
+        return ResponseProcessor()
+    }
+
+    @Singleton
+    @Provides
+    fun provideWorkManager(@ApplicationContext context: Context): WorkManager =
+        WorkManager.getInstance(context)
 }

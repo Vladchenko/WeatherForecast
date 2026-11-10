@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.data.repository
+package io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain
 
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather

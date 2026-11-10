@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository
 
+import io.github.vladchenko.weatherforecast.core.data.exception.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
@@ -8,13 +9,12 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
-import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.local.HourlyWeatherLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.remote.HourlyWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherDto
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import kotlinx.coroutines.withContext
 
 /**

@@ -2,7 +2,7 @@ package io.github.vladchenko.weatherforecast.feature.currentweather.interactor
 
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
-import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
+import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 
 /**

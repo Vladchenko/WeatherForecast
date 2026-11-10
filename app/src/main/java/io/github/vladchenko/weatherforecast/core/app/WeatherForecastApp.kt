@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation
+package io.github.vladchenko.weatherforecast.core.app
 
 import android.app.Application
 import androidx.work.Configuration

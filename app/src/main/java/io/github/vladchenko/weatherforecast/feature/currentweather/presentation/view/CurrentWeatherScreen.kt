@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view
+﻿package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -8,10 +8,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.presentation.AppBarViewModel
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.viewmodel.CurrentWeatherViewModel
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.viewmodel.HourlyWeatherViewModel
-import io.github.vladchenko.weatherforecast.presentation.navigation.WeatherAppNavHost
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
+import io.github.vladchenko.weatherforecast.ui.navigation.WeatherAppNavHost
 
 /**
  * Root composable for the main weather forecast screen.

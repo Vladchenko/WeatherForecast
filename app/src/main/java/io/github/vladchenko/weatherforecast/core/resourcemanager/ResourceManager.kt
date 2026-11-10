@@ -5,6 +5,7 @@ import androidx.annotation.AttrRes
 /**
  * Resource manager to provide string resources
  */
+@Deprecated("Compose gets strings, colors and other resources on its own")
 interface ResourceManager {
 
     /**

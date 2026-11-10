@@ -3,11 +3,11 @@ package io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain
 import android.util.Log
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
-import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
-import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.models.AISummaryRequest
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.models.AiModel
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.models.WeatherSummary
+import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 
 /**
  * Interactor for AI weather summary business logic.

@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.navigation
+﻿package io.github.vladchenko.weatherforecast.ui.navigation
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable

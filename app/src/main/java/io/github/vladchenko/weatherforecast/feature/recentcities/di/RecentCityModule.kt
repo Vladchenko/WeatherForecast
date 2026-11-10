@@ -4,9 +4,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.dao.RecentCitiesDAO
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.datasource.RecentCitiesDataSource
 import io.github.vladchenko.weatherforecast.feature.recentcities.data.datasource.RecentCitiesDataSourceImpl

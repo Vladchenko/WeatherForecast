@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
@@ -14,6 +13,7 @@ import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
+import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
@@ -51,7 +51,7 @@ import javax.inject.Inject
  * @property networkStateHolder manages network connectivity (connected or disconnected)
  * @property preferencesManager manages user preferences (e.g., temperature unit)
  * @property weatherOutputMapper processes raw weather data load results and renders them into UI-ready structure
- * @property chosenCityInteractor handles saving and retrieving the chosen city
+ * @property chosenCityRepository handles saving and retrieving the chosen city
  * @property forecastInteractor loads weather data from remote API with fallback to local cache
  */
 @HiltViewModel
@@ -62,7 +62,7 @@ class CurrentWeatherViewModel @Inject constructor(
     private val networkStateHolder: NetworkStateHolder,
     private val preferencesManager: PreferencesManager,
     private val weatherOutputMapper: WeatherOutputMapper,
-    private val chosenCityInteractor: ChosenCityInteractor,
+    private val chosenCityRepository: ChosenCityRepository,
     private val forecastInteractor: CurrentWeatherInteractor,
 ) : ViewModel() {
 
@@ -110,7 +110,7 @@ class CurrentWeatherViewModel @Inject constructor(
 
     /**
      * Launches weather forecast download, using the provided [cityModel].
-     * If blank, attempts to load the last saved city from [chosenCityInteractor].
+     * If blank, attempts to load the last saved city from [chosenCityRepository].
      *
      * @param cityModel to provide a weather for
      */
@@ -119,7 +119,7 @@ class CurrentWeatherViewModel @Inject constructor(
         currentJob = scope.launch {
             showLoadingStatusFor(cityModel.city)
             val model = if (cityModel.city.isBlank()) {
-                val savedModel = chosenCityInteractor.loadChosenCity()
+                val savedModel = chosenCityRepository.loadChosenCity()
                 if (savedModel.city.isBlank()) {
                     cityErrorEventBus.send(CityErrorEvent.CityBlank)
                     return@launch
@@ -144,7 +144,7 @@ class CurrentWeatherViewModel @Inject constructor(
     fun refreshWeather(isPullToRefresh: Boolean) {
         _weatherStateFlow.tryEmit(WeatherUiState.Loading(isManualRefresh = isPullToRefresh))
         scope.launch {
-            val city = chosenCityInteractor.loadChosenCity()
+            val city = chosenCityRepository.loadChosenCity()
             launchWeatherForecast(city)
         }
     }
@@ -207,7 +207,7 @@ class CurrentWeatherViewModel @Inject constructor(
         cityModel: CityLocationModel,
         uiState: WeatherUiState.Success<CurrentWeatherUi>
     ) {
-        chosenCityInteractor.saveChosenCity(
+        chosenCityRepository.saveChosenCity(
             CityLocationModel(
                 cityModel.city,
                 Coordinate(

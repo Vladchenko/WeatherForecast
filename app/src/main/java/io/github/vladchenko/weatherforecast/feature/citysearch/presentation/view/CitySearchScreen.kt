@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view
+﻿package io.github.vladchenko.weatherforecast.feature.citysearch.presentation.view
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -8,9 +8,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
+import io.github.vladchenko.weatherforecast.core.presentation.AppBarViewModel
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.event.CitySelectionEvent
 import io.github.vladchenko.weatherforecast.feature.citysearch.presentation.viewmodel.CitySearchViewModel
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
 
 /**
  * The root composable for the city selection screen.

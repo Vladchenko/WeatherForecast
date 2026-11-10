@@ -5,12 +5,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
+import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
-import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.api.HourlyForecastApiService
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.dao.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.local.HourlyWeatherLocalDataSource
@@ -21,6 +20,7 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.H
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.HourlyWeatherRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton

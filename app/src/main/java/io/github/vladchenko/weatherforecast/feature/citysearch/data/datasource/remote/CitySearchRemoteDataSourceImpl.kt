@@ -1,9 +1,9 @@
 package io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.remote
 
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
+import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.core.utils.toDataError
-import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.api.CitySearchApiService
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.model.CitySearchResultDto
 import javax.inject.Inject

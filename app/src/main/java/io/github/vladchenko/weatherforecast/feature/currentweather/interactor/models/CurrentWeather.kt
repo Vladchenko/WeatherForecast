@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models
 
 import androidx.compose.runtime.Immutable
-import io.github.vladchenko.weatherforecast.core.domain.model.City
+import io.github.vladchenko.weatherforecast.core.domain.model.CityModel
 
 /**
  * Data model representing a weather forecast response.
@@ -24,7 +24,7 @@ import io.github.vladchenko.weatherforecast.core.domain.model.City
  * @property temperatureType unit of temperature measurement (e.g., "C", "F", "K").
  */
 data class CurrentWeather(
-    val requestedCity: City? = null,
+    val requestedCity: CityModel? = null,
     val city: String,
     val coordinate: Coordinate,
     val dateTime: String,

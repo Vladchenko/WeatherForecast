@@ -4,11 +4,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.api.CitySearchApiService
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.local.CitySearchDAO
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.local.CitySearchLocalDataSource

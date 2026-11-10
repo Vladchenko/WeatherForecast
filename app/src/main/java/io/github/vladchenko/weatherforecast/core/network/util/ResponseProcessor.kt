@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.data.util
+package io.github.vladchenko.weatherforecast.core.network.util
 
 import io.github.vladchenko.weatherforecast.core.data.model.DataError
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult

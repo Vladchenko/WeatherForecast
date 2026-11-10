@@ -4,13 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
-import io.github.vladchenko.weatherforecast.core.domain.ChosenCityInteractor
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
 import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.WeatherSummaryInteractor
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.models.WeatherSummary
+import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ import javax.inject.Inject
  *
  * @param statusStateHolder holder for status bar messages.
  * @param preferencesManager app settings manager.
- * @param chosenCityInteractor interactor for the chosen city.
+ * @param chosenCityRepository interactor for the chosen city.
  * @param weatherSummaryInteractor interactor for AI summary business logic.
  * @param errorToMessageMapper maps [ForecastError] to string resource IDs for display.
  */
@@ -34,7 +34,7 @@ import javax.inject.Inject
 class WeatherSummaryViewModel @Inject constructor(
     private val statusStateHolder: StatusStateHolder,
     private val preferencesManager: PreferencesManager,
-    private val chosenCityInteractor: ChosenCityInteractor,
+    private val chosenCityRepository: ChosenCityRepository,
     private val weatherSummaryInteractor: WeatherSummaryInteractor,
     private val errorToMessageMapper: ForecastErrorToMessageIdMapper
 ) : ViewModel() {
@@ -57,7 +57,7 @@ class WeatherSummaryViewModel @Inject constructor(
             _weatherSummary.value = WeatherSummaryUiState.Loading
             statusStateHolder.updateInfoStatus(R.string.loading)
 
-            val cityModel = chosenCityInteractor.loadChosenCity()
+            val cityModel = chosenCityRepository.loadChosenCity()
 
             _weatherSummary.value = try {
                 val summary = weatherSummaryInteractor.fetchWeatherSummary(

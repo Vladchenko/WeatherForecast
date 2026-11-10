@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.settings
+﻿package io.github.vladchenko.weatherforecast.feature.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,12 +42,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
+import io.github.vladchenko.weatherforecast.core.presentation.models.AppBarUiState
 import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.models.AiModel
-import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
 
 /**
  * App settings screen layout.

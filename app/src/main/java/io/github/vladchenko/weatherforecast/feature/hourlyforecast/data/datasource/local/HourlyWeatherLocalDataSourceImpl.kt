@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasource.local
 
+import io.github.vladchenko.weatherforecast.core.data.exception.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.dao.HourlyWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.model.HourlyWeatherEntity
 

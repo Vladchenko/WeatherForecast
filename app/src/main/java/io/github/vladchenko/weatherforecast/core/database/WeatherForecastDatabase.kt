@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.data.database
+package io.github.vladchenko.weatherforecast.core.database
 
 import android.content.Context
 import androidx.room.Database

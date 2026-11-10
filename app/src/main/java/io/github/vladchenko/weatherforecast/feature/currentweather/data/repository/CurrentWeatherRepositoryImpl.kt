@@ -1,5 +1,6 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.data.repository
 
+import io.github.vladchenko.weatherforecast.core.data.exception.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.data.model.DataResult
 import io.github.vladchenko.weatherforecast.core.domain.model.ForecastError
@@ -7,14 +8,13 @@ import io.github.vladchenko.weatherforecast.core.domain.model.LoadResult
 import io.github.vladchenko.weatherforecast.core.domain.model.TemperatureUnit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
-import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.local.CurrentWeatherLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.remote.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherDto
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
+import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.models.CurrentWeather
 import kotlinx.coroutines.withContext
 

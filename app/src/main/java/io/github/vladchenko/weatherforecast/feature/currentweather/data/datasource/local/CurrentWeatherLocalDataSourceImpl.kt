@@ -1,7 +1,7 @@
 package io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.local
 
+import io.github.vladchenko.weatherforecast.core.data.exception.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.api.customexceptions.NoSuchDatabaseEntryException
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.dao.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.model.CurrentWeatherEntity
 import javax.inject.Inject

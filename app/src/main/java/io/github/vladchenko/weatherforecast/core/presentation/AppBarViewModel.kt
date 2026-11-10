@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar
+package io.github.vladchenko.weatherforecast.core.presentation
 
 import androidx.annotation.AttrRes
 import androidx.annotation.StringRes
@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
+import io.github.vladchenko.weatherforecast.core.presentation.models.AppBarUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
-import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

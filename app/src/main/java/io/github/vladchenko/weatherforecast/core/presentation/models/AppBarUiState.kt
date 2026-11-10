@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.presentation.models
+package io.github.vladchenko.weatherforecast.core.presentation.models
 
 import androidx.annotation.AttrRes
 import androidx.annotation.StringRes

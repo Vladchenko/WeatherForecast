@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.settings
+﻿package io.github.vladchenko.weatherforecast.feature.settings
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesManager
-import io.github.vladchenko.weatherforecast.presentation.viewmodel.appBar.AppBarViewModel
+import io.github.vladchenko.weatherforecast.core.presentation.AppBarViewModel
 
 /**
  * Root composable for the application settings screen.

@@ -50,7 +50,7 @@ sealed interface LoadResult<out T> {
      */
     data class Error(
         val city: String? = null,
-        val requestedCity: City? = null,
+        val requestedCity: CityModel? = null,
         val error: ForecastError
     ) : LoadResult<Nothing>
 }

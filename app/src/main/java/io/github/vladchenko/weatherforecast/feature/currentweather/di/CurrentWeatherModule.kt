@@ -5,18 +5,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
+import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
+import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.presentation.mapper.ForecastErrorToMessageIdMapper
 import io.github.vladchenko.weatherforecast.core.ui.dialog.WeatherDialogController
 import io.github.vladchenko.weatherforecast.core.ui.event.CityErrorEventBus
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
-import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
-import io.github.vladchenko.weatherforecast.data.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.api.CurrentWeatherApiService
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.dao.CurrentWeatherDAO
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.local.CurrentWeatherLocalDataSource
@@ -26,7 +25,9 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasour
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.CurrentWeatherRepositoryImpl
+import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
+import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.CityErrorCoordinator
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.domaintouimapper.WeatherDomainToUiMapperImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.mapper.outputmapper.WeatherOutputMapper
@@ -123,7 +124,9 @@ class CurrentWeatherModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastRemoteInteractor(currentWeatherRepository: CurrentWeatherRepository): CurrentWeatherInteractor {
+    fun provideWeatherForecastRemoteInteractor(
+        currentWeatherRepository: CurrentWeatherRepository
+    ): CurrentWeatherInteractor {
         return CurrentWeatherInteractor(currentWeatherRepository)
     }
 
@@ -163,8 +166,8 @@ class CurrentWeatherModule {
         navigationEventBus: NavigationEventBus,
         geoLocationEventBus: GeoLocationEventBus,
         dialogController: WeatherDialogController,
-    ): io.github.vladchenko.weatherforecast.feature.currentweather.presentation.CityErrorCoordinator {
-        return io.github.vladchenko.weatherforecast.feature.currentweather.presentation.CityErrorCoordinator(
+    ): CityErrorCoordinator {
+        return CityErrorCoordinator(
             statusStateHolder,
             cityErrorEventBus,
             navigationEventBus,

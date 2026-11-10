@@ -5,13 +5,12 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.core.domain.ChosenCityInteractor
+
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.datasource.ChosenCityDataSource
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.datasource.ChosenCityLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.chosencity.data.repository.ChosenCityRepositoryImpl
-import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityInteractorImpl
+
 import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCityRepository
 import javax.inject.Singleton
 
@@ -39,14 +38,5 @@ class ChosenCityModule {
         coroutineDispatchers: CoroutineDispatchers
     ): ChosenCityRepository {
         return ChosenCityRepositoryImpl(coroutineDispatchers, chosenCityDataSource)
-    }
-
-    @Singleton
-    @Provides
-    fun provideChosenCityInteractor(
-        loggingService: LoggingService,
-        chosenCityRepository: ChosenCityRepository
-    ): ChosenCityInteractor {
-        return ChosenCityInteractorImpl(loggingService, chosenCityRepository)
     }
 }

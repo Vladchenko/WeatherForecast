@@ -13,6 +13,8 @@ import androidx.compose.ui.text.withStyle
 /**
  * Utility for parsing inline markdown formatting to [AnnotatedString].
  * Supports: bold (**text**), italic (*text*), links [text](url), inline code (`code`).
+ *
+ * @see io.github.vladchenko.weatherforecast.core.data.mapper.MarkdownParser
  */
 object MarkdownInlineParser {
 

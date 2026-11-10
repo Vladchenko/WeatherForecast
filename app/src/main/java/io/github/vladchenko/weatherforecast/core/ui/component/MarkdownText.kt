@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.aiweathersummary.presentation.view
+package io.github.vladchenko.weatherforecast.core.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

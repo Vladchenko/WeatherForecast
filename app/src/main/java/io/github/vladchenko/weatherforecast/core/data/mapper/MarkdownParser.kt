@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.data
+package io.github.vladchenko.weatherforecast.core.data.mapper
 
 import io.github.vladchenko.weatherforecast.core.domain.model.MarkdownSegment
 import javax.inject.Singleton
@@ -6,6 +6,8 @@ import javax.inject.Singleton
 /**
  * Parses raw markdown text into a list of [MarkdownSegment].
  * Stateless utility class, provided as a singleton via Hilt.
+ *
+ * @see io.github.vladchenko.weatherforecast.core.ui.utils.MarkdownInlineParser
  */
 @Singleton
 class MarkdownParser {

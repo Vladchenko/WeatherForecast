@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.aiweathersummary.di
+﻿package io.github.vladchenko.weatherforecast.feature.aiweathersummary.di
 
 import android.content.Context
 import dagger.Module
@@ -8,14 +8,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.R
+import io.github.vladchenko.weatherforecast.core.data.mapper.MarkdownParser
+import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.HEADER_USER_AGENT
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.USER_AGENT
 import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_SUMMARY_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
-import io.github.vladchenko.weatherforecast.data.MarkdownParser
-import io.github.vladchenko.weatherforecast.data.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.data.repository.CurrentWeatherRepository
-import io.github.vladchenko.weatherforecast.data.repository.HourlyWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.WeatherSummaryApiService
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryDAO
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSource
@@ -28,6 +26,8 @@ import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.Defa
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.WeatherPromptBuilder
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.WeatherSummaryInteractor
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.WeatherSummaryRepository
+import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
+import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

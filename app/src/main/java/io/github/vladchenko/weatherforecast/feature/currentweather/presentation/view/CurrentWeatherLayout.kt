@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view
+﻿package io.github.vladchenko.weatherforecast.feature.currentweather.presentation.view
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -64,16 +64,16 @@ import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.domain.model.CityLocationModel
 import io.github.vladchenko.weatherforecast.core.domain.model.Coordinate
 import io.github.vladchenko.weatherforecast.core.domain.model.HourlyWeather
+import io.github.vladchenko.weatherforecast.core.presentation.models.AppBarUiState
 import io.github.vladchenko.weatherforecast.core.ui.component.BackgroundImage
+import io.github.vladchenko.weatherforecast.core.ui.component.ShimmerDefaults
+import io.github.vladchenko.weatherforecast.core.ui.component.SkeletonLoader
 import io.github.vladchenko.weatherforecast.core.ui.state.WeatherUiState
 import io.github.vladchenko.weatherforecast.core.ui.status.TextType
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.rememberResolvedColorAttr
 import io.github.vladchenko.weatherforecast.core.ui.utils.UiUtils.toToolbarSubtitleFontSize
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.models.CurrentWeatherUi
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.presentation.view.HourlyWeatherLayout
-import io.github.vladchenko.weatherforecast.presentation.models.AppBarUiState
-import io.github.vladchenko.weatherforecast.presentation.view.CurrentWeatherSkeleton
-import io.github.vladchenko.weatherforecast.presentation.view.ShimmerDefaults
 
 /**
  * Main weather screen layout.
@@ -348,7 +348,7 @@ fun CurrentWeatherLayout(
                         ) { state ->
                             when (state) {
                                 is WeatherUiState.Loading -> {
-                                    CurrentWeatherSkeleton(
+                                    SkeletonLoader(
                                         shimmerColors = ShimmerDefaults.colors(
                                             baseColor = Color.White.copy(alpha = 0.03f),
                                             highlightColor = Color.White.copy(alpha = 0.35f),
