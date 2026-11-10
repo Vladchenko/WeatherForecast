@@ -6,15 +6,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.data.mapper.MarkdownParser
 import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.HEADER_USER_AGENT
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.USER_AGENT
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_SUMMARY_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.di.HiltRetrofitBuilder
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.WeatherSummaryApiService
+import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.WeatherSummaryConstants.WEATHER_SUMMARY_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryDAO
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSourceImpl
@@ -28,11 +26,7 @@ import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.Weat
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.WeatherSummaryRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -58,38 +52,16 @@ class WeatherSummaryModule {
 
     @Singleton
     @Provides
+    @Named(WEATHER_SUMMARY_RETROFIT_NAME)
+    fun provideWeatherSummaryRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
+        return hiltRetrofitBuilder.createWeatherSummaryRetrofit()
+    }
+
+    @Provides
     fun provideAiApiService(
         @Named(WEATHER_SUMMARY_RETROFIT_NAME) retrofit: Retrofit
     ): WeatherSummaryApiService {
         return retrofit.create(WeatherSummaryApiService::class.java)
-    }
-
-    @Singleton
-    @Provides
-    @Named(WEATHER_SUMMARY_RETROFIT_NAME)
-    fun provideAiRetrofit(): Retrofit {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
-            else HttpLoggingInterceptor.Level.NONE
-        }
-
-        val userAgentInterceptor = Interceptor { chain ->
-            val request = chain.request().newBuilder()
-                .header(HEADER_USER_AGENT, USER_AGENT)
-                .build()
-            chain.proceed(request)
-        }
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .addInterceptor(userAgentInterceptor)
-            .build()
-
-        return Retrofit.Builder()
-            .baseUrl(BuildConfig.OPEN_ROUTER_API_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
     }
 
     @Singleton

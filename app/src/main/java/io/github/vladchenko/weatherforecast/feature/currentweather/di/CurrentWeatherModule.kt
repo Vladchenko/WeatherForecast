@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.di.HiltRetrofitBuilder
 import io.github.vladchenko.weatherforecast.core.geolocation.GeoLocationEventBus
 import io.github.vladchenko.weatherforecast.core.navigation.api.NavigationEventBus
 import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
@@ -25,6 +25,7 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasour
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.CurrentWeatherRepositoryImpl
+import io.github.vladchenko.weatherforecast.feature.currentweather.di.CurrentWeatherConstants.CURRENT_WEATHER_RETROFIT
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.currentweather.presentation.CityErrorCoordinator
@@ -57,7 +58,16 @@ class CurrentWeatherModule {
 
     @Singleton
     @Provides
-    fun provideWeatherForecastApiService(@Named(WEATHER_RETROFIT_NAME) retrofit: Retrofit): CurrentWeatherApiService {
+    @Named(CURRENT_WEATHER_RETROFIT)
+    fun provideCurrentWeatherRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
+        return hiltRetrofitBuilder.createWeatherRetrofit()
+    }
+
+    @Singleton
+    @Provides
+    fun provideWeatherForecastApiService(
+        @Named(CURRENT_WEATHER_RETROFIT) retrofit: Retrofit
+    ): CurrentWeatherApiService {
         return retrofit.create(CurrentWeatherApiService::class.java)
     }
 

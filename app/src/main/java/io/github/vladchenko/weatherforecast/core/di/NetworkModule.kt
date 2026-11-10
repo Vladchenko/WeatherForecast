@@ -7,9 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.github.vladchenko.weatherforecast.BuildConfig
 import io.github.vladchenko.weatherforecast.core.coordinator.NetworkStatusCoordinator
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolder
 import io.github.vladchenko.weatherforecast.core.network.NetworkStateHolderImpl
 import io.github.vladchenko.weatherforecast.core.network.connectivity.ConnectivityObserver
@@ -18,10 +16,7 @@ import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.ui.status.StatusStateHolder
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -30,12 +25,11 @@ import javax.inject.Singleton
  * This module defines how core networking components are created and injected,
  * including:
  * - [ConnectivityObserver] for monitoring network connectivity state
- * - Named [Retrofit] instance for weather API calls ([WEATHER_RETROFIT_NAME])
+ * - Shared [OkHttpClient] without feature-specific interceptors
+ * - [HiltRetrofitBuilder] for creating feature-specific [Retrofit] instances
  *
- * The Retrofit instance is configured with:
- * - Base URL from BuildConfig (e.g., "https://api.openweathermap.org/")
- * - [HttpLoggingInterceptor] enabled only in debug builds
- * - [GsonConverterFactory] for JSON parsing
+ * Feature-specific Retrofit instances (with their own baseUrl and interceptors)
+ * are created in respective feature modules via [HiltRetrofitBuilder].
  *
  * All bindings are scoped to [SingletonComponent] to ensure single instances
  * throughout the app lifecycle.
@@ -50,22 +44,16 @@ class NetworkModule {
         return ConnectivityObserverImpl(context)
     }
 
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder().build()
+    }
+
     @Singleton
     @Provides
-    @Named(WEATHER_RETROFIT_NAME)
-    fun provideWeatherRetrofit(): Retrofit {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
-            else HttpLoggingInterceptor.Level.NONE
-        }
-        val client = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .build()
-        return Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+    fun provideHiltRetrofitBuilder(okHttpClient: OkHttpClient): HiltRetrofitBuilder {
+        return HiltRetrofitBuilder(okHttpClient)
     }
 
     @Singleton

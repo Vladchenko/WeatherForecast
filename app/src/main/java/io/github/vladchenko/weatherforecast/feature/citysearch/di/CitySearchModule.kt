@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.WEATHER_RETROFIT_NAME
+import io.github.vladchenko.weatherforecast.core.di.HiltRetrofitBuilder
 import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -18,6 +18,7 @@ import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.r
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchDtoMapper
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.mapper.CitySearchEntityMapper
 import io.github.vladchenko.weatherforecast.feature.citysearch.data.repository.CitySearchRepositoryImpl
+import io.github.vladchenko.weatherforecast.feature.citysearch.di.CitySearchConstants.CITY_SEARCH_RETROFIT
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchInteractor
 import io.github.vladchenko.weatherforecast.feature.citysearch.domain.CitySearchRepository
 import retrofit2.Retrofit
@@ -45,7 +46,14 @@ class CitySearchModule {
 
     @Singleton
     @Provides
-    fun provideCityApiService(@Named(WEATHER_RETROFIT_NAME) retrofit: Retrofit): CitySearchApiService {
+    @Named(CITY_SEARCH_RETROFIT)
+    fun provideCitySearchRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
+        return hiltRetrofitBuilder.createWeatherRetrofit()
+    }
+
+    @Singleton
+    @Provides
+    fun provideCityApiService(@Named(CITY_SEARCH_RETROFIT) retrofit: Retrofit): CitySearchApiService {
         return retrofit.create(CitySearchApiService::class.java)
     }
 

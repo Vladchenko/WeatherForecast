@@ -56,7 +56,7 @@ class CoreModule {
 
     @Singleton
     @Provides
-    fun provideCoroutineScope(coroutineDispatchers: CoroutineDispatchers): CoroutineScope {
+    fun provideApplicationCoroutineScope(coroutineDispatchers: CoroutineDispatchers): CoroutineScope {
         return CoroutineScope(SupervisorJob() + coroutineDispatchers.default)
     }
 
