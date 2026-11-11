@@ -9,10 +9,9 @@ import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.R
 import io.github.vladchenko.weatherforecast.core.data.mapper.MarkdownParser
 import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.core.di.HiltRetrofitBuilder
+import io.github.vladchenko.weatherforecast.core.di.WeatherSummaryRetrofit
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.WeatherSummaryApiService
-import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.api.WeatherSummaryConstants.WEATHER_SUMMARY_RETROFIT_NAME
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryDAO
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSource
 import io.github.vladchenko.weatherforecast.feature.aiweathersummary.data.datasource.local.AISummaryLocalDataSourceImpl
@@ -27,7 +26,6 @@ import io.github.vladchenko.weatherforecast.feature.aiweathersummary.domain.Weat
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import retrofit2.Retrofit
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -47,16 +45,9 @@ class WeatherSummaryModule {
         return database.getAiDAO()
     }
 
-    @Singleton
-    @Provides
-    @Named(WEATHER_SUMMARY_RETROFIT_NAME)
-    fun provideWeatherSummaryRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
-        return hiltRetrofitBuilder.createWeatherSummaryRetrofit()
-    }
-
     @Provides
     fun provideAiApiService(
-        @Named(WEATHER_SUMMARY_RETROFIT_NAME) retrofit: Retrofit
+        @WeatherSummaryRetrofit retrofit: Retrofit
     ): WeatherSummaryApiService {
         return retrofit.create(WeatherSummaryApiService::class.java)
     }

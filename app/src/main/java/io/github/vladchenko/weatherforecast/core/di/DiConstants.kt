@@ -6,7 +6,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 /**
  * Shared constants for dependency injection and HTTP configuration.
  *
- * Contains API request timeouts and HTTP header values
+ * Contains API request timeouts, HTTP header values, and base URLs
  * used across the application.
  */
 object DiConstants {

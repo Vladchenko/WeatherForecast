@@ -29,7 +29,7 @@ import javax.inject.Singleton
  * - [HiltRetrofitBuilder] for creating feature-specific [Retrofit] instances
  *
  * Feature-specific Retrofit instances (with their own baseUrl and interceptors)
- * are created in respective feature modules via [HiltRetrofitBuilder].
+ * are created via [HiltRetrofitBuilder].
  *
  * All bindings are scoped to [SingletonComponent] to ensure single instances
  * throughout the app lifecycle.
@@ -54,6 +54,27 @@ class NetworkModule {
     @Provides
     fun provideHiltRetrofitBuilder(okHttpClient: OkHttpClient): HiltRetrofitBuilder {
         return HiltRetrofitBuilder(okHttpClient)
+    }
+
+    @Singleton
+    @Provides
+    @WeatherRetrofit
+    fun provideWeatherRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
+        return hiltRetrofitBuilder.createWeatherRetrofit()
+    }
+
+    @Singleton
+    @Provides
+    @WeatherSummaryRetrofit
+    fun provideWeatherSummaryRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
+        return hiltRetrofitBuilder.createWeatherSummaryRetrofit()
+    }
+
+    @Singleton
+    @Provides
+    @NominatimRetrofit
+    fun provideNominatimRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
+        return hiltRetrofitBuilder.createNominatimRetrofit()
     }
 
     @Singleton

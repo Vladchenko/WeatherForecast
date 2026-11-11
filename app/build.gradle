@@ -35,12 +35,12 @@ android {
             useSupportLibrary true
         }
 
-        // Чтение API_KEY и BASE_URL из local.properties
+        // Чтение из local.properties
         def apiKey = localProperties['API_KEY'] ?: localProperties['WEATHER_API_KEY']
         def baseUrl = localProperties['API_BASE_URL'] ?: localProperties['WEATHER_API_BASE_URL']
+        def nominatimBaseUrl = localProperties['NOMINATIM_BASE_URL']
         def openRouterApiUrl = localProperties['OPEN_ROUTER_API_URL'] ?: localProperties['GEMMA4_26B_A4B_IT_API_URL']
-        def openRouterApi = localProperties['OPEN_ROUTER_API_KEY']
-        def defaultModel = localProperties['OPEN_ROUTER_DEFAULT_MODEL'] ?: 'google/gemma-4-31b-it:free'
+        def openRouterApiKey = localProperties['OPEN_ROUTER_API_KEY']
 
         if (!apiKey) {
             throw new GradleException("API_KEY не найден в local.properties")
@@ -48,12 +48,15 @@ android {
         if (!baseUrl) {
             throw new GradleException("API_BASE_URL не найден в local.properties")
         }
+        if (!nominatimBaseUrl) {
+            throw new GradleException("NOMINATIM_BASE_URL не найден в local.properties")
+        }
 
         buildConfigField("String", "API_KEY", apiKey)
         buildConfigField("String", "API_BASE_URL", baseUrl)
+        buildConfigField("String", "NOMINATIM_BASE_URL", nominatimBaseUrl)
+        buildConfigField("String", "OPEN_ROUTER_API_KEY", openRouterApiKey)
         buildConfigField("String", "OPEN_ROUTER_API_URL", openRouterApiUrl)
-        buildConfigField("String", "OPEN_ROUTER_API_KEY", openRouterApi)
-        buildConfigField("String", "OPEN_ROUTER_DEFAULT_MODEL", defaultModel)
 
         // Настройка Room
         javaCompileOptions {

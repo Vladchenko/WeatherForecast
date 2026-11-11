@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.core.di.HiltRetrofitBuilder
+import io.github.vladchenko.weatherforecast.core.di.WeatherRetrofit
 import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -16,14 +16,12 @@ import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasour
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.local.CurrentWeatherLocalDataSourceImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.remote.CurrentWeatherRemoteDataSource
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.datasource.remote.CurrentWeatherRemoteDataSourceImpl
-import io.github.vladchenko.weatherforecast.feature.currentweather.data.di.CurrentWeatherConstants.CURRENT_WEATHER_RETROFIT
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.mapper.CurrentWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.currentweather.data.repository.CurrentWeatherRepositoryImpl
 import io.github.vladchenko.weatherforecast.feature.currentweather.domain.CurrentWeatherRepository
 import io.github.vladchenko.weatherforecast.feature.currentweather.interactor.CurrentWeatherInteractor
 import retrofit2.Retrofit
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -45,16 +43,7 @@ class CurrentWeatherModule {
 
     @Singleton
     @Provides
-    @Named(CURRENT_WEATHER_RETROFIT)
-    fun provideCurrentWeatherRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
-        return hiltRetrofitBuilder.createWeatherRetrofit()
-    }
-
-    @Singleton
-    @Provides
-    fun provideWeatherForecastApiService(
-        @Named(CURRENT_WEATHER_RETROFIT) retrofit: Retrofit
-    ): CurrentWeatherApiService {
+    fun provideWeatherForecastApiService(@WeatherRetrofit retrofit: Retrofit): CurrentWeatherApiService {
         return retrofit.create(CurrentWeatherApiService::class.java)
     }
 

@@ -1,8 +1,6 @@
 package io.github.vladchenko.weatherforecast.core.di
 
 import io.github.vladchenko.weatherforecast.BuildConfig
-import io.github.vladchenko.weatherforecast.core.di.DiConstants.HEADER_USER_AGENT
-import io.github.vladchenko.weatherforecast.feature.geolocation.data.api.GeoLocationApiConstants.USER_AGENT
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -12,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 /**
  * Factory for creating [Retrofit] instances with shared [OkHttpClient].
  *
- * Provides pre-configured methods for common API endpoints (OpenWeatherMap, OpenRouter)
+ * Provides pre-configured methods for common API endpoints (OpenWeatherMap, OpenRouter, Nominatim)
  * while allowing custom base URLs and interceptors via [create].
  *
  * Each created [Retrofit] instance clones the shared [OkHttpClient] via [OkHttpClient.newBuilder]
@@ -39,6 +37,13 @@ class HiltRetrofitBuilder(private val okHttpClient: OkHttpClient) {
         )
     }
 
+    fun createNominatimRetrofit(): Retrofit {
+        return create(
+            baseUrl = BuildConfig.NOMINATIM_BASE_URL,
+            interceptors = listOf(userAgentInterceptor())
+        )
+    }
+
     private fun loggingInterceptor(): Interceptor {
         return HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
@@ -48,7 +53,7 @@ class HiltRetrofitBuilder(private val okHttpClient: OkHttpClient) {
     private fun userAgentInterceptor(): Interceptor {
         return Interceptor { chain ->
             chain.request().newBuilder()
-                .header(HEADER_USER_AGENT, USER_AGENT)
+                .header(DiConstants.HEADER_USER_AGENT, DiConstants.USER_AGENT)
                 .build()
                 .let(chain::proceed)
         }

@@ -6,7 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.data.mapper.DataErrorToForecastErrorMapper
 import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
-import io.github.vladchenko.weatherforecast.core.di.HiltRetrofitBuilder
+import io.github.vladchenko.weatherforecast.core.di.WeatherRetrofit
 import io.github.vladchenko.weatherforecast.core.network.util.ResponseProcessor
 import io.github.vladchenko.weatherforecast.core.utils.dispatchers.CoroutineDispatchers
 import io.github.vladchenko.weatherforecast.core.utils.logging.LoggingService
@@ -19,11 +19,9 @@ import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.datasour
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherDtoMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.mapper.HourlyWeatherEntityMapper
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.repository.HourlyWeatherRepositoryImpl
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.di.HourlyForecastConstants.HOURLY_WEATHER_RETROFIT
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherInteractor
 import io.github.vladchenko.weatherforecast.feature.hourlyforecast.domain.HourlyWeatherRepository
 import retrofit2.Retrofit
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -45,16 +43,7 @@ class HourlyForecastModule {
 
     @Singleton
     @Provides
-    @Named(HOURLY_WEATHER_RETROFIT)
-    fun provideHourlyWeatherRetrofit(hiltRetrofitBuilder: HiltRetrofitBuilder): Retrofit {
-        return hiltRetrofitBuilder.createWeatherRetrofit()
-    }
-
-    @Singleton
-    @Provides
-    fun provideHourlyForecastApiService(
-        @Named(HOURLY_WEATHER_RETROFIT) retrofit: Retrofit
-    ): HourlyForecastApiService {
+    fun provideHourlyForecastApiService(@WeatherRetrofit retrofit: Retrofit): HourlyForecastApiService {
         return retrofit.create(HourlyForecastApiService::class.java)
     }
 
