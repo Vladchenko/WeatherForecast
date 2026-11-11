@@ -31,18 +31,12 @@ import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 /**
- * Dagger module for providing core application-wide dependencies.
+ * Hilt module for providing core application-wide dependencies.
  *
- * This module defines bindings for fundamental components used across features,
- * including:
- * - [CoroutineDispatchers] and [CoroutineScope] for background operations
- * - [PreferencesManager] for persistent key-value storage
- * - [LoggingService] for consistent logging throughout the app
- * - Factories and helpers for common UI dialogs ([AlertDialogFactory], [LocationDialogFactory], [WeatherDialogFactory])
- * - [DataErrorToForecastErrorMapper] for converting data-layer errors to domain errors
- *
- * All bindings are scoped to [SingletonComponent], ensuring single instances
- * live for the entire application lifecycle.
+ * Defines how components such as [CoroutineDispatchers], [CoroutineScope],
+ * [PreferencesManager], [LoggingService], and various EventBus implementations
+ * are created and injected. All bindings are tied to [SingletonComponent],
+ * ensuring single instances throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)

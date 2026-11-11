@@ -9,29 +9,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.vladchenko.weatherforecast.core.database.WeatherForecastDatabase
 import io.github.vladchenko.weatherforecast.core.preferences.PreferencesConstants.SHARED_PREFERENCES_KEY
-import io.github.vladchenko.weatherforecast.feature.citysearch.data.datasource.local.CitySearchDAO
-import io.github.vladchenko.weatherforecast.feature.currentweather.data.dao.CurrentWeatherDAO
-import io.github.vladchenko.weatherforecast.feature.hourlyforecast.data.dao.HourlyWeatherDAO
 import javax.inject.Singleton
 
 /**
- * Dagger Hilt module that provides persistence-related dependencies for the application.
+ * Hilt module for providing persistence-related dependencies for the application.
  *
- * This object module is installed in the [SingletonComponent], ensuring that all provided instances
- * are created once and shared across the entire app lifecycle.
- *
- * It supplies:
- * - A singleton [WeatherForecastDatabase] instance using Room, which serves as the main database
- *   for storing weather forecasts, hourly data, and city names
- * - Data Access Objects (DAOs) for each entity:
- *   - [CurrentWeatherDAO] – for current weather data
- *   - [HourlyWeatherDAO] – for hourly forecast entries
- * - [CitySearchDAO] – for cached city name suggestions
- * - A [SharedPreferences] instance for lightweight persistent storage,
- *   used to save user preferences such as the selected city
- *
- * The database is initialized via [WeatherForecastDatabase.getInstance], which ensures a single instance
- * across the app and supports proper dependency injection.
+ * Defines how [WeatherForecastDatabase] and [SharedPreferences] are created and injected.
+ * All bindings are tied to [SingletonComponent], ensuring single instances
+ * throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)

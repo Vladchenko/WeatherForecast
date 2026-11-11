@@ -17,11 +17,11 @@ import io.github.vladchenko.weatherforecast.feature.recentcities.domain.RecentCi
 import javax.inject.Singleton
 
 /**
- * Dagger module for providing dependencies related to the Recent Cities feature.
+ * Hilt module for providing dependencies related to the Recent Cities feature.
  *
- * This module defines how components such as mappers, data sources, repository,
- * and interactor are created and injected within the application. All bindings
- * are scoped to the SingletonComponent to ensure single instances across the app lifecycle.
+ * Defines how components such as DAO, mapper, data source, repository, and interactor
+ * are created and injected. All bindings are tied to [SingletonComponent],
+ * ensuring single instances throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)

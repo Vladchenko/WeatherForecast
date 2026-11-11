@@ -1,4 +1,4 @@
-package io.github.vladchenko.weatherforecast.feature.currentweather.di
+package io.github.vladchenko.weatherforecast.feature.currentweather.data.di
 
 /**
  * Constants for the Current Weather feature DI.

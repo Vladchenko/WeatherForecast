@@ -31,14 +31,11 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * Hilt module for providing dependencies for the AI weather summary feature.
+ * Hilt module for providing dependencies for the AI Weather Summary feature.
  *
- * Contains providers for:
- * - Room DAO for working with local AI summary database
- * - Retrofit API service for interacting with OpenRouter AI
- * - Local and remote data sources
- * - Repository and interactor for business logic
- * - Prompt builder for forming requests to the AI model
+ * Defines how components such as DAO, data sources, repository, and interactor
+ * are created and injected. All bindings are tied to [SingletonComponent],
+ * ensuring single instances throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)

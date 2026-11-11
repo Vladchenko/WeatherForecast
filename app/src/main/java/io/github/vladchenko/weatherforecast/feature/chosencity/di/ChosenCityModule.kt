@@ -15,11 +15,11 @@ import io.github.vladchenko.weatherforecast.feature.chosencity.domain.ChosenCity
 import javax.inject.Singleton
 
 /**
- * Hilt module for providing dependencies for the chosen city feature.
+ * Hilt module for providing dependencies for the Chosen City feature.
  *
- * Defines how components such as data sources,
- * repository, and interactor are created and injected. All bindings are tied to SingletonComponent,
- * to ensure single instances throughout the app lifecycle.
+ * Defines how components such as data source and repository
+ * are created and injected. All bindings are tied to [SingletonComponent],
+ * ensuring single instances throughout the app lifecycle.
  */
 @Module
 @InstallIn(SingletonComponent::class)
